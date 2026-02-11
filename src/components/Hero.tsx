@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { PERSONAL_INFO, TYPING_ROLES } from '../constants';
-import { ArrowDown, Download, ChevronDown } from 'lucide-react';
+import { Download, ChevronDown } from 'lucide-react';
 import HeaderImg from '../assets/Headerimg1.png';
 
 // Stagger container variant
@@ -15,7 +15,7 @@ const containerVariants = {
 
 const itemVariants = {
     hidden: { opacity: 0, y: 30 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] } },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const } },
 };
 
 const Hero: React.FC = () => {
