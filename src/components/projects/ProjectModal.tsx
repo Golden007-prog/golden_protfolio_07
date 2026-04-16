@@ -1,12 +1,36 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import { X, Github, ExternalLink, Target, Wrench, Sparkles, Star } from 'lucide-react';
-import { useEffect } from 'react';
+import { X, Github, ExternalLink, Target, Wrench, Sparkles, Star, Clock, Share2, Check } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { Project } from './ProjectCard';
 
 type Props = { project: Project | null; onClose: () => void };
 
 export function ProjectModal({ project, onClose }: Props) {
+  const [copied, setCopied] = useState(false);
+
+  const readMin = useMemo(() => {
+    if (!project) return 0;
+    const words = `${project.shortDescription} ${project.fullDescription}`.trim().split(/\s+/).length;
+    return Math.max(1, Math.round(words / 220));
+  }, [project]);
+
+  const handleShare = async () => {
+    if (!project) return;
+    const url = `${window.location.origin}${window.location.pathname}#projects`;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: project.name, text: project.tagline, url });
+      } else {
+        await navigator.clipboard.writeText(url);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1800);
+      }
+    } catch {
+      // user cancelled or clipboard denied — ignore
+    }
+  };
+
   useEffect(() => {
     if (!project) return;
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
@@ -59,13 +83,18 @@ export function ProjectModal({ project, onClose }: Props) {
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0F] via-[#0A0A0F]/60 to-transparent" />
-                <div className="absolute bottom-6 left-6 md:left-10">
+                <div className="absolute bottom-6 left-6 right-6 md:left-10 md:right-10">
                   <p className="text-[10px] uppercase tracking-[0.3em] text-violet-bright font-mono mb-2">
                     {project.category}
                     {project.featured && <span className="ml-3 text-cyan-bright">· Featured</span>}
                   </p>
                   <h2 className="text-3xl md:text-5xl font-display font-bold text-text-primary">{project.name}</h2>
-                  <p className="mt-2 font-mono text-sm text-text-muted">{project.tagline}</p>
+                  <div className="mt-2 flex flex-wrap items-center gap-3">
+                    <p className="font-mono text-sm text-text-muted">{project.tagline}</p>
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/[0.06] border border-white/[0.08] text-[10px] font-mono text-text-muted">
+                      <Clock size={10} /> {readMin} min read
+                    </span>
+                  </div>
                 </div>
               </div>
 
@@ -144,6 +173,13 @@ export function ProjectModal({ project, onClose }: Props) {
                       <ExternalLink size={14} /> Live Demo
                     </a>
                   )}
+                  <button
+                    type="button"
+                    onClick={handleShare}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/[0.04] border border-white/[0.08] text-sm text-text-secondary hover:border-cyan-bright/50 hover:text-text-primary transition-all"
+                  >
+                    {copied ? <><Check size={14} className="text-emerald-400" /> Copied</> : <><Share2 size={14} /> Share</>}
+                  </button>
                 </section>
               </div>
             </motion.div>

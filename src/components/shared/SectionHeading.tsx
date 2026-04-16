@@ -1,4 +1,5 @@
 import { Fragment, type ReactNode } from 'react';
+import { GlitchText } from './GlitchText';
 
 function renderTitle(title: ReactNode) {
   if (typeof title !== 'string') return title;
@@ -7,13 +8,15 @@ function renderTitle(title: ReactNode) {
     <>
       {parts.map((part, i) => {
         if (part.startsWith('*') && part.endsWith('*')) {
+          const inner = part.slice(1, -1);
           return (
-            <span
-              key={i}
-              className="italic bg-gradient-to-r from-violet-bright via-pink to-cyan-bright bg-clip-text text-transparent"
-            >
-              {part.slice(1, -1)}
-            </span>
+            <GlitchText key={i} text={inner}>
+              <span
+                className="italic bg-gradient-to-r from-violet-bright via-pink to-cyan-bright bg-clip-text text-transparent"
+              >
+                {inner}
+              </span>
+            </GlitchText>
           );
         }
         return <Fragment key={i}>{part}</Fragment>;

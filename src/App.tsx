@@ -6,12 +6,14 @@ import { AboutSection } from './components/about/AboutSection';
 import { SkillsSection } from './components/skills/SkillsSection';
 import { ProjectsSection } from './components/projects/ProjectsSection';
 import { ExperienceSection } from './components/experience/ExperienceSection';
+import { PhilosophySection } from './components/shared/PhilosophySection';
 import { ContactSection } from './components/contact/ContactSection';
 import { LiveStatusBar } from './components/shared/LiveStatusBar';
 import { AskMeBot } from './components/shared/AskMeBot';
 import LoadingScreen from './components/loading/LoadingScreen';
 import CometCursor from './components/shared/CometCursor';
 import { AmbientSoundToggle } from './components/shared/AmbientSoundToggle';
+import { KonamiCode } from './components/shared/KonamiCode';
 
 const SESSION_KEY = 'ob-seen-loader-v2';
 
@@ -64,6 +66,40 @@ function App() {
     };
   }, []);
 
+  useEffect(() => {
+    const original = document.title;
+    let awayTimer = 0;
+    const onVis = () => {
+      if (document.hidden) {
+        awayTimer = window.setTimeout(() => {
+          document.title = '👋 Come back! — Oikantik';
+        }, 3000);
+      } else {
+        window.clearTimeout(awayTimer);
+        document.title = original;
+      }
+    };
+    document.addEventListener('visibilitychange', onVis);
+    return () => {
+      document.removeEventListener('visibilitychange', onVis);
+      window.clearTimeout(awayTimer);
+      document.title = original;
+    };
+  }, []);
+
+  useEffect(() => {
+    // eslint-disable-next-line no-console
+    console.log(
+      '%c👋 Hey, developer.',
+      'color:#A855F7; font-size:18px; font-weight:700;',
+    );
+    // eslint-disable-next-line no-console
+    console.log(
+      '%cBuilt with React 19 · R3F · Framer Motion · GSAP · Tailwind 4.\nSource: https://github.com/Golden007-prog/golden_protfolio_07\nSay hi: basuoikantik@gmail.com',
+      'color:#22D3EE; font-family:monospace; font-size:12px;',
+    );
+  }, []);
+
   const handleLoaderComplete = () => {
     sessionStorage.setItem(SESSION_KEY, '1');
     setLoaded(true);
@@ -101,6 +137,9 @@ function App() {
           <div className="relative z-20 bg-bg-base">
             <ExperienceSection />
           </div>
+          <div className="relative z-20 bg-bg-base">
+            <PhilosophySection />
+          </div>
           <div className="relative z-30 bg-bg-base">
             <ContactSection />
           </div>
@@ -108,7 +147,9 @@ function App() {
         <LiveStatusBar />
         <AmbientSoundToggle />
         <AskMeBot />
+        <KonamiCode />
         <Footer />
+        <div className="noise-overlay" aria-hidden="true" />
       </div>
     </>
   );

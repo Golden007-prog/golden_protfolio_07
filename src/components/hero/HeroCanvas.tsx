@@ -12,11 +12,19 @@ import * as THREE from 'three';
 const MODEL_URL = `${import.meta.env.BASE_URL}models/Meshy_AI_Realistic_style_Solid_0416043256_texture.glb`;
 
 const globalMouse = { x: 0, y: 0 };
+const globalScroll = { progress: 0 };
 if (typeof window !== 'undefined') {
   window.addEventListener('mousemove', (e) => {
     globalMouse.x = (e.clientX / window.innerWidth) * 2 - 1;
     globalMouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
   });
+  const updateScroll = () => {
+    const h = window.innerHeight;
+    const y = Math.min(window.scrollY, h * 1.5);
+    globalScroll.progress = Math.min(1, y / h);
+  };
+  window.addEventListener('scroll', updateScroll, { passive: true });
+  updateScroll();
 }
 
 function CyborgModel() {
@@ -48,8 +56,9 @@ function CyborgModel() {
     if (!group.current) return;
     const mx = globalMouse.x;
     const my = globalMouse.y;
-    targetRotation.current.y = mx * 0.7;
-    targetRotation.current.x = -(my * 0.45);
+    const sp = globalScroll.progress;
+    targetRotation.current.y = mx * 0.7 + sp * 0.35;
+    targetRotation.current.x = -(my * 0.45) + sp * 0.18;
     const k = 0.06;
     currentRotation.current.y += (targetRotation.current.y - currentRotation.current.y) * k;
     currentRotation.current.x += (targetRotation.current.x - currentRotation.current.x) * k;
@@ -57,12 +66,15 @@ function CyborgModel() {
     group.current.rotation.x = currentRotation.current.x;
 
     const targetOffsetX = -mx * 0.12;
-    const targetOffsetY = -my * 0.08;
+    const targetOffsetY = -my * 0.08 - sp * 0.25;
     currentOffset.current.x += (targetOffsetX - currentOffset.current.x) * 0.05;
     currentOffset.current.y += (targetOffsetY - currentOffset.current.y) * 0.05;
     group.current.position.x = currentOffset.current.x;
     group.current.position.y =
       currentOffset.current.y + Math.sin(state.clock.elapsedTime * 0.6) * 0.02;
+
+    const baseScale = 1 - sp * 0.12;
+    group.current.scale.setScalar(baseScale);
   });
 
   return (

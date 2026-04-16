@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import profile from '../../data/profile.json';
+import { Magnetic } from '../shared/Magnetic';
 
 const ROLES = [
   'Gen AI & Data Science Engineer',
@@ -36,6 +37,15 @@ function useTypewriterCycle(words: string[], typeMs = 60, holdMs = 2200, eraseMs
     };
   }, [words, typeMs, holdMs, eraseMs]);
   return text;
+}
+
+function greeting() {
+  const h = new Date().getHours();
+  if (h < 5) return 'Burning the midnight oil?';
+  if (h < 12) return 'Good morning';
+  if (h < 17) return 'Good afternoon';
+  if (h < 21) return 'Good evening';
+  return 'Late-night browsing?';
 }
 
 const HeroCanvas = lazy(() => import('./HeroCanvas').then((m) => ({ default: m.HeroCanvas })));
@@ -167,7 +177,7 @@ export function HeroSection() {
 
         <div className="relative z-20 h-full container-padding mx-auto max-w-[1440px] flex flex-col justify-center">
           <p className="font-mono text-[10px] uppercase tracking-[0.35em] text-text-dim mb-8">
-            {profile.location} · Available for hire
+            <span className="text-cyan-bright">{greeting()}</span> · {profile.location} · Available for hire
           </p>
 
           <h1 className="font-display font-bold leading-[0.85] tracking-[-0.035em]">
@@ -204,27 +214,33 @@ export function HeroSection() {
           </div>
 
           <div className="mt-10 flex flex-wrap items-center gap-4">
-            <a
-              href="#projects"
-              className="group relative px-7 py-3.5 bg-text-primary text-bg-base text-sm font-medium rounded-full transition-all duration-300 hover:scale-[1.03] hover:shadow-[0_0_40px_rgba(168,85,247,0.35)]"
-            >
-              View Projects
-              <span className="inline-block ml-2 group-hover:translate-x-1 transition-transform">→</span>
-            </a>
-            <a
-              href="#contact"
-              className="group px-7 py-3.5 text-text-secondary text-sm font-medium border border-white/[0.12] rounded-full backdrop-blur-sm hover:border-violet-bright/60 hover:text-text-primary hover:bg-violet-bright/5 transition-all duration-300"
-            >
-              Get in touch
-              <span className="inline-block ml-2 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all">→</span>
-            </a>
-            <a
-              href={`${base}oikantik_basu_u.pdf`}
-              download
-              className="px-5 py-3.5 text-xs font-mono uppercase tracking-wider text-violet-bright/90 hover:text-cyan-bright transition-colors"
-            >
-              Download CV ↓
-            </a>
+            <Magnetic strength={0.3}>
+              <a
+                href="#projects"
+                className="group relative px-7 py-3.5 bg-text-primary text-bg-base text-sm font-medium rounded-full transition-all duration-300 hover:scale-[1.03] hover:shadow-[0_0_40px_rgba(168,85,247,0.35)]"
+              >
+                View Projects
+                <span className="inline-block ml-2 group-hover:translate-x-1 transition-transform">→</span>
+              </a>
+            </Magnetic>
+            <Magnetic strength={0.3}>
+              <a
+                href="#contact"
+                className="group px-7 py-3.5 text-text-secondary text-sm font-medium border border-white/[0.12] rounded-full backdrop-blur-sm hover:border-violet-bright/60 hover:text-text-primary hover:bg-violet-bright/5 transition-all duration-300"
+              >
+                Get in touch
+                <span className="inline-block ml-2 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all">→</span>
+              </a>
+            </Magnetic>
+            <Magnetic strength={0.45}>
+              <a
+                href={`${base}oikantik_basu_u.pdf`}
+                download
+                className="px-5 py-3.5 text-xs font-mono uppercase tracking-wider text-violet-bright/90 hover:text-cyan-bright transition-colors"
+              >
+                Download CV ↓
+              </a>
+            </Magnetic>
           </div>
         </div>
 
