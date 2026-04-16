@@ -99,7 +99,9 @@ export function ProjectCard({ project, onOpen }: Props) {
             src={thumb}
             alt={project.name}
             loading="lazy"
-            className={`w-full h-full object-cover transition-all duration-700 ${hovered ? 'opacity-0 scale-110' : 'opacity-80 scale-100'}`}
+            className={`w-full h-full object-cover transition-all duration-700 ${
+              hovered ? 'opacity-100 scale-105' : 'opacity-0 scale-100'
+            }`}
           />
           {project.demoVideo && (
             <video
@@ -114,16 +116,14 @@ export function ProjectCard({ project, onOpen }: Props) {
               <source src={project.demoVideo.startsWith('/') ? base + project.demoVideo.slice(1) : project.demoVideo} type="video/mp4" />
             </video>
           )}
-          {!project.demoVideo && (
-            <div
-              className={`absolute inset-0 transition-opacity duration-500 pointer-events-none ${hovered ? 'opacity-100' : 'opacity-0'}`}
-              style={{
-                background:
-                  'radial-gradient(circle at 30% 20%, rgba(168,85,247,0.35), transparent 55%), radial-gradient(circle at 70% 80%, rgba(34,211,238,0.25), transparent 55%)',
-              }}
-            />
-          )}
-          <div className="absolute inset-0 bg-gradient-to-t from-bg-elevated via-bg-elevated/40 to-transparent" />
+          <div
+            className={`absolute inset-0 transition-opacity duration-500 pointer-events-none ${hovered ? 'opacity-0' : 'opacity-100'}`}
+            style={{
+              background:
+                'radial-gradient(circle at 30% 20%, rgba(168,85,247,0.35), transparent 55%), radial-gradient(circle at 70% 80%, rgba(34,211,238,0.25), transparent 55%)',
+            }}
+          />
+          <div className={`absolute inset-0 bg-gradient-to-t from-bg-elevated via-bg-elevated/40 to-transparent transition-opacity duration-500 ${hovered ? 'opacity-40' : 'opacity-100'}`} />
           <div className="absolute top-3 left-3 flex items-center gap-2">
             <span className="font-mono text-[10px] uppercase tracking-widest px-2 py-1 rounded-full glass text-cyan-bright">
               {project.category}

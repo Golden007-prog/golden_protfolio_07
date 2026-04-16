@@ -1,6 +1,6 @@
 import { useState, Suspense, lazy, type FormEvent } from 'react';
-import { motion } from 'framer-motion';
-import { Github, Linkedin, Mail, Phone, ArrowRight } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Github, Linkedin, Mail, Phone, ArrowRight, CheckCircle2, AlertTriangle, Loader2 } from 'lucide-react';
 import { SectionWrapper } from '../layout/SectionWrapper';
 import { SectionHeading } from '../shared/SectionHeading';
 import { ScrollReveal } from '../shared/ScrollReveal';
@@ -14,12 +14,60 @@ const fieldVariants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.55, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] } },
 };
 
+type Status = 'idle' | 'sending' | 'success' | 'error';
+
+const FORMSUBMIT_ENDPOINT = `https://formsubmit.co/ajax/${profile.email}`;
+
 export function ContactSection() {
   const base = import.meta.env.BASE_URL;
-  const [form, setForm] = useState({ name: '', email: '', message: '' });
+  const [form, setForm] = useState({ name: '', email: '', message: '', _honey: '' });
+  const [status, setStatus] = useState<Status>('idle');
+  const [errorMsg, setErrorMsg] = useState('');
 
-  const onSubmit = (e: FormEvent) => {
+  const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    if (form._honey) return;
+    if (!form.name.trim() || !form.email.trim() || !form.message.trim()) {
+      setStatus('error');
+      setErrorMsg('Please fill in every field.');
+      return;
+    }
+
+    setStatus('sending');
+    setErrorMsg('');
+
+    try {
+      const res = await fetch(FORMSUBMIT_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({
+          name: form.name,
+          email: form.email,
+          message: form.message,
+          _subject: `Portfolio inquiry from ${form.name}`,
+          _template: 'table',
+          _captcha: 'false',
+        }),
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data?.success === 'false') {
+        throw new Error(data?.message || 'Submission failed');
+      }
+
+      setStatus('success');
+      setForm({ name: '', email: '', message: '', _honey: '' });
+    } catch (err) {
+      setStatus('error');
+      setErrorMsg(
+        err instanceof Error && err.message !== 'Submission failed'
+          ? err.message
+          : 'Could not send. Try the mail link below, or retry in a moment.',
+      );
+    }
+  };
+
+  const openMailto = () => {
     const body = encodeURIComponent(`From: ${form.name} <${form.email}>\n\n${form.message}`);
     window.location.href = `mailto:${profile.email}?subject=Portfolio%20inquiry&body=${body}`;
   };
@@ -113,24 +161,85 @@ export function ContactSection() {
                   rows={5}
                   value={form.message}
                   onChange={(e) => setForm({ ...form, message: e.target.value })}
-                  className="mt-2 w-full bg-white/[0.03] border border-white/10 rounded-xl px-4 py-3 text-text-primary placeholder-text-dim focus:outline-none focus:border-violet-bright focus:ring-2 focus:ring-violet-bright/20 transition-all resize-none"
+                  className="mt-2 w-full bg-glass-fill border border-glass-border-strong rounded-xl px-4 py-3 text-text-primary placeholder-text-dim focus:outline-none focus:border-violet-bright focus:ring-2 focus:ring-violet-bright/20 transition-all resize-none"
                   placeholder="Tell me about the project…"
                 />
               </motion.div>
 
-              <motion.button
-                type="submit"
-                variants={fieldVariants}
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.98 }}
-                className="group inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-violet to-violet-bright text-white font-medium hover:from-violet-bright hover:to-cyan-bright transition-all hover:glow-violet"
-              >
-                Send message
-                <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-              </motion.button>
+              <input
+                type="text"
+                name="_honey"
+                tabIndex={-1}
+                autoComplete="off"
+                value={form._honey}
+                onChange={(e) => setForm({ ...form, _honey: e.target.value })}
+                className="absolute left-[-9999px] opacity-0 pointer-events-none"
+                aria-hidden="true"
+              />
+
+              <motion.div variants={fieldVariants} className="flex flex-wrap items-center gap-4">
+                <motion.button
+                  type="submit"
+                  disabled={status === 'sending'}
+                  whileHover={status === 'sending' ? undefined : { scale: 1.03 }}
+                  whileTap={status === 'sending' ? undefined : { scale: 0.98 }}
+                  className="group inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-violet to-violet-bright text-white font-medium hover:from-violet-bright hover:to-cyan-bright transition-all hover:glow-violet disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {status === 'sending' ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin" />
+                      Sending…
+                    </>
+                  ) : status === 'success' ? (
+                    <>
+                      <CheckCircle2 size={16} />
+                      Sent
+                    </>
+                  ) : (
+                    <>
+                      Send message
+                      <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                    </>
+                  )}
+                </motion.button>
+
+                <AnimatePresence mode="wait">
+                  {status === 'success' && (
+                    <motion.p
+                      key="ok"
+                      initial={{ opacity: 0, x: -8 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0 }}
+                      className="text-sm text-emerald-400 flex items-center gap-2"
+                    >
+                      <CheckCircle2 size={14} />
+                      Thanks — I'll reply within a day.
+                    </motion.p>
+                  )}
+                  {status === 'error' && (
+                    <motion.div
+                      key="err"
+                      initial={{ opacity: 0, x: -8 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0 }}
+                      className="text-sm text-rose-400 flex items-center gap-2 flex-wrap"
+                    >
+                      <AlertTriangle size={14} />
+                      <span>{errorMsg}</span>
+                      <button
+                        type="button"
+                        onClick={openMailto}
+                        className="underline text-rose-300 hover:text-rose-200"
+                      >
+                        Email me directly
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
             </motion.form>
 
-            <div className="mt-10 pt-8 border-t border-white/5 grid sm:grid-cols-2 gap-5">
+            <div className="mt-10 pt-8 border-t border-glass-border grid sm:grid-cols-2 gap-5">
               <DirectLink icon={<Mail size={14} />} label={profile.email} href={`mailto:${profile.email}`} />
               <DirectLink icon={<Phone size={14} />} label={profile.phone} href={`tel:${profile.phone}`} />
             </div>
@@ -158,7 +267,7 @@ function Field({ label, id, type = 'text', value, onChange }: { label: string; i
         required
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="mt-2 w-full bg-white/[0.03] border border-white/10 rounded-xl px-4 py-3 text-text-primary placeholder-text-dim focus:outline-none focus:border-violet-bright focus:ring-2 focus:ring-violet-bright/20 transition-all"
+        className="mt-2 w-full bg-glass-fill border border-glass-border-strong rounded-xl px-4 py-3 text-text-primary placeholder-text-dim focus:outline-none focus:border-violet-bright focus:ring-2 focus:ring-violet-bright/20 transition-all"
       />
     </div>
   );

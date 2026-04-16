@@ -27,7 +27,7 @@
     "liveUrl": "https://golden007-prog.github.io/UrbanCare-AI/",
     "featured": true,
     "category": "AI/ML",
-    "thumbnail": "/images/project-thumb-1.webp",
+    "thumbnail": "https://github.com/user-attachments/assets/a9447147-00a8-48ef-980c-120880a48cf4",
     "problem": "Most clinical AI is a black box — physicians can't audit how a diagnosis was reached, so they can't trust it and compliance teams can't sign off on it.",
     "solution": "A Semantics-to-Vector interface that bridges human-readable clinical semantics and internal model vectors, making every layer of the 30-agent pipeline inspectable — from lab-report extraction to differential diagnosis.",
     "lessons": "Interpretability isn't a feature you bolt on at the end — for clinical tools, it has to be the interface itself."
@@ -59,7 +59,7 @@
     "liveUrl": null,
     "featured": true,
     "category": "AI/ML",
-    "thumbnail": "/images/project-thumb-2.webp",
+    "thumbnail": "https://opengraph.githubassets.com/1/Golden007-prog/bruhworking",
     "problem": "Long-running agentic tasks crash browsers, lose state mid-flight, and offer no mid-run visibility — so users can't trust them with real work.",
     "solution": "A planner-coordinated swarm on Cloud Run that streams per-agent progress over SSE, with quality gates that re-run only failing branches instead of the whole pipeline.",
     "lessons": "Agent orchestration is an observability problem, not just a routing problem — stream progress early and often."
@@ -92,7 +92,7 @@
     "liveUrl": "https://golden007-prog.github.io/Vyapar-Gyan/",
     "featured": true,
     "category": "AI/ML",
-    "thumbnail": "/images/project-thumb-3.webp",
+    "thumbnail": "https://opengraph.githubassets.com/1/Golden007-prog/Vyapar-Gyan",
     "problem": "India's next billion commerce users don't use web dashboards — they speak eight languages, live inside WhatsApp, and send voice notes, not typed SKUs.",
     "solution": "Voice-first WhatsApp commerce: Gemini transcribes and classifies voice notes, routes intents to 65+ Lambdas across 12 domains, and AWS Polly responds in the customer's dialect.",
     "lessons": "Voice-first isn't a novelty — it collapses a typing funnel that was quietly blocking non-English users entirely."
@@ -124,7 +124,7 @@
     "liveUrl": "https://golden007-prog.github.io/Omni-Lab/",
     "featured": true,
     "category": "AI/ML",
-    "thumbnail": "/images/project-thumb-4.webp",
+    "thumbnail": "https://github.com/user-attachments/assets/a5b59b91-12d6-464b-845a-742c0a814cbb",
     "problem": "Static educational content (PDFs, slides, lecture videos) doesn't adapt to what a specific learner is confused about right now.",
     "solution": "Three specialized agents — Teacher (live voice with barge-in), Scientist (writes code to verify claims), Visualizer (Veo-generated videos) — turn any PDF into an interactive, interruptible lesson.",
     "lessons": "The cleanest way to stop LLMs hallucinating in education is to let a Scientist agent write code that proves or disproves its own claims."
@@ -156,7 +156,7 @@
     "liveUrl": null,
     "featured": true,
     "category": "AI/ML",
-    "thumbnail": "/images/project-thumb-5.webp",
+    "thumbnail": "https://opengraph.githubassets.com/1/Golden007-prog/Content-Storyteller",
     "problem": "Marketing teams need polished multi-format output (copy, visuals, video, voiceover) from rough inputs — but most AI tools lock you into a single modality.",
     "solution": "Output-intent inference decides which pipeline stages run per job, so the same brief yields a LinkedIn GIF, a storyboard, and a Veo promo from ten coordinated GCP services.",
     "lessons": "Multimodal pipelines are cheaper when you infer intent upfront instead of running every stage blindly."
@@ -188,7 +188,7 @@
     "liveUrl": null,
     "featured": false,
     "category": "Data Science",
-    "thumbnail": "/images/project-thumb-6.webp"
+    "thumbnail": "https://github.com/user-attachments/assets/b5ad89d3-25c2-4868-b7f1-cc5c0647e793"
   },
   {
     "name": "Drugs Side Effects Analysis",
@@ -217,7 +217,7 @@
     "liveUrl": null,
     "featured": false,
     "category": "Data Science",
-    "thumbnail": "/images/project-thumb-7.webp"
+    "thumbnail": "https://github.com/user-attachments/assets/32a10826-deee-49b1-945b-8e92370ae6f4"
   },
   {
     "name": "IBM HR Attrition Prediction",
@@ -245,7 +245,7 @@
     "liveUrl": null,
     "featured": false,
     "category": "Data Science",
-    "thumbnail": "/images/project-thumb-8.webp"
+    "thumbnail": "https://github.com/user-attachments/assets/de2fd646-4dfd-4a7f-b870-46213d42b2a3"
   },
   {
     "name": "Netflix Content Analytics",
@@ -272,7 +272,7 @@
     "liveUrl": null,
     "featured": false,
     "category": "Data Science",
-    "thumbnail": "/images/project-thumb-9.webp"
+    "thumbnail": "https://opengraph.githubassets.com/1/Golden007-prog/Netflix-Data-Cleaning-Analysis-and-Visualization"
   },
   {
     "name": "MCQ Tech Challenge",
@@ -299,6 +299,6 @@
     "liveUrl": "https://golden007-prog.github.io/test-challenger-07/",
     "featured": false,
     "category": "Web App",
-    "thumbnail": "/images/project-thumb-10.webp"
+    "thumbnail": "https://opengraph.githubassets.com/1/Golden007-prog/test-challenger-07"
   }
 ]
