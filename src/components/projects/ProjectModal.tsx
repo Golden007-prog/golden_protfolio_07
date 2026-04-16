@@ -54,7 +54,7 @@ export function ProjectModal({ project, onClose }: Props) {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
-          className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md overflow-y-auto overscroll-contain"
+          className="fixed inset-0 z-[100] bg-bg-base/80 backdrop-blur-md overflow-y-auto overscroll-contain"
           role="dialog"
           aria-modal="true"
           aria-label={project.name}
@@ -63,9 +63,9 @@ export function ProjectModal({ project, onClose }: Props) {
             type="button"
             onClick={(e) => { e.stopPropagation(); onClose(); }}
             aria-label="Close"
-            className="fixed top-4 right-4 md:top-6 md:right-6 z-[110] w-11 h-11 rounded-full bg-black/70 backdrop-blur border border-white/[0.15] flex items-center justify-center hover:bg-white/10 transition-colors"
+            className="fixed top-4 right-4 md:top-6 md:right-6 z-[110] w-11 h-11 rounded-full glass-strong flex items-center justify-center hover:border-violet-bright/60 transition-colors"
           >
-            <X className="w-5 h-5 text-white" />
+            <X className="w-5 h-5 text-text-primary" />
           </button>
           <div className="flex min-h-full items-start md:items-center justify-center p-4 md:p-8">
             <motion.div
@@ -74,7 +74,7 @@ export function ProjectModal({ project, onClose }: Props) {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 20, scale: 0.98 }}
               transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-              className="relative w-full max-w-5xl bg-[#0A0A0F] border border-white/[0.08] rounded-2xl shadow-2xl my-auto overflow-hidden"
+              className="relative w-full max-w-5xl bg-bg-surface border border-glass-border rounded-2xl shadow-2xl my-auto overflow-hidden"
             >
               <div className="relative h-56 md:h-72 overflow-hidden">
                 <img
@@ -82,7 +82,7 @@ export function ProjectModal({ project, onClose }: Props) {
                   alt={project.name}
                   className="w-full h-full object-cover"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0F] via-[#0A0A0F]/60 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-bg-surface via-bg-surface/60 to-transparent" />
                 <div className="absolute bottom-6 left-6 right-6 md:left-10 md:right-10">
                   <p className="text-[10px] uppercase tracking-[0.3em] text-violet-bright font-mono mb-2">
                     {project.category}

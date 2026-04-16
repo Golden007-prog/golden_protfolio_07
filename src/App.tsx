@@ -50,7 +50,7 @@ function App() {
         rafId = 0;
       });
     };
-    const onClick = (e: MouseEvent) => {
+    const onPointerDown = (e: PointerEvent) => {
       if (reduce) return;
       const r = document.createElement('div');
       r.className = 'click-ripple';
@@ -60,10 +60,10 @@ function App() {
       setTimeout(() => r.remove(), 600);
     };
     window.addEventListener('mousemove', onMove, { passive: true });
-    window.addEventListener('click', onClick);
+    window.addEventListener('pointerdown', onPointerDown, { passive: true });
     return () => {
       window.removeEventListener('mousemove', onMove);
-      window.removeEventListener('click', onClick);
+      window.removeEventListener('pointerdown', onPointerDown);
       if (rafId) cancelAnimationFrame(rafId);
     };
   }, []);

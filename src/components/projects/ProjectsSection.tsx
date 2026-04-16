@@ -12,12 +12,6 @@ const PROJECTS: Project[] = (projectsData as Array<Omit<Project, 'slug'> & { slu
   slug: p.slug ?? p.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
 }));
 
-const BENTO_SPANS = [4, 2, 2, 2, 2, 3, 3, 2, 4, 2] as const;
-const SPAN_CLASS: Record<number, string> = {
-  2: 'md:col-span-2',
-  3: 'md:col-span-3',
-  4: 'md:col-span-4',
-};
 
 export function ProjectsSection() {
   const categories = useMemo(() => ['All', ...new Set(PROJECTS.map((p) => p.category))], []);
@@ -62,24 +56,21 @@ export function ProjectsSection() {
 
       <motion.div
         layout
-        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-5 md:gap-6"
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6 auto-rows-fr"
       >
-        {shown.map((p, i) => {
-          const span = BENTO_SPANS[i % BENTO_SPANS.length];
-          return (
-            <motion.div
-              layout
-              key={p.slug}
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: (i % 6) * 0.06 }}
-              className={SPAN_CLASS[span]}
-            >
-              <ProjectCard project={p} onOpen={setActive} />
-            </motion.div>
-          );
-        })}
+        {shown.map((p, i) => (
+          <motion.div
+            layout
+            key={p.slug}
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: (i % 3) * 0.08 }}
+            className="h-full"
+          >
+            <ProjectCard project={p} onOpen={setActive} />
+          </motion.div>
+        ))}
       </motion.div>
 
       <ProjectModal project={active} onClose={() => setActive(null)} />

@@ -66,7 +66,7 @@ export function ScrollNarrative() {
     <section
       ref={containerRef}
       className="relative py-32 md:py-48 container-padding overflow-hidden"
-      style={{ zIndex: 5, backgroundColor: '#060609' }}
+      style={{ zIndex: 5, backgroundColor: 'var(--app-bg-base)' }}
     >
       <div className="max-w-5xl mx-auto">
         <p className="font-mono text-[10px] uppercase tracking-[0.35em] text-text-dim mb-10">

@@ -3,6 +3,7 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { Float, Environment, useGLTF } from '@react-three/drei';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import * as THREE from 'three';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const MODEL_URL = `${import.meta.env.BASE_URL}models/holo-envelope.glb`;
 
@@ -43,6 +44,8 @@ function Envelope() {
 useGLTF.preload(MODEL_URL);
 
 export function ContactCanvas() {
+  const { resolvedTheme } = useTheme();
+  const isLight = resolvedTheme === 'light';
   return (
     <Canvas
       camera={{ position: [0, 0.2, 5.5], fov: 38 }}
@@ -50,14 +53,26 @@ export function ContactCanvas() {
       gl={{
         antialias: true,
         toneMapping: THREE.ACESFilmicToneMapping,
-        toneMappingExposure: 0.7,
+        toneMappingExposure: isLight ? 0.55 : 0.7,
         outputColorSpace: THREE.SRGBColorSpace,
       }}
     >
-      <ambientLight intensity={0.22} color="#ffffff" />
-      <directionalLight position={[4, 5, 4]} intensity={1.1} color="#ffffff" />
-      <pointLight position={[-4, 3, -2]} intensity={1.2} color="#A855F7" distance={12} decay={2} />
-      <pointLight position={[3, -2, 3]} intensity={0.7} color="#22D3EE" distance={10} decay={2} />
+      <ambientLight intensity={isLight ? 0.35 : 0.22} color="#ffffff" />
+      <directionalLight position={[4, 5, 4]} intensity={isLight ? 0.9 : 1.1} color="#ffffff" />
+      <pointLight
+        position={[-4, 3, -2]}
+        intensity={isLight ? 0.55 : 1.2}
+        color={isLight ? '#B8A4E8' : '#A855F7'}
+        distance={12}
+        decay={2}
+      />
+      <pointLight
+        position={[3, -2, 3]}
+        intensity={isLight ? 0.35 : 0.7}
+        color={isLight ? '#A8D4DC' : '#22D3EE'}
+        distance={10}
+        decay={2}
+      />
       <pointLight position={[0, 0, 4]} intensity={0.35} color="#ffffff" distance={8} decay={2} />
 
       <Suspense fallback={null}>
@@ -66,7 +81,12 @@ export function ContactCanvas() {
       </Suspense>
 
       <EffectComposer>
-        <Bloom intensity={0.45} luminanceThreshold={0.5} luminanceSmoothing={0.9} mipmapBlur />
+        <Bloom
+          intensity={isLight ? 0.18 : 0.45}
+          luminanceThreshold={isLight ? 0.75 : 0.5}
+          luminanceSmoothing={0.9}
+          mipmapBlur
+        />
       </EffectComposer>
     </Canvas>
   );

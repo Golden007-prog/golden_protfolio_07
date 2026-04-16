@@ -6,7 +6,6 @@ import { StatCard } from './StatCard';
 import profile from '../../data/profile.json';
 
 export function AboutSection() {
-  const base = import.meta.env.BASE_URL;
   return (
     <SectionWrapper id="about">
       <SectionHeading
@@ -16,30 +15,37 @@ export function AboutSection() {
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 items-stretch">
-        <ScrollReveal className="lg:col-span-2 relative rounded-2xl overflow-hidden min-h-[320px]">
-          <img
-            src={`${base}images/about-workspace.webp`}
-            alt=""
-            aria-hidden="true"
-            loading="lazy"
-            className="absolute inset-0 w-full h-full object-cover"
+        <ScrollReveal className="lg:col-span-2 relative rounded-2xl overflow-hidden min-h-[320px] about-portrait">
+          <div className="absolute inset-0 about-portrait-bg" />
+          <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full opacity-40 about-portrait-blob-a" />
+          <div className="absolute -bottom-20 -left-10 w-72 h-72 rounded-full opacity-30 about-portrait-blob-b" />
+          <div
+            aria-hidden
+            className="absolute inset-0 opacity-[0.08] mix-blend-overlay pointer-events-none"
+            style={{
+              backgroundImage:
+                'linear-gradient(rgba(255,255,255,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.6) 1px, transparent 1px)',
+              backgroundSize: '40px 40px',
+            }}
           />
-          <video
-            autoPlay muted loop playsInline preload="metadata"
-            poster={`${base}images/about-workspace.webp`}
-            aria-hidden="true"
-            className="absolute inset-0 w-full h-full object-cover opacity-55 mix-blend-screen"
-          >
-            <source src={`${base}videos/about-bg.mp4`} type="video/mp4" />
-          </video>
-          <div className="absolute inset-0 bg-gradient-to-br from-bg-base/50 via-violet/10 to-cyan/10" />
-          <div className="relative z-10 p-8 h-full flex flex-col justify-end">
-            <p className="font-mono text-xs tracking-[0.3em] uppercase text-cyan-bright">
-              {profile.location}
-            </p>
-            <p className="mt-3 text-2xl font-display font-semibold text-text-primary">
-              {profile.headline}
-            </p>
+          <div className="relative z-10 p-8 h-full flex flex-col justify-between">
+            <div className="flex items-center gap-3">
+              <span className="font-mono text-[10px] tracking-[0.3em] uppercase text-cyan-bright">
+                {profile.location}
+              </span>
+              <span className="h-px flex-1 bg-gradient-to-r from-cyan-bright/60 to-transparent" />
+            </div>
+            <div>
+              <p className="font-display text-[5.5rem] md:text-[7rem] leading-[0.85] font-bold tracking-[-0.04em] about-portrait-mark">
+                OB.
+              </p>
+              <p className="mt-4 text-lg md:text-xl font-display font-semibold text-text-primary">
+                {profile.headline}
+              </p>
+              <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.25em] text-text-dim">
+                {profile.name} · Available for hire
+              </p>
+            </div>
           </div>
         </ScrollReveal>
 

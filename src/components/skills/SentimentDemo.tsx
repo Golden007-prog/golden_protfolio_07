@@ -85,7 +85,7 @@ export function SentimentDemo() {
         onChange={(e) => setText(e.target.value)}
         rows={3}
         placeholder="Type or paste some text…"
-        className="w-full px-4 py-3 rounded-xl bg-white/[0.03] border border-white/[0.08] text-sm text-text-primary placeholder:text-text-dim focus:outline-none focus:border-violet-bright/50 resize-none"
+        className="w-full px-4 py-3 rounded-xl bg-glass-fill border border-glass-border-strong text-sm text-text-primary placeholder:text-text-dim focus:outline-none focus:border-violet-bright/70 focus:ring-2 focus:ring-violet-bright/20 resize-none transition-colors"
       />
 
       <div className="mt-4 flex flex-wrap gap-2">
@@ -94,7 +94,7 @@ export function SentimentDemo() {
             key={i}
             type="button"
             onClick={() => setText(ex)}
-            className="text-[11px] px-2.5 py-1 rounded-full bg-white/[0.03] border border-white/[0.06] text-text-muted hover:border-cyan-bright/40 hover:text-text-primary transition-colors"
+            className="text-[11px] px-2.5 py-1 rounded-full bg-glass-fill border border-glass-border-strong text-text-muted hover:border-cyan-bright/60 hover:text-text-primary transition-colors"
           >
             Example {i + 1}
           </button>
@@ -102,10 +102,10 @@ export function SentimentDemo() {
       </div>
 
       <div className="mt-6 grid md:grid-cols-3 gap-3">
-        <div className="md:col-span-2 p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+        <div className="md:col-span-2 p-4 rounded-xl bg-glass-fill border border-glass-border-strong">
           <p className="text-[10px] font-mono uppercase tracking-wider text-text-dim">Polarity</p>
-          <div className="mt-3 h-2 rounded-full bg-white/[0.05] overflow-hidden relative">
-            <div className="absolute inset-y-0 left-1/2 w-px bg-white/[0.12]" />
+          <div className="mt-3 h-2 rounded-full bg-glass-border overflow-hidden relative">
+            <div className="absolute inset-y-0 left-1/2 w-px bg-glass-border-strong" />
             <motion.div
               className={`h-full ${result.score >= 0 ? 'bg-gradient-to-r from-cyan-bright to-green-400' : 'bg-gradient-to-r from-pink-500 to-red-500'}`}
               style={{
@@ -125,7 +125,7 @@ export function SentimentDemo() {
             <span>+1.0 positive</span>
           </div>
         </div>
-        <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06] flex flex-col items-center justify-center">
+        <div className="p-4 rounded-xl bg-glass-fill border border-glass-border-strong flex flex-col items-center justify-center">
           <p className="text-[10px] font-mono uppercase tracking-wider text-text-dim">Label</p>
           <p className={`mt-2 font-display text-2xl font-bold capitalize ${color}`}>{result.label}</p>
           <p className="mt-1 font-mono text-[10px] text-text-dim">score {result.score.toFixed(2)}</p>

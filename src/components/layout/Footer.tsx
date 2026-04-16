@@ -11,10 +11,10 @@ export function Footer() {
   const days = daysSinceLaunch();
   return (
     <footer
-      className="relative container-padding py-12 border-t border-white/5"
-      style={{ zIndex: 40, backgroundColor: '#050508' }}
+      className="relative container-padding py-12 border-t border-glass-border"
+      style={{ zIndex: 40, backgroundColor: 'var(--app-bg-footer)' }}
     >
-      <div className="absolute inset-0 -z-10" style={{ backgroundColor: '#050508' }} />
+      <div className="absolute inset-0 -z-10" style={{ backgroundColor: 'var(--app-bg-footer)' }} />
       <div className="mx-auto max-w-[1440px] flex flex-col md:flex-row items-center justify-between gap-6">
         <div className="flex flex-col items-center md:items-start gap-1">
           <p className="font-mono text-xs tracking-[0.2em] uppercase text-text-dim">

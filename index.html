@@ -6,6 +6,23 @@
     <link rel="apple-touch-icon" href="/golden_protfolio_07/ob-logo.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#060609" />
+    <script>
+      (function () {
+        try {
+          var saved = localStorage.getItem('theme');
+          var systemLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+          var resolved = saved === 'light' ? 'light'
+            : saved === 'dark' ? 'dark'
+            : saved === 'system' ? (systemLight ? 'light' : 'dark')
+            : 'dark';
+          document.documentElement.setAttribute('data-theme', resolved);
+          var meta = document.querySelector('meta[name="theme-color"]');
+          if (meta) meta.setAttribute('content', resolved === 'dark' ? '#060609' : '#FAFAF7');
+        } catch (e) {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
+      })();
+    </script>
     <title>Oikantik Basu — Data Scientist & ML Engineer</title>
     <meta name="description" content="Portfolio of Oikantik Basu — Data Science graduate specializing in ML, LLMs, and NLP. Interactive 3D showcase of projects, skills, and experience." />
     <meta name="author" content="Oikantik Basu" />

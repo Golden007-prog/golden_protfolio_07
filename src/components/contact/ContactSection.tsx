@@ -30,12 +30,31 @@ export function ContactSection() {
         autoPlay muted loop playsInline preload="metadata"
         poster={`${base}images/contact-bg.webp`}
         aria-hidden="true"
-        className="absolute inset-0 -z-10 w-full h-full object-cover opacity-25 pointer-events-none"
+        className="absolute inset-0 -z-10 w-full h-full object-cover opacity-25 pointer-events-none dark-only"
       >
         <source src={`${base}videos/contact-bg.mp4`} type="video/mp4" />
       </video>
       <div
-        className="absolute inset-0 -z-10 opacity-35 pointer-events-none mix-blend-screen"
+        className="absolute inset-0 -z-10 pointer-events-none light-only overflow-hidden"
+        style={{
+          maskImage:
+            'radial-gradient(ellipse 85% 75% at 50% 50%, black 35%, rgba(0,0,0,0.35) 70%, transparent 100%)',
+          WebkitMaskImage:
+            'radial-gradient(ellipse 85% 75% at 50% 50%, black 35%, rgba(0,0,0,0.35) 70%, transparent 100%)',
+        }}
+      >
+        <video
+          autoPlay muted loop playsInline preload="metadata"
+          aria-hidden="true"
+          className="w-full h-full object-cover opacity-40"
+          style={{ filter: 'saturate(0.75) brightness(1.02)' }}
+        >
+          <source src={`${base}videos/contact-bg-light.mp4`} type="video/mp4" />
+        </video>
+      </div>
+      <div className="absolute inset-0 -z-10 bg-gradient-to-b from-bg-base/50 via-transparent to-bg-base/70 pointer-events-none light-only" />
+      <div
+        className="absolute inset-0 -z-10 opacity-35 pointer-events-none mix-blend-screen dark-only"
         style={{ backgroundImage: `url(${base}images/contact-bg.webp)`, backgroundSize: 'cover', backgroundPosition: 'center' }}
       />
       <div className="absolute inset-0 -z-10 bg-gradient-to-b from-bg-base/60 via-transparent to-bg-base pointer-events-none" />
@@ -47,8 +66,8 @@ export function ContactSection() {
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
         <ScrollReveal className="lg:col-span-2 relative flex items-center justify-center min-h-[320px] lg:min-h-[480px]">
-          <div className="absolute -inset-4 bg-violet-bright/10 rounded-[2rem] blur-3xl pointer-events-none" />
-          <div className="absolute -inset-8 bg-cyan-bright/5 rounded-[2rem] blur-3xl pointer-events-none" />
+          <div className="absolute -inset-4 bg-violet-bright/10 rounded-[2rem] blur-3xl pointer-events-none dark-only" />
+          <div className="absolute -inset-8 bg-cyan-bright/5 rounded-[2rem] blur-3xl pointer-events-none dark-only" />
           <div className="relative w-full h-full">
             <Suspense fallback={<div className="w-full h-full glass animate-pulse rounded-3xl" />}>
               <ContactCanvas />

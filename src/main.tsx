@@ -5,6 +5,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import './index.css';
 import App from './App.tsx';
+import { ThemeProvider } from './contexts/ThemeContext';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -21,6 +22,8 @@ gsap.ticker.lagSmoothing(0);
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    <ThemeProvider>
+      <App />
+    </ThemeProvider>
   </StrictMode>,
 );

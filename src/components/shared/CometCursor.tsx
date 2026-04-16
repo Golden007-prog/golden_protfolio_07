@@ -15,7 +15,8 @@ export default function CometCursor() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    if (window.matchMedia('(hover: none)').matches) return;
+
+    const isTouch = window.matchMedia('(hover: none)').matches;
 
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -39,22 +40,45 @@ export default function CometCursor() {
     const trail: TrailPoint[] = [];
     let rafId = 0;
     let initialized = false;
+    let fadeTimer: ReturnType<typeof setTimeout> | null = null;
     const MAX_TRAIL = 28;
     const MIN_DIST = 1.5;
 
-    const handleMove = (e: MouseEvent) => {
-      mouse.x = e.clientX;
-      mouse.y = e.clientY;
+    const setPoint = (x: number, y: number) => {
+      mouse.x = x;
+      mouse.y = y;
       if (!initialized) {
-        head.x = e.clientX;
-        head.y = e.clientY;
+        head.x = x;
+        head.y = y;
         initialized = true;
       }
       setVisible(true);
+      if (fadeTimer) { clearTimeout(fadeTimer); fadeTimer = null; }
     };
 
+    const handleMove = (e: MouseEvent) => setPoint(e.clientX, e.clientY);
     const handleLeave = () => setVisible(false);
     const handleEnter = () => setVisible(true);
+
+    const handleTouch = (e: TouchEvent) => {
+      const t = e.touches[0];
+      if (!t) return;
+      setPoint(t.clientX, t.clientY);
+
+      const el = document.elementFromPoint(t.clientX, t.clientY) as HTMLElement | null;
+      const isInteractive = !!el?.closest(
+        'a, button, input, textarea, [role="button"], [data-cursor-hover]',
+      );
+      hoveringRef.current = isInteractive;
+      setHovering(isInteractive);
+    };
+
+    const handleTouchEnd = () => {
+      if (fadeTimer) clearTimeout(fadeTimer);
+      fadeTimer = setTimeout(() => setVisible(false), 450);
+      hoveringRef.current = false;
+      setHovering(false);
+    };
 
     const handleOver = (e: Event) => {
       const target = e.target as HTMLElement;
@@ -110,18 +134,33 @@ export default function CometCursor() {
 
     animate();
 
-    window.addEventListener('mousemove', handleMove);
-    window.addEventListener('mouseleave', handleLeave);
-    window.addEventListener('mouseenter', handleEnter);
-    document.addEventListener('mouseover', handleOver);
+    if (isTouch) {
+      window.addEventListener('touchstart', handleTouch, { passive: true });
+      window.addEventListener('touchmove', handleTouch, { passive: true });
+      window.addEventListener('touchend', handleTouchEnd, { passive: true });
+      window.addEventListener('touchcancel', handleTouchEnd, { passive: true });
+    } else {
+      window.addEventListener('mousemove', handleMove);
+      window.addEventListener('mouseleave', handleLeave);
+      window.addEventListener('mouseenter', handleEnter);
+      document.addEventListener('mouseover', handleOver);
+    }
 
     return () => {
       cancelAnimationFrame(rafId);
+      if (fadeTimer) clearTimeout(fadeTimer);
       window.removeEventListener('resize', resize);
-      window.removeEventListener('mousemove', handleMove);
-      window.removeEventListener('mouseleave', handleLeave);
-      window.removeEventListener('mouseenter', handleEnter);
-      document.removeEventListener('mouseover', handleOver);
+      if (isTouch) {
+        window.removeEventListener('touchstart', handleTouch);
+        window.removeEventListener('touchmove', handleTouch);
+        window.removeEventListener('touchend', handleTouchEnd);
+        window.removeEventListener('touchcancel', handleTouchEnd);
+      } else {
+        window.removeEventListener('mousemove', handleMove);
+        window.removeEventListener('mouseleave', handleLeave);
+        window.removeEventListener('mouseenter', handleEnter);
+        document.removeEventListener('mouseover', handleOver);
+      }
     };
   }, []);
 
@@ -134,7 +173,7 @@ export default function CometCursor() {
         style={{
           zIndex: 99998,
           opacity: visible ? 1 : 0,
-          transition: 'opacity 0.2s',
+          transition: 'opacity 0.25s',
         }}
       />
       <div
@@ -143,8 +182,8 @@ export default function CometCursor() {
         className="pointer-events-none fixed top-0 left-0 rounded-full transition-[width,height,background] duration-200"
         style={{
           zIndex: 99999,
-          width: hovering ? '14px' : '8px',
-          height: hovering ? '14px' : '8px',
+          width: hovering ? '18px' : '10px',
+          height: hovering ? '18px' : '10px',
           background: hovering ? '#06B6D4' : '#A855F7',
           boxShadow: hovering
             ? '0 0 20px rgba(6, 182, 212, 0.6), 0 0 40px rgba(6, 182, 212, 0.3)'

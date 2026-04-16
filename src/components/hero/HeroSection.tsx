@@ -128,7 +128,7 @@ export function HeroSection() {
   return (
     <section ref={sectionRef} id="hero" className="relative h-screen">
       <div className="relative h-screen overflow-hidden">
-        <div className="absolute inset-0 z-0 pointer-events-none">
+        <div className="absolute inset-0 z-0 pointer-events-none dark-only">
           <video
             autoPlay muted loop playsInline preload="auto"
             poster={`${base}images/skills-bg.webp`}
@@ -141,10 +141,22 @@ export function HeroSection() {
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-bg-base/90" />
         </div>
 
+        <div className="absolute inset-0 z-0 pointer-events-none light-only">
+          <video
+            autoPlay muted loop playsInline preload="auto"
+            aria-hidden="true"
+            className="w-full h-full object-cover opacity-55"
+          >
+            <source src={`${base}videos/hero-bg-light.mp4`} type="video/mp4" />
+          </video>
+          <div className="absolute inset-0 bg-gradient-to-r from-bg-base via-bg-base/60 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-bg-base/80" />
+        </div>
+
         <div className="absolute right-0 top-0 w-full lg:w-[58%] h-full">
           <div
             aria-hidden
-            className="pointer-events-none absolute inset-0 z-0 overflow-hidden"
+            className="pointer-events-none absolute inset-0 z-0 overflow-hidden dark-only"
           >
             <div
               className="absolute top-[18%] right-[10%] w-[420px] h-[420px] rounded-full"
@@ -213,11 +225,11 @@ export function HeroSection() {
             </p>
           </div>
 
-          <div className="mt-10 flex flex-wrap items-center gap-4">
+          <div className="mt-10 flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3 sm:gap-4">
             <Magnetic strength={0.3}>
               <a
                 href="#projects"
-                className="group relative px-7 py-3.5 bg-text-primary text-bg-base text-sm font-medium rounded-full transition-all duration-300 hover:scale-[1.03] hover:shadow-[0_0_40px_rgba(168,85,247,0.35)]"
+                className="group relative inline-flex items-center justify-center px-6 sm:px-7 py-3 sm:py-3.5 bg-text-primary text-bg-base text-sm font-medium rounded-full transition-all duration-300 hover:scale-[1.03] hover:shadow-[0_0_40px_rgba(168,85,247,0.35)] w-full sm:w-auto"
               >
                 View Projects
                 <span className="inline-block ml-2 group-hover:translate-x-1 transition-transform">→</span>
@@ -226,7 +238,7 @@ export function HeroSection() {
             <Magnetic strength={0.3}>
               <a
                 href="#contact"
-                className="group px-7 py-3.5 text-text-secondary text-sm font-medium border border-white/[0.12] rounded-full backdrop-blur-sm hover:border-violet-bright/60 hover:text-text-primary hover:bg-violet-bright/5 transition-all duration-300"
+                className="group inline-flex items-center justify-center px-6 sm:px-7 py-3 sm:py-3.5 text-text-secondary text-sm font-medium border border-glass-border-strong rounded-full backdrop-blur-sm hover:border-violet-bright/60 hover:text-text-primary hover:bg-violet-bright/5 transition-all duration-300 w-full sm:w-auto"
               >
                 Get in touch
                 <span className="inline-block ml-2 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all">→</span>
@@ -236,7 +248,7 @@ export function HeroSection() {
               <a
                 href={`${base}oikantik_basu_u.pdf`}
                 download
-                className="px-5 py-3.5 text-xs font-mono uppercase tracking-wider text-violet-bright/90 hover:text-cyan-bright transition-colors"
+                className="inline-flex items-center justify-center sm:justify-start px-4 sm:px-5 py-3 sm:py-3.5 text-xs font-mono uppercase tracking-wider text-violet-bright/90 hover:text-cyan-bright transition-colors"
               >
                 Download CV ↓
               </a>

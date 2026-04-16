@@ -76,7 +76,7 @@ export function SkillPill({ name, detail, accent, delay = 0 }: Props) {
                 transform: 'translate(-50%, calc(-100% - 12px))',
               }}
             >
-              <div className="w-72 bg-[#0A0A0F]/95 border border-white/[0.1] rounded-xl px-4 py-3 shadow-2xl shadow-black/60 backdrop-blur-xl">
+              <div className="w-72 bg-bg-surface/95 border border-glass-border-strong rounded-xl px-4 py-3 shadow-2xl backdrop-blur-xl">
                 <p
                   className="text-xs text-text-secondary leading-relaxed"
                   dangerouslySetInnerHTML={{ __html: detail!.shortDef }}
@@ -85,7 +85,7 @@ export function SkillPill({ name, detail, accent, delay = 0 }: Props) {
                   Click to learn more →
                 </p>
               </div>
-              <div className="absolute left-1/2 top-full w-2 h-2 bg-[#0A0A0F] border-r border-b border-white/[0.1] -translate-x-1/2 -translate-y-1/2 rotate-45" />
+              <div className="absolute left-1/2 top-full w-2 h-2 bg-bg-surface border-r border-b border-glass-border-strong -translate-x-1/2 -translate-y-1/2 rotate-45" />
             </motion.div>
           )}
         </AnimatePresence>,

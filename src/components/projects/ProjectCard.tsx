@@ -93,7 +93,7 @@ export function ProjectCard({ project, onOpen }: Props) {
       aria-label={`Open ${project.name} details`}
       className={`text-left w-full group cursor-pointer relative ${project.featured ? 'featured-card' : ''}`}
     >
-      <GlassCard strong className="overflow-hidden h-full transition-all duration-500 group-hover:border-violet-bright/30 group-hover:shadow-[0_16px_60px_rgba(124,58,237,0.25)]">
+      <GlassCard strong className="overflow-hidden h-full flex flex-col transition-all duration-500 group-hover:border-violet-bright/30 group-hover:shadow-[0_16px_60px_rgba(124,58,237,0.25)]">
         <div className="relative aspect-[16/10] overflow-hidden">
           <img
             src={thumb}
@@ -137,7 +137,7 @@ export function ProjectCard({ project, onOpen }: Props) {
           <ArrowUpRight className="absolute top-3 right-3 text-text-muted group-hover:text-violet-bright transition-colors" size={18} />
         </div>
 
-        <div className="p-5">
+        <div className="p-5 flex flex-col flex-1">
           <h3 className="font-display text-xl font-semibold text-text-primary group-hover:text-violet-bright transition-colors">
             {project.name}
           </h3>
@@ -159,7 +159,7 @@ export function ProjectCard({ project, onOpen }: Props) {
             )}
           </div>
 
-          <div className="mt-4 flex items-center gap-2 text-xs">
+          <div className="mt-auto pt-4 flex items-center gap-2 text-xs">
             {project.liveUrl && (
               <a
                 href={project.liveUrl}

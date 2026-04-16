@@ -28,12 +28,31 @@ export function SkillsSection() {
         autoPlay muted loop playsInline preload="metadata"
         poster={`${base}images/skills-bg.webp`}
         aria-hidden="true"
-        className="absolute inset-0 -z-10 w-full h-full object-cover opacity-25 pointer-events-none"
+        className="absolute inset-0 -z-10 w-full h-full object-cover opacity-25 pointer-events-none dark-only"
       >
         <source src={`${base}videos/skills-bg.mp4`} type="video/mp4" />
       </video>
       <div
-        className="absolute inset-0 -z-10 opacity-20 pointer-events-none mix-blend-screen"
+        className="absolute inset-0 -z-10 pointer-events-none light-only overflow-hidden"
+        style={{
+          maskImage:
+            'radial-gradient(ellipse 85% 75% at 50% 50%, black 35%, rgba(0,0,0,0.35) 70%, transparent 100%)',
+          WebkitMaskImage:
+            'radial-gradient(ellipse 85% 75% at 50% 50%, black 35%, rgba(0,0,0,0.35) 70%, transparent 100%)',
+        }}
+      >
+        <video
+          autoPlay muted loop playsInline preload="metadata"
+          aria-hidden="true"
+          className="w-full h-full object-cover opacity-40"
+          style={{ filter: 'saturate(0.75) brightness(1.02)' }}
+        >
+          <source src={`${base}videos/skills-bg-light.mp4`} type="video/mp4" />
+        </video>
+      </div>
+      <div className="absolute inset-0 -z-10 bg-gradient-to-b from-bg-base/50 via-transparent to-bg-base/70 pointer-events-none light-only" />
+      <div
+        className="absolute inset-0 -z-10 opacity-20 pointer-events-none mix-blend-screen dark-only"
         style={{ backgroundImage: `url(${base}images/skills-neural.webp)`, backgroundSize: 'cover', backgroundPosition: 'center' }}
       />
       <div className="absolute inset-0 -z-10 bg-gradient-to-b from-bg-base/70 via-transparent to-bg-base/90 pointer-events-none" />

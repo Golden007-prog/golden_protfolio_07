@@ -4,10 +4,10 @@ import {
   useGLTF,
   Environment,
   Lightformer,
-  ContactShadows,
 } from '@react-three/drei';
 import { EffectComposer, Bloom, ChromaticAberration, Vignette } from '@react-three/postprocessing';
 import * as THREE from 'three';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const MODEL_URL = `${import.meta.env.BASE_URL}models/Meshy_AI_Realistic_style_Solid_0416043256_texture.glb`;
 
@@ -85,6 +85,8 @@ function CyborgModel() {
 }
 
 export function HeroCanvas() {
+  const { resolvedTheme } = useTheme();
+  const isLight = resolvedTheme === 'light';
   return (
     <Canvas
       camera={{ position: [0.1, 0.15, 5.1], fov: 38 }}
@@ -154,21 +156,12 @@ export function HeroCanvas() {
 
       <Suspense fallback={null}>
         <CyborgModel />
-
-        <ContactShadows
-          position={[0, -0.8, 0]}
-          opacity={0.25}
-          scale={6}
-          blur={2}
-          far={3}
-          color="#000000"
-        />
       </Suspense>
 
       <EffectComposer>
         <Bloom luminanceThreshold={0.1} luminanceSmoothing={0.9} intensity={0.5} mipmapBlur />
         <ChromaticAberration offset={[0.00015, 0.00015]} radialModulation={false} modulationOffset={0} />
-        <Vignette eskil={false} offset={0.1} darkness={0.85} />
+        <Vignette eskil={false} offset={0.1} darkness={isLight ? 0.25 : 0.85} />
       </EffectComposer>
     </Canvas>
   );
