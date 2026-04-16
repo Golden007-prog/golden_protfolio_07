@@ -26,7 +26,7 @@ export function ReadingList() {
         </div>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-3">
+      <div className="grid md:grid-cols-2 gap-3 auto-rows-fr">
         {items.map((item, i) => (
           <motion.a
             key={item.title}
@@ -38,7 +38,7 @@ export function ReadingList() {
             viewport={{ once: true }}
             transition={{ duration: 0.45, delay: i * 0.06, ease: [0.16, 1, 0.3, 1] }}
             whileHover={{ y: -3 }}
-            className="group block p-4 rounded-xl bg-white/[0.02] border border-white/[0.06] hover:border-violet-bright/30 transition-colors"
+            className="group flex flex-col h-full p-4 rounded-xl bg-white/[0.02] border border-white/[0.06] hover:border-violet-bright/30 transition-colors"
           >
             <div className="flex items-start justify-between gap-2">
               <div className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-wider">
@@ -55,7 +55,7 @@ export function ReadingList() {
               {item.title}
             </p>
             <p className="mt-0.5 text-[11px] text-text-dim">{item.authors}</p>
-            <p className="mt-2 text-xs text-text-muted leading-relaxed">{item.note}</p>
+            <p className="mt-2 text-xs text-text-muted leading-relaxed flex-1">{item.note}</p>
           </motion.a>
         ))}
       </div>

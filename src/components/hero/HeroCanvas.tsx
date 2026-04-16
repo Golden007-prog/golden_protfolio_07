@@ -75,7 +75,7 @@ function CyborgModel() {
 export function HeroCanvas() {
   return (
     <Canvas
-      camera={{ position: [0.2, 0.2, 4.2], fov: 40 }}
+      camera={{ position: [0.1, 0.15, 5.1], fov: 38 }}
       shadows
       dpr={[1, 2]}
       gl={{

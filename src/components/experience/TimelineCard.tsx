@@ -16,20 +16,18 @@ type Exp = {
   metrics?: Metric[];
 };
 
-type Props = { exp: Exp; side: 'left' | 'right' };
+type Props = { exp: Exp };
 
-export function TimelineCard({ exp, side }: Props) {
+export function TimelineCard({ exp }: Props) {
   const [expanded, setExpanded] = useState(false);
   return (
-    <div className={`relative grid md:grid-cols-2 gap-6 ${side === 'right' ? '' : ''}`}>
-      <motion.div
-        initial={{ opacity: 0, x: side === 'left' ? -40 : 40 }}
-        whileInView={{ opacity: 1, x: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-        className={side === 'left' ? 'md:col-start-1' : 'md:col-start-2'}
-      >
-        <GlassCard strong className="p-7 md:p-8" whileHover={{ y: -4 }}>
+    <motion.div
+      initial={{ opacity: 0, x: 40 }}
+      whileInView={{ opacity: 1, x: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+    >
+      <GlassCard strong className="p-7 md:p-8" whileHover={{ y: -4 }}>
           <div className="flex items-center gap-2 text-cyan-bright">
             <Briefcase size={14} />
             <span className="font-mono text-[10px] uppercase tracking-[0.25em]">{exp.type ?? exp.role.split(' ').slice(-1)[0]}</span>
@@ -97,9 +95,8 @@ export function TimelineCard({ exp, side }: Props) {
                 </motion.div>
               ))}
             </div>
-          )}
-        </GlassCard>
-      </motion.div>
-    </div>
+        )}
+      </GlassCard>
+    </motion.div>
   );
 }

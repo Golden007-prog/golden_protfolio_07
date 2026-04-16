@@ -44,15 +44,24 @@ export function ProjectCard({ project, onOpen }: Props) {
   };
 
   return (
-    <motion.button
+    <motion.div
       onClick={() => onOpen(project)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onOpen(project);
+        }
+      }}
       onMouseEnter={onEnter}
       onMouseLeave={onLeave}
       onFocus={onEnter}
       onBlur={onLeave}
       whileHover={{ y: -8 }}
       style={{ transformPerspective: 1200 }}
-      className="text-left w-full group"
+      role="button"
+      tabIndex={0}
+      aria-label={`Open ${project.name} details`}
+      className="text-left w-full group cursor-pointer"
     >
       <GlassCard strong className="overflow-hidden h-full transition-all duration-500 group-hover:border-violet-bright/30 group-hover:shadow-[0_16px_60px_rgba(124,58,237,0.25)]">
         <div className="relative aspect-[16/10] overflow-hidden">
@@ -120,12 +129,31 @@ export function ProjectCard({ project, onOpen }: Props) {
             )}
           </div>
 
-          <div className="mt-4 flex items-center gap-3 text-xs text-text-dim">
-            <span className="flex items-center gap-1"><Github size={12} /> {project.language}</span>
-            {project.liveUrl && <span className="flex items-center gap-1 text-cyan-bright/80"><ExternalLink size={12} /> Live</span>}
+          <div className="mt-4 flex items-center gap-2 text-xs">
+            {project.liveUrl && (
+              <a
+                href={project.liveUrl}
+                target="_blank"
+                rel="noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-violet-bright to-cyan-bright text-white font-medium text-[11px] hover:shadow-[0_0_20px_rgba(168,85,247,0.45)] transition-shadow"
+              >
+                <ExternalLink size={11} /> Live Demo
+              </a>
+            )}
+            <a
+              href={project.githubUrl}
+              target="_blank"
+              rel="noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-white/[0.08] text-text-muted hover:text-text-primary hover:border-white/20 text-[11px] transition-colors"
+            >
+              <Github size={11} /> Code
+            </a>
+            <span className="ml-auto font-mono text-[10px] text-text-dim">{project.language}</span>
           </div>
         </div>
       </GlassCard>
-    </motion.button>
+    </motion.div>
   );
 }

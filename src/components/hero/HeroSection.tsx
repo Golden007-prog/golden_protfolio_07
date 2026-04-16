@@ -179,8 +179,14 @@ export function HeroSection() {
             </span>
             <span
               ref={lastNameRef}
-              className="block text-[clamp(3rem,7.5vw,7rem)] bg-gradient-to-r from-violet-bright via-pink to-cyan-bright bg-clip-text text-transparent"
-              style={{ WebkitBackgroundClip: 'text' }}
+              className="block text-[clamp(3rem,7.5vw,7rem)]"
+              style={{
+                backgroundImage: 'linear-gradient(90deg, #A855F7 0%, #EC4899 50%, #22D3EE 100%)',
+                WebkitBackgroundClip: 'text',
+                backgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                color: 'transparent',
+              }}
             >
               Basu.
             </span>

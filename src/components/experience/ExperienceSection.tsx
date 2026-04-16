@@ -34,14 +34,15 @@ export function ExperienceSection() {
           viewport={{ once: true }}
           transition={{ duration: 1.5, ease: 'easeOut' }}
           style={{ transformOrigin: 'top' }}
-          className="absolute left-4 md:left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-violet-bright via-cyan-bright to-transparent"
+          className="absolute left-4 md:left-6 top-0 bottom-0 w-[2px] bg-gradient-to-b from-violet-bright via-cyan-bright to-transparent"
         />
 
-        <div className="space-y-12 md:space-y-20 pl-12 md:pl-0">
+        <div className="space-y-8 md:space-y-10 pl-12 md:pl-20">
           {profile.experience.map((exp, i) => (
             <div key={`${exp.company}-${i}`} className="relative">
-              <span className="absolute -left-12 md:left-1/2 md:-translate-x-1/2 top-6 w-3 h-3 rounded-full bg-violet-bright glow-violet ring-4 ring-bg-base" />
-              <TimelineCard exp={exp} side={i % 2 === 0 ? 'left' : 'right'} />
+              <span className="absolute -left-[34px] md:-left-[58px] top-7 w-3 h-3 rounded-full bg-violet-bright glow-violet ring-4 ring-bg-base" />
+              <span className="absolute -left-[30px] md:-left-[54px] top-[34px] h-[2px] w-6 md:w-10 bg-gradient-to-r from-violet-bright/70 to-transparent" />
+              <TimelineCard exp={exp} />
             </div>
           ))}
         </div>

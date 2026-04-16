@@ -48,7 +48,7 @@ export function StatCard({ value, suffix = '', label }: Props) {
         </span>
         <span className="text-text-muted text-3xl ml-1">{suffix}</span>
       </motion.div>
-      <p className="relative mt-3 font-mono text-xs tracking-[0.2em] uppercase text-text-muted">{label}</p>
+      <p className="relative mt-4 font-mono text-[13px] md:text-sm tracking-[0.18em] uppercase text-text-secondary font-medium">{label}</p>
     </GlassCard>
   );
 }

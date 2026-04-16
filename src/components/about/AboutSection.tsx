@@ -65,6 +65,32 @@ export function AboutSection() {
         </ScrollReveal>
       </div>
 
+      <ScrollReveal delay={0.1} className="mt-8">
+        <div className="glass rounded-2xl p-5 md:p-6 flex flex-col md:flex-row md:items-center gap-4 md:gap-6">
+          <div className="flex items-center gap-2 shrink-0">
+            <span className="relative flex h-2.5 w-2.5">
+              <span className="absolute inset-0 rounded-full bg-emerald-400/60 animate-ping" />
+              <span className="relative rounded-full h-2.5 w-2.5 bg-emerald-400" />
+            </span>
+            <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-emerald-300">Currently</span>
+          </div>
+          <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-6 text-sm">
+            <div>
+              <p className="font-mono text-[9px] uppercase tracking-[0.25em] text-text-dim">Focus</p>
+              <p className="mt-1 text-text-primary">Production LLM agents &amp; RAG systems</p>
+            </div>
+            <div>
+              <p className="font-mono text-[9px] uppercase tracking-[0.25em] text-text-dim">Role</p>
+              <p className="mt-1 text-text-primary">{profile.experience[0]?.role ?? 'AI Engineer'}</p>
+            </div>
+            <div>
+              <p className="font-mono text-[9px] uppercase tracking-[0.25em] text-text-dim">Open to</p>
+              <p className="mt-1 text-text-primary">Full-time &amp; contract · Remote / Bengaluru</p>
+            </div>
+          </div>
+        </div>
+      </ScrollReveal>
+
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-10">
         {[
           { value: profile.stats.yearsExperience, suffix: '+', label: 'Years Experience' },
