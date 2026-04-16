@@ -20,7 +20,7 @@ const EASTER_EGGS = [
 
 export function KonamiCode() {
   const [unlocked, setUnlocked] = useState(false);
-  const [buffer, setBuffer] = useState<string[]>([]);
+  const [, setBuffer] = useState<string[]>([]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
