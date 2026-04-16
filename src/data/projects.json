@@ -27,7 +27,10 @@
     "liveUrl": "https://golden007-prog.github.io/UrbanCare-AI/",
     "featured": true,
     "category": "AI/ML",
-    "thumbnail": "/images/project-thumb-1.webp"
+    "thumbnail": "/images/project-thumb-1.webp",
+    "problem": "Most clinical AI is a black box — physicians can't audit how a diagnosis was reached, so they can't trust it and compliance teams can't sign off on it.",
+    "solution": "A Semantics-to-Vector interface that bridges human-readable clinical semantics and internal model vectors, making every layer of the 30-agent pipeline inspectable — from lab-report extraction to differential diagnosis.",
+    "lessons": "Interpretability isn't a feature you bolt on at the end — for clinical tools, it has to be the interface itself."
   },
   {
     "name": "Bruhworking — NexusFlow",
@@ -56,7 +59,10 @@
     "liveUrl": null,
     "featured": true,
     "category": "AI/ML",
-    "thumbnail": "/images/project-thumb-2.webp"
+    "thumbnail": "/images/project-thumb-2.webp",
+    "problem": "Long-running agentic tasks crash browsers, lose state mid-flight, and offer no mid-run visibility — so users can't trust them with real work.",
+    "solution": "A planner-coordinated swarm on Cloud Run that streams per-agent progress over SSE, with quality gates that re-run only failing branches instead of the whole pipeline.",
+    "lessons": "Agent orchestration is an observability problem, not just a routing problem — stream progress early and often."
   },
   {
     "name": "Vyapar-Gyan",
@@ -86,7 +92,10 @@
     "liveUrl": "https://golden007-prog.github.io/Vyapar-Gyan/",
     "featured": true,
     "category": "AI/ML",
-    "thumbnail": "/images/project-thumb-3.webp"
+    "thumbnail": "/images/project-thumb-3.webp",
+    "problem": "India's next billion commerce users don't use web dashboards — they speak eight languages, live inside WhatsApp, and send voice notes, not typed SKUs.",
+    "solution": "Voice-first WhatsApp commerce: Gemini transcribes and classifies voice notes, routes intents to 65+ Lambdas across 12 domains, and AWS Polly responds in the customer's dialect.",
+    "lessons": "Voice-first isn't a novelty — it collapses a typing funnel that was quietly blocking non-English users entirely."
   },
   {
     "name": "Omni-Lab",
@@ -115,7 +124,10 @@
     "liveUrl": "https://golden007-prog.github.io/Omni-Lab/",
     "featured": true,
     "category": "AI/ML",
-    "thumbnail": "/images/project-thumb-4.webp"
+    "thumbnail": "/images/project-thumb-4.webp",
+    "problem": "Static educational content (PDFs, slides, lecture videos) doesn't adapt to what a specific learner is confused about right now.",
+    "solution": "Three specialized agents — Teacher (live voice with barge-in), Scientist (writes code to verify claims), Visualizer (Veo-generated videos) — turn any PDF into an interactive, interruptible lesson.",
+    "lessons": "The cleanest way to stop LLMs hallucinating in education is to let a Scientist agent write code that proves or disproves its own claims."
   },
   {
     "name": "Content Storyteller",
@@ -144,7 +156,10 @@
     "liveUrl": null,
     "featured": true,
     "category": "AI/ML",
-    "thumbnail": "/images/project-thumb-5.webp"
+    "thumbnail": "/images/project-thumb-5.webp",
+    "problem": "Marketing teams need polished multi-format output (copy, visuals, video, voiceover) from rough inputs — but most AI tools lock you into a single modality.",
+    "solution": "Output-intent inference decides which pipeline stages run per job, so the same brief yields a LinkedIn GIF, a storyboard, and a Veo promo from ten coordinated GCP services.",
+    "lessons": "Multimodal pipelines are cheaper when you infer intent upfront instead of running every stage blindly."
   },
   {
     "name": "TCS Stock Forecasting",

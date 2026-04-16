@@ -19,6 +19,11 @@ export type Project = {
   thumbnail: string;
   stars: number;
   demoVideo?: string;
+  problem?: string;
+  solution?: string;
+  challenges?: { challenge: string; solution: string }[];
+  lessons?: string;
+  metrics?: { value: string; label: string }[];
 };
 
 type Props = { project: Project; onOpen: (p: Project) => void };

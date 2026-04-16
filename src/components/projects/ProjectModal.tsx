@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import { X, Github, ExternalLink, Target, Wrench, Sparkles, Star, Clock, Share2, Check } from 'lucide-react';
+import { X, Github, ExternalLink, Target, Wrench, Sparkles, Star, Clock, Share2, Check, AlertCircle, TrendingUp, Lightbulb } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { Project } from './ProjectCard';
@@ -107,19 +107,79 @@ export function ProjectModal({ project, onClose }: Props) {
                   ))}
                 </div>
 
-                <section>
-                  <h3 className="flex items-center gap-2 text-[10px] uppercase tracking-[0.25em] text-violet-bright font-mono mb-3">
-                    <Target size={12} /> What I built
-                  </h3>
-                  <p className="text-base md:text-lg text-text-secondary leading-relaxed">{project.shortDescription}</p>
-                </section>
+                {project.problem ? (
+                  <section>
+                    <h3 className="flex items-center gap-2 text-[10px] uppercase tracking-[0.25em] text-violet-bright font-mono mb-3">
+                      <Target size={12} /> The problem
+                    </h3>
+                    <p className="text-base md:text-lg text-text-secondary leading-relaxed">{project.problem}</p>
+                  </section>
+                ) : (
+                  <section>
+                    <h3 className="flex items-center gap-2 text-[10px] uppercase tracking-[0.25em] text-violet-bright font-mono mb-3">
+                      <Target size={12} /> What I built
+                    </h3>
+                    <p className="text-base md:text-lg text-text-secondary leading-relaxed">{project.shortDescription}</p>
+                  </section>
+                )}
 
-                {project.fullDescription && project.fullDescription !== project.shortDescription && (
+                {project.solution && (
+                  <section>
+                    <h3 className="flex items-center gap-2 text-[10px] uppercase tracking-[0.25em] text-violet-bright font-mono mb-3">
+                      <Wrench size={12} /> My approach
+                    </h3>
+                    <p className="text-base text-text-secondary leading-relaxed">{project.solution}</p>
+                  </section>
+                )}
+
+                {project.fullDescription && project.fullDescription !== project.shortDescription && !project.solution && (
                   <section>
                     <h3 className="flex items-center gap-2 text-[10px] uppercase tracking-[0.25em] text-violet-bright font-mono mb-3">
                       <Wrench size={12} /> How it works
                     </h3>
                     <p className="text-base text-text-secondary leading-relaxed">{project.fullDescription}</p>
+                  </section>
+                )}
+
+                {project.metrics && project.metrics.length > 0 && (
+                  <section>
+                    <h3 className="flex items-center gap-2 text-[10px] uppercase tracking-[0.25em] text-violet-bright font-mono mb-4">
+                      <TrendingUp size={12} /> Outcomes
+                    </h3>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                      {project.metrics.map((m) => (
+                        <Metric key={m.label} value={m.value} label={m.label} />
+                      ))}
+                    </div>
+                  </section>
+                )}
+
+                {project.challenges && project.challenges.length > 0 && (
+                  <section>
+                    <h3 className="flex items-center gap-2 text-[10px] uppercase tracking-[0.25em] text-violet-bright font-mono mb-4">
+                      <AlertCircle size={12} /> Challenges & solutions
+                    </h3>
+                    <div className="space-y-3">
+                      {project.challenges.map((c, i) => (
+                        <div key={i} className="p-4 md:p-5 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+                          <p className="text-sm font-medium text-text-primary mb-1.5">
+                            <span className="text-amber">⚡</span> {c.challenge}
+                          </p>
+                          <p className="text-sm text-text-muted leading-relaxed">
+                            <span className="text-violet-bright">→</span> {c.solution}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                )}
+
+                {project.lessons && (
+                  <section>
+                    <h3 className="flex items-center gap-2 text-[10px] uppercase tracking-[0.25em] text-violet-bright font-mono mb-3">
+                      <Lightbulb size={12} /> What I'd do differently
+                    </h3>
+                    <p className="text-sm text-text-muted italic leading-relaxed">{project.lessons}</p>
                   </section>
                 )}
 
