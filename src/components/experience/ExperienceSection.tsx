@@ -5,6 +5,7 @@ import { SectionHeading } from '../shared/SectionHeading';
 import { ScrollReveal } from '../shared/ScrollReveal';
 import { GlassCard } from '../shared/GlassCard';
 import { GitHubHeatmap } from '../shared/GitHubHeatmap';
+import { LeetCodeHeatmap } from '../shared/LeetCodeHeatmap';
 import { ReadingList } from '../shared/ReadingList';
 import { TimelineCard } from './TimelineCard';
 import profile from '../../data/profile.json';
@@ -18,8 +19,12 @@ export function ExperienceSection() {
         subtitle="Internships, freelance AI work, and a Master's in progress — all pulling in the same direction."
       />
 
-      <ScrollReveal className="mb-16">
+      <ScrollReveal className="mb-8">
         <GitHubHeatmap />
+      </ScrollReveal>
+
+      <ScrollReveal className="mb-16">
+        <LeetCodeHeatmap />
       </ScrollReveal>
 
       <div className="relative">

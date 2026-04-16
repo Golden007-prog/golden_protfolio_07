@@ -156,6 +156,8 @@ export function AskMeBot() {
   ]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const toggleRef = useRef<HTMLButtonElement>(null);
 
   const starters = useMemo(() => STARTERS, []);
 
@@ -163,6 +165,27 @@ export function AskMeBot() {
     if (open && inputRef.current) {
       setTimeout(() => inputRef.current?.focus(), 100);
     }
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    const handlePointerDown = (e: MouseEvent | TouchEvent) => {
+      const target = e.target as Node;
+      if (panelRef.current?.contains(target)) return;
+      if (toggleRef.current?.contains(target)) return;
+      setOpen(false);
+    };
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false);
+    };
+    document.addEventListener('mousedown', handlePointerDown);
+    document.addEventListener('touchstart', handlePointerDown);
+    document.addEventListener('keydown', handleKey);
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown);
+      document.removeEventListener('touchstart', handlePointerDown);
+      document.removeEventListener('keydown', handleKey);
+    };
   }, [open]);
 
   useEffect(() => {
@@ -182,6 +205,7 @@ export function AskMeBot() {
   return (
     <>
       <motion.button
+        ref={toggleRef}
         onClick={() => setOpen((o) => !o)}
         aria-label={open ? 'Close assistant' : 'Open assistant'}
         initial={{ scale: 0, opacity: 0 }}
@@ -207,6 +231,7 @@ export function AskMeBot() {
       <AnimatePresence>
         {open && (
           <motion.div
+            ref={panelRef}
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}

@@ -1,4 +1,4 @@
-import { Suspense, useRef, useState } from 'react';
+import { Suspense, useRef } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Float, Environment, useGLTF } from '@react-three/drei';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
@@ -17,39 +17,23 @@ if (typeof window !== 'undefined') {
 function Envelope() {
   const { scene } = useGLTF(MODEL_URL);
   const group = useRef<THREE.Group>(null);
-  const [hovered, setHovered] = useState(false);
   const currentRot = useRef({ x: 0, y: 0 });
-  const currentScale = useRef(1.0);
 
   useFrame((_s, delta) => {
     if (!group.current) return;
     const targetY = globalMouse.x * 0.55;
     const targetX = -(globalMouse.y * 0.35);
-    const targetScale = hovered ? 1.18 : 1.0;
     const k = Math.min(1, delta * 6);
 
     currentRot.current.y += (targetY - currentRot.current.y) * k;
     currentRot.current.x += (targetX - currentRot.current.x) * k;
-    currentScale.current += (targetScale - currentScale.current) * k;
 
     group.current.rotation.y = currentRot.current.y;
     group.current.rotation.x = currentRot.current.x;
-    group.current.scale.setScalar(currentScale.current);
   });
 
   return (
-    <group
-      ref={group}
-      onPointerOver={(e) => {
-        e.stopPropagation();
-        setHovered(true);
-        document.body.style.cursor = 'pointer';
-      }}
-      onPointerOut={() => {
-        setHovered(false);
-        document.body.style.cursor = 'auto';
-      }}
-    >
+    <group ref={group}>
       <Float speed={1.4} rotationIntensity={0.25} floatIntensity={0.45}>
         <primitive object={scene} scale={1.15} position={[0, -0.1, 0]} />
       </Float>
