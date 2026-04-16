@@ -192,7 +192,7 @@ export function HeroSection() {
             <span className="text-cyan-bright">{greeting()}</span> · {profile.location} · Available for hire
           </p>
 
-          <h1 className="font-display font-bold leading-[0.85] tracking-[-0.035em]">
+          <h1 className="font-display font-bold leading-[0.9] tracking-[-0.035em] pb-2">
             <span
               ref={firstNameRef}
               className="block text-[clamp(3rem,7.5vw,7rem)] text-text-primary"
@@ -201,11 +201,9 @@ export function HeroSection() {
             </span>
             <span
               ref={lastNameRef}
-              className="block text-[clamp(3rem,7.5vw,7rem)]"
+              className="block text-[clamp(3rem,7.5vw,7rem)] bg-gradient-to-r from-[#A855F7] via-[#EC4899] to-[#22D3EE] bg-clip-text pb-1 drop-shadow-[0_2px_18px_rgba(168,85,247,0.35)]"
               style={{
-                backgroundImage: 'linear-gradient(90deg, #A855F7 0%, #EC4899 50%, #22D3EE 100%)',
                 WebkitBackgroundClip: 'text',
-                backgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 color: 'transparent',
               }}
