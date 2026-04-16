@@ -17,6 +17,7 @@ export function Navbar() {
   const progress = useScrollProgress();
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState('hero');
+  const [hidden, setHidden] = useState(false);
   const scrolled = progress > 0.01;
 
   useEffect(() => {
@@ -35,6 +36,30 @@ export function Navbar() {
     return () => io.disconnect();
   }, []);
 
+  useEffect(() => {
+    let lastY = window.scrollY;
+    let ticking = false;
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        const y = window.scrollY;
+        const delta = y - lastY;
+        if (y < 80) {
+          setHidden(false);
+        } else if (delta > 8) {
+          setHidden(true);
+        } else if (delta < -8) {
+          setHidden(false);
+        }
+        lastY = y;
+        ticking = false;
+      });
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
   return (
     <>
       <div className="fixed top-0 left-0 right-0 z-50 h-[2px] bg-transparent">
@@ -46,10 +71,10 @@ export function Navbar() {
 
       <motion.nav
         initial={{ y: -30, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        animate={{ y: hidden && !open ? -80 : 0, opacity: hidden && !open ? 0 : 1 }}
+        transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
         className={cn(
-          'fixed top-4 left-1/2 -translate-x-1/2 z-40 transition-all duration-500',
+          'fixed top-4 left-1/2 -translate-x-1/2 z-40',
           'flex items-center gap-1 rounded-full px-3 py-2',
           scrolled ? 'glass-strong' : 'glass',
         )}

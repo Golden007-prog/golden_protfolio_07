@@ -14,6 +14,8 @@ import LoadingScreen from './components/loading/LoadingScreen';
 import CometCursor from './components/shared/CometCursor';
 import { AmbientSoundToggle } from './components/shared/AmbientSoundToggle';
 import { KonamiCode } from './components/shared/KonamiCode';
+import { BokehParticles } from './components/shared/BokehParticles';
+import { ToolsStrip } from './components/shared/ToolsStrip';
 
 const SESSION_KEY = 'ob-seen-loader-v2';
 
@@ -132,6 +134,9 @@ function App() {
             <SkillsSection />
           </div>
           <div className="relative z-20 bg-bg-base">
+            <ToolsStrip />
+          </div>
+          <div className="relative z-20 bg-bg-base">
             <ProjectsSection />
           </div>
           <div className="relative z-20 bg-bg-base">
@@ -144,6 +149,7 @@ function App() {
             <ContactSection />
           </div>
         </main>
+        <BokehParticles />
         <LiveStatusBar />
         <AmbientSoundToggle />
         <AskMeBot />

@@ -331,6 +331,70 @@ input, textarea { cursor: text !important; }
 }
 
 /* ============================
+   Featured card rotating border
+   ============================ */
+.featured-card::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: 1.25rem;
+  padding: 1px;
+  background: conic-gradient(
+    from 0deg,
+    rgba(168, 85, 247, 0.0) 0deg,
+    rgba(168, 85, 247, 0.8) 90deg,
+    rgba(34, 211, 238, 0.8) 180deg,
+    rgba(236, 72, 153, 0.6) 270deg,
+    rgba(168, 85, 247, 0.0) 360deg
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0.55;
+  animation: featuredRotate 6s linear infinite;
+  z-index: 1;
+}
+.featured-card:hover::before {
+  opacity: 1;
+}
+@keyframes featuredRotate {
+  to { transform: rotate(360deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .featured-card::before { animation: none; }
+}
+
+/* ============================
+   Bokeh particles
+   ============================ */
+.bokeh {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+.bokeh span {
+  position: absolute;
+  bottom: -120px;
+  border-radius: 50%;
+  filter: blur(1.5px);
+  opacity: 0.25;
+  animation: bokehRise linear infinite;
+}
+@keyframes bokehRise {
+  0% { transform: translate(0, 0) scale(1); opacity: 0; }
+  10% { opacity: 0.35; }
+  90% { opacity: 0.25; }
+  100% { transform: translate(var(--dx, 20px), -110vh) scale(0.9); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bokeh { display: none; }
+}
+
+/* ============================
    Noise overlay
    ============================ */
 .noise-overlay {

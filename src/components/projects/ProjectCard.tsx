@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { ArrowUpRight, Github, ExternalLink } from 'lucide-react';
 import { GlassCard } from '../shared/GlassCard';
 
@@ -28,6 +28,22 @@ export function ProjectCard({ project, onOpen }: Props) {
   const thumb = project.thumbnail.startsWith('/') ? base + project.thumbnail.slice(1) : project.thumbnail;
   const [hovered, setHovered] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  const mx = useMotionValue(0);
+  const my = useMotionValue(0);
+  const sprX = useSpring(mx, { stiffness: 180, damping: 18 });
+  const sprY = useSpring(my, { stiffness: 180, damping: 18 });
+  const rotateY = useTransform(sprX, [-0.5, 0.5], [-8, 8]);
+  const rotateX = useTransform(sprY, [-0.5, 0.5], [6, -6]);
+
+  const onMove = (e: React.MouseEvent) => {
+    const el = cardRef.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    mx.set((e.clientX - r.left) / r.width - 0.5);
+    my.set((e.clientY - r.top) / r.height - 0.5);
+  };
 
   const onEnter = () => {
     setHovered(true);
@@ -38,6 +54,8 @@ export function ProjectCard({ project, onOpen }: Props) {
   };
   const onLeave = () => {
     setHovered(false);
+    mx.set(0);
+    my.set(0);
     if (videoRef.current) {
       videoRef.current.pause();
     }
@@ -45,6 +63,7 @@ export function ProjectCard({ project, onOpen }: Props) {
 
   return (
     <motion.div
+      ref={cardRef}
       onClick={() => onOpen(project)}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
@@ -53,15 +72,21 @@ export function ProjectCard({ project, onOpen }: Props) {
         }
       }}
       onMouseEnter={onEnter}
+      onMouseMove={onMove}
       onMouseLeave={onLeave}
       onFocus={onEnter}
       onBlur={onLeave}
       whileHover={{ y: -8 }}
-      style={{ transformPerspective: 1200 }}
+      style={{
+        transformPerspective: 1200,
+        rotateX,
+        rotateY,
+        transformStyle: 'preserve-3d',
+      }}
       role="button"
       tabIndex={0}
       aria-label={`Open ${project.name} details`}
-      className="text-left w-full group cursor-pointer"
+      className={`text-left w-full group cursor-pointer relative ${project.featured ? 'featured-card' : ''}`}
     >
       <GlassCard strong className="overflow-hidden h-full transition-all duration-500 group-hover:border-violet-bright/30 group-hover:shadow-[0_16px_60px_rgba(124,58,237,0.25)]">
         <div className="relative aspect-[16/10] overflow-hidden">
