@@ -1,0 +1,107 @@
+{
+  "name": "Oikantik Basu",
+  "headline": "Data Science & Gen AI Developer | Multi-Agent Systems | LLM Fine-tuning | RAG",
+  "location": "Bengaluru, India",
+  "email": "basuoikantik@gmail.com",
+  "phone": "+91 7001124396",
+  "links": {
+    "linkedin": "https://linkedin.com/in/oikantik-basu-b13919278",
+    "github": "https://github.com/Golden007-prog",
+    "leetcode": "https://leetcode.com/oikantik007",
+    "hire": "https://pingpen.in/hire"
+  },
+  "about": "Data Science and Gen AI developer with hands-on experience in LLM fine-tuning, RAG systems, agentic AI architectures, and production ML deployments. Proficient in building and deploying solutions using LangChain, LlamaIndex, AutoGen, and leading LLM APIs (GPT, Claude, Bedrock, Gemini). Experienced in exploratory data analysis, data visualization, vector database optimization (Chroma/FAISS), and translating model outputs into actionable business insights. Skilled in Python, SQL, and cloud platforms (AWS, GCP), with a strong foundation in statistics and machine learning. Pursuing a Master's in Data Science from the University of Pittsburgh.",
+  "stats": {
+    "yearsExperience": 3,
+    "projectsShipped": 12,
+    "techStack": 30
+  },
+  "experience": [
+    {
+      "company": "iHUB DivyaSampark @ IIT Roorkee",
+      "role": "Agentic Systems and Design Program",
+      "duration": "Jan 2026 - Present",
+      "location": "Remote",
+      "description": "Architecting multi-agent systems using ReAct framework and LangGraph for autonomous reasoning. Building advanced RAG pipelines with LlamaIndex, LangChain, and vector databases (Chroma/FAISS), optimizing retrieval accuracy through semantic chunking and vectorization. Implementing LLMOps best practices for production deployment including agent observability (tracing), evaluation frameworks, and REST API serving via FastAPI.",
+      "highlights": [
+        "Multi-agent systems on ReAct + LangGraph",
+        "RAG pipelines with Chroma/FAISS optimization",
+        "LLMOps: tracing, evaluation, FastAPI serving"
+      ],
+      "metrics": [
+        { "value": "4+", "label": "Agent frameworks" },
+        { "value": "2×", "label": "Vector DBs tuned" },
+        { "value": "FastAPI", "label": "Serving layer" }
+      ]
+    },
+    {
+      "company": "Mindrift",
+      "role": "Freelance AI Agent Specialist",
+      "duration": "Jun 2025 - Present",
+      "location": "Remote",
+      "description": "Conducting RLHF evaluations to align LLMs (GPT, Claude) with safety and accuracy guidelines. Evaluating complex Python code generation and reasoning traces using AutoGen-based multi-agent workflows. Identifying and documenting hallucinations and logic failures in state-of-the-art models, building evaluation metrics that improved model reliability.",
+      "highlights": [
+        "RLHF evaluations for GPT + Claude alignment",
+        "AutoGen multi-agent code evaluation",
+        "Hallucination detection & eval metrics"
+      ],
+      "metrics": [
+        { "value": "GPT + Claude", "label": "LLMs aligned" },
+        { "value": "AutoGen", "label": "Eval workflow" },
+        { "value": "RLHF", "label": "Feedback loop" }
+      ]
+    },
+    {
+      "company": "Unified Mentor Private Limited",
+      "role": "Data Science Intern",
+      "duration": "Mar 2025 - Jun 2025",
+      "location": "Gurgaon, Haryana",
+      "description": "Performed exploratory data analysis and regression modeling on IBM HR Analytics dataset, uncovering key attrition drivers via interactive visualizations. Built SQL-based data mining queries to extract and transform structured datasets, delivering actionable insights on TCS stock trends through time-series analysis.",
+      "highlights": [
+        "EDA + regression on IBM HR Analytics",
+        "SQL data mining for TCS stock time-series",
+        "Interactive visualization dashboards"
+      ],
+      "metrics": [
+        { "value": "86%", "label": "HR attrition accuracy" },
+        { "value": "20y", "label": "TCS stock analyzed" },
+        { "value": "R² 0.999", "label": "Trend fit" }
+      ]
+    }
+  ],
+  "education": [
+    {
+      "institution": "University of Pittsburgh (Coursera)",
+      "degree": "Master's in Data Science (Online MDS)",
+      "year": "Sept 2025 - Feb 2027",
+      "status": "In progress, Summer Term 2026"
+    },
+    {
+      "institution": "Techno International New Town, Kolkata",
+      "degree": "B.Tech in Computer Science & Engineering",
+      "year": "Oct 2020 - Jul 2024",
+      "status": "CGPA: 8.22"
+    }
+  ],
+  "skills": {
+    "GenAI & LLMs": [
+      "LangChain", "LlamaIndex", "AutoGen", "RAG", "CoT", "RLHF", "ReAct",
+      "LangGraph", "Hugging Face", "GPT API", "Claude API", "AWS Bedrock", "Gemma", "Gemini"
+    ],
+    "Agentic AI": [
+      "Multi-agent orchestration", "Chroma", "FAISS", "Semantic chunking",
+      "Vectorization", "Performance tuning", "Evaluation metrics", "Agent observability", "Tracing"
+    ],
+    "Data Science & ML": [
+      "Python", "SQL", "Pandas", "Scikit-learn", "TensorFlow", "PyTorch",
+      "JAX/Tunix", "SpaCy", "NLTK", "Statistics", "Regression", "Model tuning"
+    ],
+    "Analytics & Viz": [
+      "EDA", "Data storytelling", "Power BI", "Tableau", "Clinical text mining", "Sentiment analysis"
+    ],
+    "Infrastructure": [
+      "AWS Lambda", "API Gateway", "DynamoDB", "GCP", "FastAPI", "Firebase", "Git", "CI/CD", "VS Code"
+    ]
+  },
+  "certifications": []
+}

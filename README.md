@@ -1,73 +1,97 @@
-# React + TypeScript + Vite
+# Oikantik Basu — Portfolio
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A personal portfolio website built with React, TypeScript, and Vite. Features interactive animations, a projects showcase, skills radar, and an AI assistant.
 
-Currently, two official plugins are available:
+## Tech Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **React 19** + **TypeScript 5**
+- **Vite 7** — build tool and dev server
+- **Tailwind CSS 4** — styling
+- **Framer Motion** — animations and transitions
+- **Lucide React** — icons
 
-## React Compiler
+## Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Animated hero section with custom character cursor
+- Anti-gravity background effect
+- Projects slider with detail modals
+- Interactive skills radar
+- Experience timeline
+- AI assistant component
+- Lab mode toggle for experimental UI
+- Downloadable CV (PDF)
 
-## Expanding the ESLint configuration
+## Getting Started
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Prerequisites
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+- Node.js 20+
+- npm or pnpm
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### Installation
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Development
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm run dev
 ```
+
+Open [http://localhost:5173](http://localhost:5173) in your browser.
+
+### Build
+
+```bash
+npm run build
+```
+
+Outputs to the `dist/` directory.
+
+### Preview production build
+
+```bash
+npm run preview
+```
+
+### Lint
+
+```bash
+npm run lint
+```
+
+## Project Structure
+
+```
+src/
+├── components/         # React components
+│   ├── Hero.tsx
+│   ├── Navbar.tsx
+│   ├── Projects.tsx
+│   ├── ProjectSlider.tsx
+│   ├── ProjectModal.tsx
+│   ├── Experience.tsx
+│   ├── SkillsRadar.tsx
+│   ├── Contact.tsx
+│   ├── AIAssistant.tsx
+│   ├── CharacterCursor.tsx
+│   ├── AntiGravityBackground.tsx
+│   ├── LoadingScreen.tsx
+│   └── LabModeContext.tsx
+├── assets/             # Images and static assets
+├── App.tsx             # Root component
+├── main.tsx            # Entry point
+├── constants.ts        # Shared constants
+└── index.css           # Global styles
+public/                 # Static files (CV PDF, icons)
+```
+
+## Deployment
+
+The project is configured for GitHub Pages with a base path of `/golden_protfolio_07/` (see [vite.config.ts](vite.config.ts)). Update `base` in `vite.config.ts` if deploying elsewhere.
+
+## License
+
+Personal project — all rights reserved.

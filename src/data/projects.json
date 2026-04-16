@@ -1,0 +1,289 @@
+[
+  {
+    "name": "UrbanCare AI",
+    "tagline": "AI-Native Clinical Ecosystem for Mechanistic Interpretability",
+    "shortDescription": "A 30-agent, 8-layer clinical pipeline built on MedGemma + TxGemma + Gemini. Provides a Semantics-to-Vector interface so physicians can inspect how medical AI models reach their diagnoses — from lab report extraction and X-ray fracture detection to differential diagnosis and voice copilot.",
+    "fullDescription": "Production-ready AI-native clinical dashboard acting as a Doctor Consultant. Leverages Google HAI-DEF open-weight models (MedGemma 4B for vision/document tasks, TxGemma for therapeutic reasoning). Features a transparent Semantics-to-Vector interface bridging human-readable clinical semantics and internal model vectors — making AI reasoning auditable at every layer. Multi-tenant hospital platform with role-based access control, real-time vitals SSE streaming, and voice clinical copilot powered by RAG over patient memory vectors.",
+    "language": "TypeScript",
+    "techStack": [
+      "React 19",
+      "Node.js",
+      "PostgreSQL",
+      "MedGemma",
+      "TxGemma",
+      "Gemini",
+      "LangChain",
+      "GCP"
+    ],
+    "topics": [
+      "medical-ai",
+      "interpretability",
+      "multi-agent",
+      "healthcare"
+    ],
+    "stars": 0,
+    "forks": 0,
+    "githubUrl": "https://github.com/Golden007-prog/UrbanCare-AI",
+    "liveUrl": "https://golden007-prog.github.io/UrbanCare-AI/",
+    "featured": true,
+    "category": "AI/ML",
+    "thumbnail": "/images/project-thumb-1.webp"
+  },
+  {
+    "name": "Bruhworking — NexusFlow",
+    "tagline": "Serverless Agent Swarm for Stateful Orchestration",
+    "shortDescription": "Async multi-agent orchestration engine built with Google ADK + Gemini 2.0 Flash + Cloud Run. Submit a complex task (e.g. analyze a 50-page PDF) and a coordinated swarm of specialized agents (Planner, Researcher, Writer, Reviewer) divides, conquers, and delivers — with real-time SSE streaming and per-agent cost tracking.",
+    "fullDescription": "Breaks complex tasks into subtasks via BruhPlanner, delegates to specialized agents, streams real-time progress via SSE, iteratively improves output if quality score < 80, and returns polished output with per-agent token cost tracking. Deployed on Cloud Run with auto-scaling.",
+    "language": "Python",
+    "techStack": [
+      "Python",
+      "FastAPI",
+      "Google ADK",
+      "Gemini 2.0 Flash",
+      "Cloud Run",
+      "Docker",
+      "SSE"
+    ],
+    "topics": [
+      "multi-agent",
+      "async",
+      "orchestration",
+      "gemini"
+    ],
+    "stars": 0,
+    "forks": 0,
+    "githubUrl": "https://github.com/Golden007-prog/bruhworking",
+    "liveUrl": null,
+    "featured": true,
+    "category": "AI/ML",
+    "thumbnail": "/images/project-thumb-2.webp"
+  },
+  {
+    "name": "Vyapar-Gyan",
+    "tagline": "AI Marketplace with WhatsApp Commerce & Voice-First Shopping",
+    "shortDescription": "Omnichannel commerce for Indian retailers. Customers shop via WhatsApp or web chat in 8 Indian languages using voice notes. Gemini 2.0 transcribes voice, extracts product intents, routes to seller. Features Khata book OCR, Razorpay Route splits, and Bedrock-powered dead-stock detection.",
+    "fullDescription": "Full-stack serverless AWS architecture with 65+ Lambda handlers across 12 domains. Voice-first shopping in Hindi/English/Tamil/Telugu/Marathi/Bengali/Gujarati/Kannada. AWS Polly neural TTS for voice responses via WhatsApp. Proactive AI insights with severity scoring.",
+    "language": "TypeScript",
+    "techStack": [
+      "AWS Lambda",
+      "DynamoDB",
+      "Twilio",
+      "Razorpay",
+      "Bedrock",
+      "Gemini 2.0",
+      "Next.js 14",
+      "CDK"
+    ],
+    "topics": [
+      "marketplace",
+      "whatsapp-commerce",
+      "voice-ai",
+      "serverless"
+    ],
+    "stars": 0,
+    "forks": 0,
+    "githubUrl": "https://github.com/Golden007-prog/Vyapar-Gyan",
+    "liveUrl": "https://golden007-prog.github.io/Vyapar-Gyan/",
+    "featured": true,
+    "category": "AI/ML",
+    "thumbnail": "/images/project-thumb-3.webp"
+  },
+  {
+    "name": "Omni-Lab",
+    "tagline": "Empirical AI Tutor with Three Specialized Agents",
+    "shortDescription": "Autonomous educational workspace powered by three AI agents: Teacher (Gemini 2.5 Flash Native Audio), Scientist (Gemini 3 Pro), Visualizer (Gemini 3 Flash). Upload any PDF → auto-generates slides, narrates via live voice, and lets you ask questions with real-time interruption. Generates videos via Veo.",
+    "fullDescription": "Transforms static content into interactive, verifiable, visual lessons. Local VAD for barge-in voice interruptions. Scientist agent writes code to prove concepts rather than hallucinate. Flashcards, quizzes, infographics, and Veo-generated educational videos on demand.",
+    "language": "TypeScript",
+    "techStack": [
+      "React 19",
+      "TypeScript",
+      "Vite 6",
+      "Gemini 2.5 Flash Audio",
+      "Gemini 3 Pro",
+      "Veo 3.1",
+      "Recharts"
+    ],
+    "topics": [
+      "education",
+      "multimodal",
+      "voice-ai",
+      "video-generation"
+    ],
+    "stars": 0,
+    "forks": 0,
+    "githubUrl": "https://github.com/Golden007-prog/Omni-Lab",
+    "liveUrl": "https://golden007-prog.github.io/Omni-Lab/",
+    "featured": true,
+    "category": "AI/ML",
+    "thumbnail": "/images/project-thumb-4.webp"
+  },
+  {
+    "name": "Content Storyteller",
+    "tagline": "Multimodal AI Platform for Marketing Assets",
+    "shortDescription": "Transforms rough inputs (text, images, voice notes) into polished marketing assets — copy, visuals, storyboards, voiceover scripts, and short promo videos. Includes Trend Analyzer for AI-powered trend discovery across Instagram Reels, X/Twitter, and LinkedIn. Built on GCP with Vertex AI Gemini.",
+    "fullDescription": "Output-intent inference determines which pipeline stages run per job. GIF generation for LinkedIn, live agent voice assistant with function calling and native audio, ZIP export bundle. 10 GCP services including Cloud Run, Pub/Sub, Firestore, Vertex AI.",
+    "language": "TypeScript",
+    "techStack": [
+      "React",
+      "Vertex AI",
+      "Gemini 2.5 Flash/Pro",
+      "Cloud Run",
+      "Pub/Sub",
+      "Firestore",
+      "Terraform"
+    ],
+    "topics": [
+      "marketing",
+      "multimodal",
+      "vertex-ai",
+      "gcp"
+    ],
+    "stars": 0,
+    "forks": 0,
+    "githubUrl": "https://github.com/Golden007-prog/Content-Storyteller",
+    "liveUrl": null,
+    "featured": true,
+    "category": "AI/ML",
+    "thumbnail": "/images/project-thumb-5.webp"
+  },
+  {
+    "name": "TCS Stock Forecasting",
+    "tagline": "20-Year Stock Analysis with ML, Deep Learning & Dashboard",
+    "shortDescription": "Comprehensive data science project analyzing and forecasting TCS stock. Feature engineering with MACD/RSI/rolling stats, five models compared (Linear, Random Forest, XGBoost, LSTM, Prophet), and an interactive Streamlit dashboard with buy/sell signals via EMA crossover.",
+    "fullDescription": "Linear Regression achieves R² ≈ 0.999 on trend fitting, LSTM delivers 246 RMSE with 0.827 R² on sequence forecasting. Dashboard supports 1D (1-min) to 5Y (weekly) timeframes with candlestick charts, MA20/MA50 overlays, and Sharpe ratio metrics.",
+    "language": "Jupyter Notebook",
+    "techStack": [
+      "Python",
+      "Streamlit",
+      "Plotly",
+      "Scikit-learn",
+      "XGBoost",
+      "Keras/TensorFlow",
+      "Prophet"
+    ],
+    "topics": [
+      "finance",
+      "time-series",
+      "lstm",
+      "forecasting"
+    ],
+    "stars": 1,
+    "forks": 0,
+    "githubUrl": "https://github.com/Golden007-prog/TCS-Stock-Data-Live-and-Latest",
+    "liveUrl": null,
+    "featured": false,
+    "category": "Data Science",
+    "thumbnail": "/images/project-thumb-6.webp"
+  },
+  {
+    "name": "Drugs Side Effects Analysis",
+    "tagline": "End-to-End Healthcare Data Science Platform",
+    "shortDescription": "Complete ML pipeline analyzing drug safety, efficacy, and patient experiences from Drugs.com. Trained 6 ML models (classification, regression, clustering), performed association rule mining on drug-condition-side effect patterns, and built 3 interactive Streamlit dashboards.",
+    "fullDescription": "11MB+ dataset processed through 7-step notebook workflow. Classification (Gradient Boosting), regression (rating prediction), NLP sentiment analysis (VADER, TextBlob), Apriori association mining. Safety profiling, risk flagging for pregnancy/alcohol/controlled substances.",
+    "language": "Jupyter Notebook",
+    "techStack": [
+      "Python",
+      "Streamlit",
+      "Scikit-learn",
+      "NLTK",
+      "TextBlob",
+      "Apyori",
+      "Plotly"
+    ],
+    "topics": [
+      "healthcare",
+      "nlp",
+      "association-mining",
+      "sentiment-analysis"
+    ],
+    "stars": 0,
+    "forks": 0,
+    "githubUrl": "https://github.com/Golden007-prog/Drugs-Side-Effects-and-Medical-Condition",
+    "liveUrl": null,
+    "featured": false,
+    "category": "Data Science",
+    "thumbnail": "/images/project-thumb-7.webp"
+  },
+  {
+    "name": "IBM HR Attrition Prediction",
+    "tagline": "Employee Attrition Analysis with Flask Dashboard",
+    "shortDescription": "Predicts employee attrition using IBM's HR dataset (1470 × 35). Trained seven models including XGBoost (86% accuracy, 0.83 ROC-AUC), deployed via Flask web app that converts uploaded CSVs into dynamic Excel dashboards with automated HR recommendations.",
+    "fullDescription": "Statistical analysis (ANOVA, correlation), ML comparison across Logistic Regression, SVM, Random Forest, XGBoost, LightGBM, CatBoost, AdaBoost. Flask app highlights attrition risk, job satisfaction, and overtime patterns.",
+    "language": "Jupyter Notebook",
+    "techStack": [
+      "Python",
+      "Scikit-learn",
+      "XGBoost",
+      "LightGBM",
+      "CatBoost",
+      "Flask",
+      "hvPlot"
+    ],
+    "topics": [
+      "hr-analytics",
+      "classification",
+      "xgboost"
+    ],
+    "stars": 0,
+    "forks": 0,
+    "githubUrl": "https://github.com/Golden007-prog/IBM-HR-Analytics-Employee-Attrition-Performance",
+    "liveUrl": null,
+    "featured": false,
+    "category": "Data Science",
+    "thumbnail": "/images/project-thumb-8.webp"
+  },
+  {
+    "name": "Netflix Content Analytics",
+    "tagline": "End-to-End Pipeline for 2008–2021 Netflix Catalog",
+    "shortDescription": "Modular pipeline for Netflix's 14-year content catalog: PostgreSQL ingestion, Python cleaning and feature engineering, advanced EDA (time-series, heatmaps, wordclouds, statistical tests), association-rule mining, ML models, and an interactive Streamlit dashboard.",
+    "fullDescription": "Full reproducibility from data ingest through deployment. Statistical tests quantify content strategy shifts over time; association mining reveals genre-country co-occurrence patterns.",
+    "language": "Jupyter Notebook",
+    "techStack": [
+      "Python",
+      "PostgreSQL",
+      "Pandas",
+      "Streamlit",
+      "Matplotlib",
+      "Seaborn"
+    ],
+    "topics": [
+      "media-analytics",
+      "postgresql",
+      "eda"
+    ],
+    "stars": 0,
+    "forks": 0,
+    "githubUrl": "https://github.com/Golden007-prog/Netflix-Data-Cleaning-Analysis-and-Visualization",
+    "liveUrl": null,
+    "featured": false,
+    "category": "Data Science",
+    "thumbnail": "/images/project-thumb-9.webp"
+  },
+  {
+    "name": "MCQ Tech Challenge",
+    "tagline": "AI-Powered Quiz App with GitHub Cloud Sync",
+    "shortDescription": "Modern MCQ quiz app built with vanilla JavaScript. Upload MCQ PDFs, get timed questions, and receive Google Gemini-powered performance analysis. Syncs scores across devices via a private GitHub Gist. Perfect for government job or certification prep.",
+    "fullDescription": "Cross-platform (desktop/tablet/mobile), dark-mode UI, per-question and total time tracking. GitHub token stored locally; scores persisted in private Gist only the user can access. Gemini API analyzes weak topics and suggests study strategies.",
+    "language": "JavaScript",
+    "techStack": [
+      "Vanilla JS",
+      "HTML5",
+      "CSS3",
+      "Google Gemini API",
+      "GitHub Gist API",
+      "PDF.js"
+    ],
+    "topics": [
+      "quiz",
+      "education",
+      "gemini"
+    ],
+    "stars": 0,
+    "forks": 0,
+    "githubUrl": "https://github.com/Golden007-prog/test-challenger-07",
+    "liveUrl": "https://golden007-prog.github.io/test-challenger-07/",
+    "featured": false,
+    "category": "Web App",
+    "thumbnail": "/images/project-thumb-10.webp"
+  }
+]

@@ -1,88 +1,117 @@
-import { useEffect, useCallback } from 'react';
-import AntiGravityBackground from './components/AntiGravityBackground';
-import Hero from './components/Hero';
-import Projects from './components/Projects';
-import ProjectSlider from './components/ProjectSlider';
-import Experience from './components/Experience';
-import Navbar from './components/Navbar';
-import Contact from './components/Contact';
-import CharacterCursor from './components/CharacterCursor';
-import LoadingScreen from './components/LoadingScreen';
-import AIAssistant from './components/AIAssistant';
-import { LabModeProvider, useLabMode } from './components/LabModeContext';
-import { PERSONAL_INFO } from './constants';
+import { useEffect, useState } from 'react';
+import { Navbar } from './components/layout/Navbar';
+import { Footer } from './components/layout/Footer';
+import { HeroSection } from './components/hero/HeroSection';
+import { AboutSection } from './components/about/AboutSection';
+import { SkillsSection } from './components/skills/SkillsSection';
+import { ProjectsSection } from './components/projects/ProjectsSection';
+import { ExperienceSection } from './components/experience/ExperienceSection';
+import { ContactSection } from './components/contact/ContactSection';
+import { LiveStatusBar } from './components/shared/LiveStatusBar';
+import { AskMeBot } from './components/shared/AskMeBot';
+import LoadingScreen from './components/loading/LoadingScreen';
+import CometCursor from './components/shared/CometCursor';
+import { AmbientSoundToggle } from './components/shared/AmbientSoundToggle';
 
-function AppContent() {
-    const { labMode } = useLabMode();
-
-    // Cursor spotlight — track mouse via CSS custom properties
-    const handleMouseMove = useCallback((e: MouseEvent) => {
-        document.documentElement.style.setProperty('--mouse-x', `${e.clientX}px`);
-        document.documentElement.style.setProperty('--mouse-y', `${e.clientY}px`);
-    }, []);
-
-    // Click ripple effect
-    const handleClick = useCallback((e: MouseEvent) => {
-        const ripple = document.createElement('div');
-        ripple.className = 'click-ripple';
-        ripple.style.left = `${e.clientX}px`;
-        ripple.style.top = `${e.clientY}px`;
-        document.body.appendChild(ripple);
-        setTimeout(() => ripple.remove(), 600);
-    }, []);
-
-    useEffect(() => {
-        window.addEventListener('mousemove', handleMouseMove, { passive: true });
-        window.addEventListener('click', handleClick);
-        return () => {
-            window.removeEventListener('mousemove', handleMouseMove);
-            window.removeEventListener('click', handleClick);
-        };
-    }, [handleMouseMove, handleClick]);
-
-    return (
-        <div className="relative min-h-screen bg-void-black text-white overflow-x-hidden selection:bg-influence-red selection:text-white">
-            <LoadingScreen />
-            <CharacterCursor />
-
-            {/* Cursor spotlight glow */}
-            <div className="cursor-spotlight" />
-
-            {/* Lab mode grid overlay */}
-            <div className={`lab-grid-overlay ${labMode ? 'active' : ''}`} />
-
-            <AntiGravityBackground />
-            <Navbar />
-
-            <main className="relative z-10">
-                <Hero />
-                <div id="projects">
-                    <Projects />
-                    <ProjectSlider />
-                </div>
-                <div id="experience">
-                    <Experience />
-                </div>
-                <Contact />
-
-                <footer className="py-12 border-t border-white/10 text-center bg-void-black">
-                    <p className="font-oswald text-text-muted tracking-widest text-sm">
-                        © {new Date().getFullYear()} {PERSONAL_INFO.name}. ALL RIGHTS RESERVED.
-                    </p>
-                </footer>
-            </main>
-
-            <AIAssistant />
-        </div>
-    );
-}
+const SESSION_KEY = 'ob-seen-loader-v2';
 
 function App() {
-    return (
-        <LabModeProvider>
-            <AppContent />
-        </LabModeProvider>
-    );
+  const [loaded, setLoaded] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return true;
+    return sessionStorage.getItem(SESSION_KEY) === '1';
+  });
+
+  useEffect(() => {
+    if (!loaded) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = prev;
+      };
+    }
+  }, [loaded]);
+
+  useEffect(() => {
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let rafId = 0;
+    let pendingX = 0;
+    let pendingY = 0;
+    const onMove = (e: MouseEvent) => {
+      pendingX = e.clientX;
+      pendingY = e.clientY;
+      if (rafId) return;
+      rafId = requestAnimationFrame(() => {
+        document.documentElement.style.setProperty('--mouse-x', `${pendingX}px`);
+        document.documentElement.style.setProperty('--mouse-y', `${pendingY}px`);
+        rafId = 0;
+      });
+    };
+    const onClick = (e: MouseEvent) => {
+      if (reduce) return;
+      const r = document.createElement('div');
+      r.className = 'click-ripple';
+      r.style.left = `${e.clientX}px`;
+      r.style.top = `${e.clientY}px`;
+      document.body.appendChild(r);
+      setTimeout(() => r.remove(), 600);
+    };
+    window.addEventListener('mousemove', onMove, { passive: true });
+    window.addEventListener('click', onClick);
+    return () => {
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('click', onClick);
+      if (rafId) cancelAnimationFrame(rafId);
+    };
+  }, []);
+
+  const handleLoaderComplete = () => {
+    sessionStorage.setItem(SESSION_KEY, '1');
+    setLoaded(true);
+  };
+
+  return (
+    <>
+      <CometCursor />
+
+      {!loaded && <LoadingScreen onComplete={handleLoaderComplete} />}
+
+      <div
+        className={`relative min-h-screen bg-bg-base text-text-primary overflow-x-hidden aurora-bg transition-opacity duration-700 ${loaded ? 'opacity-100' : 'opacity-0'}`}
+      >
+        <a
+          href="#main"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:rounded-lg focus:bg-violet focus:text-white focus:outline-none focus:ring-2 focus:ring-cyan"
+        >
+          Skip to main content
+        </a>
+        <Navbar />
+        <main id="main" className="relative z-10">
+          <div className="relative z-[1]">
+            <HeroSection />
+          </div>
+          <div className="relative z-20 bg-bg-base">
+            <AboutSection />
+          </div>
+          <div className="relative z-20 bg-bg-base">
+            <SkillsSection />
+          </div>
+          <div className="relative z-20 bg-bg-base">
+            <ProjectsSection />
+          </div>
+          <div className="relative z-20 bg-bg-base">
+            <ExperienceSection />
+          </div>
+          <div className="relative z-30 bg-bg-base">
+            <ContactSection />
+          </div>
+        </main>
+        <LiveStatusBar />
+        <AmbientSoundToggle />
+        <AskMeBot />
+        <Footer />
+      </div>
+    </>
+  );
 }
 
 export default App;

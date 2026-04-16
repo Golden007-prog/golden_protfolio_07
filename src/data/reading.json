@@ -1,0 +1,56 @@
+[
+  {
+    "title": "Attention Is All You Need",
+    "authors": "Vaswani et al.",
+    "year": "2017",
+    "kind": "paper",
+    "tag": "Foundations",
+    "note": "Transformer architecture — the starting point for every LLM I work with.",
+    "url": "https://arxiv.org/abs/1706.03762"
+  },
+  {
+    "title": "Retrieval-Augmented Generation for Knowledge-Intensive NLP",
+    "authors": "Lewis et al.",
+    "year": "2020",
+    "kind": "paper",
+    "tag": "RAG",
+    "note": "The original RAG paper. Re-reading it while tuning my Chroma/FAISS pipelines.",
+    "url": "https://arxiv.org/abs/2005.11401"
+  },
+  {
+    "title": "ReAct: Synergizing Reasoning and Acting in Language Models",
+    "authors": "Yao et al.",
+    "year": "2022",
+    "kind": "paper",
+    "tag": "Agents",
+    "note": "Backbone of the multi-agent work I'm shipping at iHUB.",
+    "url": "https://arxiv.org/abs/2210.03629"
+  },
+  {
+    "title": "Lost in the Middle: How Language Models Use Long Contexts",
+    "authors": "Liu et al.",
+    "year": "2023",
+    "kind": "paper",
+    "tag": "RAG",
+    "note": "Why chunk order and re-ranking matter more than raw context length.",
+    "url": "https://arxiv.org/abs/2307.03172"
+  },
+  {
+    "title": "Constitutional AI: Harmlessness from AI Feedback",
+    "authors": "Anthropic",
+    "year": "2022",
+    "kind": "paper",
+    "tag": "Alignment",
+    "note": "Direct influence on the RLHF eval workflows I run at Mindrift.",
+    "url": "https://arxiv.org/abs/2212.08073"
+  },
+  {
+    "title": "Designing Data-Intensive Applications",
+    "authors": "Martin Kleppmann",
+    "year": "2017",
+    "kind": "book",
+    "tag": "Systems",
+    "note": "Ground truth for building reliable backends under any LLM layer.",
+    "url": "https://dataintensive.net/"
+  }
+]
