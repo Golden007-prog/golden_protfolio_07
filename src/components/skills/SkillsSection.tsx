@@ -40,7 +40,7 @@ export function SkillsSection() {
       <SectionHeading
         kicker="02 / Skills"
         title="Tools in the *arsenal*."
-        subtitle="Spin the sphere. Every node is something I've shipped production code with."
+        subtitle="Spin it, or tap a node to lock it center-stage. Every one is something I've shipped production code with."
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 items-start">

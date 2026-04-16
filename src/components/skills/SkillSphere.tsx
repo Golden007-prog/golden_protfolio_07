@@ -1,6 +1,6 @@
-import { Suspense, useMemo, useRef } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { Float, Environment, Text, OrbitControls, Billboard } from '@react-three/drei';
+import { Suspense, useMemo, useRef, useState } from 'react';
+import { Canvas, useFrame, type ThreeEvent } from '@react-three/fiber';
+import { Environment, Text, OrbitControls, Billboard } from '@react-three/drei';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import * as THREE from 'three';
 
@@ -22,23 +22,66 @@ function fibonacciSphere(n: number, r = 2.2) {
   return pts;
 }
 
-function Node({ pos, label, idx }: { pos: [number, number, number]; label: string; idx: number }) {
+type NodeProps = {
+  pos: [number, number, number];
+  label: string;
+  idx: number;
+  isSelected: boolean;
+  onSelect: (i: number) => void;
+};
+
+function Node({ pos, label, idx, isSelected, onSelect }: NodeProps) {
   const color = idx % 2 === 0 ? '#A855F7' : '#22D3EE';
+  const scale = isSelected ? 1.8 : 1;
+  const emissive = isSelected ? 2.6 : 1.4;
+  const textSize = isSelected ? 0.2 : 0.14;
+
+  const handleClick = (e: ThreeEvent<MouseEvent>) => {
+    e.stopPropagation();
+    onSelect(idx);
+  };
+  const handlePointerOver = (e: ThreeEvent<PointerEvent>) => {
+    e.stopPropagation();
+    document.body.style.cursor = 'pointer';
+  };
+  const handlePointerOut = () => {
+    document.body.style.cursor = '';
+  };
+
   return (
     <group position={pos}>
-      <mesh>
-        <sphereGeometry args={[0.08, 16, 16]} />
-        <meshStandardMaterial color={color} emissive={color} emissiveIntensity={1.4} toneMapped={false} />
+      <mesh
+        scale={scale}
+        onClick={handleClick}
+        onPointerOver={handlePointerOver}
+        onPointerOut={handlePointerOut}
+      >
+        <sphereGeometry args={[0.09, 24, 24]} />
+        <meshStandardMaterial
+          color={color}
+          emissive={color}
+          emissiveIntensity={emissive}
+          toneMapped={false}
+        />
       </mesh>
-      <Billboard follow position={[0, 0.24, 0]}>
+      {isSelected && (
+        <mesh>
+          <ringGeometry args={[0.22, 0.26, 48]} />
+          <meshBasicMaterial color={color} transparent opacity={0.9} side={THREE.DoubleSide} toneMapped={false} />
+        </mesh>
+      )}
+      <Billboard follow position={[0, 0.26, 0]}>
         <Text
-          fontSize={0.14}
-          color="#FAFAFA"
+          fontSize={textSize}
+          color={isSelected ? color : '#FAFAFA'}
           anchorX="center"
           anchorY="bottom"
-          outlineWidth={0.012}
+          outlineWidth={0.014}
           outlineColor="#0A0A0F"
-          outlineOpacity={0.6}
+          outlineOpacity={0.7}
+          onClick={handleClick}
+          onPointerOver={handlePointerOver}
+          onPointerOut={handlePointerOut}
         >
           {label}
         </Text>
@@ -47,41 +90,85 @@ function Node({ pos, label, idx }: { pos: [number, number, number]; label: strin
   );
 }
 
-function SphereMesh() {
+function SphereMesh({
+  selected,
+  onSelect,
+}: {
+  selected: number | null;
+  onSelect: (i: number | null) => void;
+}) {
   const group = useRef<THREE.Group>(null);
   const positions = useMemo(() => fibonacciSphere(SKILL_NODES.length), []);
+
   useFrame((_s, delta) => {
-    if (group.current) group.current.rotation.y += delta * 0.12;
+    const g = group.current;
+    if (!g) return;
+    if (selected === null) {
+      g.rotation.y += delta * 0.12;
+      const ease = Math.min(1, delta * 3);
+      g.rotation.x += (0 - g.rotation.x) * ease;
+    } else {
+      const [px, py, pz] = positions[selected];
+      const targetY = Math.atan2(-px, pz);
+      const targetX = Math.atan2(py, Math.sqrt(px * px + pz * pz));
+      let dy = (targetY - g.rotation.y) % (Math.PI * 2);
+      if (dy > Math.PI) dy -= Math.PI * 2;
+      if (dy < -Math.PI) dy += Math.PI * 2;
+      const ease = Math.min(1, delta * 4);
+      g.rotation.y += dy * ease;
+      g.rotation.x += (targetX - g.rotation.x) * ease;
+    }
   });
+
   return (
-    <Float speed={1.2} rotationIntensity={0.3} floatIntensity={0.3}>
-      <group ref={group}>
-        <mesh>
-          <sphereGeometry args={[2.15, 32, 32]} />
-          <meshBasicMaterial color="#7C3AED" wireframe transparent opacity={0.15} />
-        </mesh>
-        {positions.map((p, i) => (
-          <Node key={SKILL_NODES[i]} pos={p} label={SKILL_NODES[i]} idx={i} />
-        ))}
-      </group>
-    </Float>
+    <group ref={group} onPointerMissed={() => onSelect(null)}>
+      <mesh>
+        <sphereGeometry args={[2.15, 32, 32]} />
+        <meshBasicMaterial color="#7C3AED" wireframe transparent opacity={0.15} />
+      </mesh>
+      {positions.map((p, i) => (
+        <Node
+          key={SKILL_NODES[i]}
+          pos={p}
+          label={SKILL_NODES[i]}
+          idx={i}
+          isSelected={selected === i}
+          onSelect={onSelect}
+        />
+      ))}
+    </group>
   );
 }
 
 export function SkillSphere() {
+  const [selected, setSelected] = useState<number | null>(null);
   return (
-    <Canvas camera={{ position: [0, 0, 6.5], fov: 45 }} dpr={[1, 2]}>
-      <ambientLight intensity={0.4} />
-      <pointLight position={[5, 5, 5]} color="#7C3AED" intensity={2} />
-      <pointLight position={[-5, -5, -3]} color="#22D3EE" intensity={1.5} />
-      <Suspense fallback={null}>
-        <SphereMesh />
-        <Environment preset="night" />
-      </Suspense>
-      <OrbitControls enableZoom={false} enablePan={false} autoRotate autoRotateSpeed={0.4} />
-      <EffectComposer>
-        <Bloom intensity={1.2} luminanceThreshold={0.3} mipmapBlur />
-      </EffectComposer>
-    </Canvas>
+    <div className="relative w-full h-full">
+      <Canvas
+        camera={{ position: [0, 0, 6.5], fov: 45 }}
+        dpr={[1, 2]}
+        onPointerMissed={() => setSelected(null)}
+      >
+        <ambientLight intensity={0.4} />
+        <pointLight position={[5, 5, 5]} color="#7C3AED" intensity={2} />
+        <pointLight position={[-5, -5, -3]} color="#22D3EE" intensity={1.5} />
+        <Suspense fallback={null}>
+          <SphereMesh selected={selected} onSelect={setSelected} />
+          <Environment preset="night" />
+        </Suspense>
+        <OrbitControls enableZoom={false} enablePan={false} />
+        <EffectComposer>
+          <Bloom intensity={1.2} luminanceThreshold={0.3} mipmapBlur />
+        </EffectComposer>
+      </Canvas>
+      {selected !== null && (
+        <button
+          onClick={() => setSelected(null)}
+          className="absolute bottom-3 left-1/2 -translate-x-1/2 font-mono text-[10px] uppercase tracking-[0.25em] text-text-muted hover:text-violet-bright transition-colors px-3 py-1.5 rounded-full glass"
+        >
+          {SKILL_NODES[selected]} · tap to release
+        </button>
+      )}
+    </div>
   );
 }
