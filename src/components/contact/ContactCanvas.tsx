@@ -1,11 +1,11 @@
 import { Suspense, useRef } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { Float, Environment, useGLTF } from '@react-three/drei';
+import { Float, Environment, Lightformer, useGLTF } from '@react-three/drei';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import * as THREE from 'three';
 import { useTheme } from '../../contexts/ThemeContext';
 
-const MODEL_URL = `${import.meta.env.BASE_URL}models/holo-envelope.glb`;
+const MODEL_URL = `/models/holo-envelope.glb`;
 
 const globalMouse = { x: 0, y: 0 };
 if (typeof window !== 'undefined') {
@@ -77,7 +77,11 @@ export function ContactCanvas() {
 
       <Suspense fallback={null}>
         <Envelope />
-        <Environment preset="studio" />
+        <Environment resolution={256}>
+          <Lightformer intensity={2} rotation-x={Math.PI / 2} position={[0, 4, -6]} scale={[10, 10, 1]} />
+          <Lightformer intensity={1.2} rotation-y={Math.PI / 2} position={[-5, 1, -1]} scale={[10, 4, 1]} color="#22D3EE" />
+          <Lightformer intensity={1.2} rotation-y={-Math.PI / 2} position={[5, 1, -1]} scale={[10, 4, 1]} color="#A855F7" />
+        </Environment>
       </Suspense>
 
       <EffectComposer>

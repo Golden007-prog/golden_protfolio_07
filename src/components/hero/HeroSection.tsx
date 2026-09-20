@@ -3,6 +3,10 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import profile from '../../data/profile.json';
 import { Magnetic } from '../shared/Magnetic';
+import { LottieIcon } from '../shared/LottieIcon';
+import { CanvasBoundary } from '../shared/CanvasBoundary';
+import { BackgroundVideo } from '../shared/BackgroundVideo';
+import { useDeviceCapability } from '../../hooks/useDeviceCapability';
 
 const ROLES = [
   'Gen AI & Data Science Engineer',
@@ -61,7 +65,8 @@ function splitChars(text: string) {
 }
 
 export function HeroSection() {
-  const base = import.meta.env.BASE_URL;
+  const base = '/';
+  const { allowHeavy3D } = useDeviceCapability();
   const sectionRef = useRef<HTMLElement>(null);
   const firstNameRef = useRef<HTMLSpanElement>(null);
   const lastNameRef = useRef<HTMLSpanElement>(null);
@@ -129,26 +134,22 @@ export function HeroSection() {
     <section ref={sectionRef} id="hero" className="relative h-screen">
       <div className="relative h-screen overflow-hidden">
         <div className="absolute inset-0 z-0 pointer-events-none dark-only">
-          <video
-            autoPlay muted loop playsInline preload="auto"
+          <BackgroundVideo
+            variant="dark"
+            src={`${base}videos/hero-bg.mp4`}
             poster={`${base}images/skills-bg.webp`}
-            aria-hidden="true"
             className="w-full h-full object-cover opacity-20"
-          >
-            <source src={`${base}videos/hero-bg.mp4`} type="video/mp4" />
-          </video>
+          />
           <div className="absolute inset-0 bg-gradient-to-r from-bg-base via-bg-base/80 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-bg-base/90" />
         </div>
 
         <div className="absolute inset-0 z-0 pointer-events-none light-only">
-          <video
-            autoPlay muted loop playsInline preload="auto"
-            aria-hidden="true"
+          <BackgroundVideo
+            variant="light"
+            src={`${base}videos/hero-bg-light.mp4`}
             className="w-full h-full object-cover opacity-55"
-          >
-            <source src={`${base}videos/hero-bg-light.mp4`} type="video/mp4" />
-          </video>
+          />
           <div className="absolute inset-0 bg-gradient-to-r from-bg-base via-bg-base/60 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-bg-base/80" />
         </div>
@@ -180,9 +181,15 @@ export function HeroSection() {
               }}
             />
           </div>
-          <Suspense fallback={<div className="w-full h-full animate-pulse" />}>
-            <HeroCanvas />
-          </Suspense>
+          {allowHeavy3D ? (
+            <CanvasBoundary>
+              <Suspense fallback={<div className="w-full h-full animate-pulse" />}>
+                <HeroCanvas />
+              </Suspense>
+            </CanvasBoundary>
+          ) : (
+            <div className="w-full h-full bg-[radial-gradient(ellipse_at_60%_45%,rgba(168,85,247,0.22),transparent_62%),radial-gradient(ellipse_at_35%_65%,rgba(34,211,238,0.16),transparent_58%)]" />
+          )}
         </div>
 
         <div className="absolute inset-0 bg-gradient-to-r from-bg-base via-bg-base/70 to-transparent lg:via-bg-base/40 z-10 pointer-events-none" />
@@ -259,9 +266,16 @@ export function HeroSection() {
           className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2"
         >
           <span className="font-mono text-[9px] uppercase tracking-[0.3em] text-text-dim">Scroll</span>
-          <div className="relative w-px h-10 overflow-hidden bg-white/5">
-            <div className="absolute inset-x-0 top-0 h-3 bg-gradient-to-b from-violet-bright to-transparent scroll-indicator" />
-          </div>
+          <LottieIcon
+            src="/lottie/scroll.json"
+            lazy={false}
+            className="block w-6 h-10 opacity-80"
+            fallback={
+              <span className="relative block w-px h-10 overflow-hidden bg-white/5">
+                <span className="absolute inset-x-0 top-0 h-3 bg-gradient-to-b from-violet-bright to-transparent scroll-indicator" />
+              </span>
+            }
+          />
         </div>
       </div>
     </section>

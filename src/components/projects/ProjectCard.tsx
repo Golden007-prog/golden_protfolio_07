@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { ArrowUpRight, Github, ExternalLink } from 'lucide-react';
 import { GlassCard } from '../shared/GlassCard';
+import { useDeviceCapability } from '../../hooks/useDeviceCapability';
 
 export type Project = {
   name: string;
@@ -29,9 +30,12 @@ export type Project = {
 type Props = { project: Project; onOpen: (p: Project) => void };
 
 export function ProjectCard({ project, onOpen }: Props) {
-  const base = import.meta.env.BASE_URL;
+  const base = '/';
   const thumb = project.thumbnail.startsWith('/') ? base + project.thumbnail.slice(1) : project.thumbnail;
   const [hovered, setHovered] = useState(false);
+  const { isTouch } = useDeviceCapability();
+  // Touch devices never fire hover, so the artwork would stay hidden forever.
+  const revealed = hovered || isTouch;
   const videoRef = useRef<HTMLVideoElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
 
@@ -100,7 +104,7 @@ export function ProjectCard({ project, onOpen }: Props) {
             alt={project.name}
             loading="lazy"
             className={`w-full h-full object-cover transition-all duration-700 ${
-              hovered ? 'opacity-100 scale-105' : 'opacity-0 scale-100'
+              revealed ? 'opacity-100 scale-105' : 'opacity-0 scale-100'
             }`}
           />
           {project.demoVideo && (
@@ -117,13 +121,13 @@ export function ProjectCard({ project, onOpen }: Props) {
             </video>
           )}
           <div
-            className={`absolute inset-0 transition-opacity duration-500 pointer-events-none ${hovered ? 'opacity-0' : 'opacity-100'}`}
+            className={`absolute inset-0 transition-opacity duration-500 pointer-events-none ${revealed ? 'opacity-0' : 'opacity-100'}`}
             style={{
               background:
                 'radial-gradient(circle at 30% 20%, rgba(168,85,247,0.35), transparent 55%), radial-gradient(circle at 70% 80%, rgba(34,211,238,0.25), transparent 55%)',
             }}
           />
-          <div className={`absolute inset-0 bg-gradient-to-t from-bg-elevated via-bg-elevated/40 to-transparent transition-opacity duration-500 ${hovered ? 'opacity-40' : 'opacity-100'}`} />
+          <div className={`absolute inset-0 bg-gradient-to-t from-bg-elevated via-bg-elevated/40 to-transparent transition-opacity duration-500 ${revealed ? 'opacity-40' : 'opacity-100'}`} />
           <div className="absolute top-3 left-3 flex items-center gap-2">
             <span className="font-mono text-[10px] uppercase tracking-widest px-2 py-1 rounded-full glass text-cyan-bright">
               {project.category}

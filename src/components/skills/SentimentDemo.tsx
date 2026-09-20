@@ -74,7 +74,7 @@ export function SentimentDemo() {
         <button
           type="button"
           onClick={() => setText('')}
-          className="flex items-center gap-1.5 text-[11px] font-mono text-text-dim hover:text-violet-bright transition-colors"
+          className="tap-safe-sm flex items-center gap-1.5 text-[11px] font-mono text-text-dim hover:text-violet-bright transition-colors"
         >
           <RotateCcw size={12} /> Clear
         </button>

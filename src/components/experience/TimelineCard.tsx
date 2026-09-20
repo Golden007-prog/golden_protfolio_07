@@ -67,7 +67,7 @@ export function TimelineCard({ exp }: Props) {
               type="button"
               onClick={() => setExpanded((v) => !v)}
               aria-expanded={expanded}
-              className="mt-5 inline-flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-wider text-cyan-bright hover:text-cyan transition-colors"
+              className="tap-safe mt-5 inline-flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-wider text-cyan-bright hover:text-cyan transition-colors"
             >
               {expanded ? 'Less' : 'Read more'}
               <motion.span animate={{ rotate: expanded ? 180 : 0 }} transition={{ duration: 0.3 }}>

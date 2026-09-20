@@ -48,6 +48,9 @@ export function ThemeToggle({ className = '' }: { className?: string }) {
             <motion.circle
               r="9"
               fill="black"
+              cx={16}
+              cy={8}
+              initial={false}
               animate={{ cx: isDark ? 16 : 30, cy: isDark ? 8 : -6 }}
               transition={{ type: 'spring', stiffness: 180, damping: 22 }}
             />

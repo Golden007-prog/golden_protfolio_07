@@ -30,9 +30,17 @@ type DocWithViewTransition = Document & {
 };
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>(readInitial);
-  const [resolvedTheme, setResolvedTheme] = useState<Resolved>(() => resolve(readInitial()));
+  // Both renders start from the same value; the stored preference is read after
+  // mount. The inline script in the document head has already painted the right
+  // theme, so there is no flash.
+  const [theme, setThemeState] = useState<Theme>('dark');
+  const [resolvedTheme, setResolvedTheme] = useState<Resolved>('dark');
   const originRef = useRef<{ x: number; y: number } | null>(null);
+
+  useEffect(() => {
+    const stored = readInitial();
+    if (stored !== 'dark') setThemeState(stored);
+  }, []);
 
   useEffect(() => {
     const apply = () => {

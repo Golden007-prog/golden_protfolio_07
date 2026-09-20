@@ -45,7 +45,7 @@ export function ProjectModal({ project, onClose }: Props) {
 
   if (typeof document === 'undefined') return null;
 
-  const base = import.meta.env.BASE_URL;
+  const base = '/';
   const body = (
     <AnimatePresence>
       {project && (

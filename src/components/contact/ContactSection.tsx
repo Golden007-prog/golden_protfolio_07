@@ -6,6 +6,10 @@ import { SectionHeading } from '../shared/SectionHeading';
 import { ScrollReveal } from '../shared/ScrollReveal';
 import { GlassCard } from '../shared/GlassCard';
 import profile from '../../data/profile.json';
+import { LottieIcon } from '../shared/LottieIcon';
+import { CanvasBoundary } from '../shared/CanvasBoundary';
+import { BackgroundVideo } from '../shared/BackgroundVideo';
+import { useDeviceCapability } from '../../hooks/useDeviceCapability';
 
 const ContactCanvas = lazy(() => import('./ContactCanvas').then((m) => ({ default: m.ContactCanvas })));
 
@@ -19,7 +23,8 @@ type Status = 'idle' | 'sending' | 'success' | 'error';
 const FORMSUBMIT_ENDPOINT = `https://formsubmit.co/ajax/${profile.email}`;
 
 export function ContactSection() {
-  const base = import.meta.env.BASE_URL;
+  const base = '/';
+  const { allowHeavy3D } = useDeviceCapability();
   const [form, setForm] = useState({ name: '', email: '', message: '', _honey: '' });
   const [status, setStatus] = useState<Status>('idle');
   const [errorMsg, setErrorMsg] = useState('');
@@ -74,14 +79,12 @@ export function ContactSection() {
 
   return (
     <SectionWrapper id="contact">
-      <video
-        autoPlay muted loop playsInline preload="metadata"
+      <BackgroundVideo
+        variant="dark"
+        src={`${base}videos/contact-bg.mp4`}
         poster={`${base}images/contact-bg.webp`}
-        aria-hidden="true"
         className="absolute inset-0 -z-10 w-full h-full object-cover opacity-25 pointer-events-none dark-only"
-      >
-        <source src={`${base}videos/contact-bg.mp4`} type="video/mp4" />
-      </video>
+      />
       <div
         className="absolute inset-0 -z-10 pointer-events-none light-only overflow-hidden"
         style={{
@@ -91,14 +94,12 @@ export function ContactSection() {
             'radial-gradient(ellipse 85% 75% at 50% 50%, black 35%, rgba(0,0,0,0.35) 70%, transparent 100%)',
         }}
       >
-        <video
-          autoPlay muted loop playsInline preload="metadata"
-          aria-hidden="true"
+        <BackgroundVideo
+          variant="light"
+          src={`${base}videos/contact-bg-light.mp4`}
           className="w-full h-full object-cover opacity-40"
           style={{ filter: 'saturate(0.75) brightness(1.02)' }}
-        >
-          <source src={`${base}videos/contact-bg-light.mp4`} type="video/mp4" />
-        </video>
+        />
       </div>
       <div className="absolute inset-0 -z-10 bg-gradient-to-b from-bg-base/50 via-transparent to-bg-base/70 pointer-events-none light-only" />
       <div
@@ -117,9 +118,13 @@ export function ContactSection() {
           <div className="absolute -inset-4 bg-violet-bright/10 rounded-[2rem] blur-3xl pointer-events-none dark-only" />
           <div className="absolute -inset-8 bg-cyan-bright/5 rounded-[2rem] blur-3xl pointer-events-none dark-only" />
           <div className="relative w-full h-full">
-            <Suspense fallback={<div className="w-full h-full glass animate-pulse rounded-3xl" />}>
-              <ContactCanvas />
-            </Suspense>
+            {allowHeavy3D ? (
+              <CanvasBoundary>
+                <Suspense fallback={<div className="w-full h-full glass animate-pulse rounded-3xl" />}>
+                  <ContactCanvas />
+                </Suspense>
+              </CanvasBoundary>
+            ) : null}
           </div>
         </ScrollReveal>
 
@@ -192,7 +197,13 @@ export function ContactSection() {
                     </>
                   ) : status === 'success' ? (
                     <>
-                      <CheckCircle2 size={16} />
+                      <LottieIcon
+                        src="/lottie/success.json"
+                        loop={false}
+                        lazy={false}
+                        className="block w-5 h-5 -my-1"
+                        fallback={<CheckCircle2 size={16} />}
+                      />
                       Sent
                     </>
                   ) : (

@@ -21,7 +21,7 @@ export function SkillModal({ skill, onClose }: Props) {
     };
   }, [onClose]);
 
-  const base = import.meta.env.BASE_URL;
+  const base = '/';
   const heroSrc = skill.heroImage ? `${base}${skill.heroImage.replace(/^\//, '')}` : '';
 
   const node = (

@@ -68,7 +68,7 @@ function answer(q: string): Msg {
   }
 
   if (/(resume|cv|download)/.test(lc)) {
-    const base = import.meta.env.BASE_URL;
+    const base = '/';
     return { from: 'bot', text: 'Here is my CV.', actions: [{ label: 'Download CV', url: `${base}oikantik_basu_u.pdf` }] };
   }
 

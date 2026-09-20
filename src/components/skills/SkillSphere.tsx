@@ -1,6 +1,6 @@
 import { Suspense, useMemo, useRef, useState } from 'react';
 import { Canvas, useFrame, type ThreeEvent } from '@react-three/fiber';
-import { Environment, Text, OrbitControls, Billboard } from '@react-three/drei';
+import { Environment, Lightformer, Text, OrbitControls, Billboard } from '@react-three/drei';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import * as THREE from 'three';
 
@@ -154,7 +154,11 @@ export function SkillSphere() {
         <pointLight position={[-5, -5, -3]} color="#22D3EE" intensity={1.5} />
         <Suspense fallback={null}>
           <SphereMesh selected={selected} onSelect={setSelected} />
-          <Environment preset="night" />
+          <Environment resolution={256}>
+            <Lightformer intensity={0.6} rotation-x={Math.PI / 2} position={[0, 5, -8]} scale={[12, 12, 1]} color="#1E1B3A" />
+            <Lightformer intensity={1.4} rotation-y={Math.PI / 2} position={[-6, 1, -1]} scale={[10, 4, 1]} color="#7C3AED" />
+            <Lightformer intensity={1.1} rotation-y={-Math.PI / 2} position={[6, 1, -1]} scale={[10, 4, 1]} color="#22D3EE" />
+          </Environment>
         </Suspense>
         <OrbitControls enableZoom={false} enablePan={false} />
         <EffectComposer>

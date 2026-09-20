@@ -20,20 +20,29 @@ import { ToolsStrip } from './components/shared/ToolsStrip';
 const SESSION_KEY = 'ob-seen-loader-v2';
 
 function App() {
-  const [loaded, setLoaded] = useState<boolean>(() => {
-    if (typeof window === 'undefined') return true;
-    return sessionStorage.getItem(SESSION_KEY) === '1';
-  });
+  // Server and first client render must agree, so the session lookup happens
+  // after mount rather than in the initialiser.
+  const [hydrated, setHydrated] = useState(false);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    if (!loaded) {
+    setHydrated(true);
+    try {
+      if (sessionStorage.getItem(SESSION_KEY) === '1') setLoaded(true);
+    } catch {
+      setLoaded(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (hydrated && !loaded) {
       const prev = document.body.style.overflow;
       document.body.style.overflow = 'hidden';
       return () => {
         document.body.style.overflow = prev;
       };
     }
-  }, [loaded]);
+  }, [hydrated, loaded]);
 
   useEffect(() => {
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -103,7 +112,7 @@ function App() {
   }, []);
 
   const handleLoaderComplete = () => {
-    sessionStorage.setItem(SESSION_KEY, '1');
+    try { sessionStorage.setItem(SESSION_KEY, '1'); } catch { /* private mode */ }
     setLoaded(true);
   };
 
@@ -111,10 +120,10 @@ function App() {
     <>
       <CometCursor />
 
-      {!loaded && <LoadingScreen onComplete={handleLoaderComplete} />}
+      {hydrated && !loaded && <LoadingScreen onComplete={handleLoaderComplete} />}
 
       <div
-        className={`relative min-h-screen bg-bg-base text-text-primary overflow-x-hidden aurora-bg transition-opacity duration-700 ${loaded ? 'opacity-100' : 'opacity-0'}`}
+        className={`relative min-h-screen bg-bg-base text-text-primary overflow-x-hidden aurora-bg transition-opacity duration-700 ${!hydrated || loaded ? 'opacity-100' : 'opacity-0'}`}
       >
         <a
           href="#main"

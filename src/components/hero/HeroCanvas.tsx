@@ -9,7 +9,7 @@ import { EffectComposer, Bloom, ChromaticAberration, Vignette } from '@react-thr
 import * as THREE from 'three';
 import { useTheme } from '../../contexts/ThemeContext';
 
-const MODEL_URL = `${import.meta.env.BASE_URL}models/Meshy_AI_Realistic_style_Solid_0416043256_texture.glb`;
+const MODEL_URL = `/models/hero-character.glb`;
 
 const globalMouse = { x: 0, y: 0 };
 const globalScroll = { progress: 0 };

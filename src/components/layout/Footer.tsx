@@ -25,9 +25,9 @@ export function Footer() {
           </p>
         </div>
         <div className="flex items-center gap-5 text-xs font-mono uppercase tracking-wider text-text-muted">
-          <a href={profile.links.github} target="_blank" rel="noreferrer" className="hover:text-violet-bright transition-colors">GitHub</a>
-          <a href={profile.links.linkedin} target="_blank" rel="noreferrer" className="hover:text-violet-bright transition-colors">LinkedIn</a>
-          <a href={profile.links.leetcode} target="_blank" rel="noreferrer" className="hover:text-violet-bright transition-colors">LeetCode</a>
+          <a href={profile.links.github} target="_blank" rel="noreferrer" className="tap-safe hover:text-violet-bright transition-colors">GitHub</a>
+          <a href={profile.links.linkedin} target="_blank" rel="noreferrer" className="tap-safe hover:text-violet-bright transition-colors">LinkedIn</a>
+          <a href={profile.links.leetcode} target="_blank" rel="noreferrer" className="tap-safe hover:text-violet-bright transition-colors">LeetCode</a>
         </div>
       </div>
     </footer>

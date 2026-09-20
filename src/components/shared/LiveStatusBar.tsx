@@ -10,7 +10,7 @@ type Status = {
   url: string;
 };
 
-const USERNAME = import.meta.env.VITE_GITHUB_USERNAME || 'Golden007-prog';
+const USERNAME = process.env.NEXT_PUBLIC_GITHUB_USERNAME || 'Golden007-prog';
 const CACHE_KEY = 'ob-live-status-v1';
 const CACHE_TTL = 5 * 60 * 1000;
 

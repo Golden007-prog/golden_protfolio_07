@@ -96,7 +96,7 @@ export function Navbar() {
       >
         <a
           href="#hero"
-          className="font-display font-bold text-sm tracking-wide px-3 sm:px-4 text-text-primary"
+          className="tap-safe font-display font-bold text-sm tracking-wide px-3 sm:px-4 text-text-primary"
         >
           OB<span className="text-violet-bright">.</span>
         </a>

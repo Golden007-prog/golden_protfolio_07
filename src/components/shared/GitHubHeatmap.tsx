@@ -5,7 +5,7 @@ import { Github } from 'lucide-react';
 type Day = { date: string; count: number; level: 0 | 1 | 2 | 3 | 4 };
 type Data = { total: { lastYear: number }; contributions: Day[] };
 
-const USERNAME = import.meta.env.VITE_GITHUB_USERNAME || 'Golden007-prog';
+const USERNAME = process.env.NEXT_PUBLIC_GITHUB_USERNAME || 'Golden007-prog';
 const CACHE_KEY = 'ob-gh-heatmap-v1';
 const CACHE_TTL = 6 * 60 * 60 * 1000;
 
