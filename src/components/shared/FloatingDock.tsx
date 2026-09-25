@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useLayoutEffect, useRef } from 'react';
 import { AmbientSoundToggle } from '@/components/shared/AmbientSoundToggle';
 import { AskMeBot } from '@/components/shared/AskMeBot';
 import { LiveStatusBar } from '@/components/shared/LiveStatusBar';
@@ -9,12 +9,28 @@ import { scrollState, subscribeScroll, usePointerTracking } from '@/lib/pointerS
 
 // Scroll this far down in one go before the dock tucks away; any upward scroll brings it back.
 const HIDE_AFTER_PX = 32;
-// Near the top of the page the dock always shows.
+// Near the top of the page the dock shows, unless it would cover a [data-dock-avoid] control.
 const ALWAYS_SHOW_ABOVE_PX = 200;
+// Controls the dock must not sit on while the scroll rules would show it: the hero's
+// calls to action reach the bottom band on short phones (320x568, 360x592).
+const AVOID_AREA = '[data-dock-avoid]';
+const AVOID_CONTROLS = 'a[href], button, input';
 // While a field is focused, how often to notice it left the page without a focusout.
 const FOCUS_POLL_MS = 500;
 
 const NO_KEYBOARD_INPUTS = new Set(['button', 'checkbox', 'color', 'file', 'hidden', 'image', 'radio', 'range', 'reset', 'submit']);
+
+/** Whether a control inside a [data-dock-avoid] area overlaps the dock's resting box. */
+function coversAvoided(dock: HTMLElement): boolean {
+  const d = dock.getBoundingClientRect();
+  if (d.width === 0 || d.height === 0) return false;
+  const hits = (r: DOMRect) => r.width > 0 && r.height > 0 && r.left < d.right && r.right > d.left && r.top < d.bottom && r.bottom > d.top;
+  for (const area of document.querySelectorAll<HTMLElement>(AVOID_AREA)) {
+    if (!hits(area.getBoundingClientRect())) continue;
+    for (const el of area.querySelectorAll<HTMLElement>(AVOID_CONTROLS)) if (hits(el.getBoundingClientRect())) return true;
+  }
+  return false;
+}
 
 function findFooter(): HTMLElement | null {
   return document.getElementById('site-footer') ?? document.querySelector<HTMLElement>('body footer');
@@ -39,7 +55,10 @@ function isTextEntry(el: Element | null): el is HTMLElement {
  * (the on-screen keyboard is up, and the dock would sit on the field) it hides,
  * and it returns when the field loses focus; fields inside a dialog are left
  * alone, since the dialog already covers the dock. While a chat answer streams
- * the launcher stays in view. Scroll work writes attributes directly: no re-renders.
+ * the launcher stays in view. Where it would cover a [data-dock-avoid] control
+ * (the hero's calls to action on a short phone) it stays tucked until those
+ * scroll clear; focusing anything in it still brings it back. Scroll work writes
+ * attributes directly: no re-renders.
  */
 export function FloatingDock() {
   usePointerTracking();
@@ -49,7 +68,9 @@ export function FloatingDock() {
   const askBusy = useRef(false);
   const scheduleRef = useRef<() => void>(() => {});
 
-  useEffect(() => {
+  // A layout effect, so a dock that starts over the hero's calls to action is tucked
+  // before its first paint instead of sliding away in front of the visitor.
+  useLayoutEffect(() => {
     const root = rootRef.current;
     if (!root) return;
     let footer: HTMLElement | null = findFooter();
@@ -113,8 +134,8 @@ export function FloatingDock() {
       if (askOpen.current) setHidden(false);
       else if (typing) setHidden(true);
       else if (blocked) setHidden(true);
-      else if (askBusy.current || wasTyping) setHidden(false);
-      else if (y < ALWAYS_SHOW_ABOVE_PX || dy < 0) setHidden(false);
+      else if (askBusy.current) setHidden(false);
+      else if (wasTyping || y < ALWAYS_SHOW_ABOVE_PX || dy < 0) setHidden(coversAvoided(root));
       else if (travel > HIDE_AFTER_PX) setHidden(true);
     };
 
@@ -154,6 +175,16 @@ export function FloatingDock() {
     };
     const toastRetry = observeToasts() ? 0 : window.setTimeout(observeToasts, 1500);
 
+    // Avoided controls move without a scroll when the text above them rewraps (fonts, the role ticker).
+    const avoidObserver = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(schedule);
+    document.querySelectorAll(AVOID_AREA).forEach((el) => {
+      avoidObserver?.observe(el);
+      if (el.parentElement) avoidObserver?.observe(el.parentElement);
+    });
+
+    // Once now, so the first paint already has the right state, and once more on the
+    // next frame, when the scroll store has caught up with a restored position.
+    update();
     schedule();
     return () => {
       scheduleRef.current = () => {};
@@ -164,6 +195,7 @@ export function FloatingDock() {
       vv?.removeEventListener('resize', schedule);
       io?.disconnect();
       toastObserver.disconnect();
+      avoidObserver?.disconnect();
       window.clearTimeout(retry);
       window.clearTimeout(toastRetry);
       window.clearInterval(poll);

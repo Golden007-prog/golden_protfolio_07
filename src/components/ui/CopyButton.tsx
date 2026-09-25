@@ -3,7 +3,7 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { Check, Copy } from 'lucide-react';
 import { LottieIcon, preloadLottie } from '@/components/shared/LottieIcon';
-import { Button, type ButtonSize, type ButtonVariant } from '@/components/ui/Button';
+import { Button, STATUS_LOTTIE_CLASS, type ButtonSize, type ButtonVariant } from '@/components/ui/Button';
 import { useToast } from '@/components/ui/Toast';
 import { track } from '@/lib/analytics';
 import { SITE } from '@/lib/site';
@@ -89,8 +89,6 @@ export function CopyButton({
     }
   };
 
-  const icon = copied ? undefined : <Copy aria-hidden="true" className="size-4 shrink-0" />;
-
   return (
     <span className={cn('inline-flex flex-wrap items-center gap-2', manual && 'w-full', className)}>
       <Button
@@ -107,12 +105,14 @@ export function CopyButton({
               loop={false}
               lazy={false}
               colors={COPY_CHECK_COLORS}
-              className="-my-1 block size-6 shrink-0"
+              className={STATUS_LOTTIE_CLASS}
               fallback={<Check aria-hidden="true" className="size-4" />}
             />
           ),
         }}
-        leadingIcon={icon}
+        // Stays set while copied: Button shows the check in its place, and the hidden
+        // resting icon and label hold the button at its resting width.
+        leadingIcon={<Copy aria-hidden="true" className="size-4 shrink-0" />}
         aria-label={iconOnly ? (copied ? copiedLabel : label) : undefined}
         data-copy-button=""
         onPointerEnter={() => preloadLottie('copyCheck')}

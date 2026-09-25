@@ -6,6 +6,8 @@ import { Bloom, EffectComposer } from '@react-three/postprocessing';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import {
+  Suspense,
+  useCallback,
   useEffect,
   useLayoutEffect,
   useMemo,
@@ -13,15 +15,17 @@ import {
   type PointerEvent as ReactPointerEvent,
   type RefObject,
 } from 'react';
+import { preload as preloadSuspended } from 'suspend-react';
 import * as THREE from 'three';
 // @ts-expect-error -- troika-three-text (installed with drei) ships no type declarations.
-import { BatchedText } from 'troika-three-text';
+import { BatchedText, preloadFont } from 'troika-three-text';
 import { useDeviceCapability } from '@/hooks/useDeviceCapability';
 import { useFrameloop } from '@/hooks/useFrameloop';
 import { getMotionPrefs, useMotionPrefs } from '@/hooks/useMotionPrefs';
 import { useThemeTokens, type ThemeTokens } from '@/hooks/useThemeTokens';
 import { NODE_CHARACTERS, SKILL_NODES } from '@/lib/skills';
 import type { SkillAccent, SkillNode } from '@/types/skills';
+import { BLOOM_RADIUS, bloomLevels } from './bloomLevels';
 import { onNodeListKeyDown, rovingIndex } from './SkillConstellation';
 import { ALL, useSkillActions, useSkillFocus, useSkillList } from './SkillFocusContext';
 
@@ -53,6 +57,22 @@ const LABEL_MAX_WIDTH = 1.9;
 // Nodes are pushed past 1.0 so only they cross the bloom threshold; labels stay crisp.
 const BLOOM_BOOST = 6;
 const BLOOM_THRESHOLD = 1.05;
+
+let labelsReady: Promise<void> | null = null;
+
+/**
+ * Resolves once the label font is parsed and its glyphs are built. drei's <Text>
+ * suspends on suspend-react's cache under ['troika-text', font, characters]
+ * (drei core/Text.js); filling that entry first lets the labels mount without
+ * suspending. The Suspense inside the Canvas still catches one if drei changes.
+ */
+export function preloadLabels(): Promise<void> {
+  if (!labelsReady) {
+    labelsReady = new Promise<void>((resolve) => preloadFont({ font: FONT_URL, characters: NODE_CHARACTERS }, () => resolve()));
+    preloadSuspended(labelsReady, ['troika-text', FONT_URL, NODE_CHARACTERS]);
+  }
+  return labelsReady;
+}
 
 const Y_AXIS = new THREE.Vector3(0, 1, 0);
 const X_AXIS = new THREE.Vector3(1, 0, 0);
@@ -96,7 +116,13 @@ function fitDistance(aspect: number): number {
   return FIT_RADIUS / Math.sin(Math.min(vHalf, hHalf));
 }
 
-type LabelMesh = THREE.Mesh & { fillOpacity: number; outlineOpacity: number; color: THREE.ColorRepresentation };
+type LabelMesh = THREE.Mesh & {
+  fillOpacity: number;
+  outlineOpacity: number;
+  color: THREE.ColorRepresentation;
+  /** Set by troika once the label is typeset; null until then. */
+  textRenderInfo: object | null;
+};
 
 type SceneProps = {
   nodes: readonly SkillNode[];
@@ -108,6 +134,8 @@ type SceneProps = {
   tokens: ThemeTokens;
   dark: boolean;
   bloom: boolean;
+  /** Called on every frame once the nodes and all their labels are on screen. */
+  onDrawn: () => void;
 };
 
 // Scratch objects for the frame loop (one sphere exists at a time).
@@ -135,7 +163,7 @@ function recordStats(renderer: THREE.WebGLRenderer) {
   stats.drawCalls = renderer.info.render.calls;
 }
 
-function SphereScene({ nodes, wrapRef, listRef, dragRef, scrollRef, scrub, tokens, dark, bloom }: SceneProps) {
+function SphereScene({ nodes, wrapRef, listRef, dragRef, scrollRef, scrub, tokens, dark, bloom, onDrawn }: SceneProps) {
   const { selected, hovered } = useSkillFocus();
   const { filter } = useSkillList();
   const { select, open } = useSkillActions();
@@ -154,6 +182,8 @@ function SphereScene({ nodes, wrapRef, listRef, dragRef, scrollRef, scrub, token
   const velocityRef = useRef({ yaw: 0, pitch: 0 });
   const scalesRef = useRef<number[]>(nodes.map(() => 1));
   const sceneRef = useRef<THREE.Scene | null>(null);
+  /** Frames drawn since every label was typeset; -1 until then. */
+  const typesetFramesRef = useRef(-1);
 
   const local = useMemo(() => nodes.map((n) => new THREE.Vector3(...n.dir).multiplyScalar(RADIUS)), [nodes]);
 
@@ -320,6 +350,17 @@ function SphereScene({ nodes, wrapRef, listRef, dragRef, scrollRef, scrub, token
         (ring.material as THREE.MeshBasicMaterial).color.copy(colors[selIdx].lit);
       }
     }
+
+    // 5. The sphere is on screen once a frame has drawn every label: troika typesets
+    //    each one in a worker after mount, and the batch repacks on the next render.
+    if (typesetFramesRef.current < 0) {
+      const labels = labelsRef.current;
+      if (labels.length === nodes.length && labels.every((l) => l?.textRenderInfo)) typesetFramesRef.current = 0;
+    } else if (typesetFramesRef.current < 2) {
+      typesetFramesRef.current++;
+    } else {
+      onDrawn();
+    }
   });
 
   const setHover = (i: number) => {
@@ -403,6 +444,23 @@ function SphereScene({ nodes, wrapRef, listRef, dragRef, scrollRef, scrub, token
   );
 }
 
+/** Only the boosted nodes cross the threshold; the glow is sized to stay inside the canvas. */
+function SphereBloom() {
+  const levels = useThree((st) => bloomLevels(Math.min(st.size.width, st.size.height) * st.viewport.dpr));
+  return (
+    <EffectComposer multisampling={0}>
+      <Bloom
+        intensity={0.9}
+        luminanceThreshold={BLOOM_THRESHOLD}
+        luminanceSmoothing={0.05}
+        mipmapBlur
+        levels={levels}
+        radius={BLOOM_RADIUS}
+      />
+    </EffectComposer>
+  );
+}
+
 /**
  * The WebGL skill sphere (lazy chunk, mounted by Deferred3D). The nodes are one
  * instanced mesh, the labels one batched troika text, so a frame is at most five
@@ -429,10 +487,22 @@ export function SkillSphere() {
   const dragRef = useRef<DragState>({ id: -1, startX: 0, startY: 0, lastX: 0, lastY: 0, active: false, yaw: 0, pitch: 0 });
   const scrollRef = useRef({ p: 0 });
 
-  // Layout effect, so the flag drops while a re-suspended canvas is hidden behind the fallback.
-  useLayoutEffect(() => {
+  // data-drawn tells Deferred3D's handoff that the sphere is on screen, so the
+  // constellation over it can fade out; the subtitle switches with it.
+  const markDrawn = useCallback(() => {
+    const wrap = wrapRef.current;
+    if (!wrap || wrap.hasAttribute('data-drawn')) return;
+    wrap.setAttribute('data-drawn', '');
     setSphereLive(true);
-    return () => setSphereLive(false);
+  }, [setSphereLive]);
+
+  // Layout effect, so both drop while a re-suspended canvas is hidden behind the fallback.
+  useLayoutEffect(() => {
+    const wrap = wrapRef.current;
+    return () => {
+      wrap?.removeAttribute('data-drawn');
+      setSphereLive(false);
+    };
   }, [setSphereLive]);
 
   useEffect(() => {
@@ -512,22 +582,23 @@ export function SkillSphere() {
           gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
           onPointerMissed={() => select(null)}
         >
-          <SphereScene
-            nodes={nodes}
-            wrapRef={wrapRef}
-            listRef={listRef}
-            dragRef={dragRef}
-            scrollRef={scrollRef}
-            scrub={scrub}
-            tokens={tokens}
-            dark={dark}
-            bloom={bloom}
-          />
-          {bloom ? (
-            <EffectComposer multisampling={0}>
-              <Bloom intensity={0.9} luminanceThreshold={BLOOM_THRESHOLD} luminanceSmoothing={0.05} mipmapBlur />
-            </EffectComposer>
-          ) : null}
+          {/* A suspension in here (the label font) must not reach Deferred3D's
+              boundary: R3F would re-suspend the whole stage behind the fallback. */}
+          <Suspense fallback={null}>
+            <SphereScene
+              nodes={nodes}
+              wrapRef={wrapRef}
+              listRef={listRef}
+              dragRef={dragRef}
+              scrollRef={scrollRef}
+              scrub={scrub}
+              tokens={tokens}
+              dark={dark}
+              bloom={bloom}
+              onDrawn={markDrawn}
+            />
+            {bloom ? <SphereBloom /> : null}
+          </Suspense>
         </Canvas>
       </div>
 

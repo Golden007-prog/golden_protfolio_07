@@ -393,6 +393,8 @@ test.describe('mobile menu (#42)', () => {
     const dialog = page.getByRole('dialog', { name: 'Site menu' });
     await expect(dialog).toBeVisible();
     await expect(burger).toHaveAttribute('aria-expanded', 'true');
+    // The trap arms once the opening frame has painted (Dialog deferTrap), then focuses Close.
+    await expect(dialog.getByRole('button', { name: 'Close menu' })).toBeFocused();
     for (let i = 0; i < 25; i++) {
       await page.keyboard.press('Tab');
       expect(await page.evaluate(() => !!document.activeElement?.closest('[role="dialog"]'))).toBe(true);

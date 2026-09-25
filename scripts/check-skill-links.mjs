@@ -3,11 +3,21 @@
 // and any sources the index build keeps) and reports the dead ones.
 //   fail: 404, 410, DNS and connection errors (on both attempts)
 //   warn: 403 and 202 (bot walls, queued pages), other 4xx/5xx, timeouts, redirect loops
+// A live link can still be the wrong paper, so research papers with an arXiv, DOI or
+// PubMed Central link are also checked against that registry's record:
+//   fail: the record's title is not the title shown, the registry has no such record,
+//         the author line is a generator note, or it names people the record does not list
+//   warn: the registry is unreachable, or arXiv has renamed the paper since v1
+// Papers on publisher pages no registry covers are listed as notes; only their author
+// line is checked. `node scripts/verify-skill-papers.mjs --write` repairs the source.
 // Exits 1 when anything failed, so it can gate CI.
 //
-//   node scripts/check-skill-links.mjs          (npm run skills:links)
+//   node scripts/check-skill-links.mjs                 (npm run skills:links)
+//   node scripts/check-skill-links.mjs --papers-only   registry checks, no HTTP probes
 
-import { collectShippedUrls } from './build-skill-index.mjs';
+import { collectShippedUrls, readSkills, toDetail } from './build-skill-index.mjs';
+import { citationProblems, paperRef, titlesMatch } from '../src/lib/paperMeta.ts';
+import { arxivFirstTitle, arxivRecords, lookup } from './paper-registry.mjs';
 
 const CONCURRENCY = 8;
 const TIMEOUT_MS = 20_000;
@@ -71,7 +81,7 @@ async function check(url) {
   return best;
 }
 
-async function main() {
+async function checkLinks() {
   const entries = collectShippedUrls();
   const byUrl = new Map();
   for (const e of entries) {
@@ -110,6 +120,59 @@ async function main() {
     }
   }
   console.log(`\n${urls.length - failed - warned} ok, ${warned} warnings, ${failed} failures`);
+  return failed;
+}
+
+/** Every shipped research paper against the registry record its link names. */
+async function checkPapers() {
+  const papers = readSkills().flatMap((skill) =>
+    (toDetail(skill).researchPapers ?? []).map((paper) => ({ ...paper, where: `${skill.name} · paper "${paper.title}"` })),
+  );
+  console.log(`\nChecking ${papers.length} research papers against arXiv, Crossref and PubMed Central…`);
+  const arxiv = await arxivRecords(papers.map((p) => paperRef(p.url)).filter((r) => r?.kind === 'arxiv').map((r) => r.id));
+
+  let failed = 0;
+  let warned = 0;
+  let verified = 0;
+  let unchecked = 0;
+  for (const paper of papers) {
+    const ref = paperRef(paper.url);
+    let record;
+    if (ref) {
+      try {
+        record = await lookup(ref, arxiv);
+      } catch (err) {
+        warned++;
+        console.log(`warn  ${err.message}\n      ${paper.where}`);
+        continue;
+      }
+    }
+    let problems = citationProblems(paper, ref ? record : undefined);
+    if (ref?.kind === 'arxiv' && problems.some((p) => p.kind === 'title')) {
+      const first = await arxivFirstTitle(ref.id).catch(() => null);
+      if (first && titlesMatch(paper.title, first)) {
+        warned++;
+        console.log(`warn  renamed on arXiv to "${record.title}"; rerun verify-skill-papers.mjs  ${paper.url}\n      ${paper.where}`);
+        problems = citationProblems({ ...paper, title: record.title }, record);
+      }
+    }
+    if (problems.length) {
+      failed++;
+      console.log(`FAIL  ${problems.map((p) => p.message).join('; ')}  ${paper.url}\n      ${paper.where}`);
+    } else if (ref) {
+      verified++;
+    } else {
+      unchecked++;
+      console.log(`note  no registry record to check against  ${paper.url}\n      ${paper.where}`);
+    }
+  }
+  console.log(`\n${verified} papers match their registry record, ${unchecked} publisher pages unchecked, ${warned} warnings, ${failed} failures`);
+  return failed;
+}
+
+async function main() {
+  const papersOnly = process.argv.includes('--papers-only');
+  const failed = (papersOnly ? 0 : await checkLinks()) + (await checkPapers());
   process.exitCode = failed > 0 ? 1 : 0;
 }
 

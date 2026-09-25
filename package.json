@@ -51,6 +51,7 @@
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "server-only": "^0.0.1",
+    "suspend-react": "0.1.3",
     "tailwind-merge": "^3.4.0",
     "three": "^0.183.2",
     "troika-three-text": "^0.52.4",

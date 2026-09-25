@@ -31,6 +31,7 @@ import { openAssistant } from '@/lib/ai/bus';
 import type { InterestId } from '@/lib/ai/prompts/projects';
 import { filterQuery } from '@/lib/ai/projectFilters';
 import { useRenderCount } from '@/lib/devRenderCount';
+import { preloadable } from '@/lib/preloadable';
 import { ease, stagger } from '@/lib/motion';
 import { setUrlParams, useUrlParam } from '@/lib/urlState';
 import { cn } from '@/utils/cn';
@@ -39,11 +40,11 @@ import { clearProjectFilters, ProjectFilters } from './ProjectFilters';
 import { CaseStudyHostContext, ServerInterestsContext, useProjectsAi } from './projectsAi';
 
 // The dialog and the whole case study load when the grid comes near (or a link
-// opens a project), never with the page: most visits never open one.
-const loadProjectModal = () => import('./ProjectModal');
-const ProjectModal = dynamic(() => loadProjectModal().then((m) => m.ProjectModal), { ssr: false });
+// opens a project), never with the page: most visits never open one. Once loaded,
+// the first open renders in the click's own commit instead of suspending.
+const ProjectModal = preloadable(() => import('./ProjectModal').then((m) => m.ProjectModal));
 // A ?project link opens the dialog on arrival: fetch it while the page hydrates.
-if (typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('project')) loadProjectModal().catch(() => {});
+if (typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('project')) ProjectModal.preload().catch(() => {});
 
 const GRID_ID = 'projects-grid';
 
@@ -134,12 +135,12 @@ export function ProjectsSection() {
   }, []);
   const projectsAi = useProjectsAi(warm);
   useEffect(() => {
-    if (warm) loadProjectModal().catch(() => {});
+    if (warm) ProjectModal.preload().catch(() => {});
   }, [warm]);
   // Warmed when the browser goes idle after load as well, so a first open from anywhere
   // (a card, the palette, the assistant) does not wait on the network.
   useEffect(() => {
-    const load = () => void loadProjectModal().catch(() => {});
+    const load = () => void ProjectModal.preload().catch(() => {});
     if (typeof window.requestIdleCallback === 'function') {
       const id = window.requestIdleCallback(load, { timeout: 4000 });
       return () => window.cancelIdleCallback(id);

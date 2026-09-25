@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  Fragment,
   useCallback,
   useEffect,
   useId,
@@ -20,7 +21,8 @@ import { useAiHealth } from '@/components/ai/AiNotice';
 import { SuggestedPrompts } from '@/components/ai/SuggestedPrompts';
 import { useAiActionRunner } from '@/components/ai/useAiActionRunner';
 import { useAiStream } from '@/components/ai/useAiStream';
-import { AiBubble, BY_SLUG, RuleBubble, type BubbleHandlers } from '@/components/ai/concierge/AiMessage';
+import { AiBubble, BY_SLUG, fallbackNoteText, RuleBubble, type BubbleHandlers } from '@/components/ai/concierge/AiMessage';
+import { aiSpoken, ruleSpoken, type SpokenPart } from '@/components/ai/concierge/spoken';
 import { CANARY_SHAPE, scrubCanary, useConversation, type AiMsg, type Msg, type RuleNote } from '@/components/ai/concierge/useConversation';
 import { LottieIcon } from '@/components/shared/LottieIcon';
 import { Button } from '@/components/ui/Button';
@@ -35,6 +37,7 @@ import { takePending } from '@/lib/ai/bus';
 import { aiSession, BLOCK_STREAK, SERVER_SESSION_SNAPSHOT, SOFT_CAP } from '@/lib/ai/circuit';
 import { SHOW_UNREVIEWED } from '@/lib/ai/config';
 import { keepFollowups, startersFor, type FollowupNames, type StarterEntries } from '@/lib/ai/followups';
+import { LANG_NAMES } from '@/lib/ai/prompts/base';
 import type { AiFallbackReason, AiSource, AiToolCall, AskOpenRequest, AskRequest, AskScope } from '@/lib/ai/protocol';
 import { langFor, safeLangTag } from '@/lib/ai/script';
 import { isTerminal } from '@/lib/ai/stream';
@@ -68,6 +71,12 @@ const FOLLOWUP_NAMES: FollowupNames = {
 // Fallbacks that mean the AI is off or out for now: the quick answers carry on.
 const RESTING: ReadonlySet<AiFallbackReason> = new Set<AiFallbackReason>(['quota', 'no-key', 'disabled', 'timeout']);
 const UNDOABLE: ReadonlySet<string> = new Set(['openProject', 'openSkill', 'setProjectFilters']);
+const SAY_DELAY_MS = 60;
+// After the status line, so 'Quick answer shown instead' is heard before the answer it introduces.
+const SPEAK_DELAY_MS = 150;
+// An answer stays in its region at least as long as it takes to read (~15 characters a second).
+const SPEAK_MIN_MS = 7000;
+const SPEAK_MS_PER_CHAR = 80;
 
 /** A scope from an ask:open request, only when it names something on the site. */
 function validScope(s: unknown): AskScope | null {
@@ -130,8 +139,10 @@ type BodyProps = {
   regenLeft: number;
   handlers: BubbleHandlers;
   announcement: string;
+  spoken: readonly SpokenPart[] | null;
   logRef: RefObject<HTMLDivElement | null>;
   inputRef: RefObject<HTMLInputElement | null>;
+  submitRef: RefObject<HTMLElement | null>;
 };
 
 function ChatBody({
@@ -160,9 +171,11 @@ function ChatBody({
   capNote,
   onClearScope,
   inputRef,
+  submitRef,
   setInput,
   onStop,
   announcement,
+  spoken,
 }: BodyProps) {
   const submit = (e: FormEvent) => {
     e.preventDefault();
@@ -208,14 +221,17 @@ function ChatBody({
         aria-busy={busy || undefined}
         className="ask-log min-h-0 flex-1 overflow-y-auto px-4 py-4"
       >
-        {/* Finished bubbles only: a streaming answer joins the log once it completes, so it is announced once. */}
+        {/* Finished bubbles only: a streaming answer joins the log once it completes.
+            Silent (role=log is otherwise polite): an added bubble would be read with every chip, link and
+            button in it. Each message's words are spoken once through [data-ask-speak] instead.
+            tabIndex -1: focus lands here when a pressed control goes away and a coarse pointer rules out the field. */}
         <div
           role="log"
-          aria-live="polite"
-          aria-relevant="additions"
+          aria-live="off"
           aria-label="Conversation"
           aria-busy={busy || undefined}
-          className="space-y-3"
+          tabIndex={-1}
+          className="space-y-3 rounded-xl ring-focus"
         >
           {messages.map((m) =>
             m.from === 'user' ? (
@@ -337,18 +353,32 @@ function ChatBody({
           maxLength={QUESTION_MAX}
           className="tap-safe min-w-0 flex-1 rounded-full border border-glass-border-strong bg-glass-fill px-4 text-base text-text-primary ring-focus placeholder:text-text-muted"
         />
-        {busy ? (
-          <Button type="button" variant="secondary" size="md" aria-label="Stop" onClick={onStop} className="w-11 px-0" data-ask-stop="">
-            <Square aria-hidden="true" className="size-3.5 fill-current" />
-          </Button>
-        ) : (
-          <Button type="submit" variant="primary" size="md" shine={false} aria-label="Send" disabled={!input.trim()} className="w-11 px-0">
-            <Send aria-hidden="true" className="size-4" />
-          </Button>
-        )}
+        {/* One node for Send and Stop, so a focused button survives the swap. */}
+        <Button
+          ref={submitRef}
+          type={busy ? 'button' : 'submit'}
+          variant={busy ? 'secondary' : 'primary'}
+          size="md"
+          shine={false}
+          aria-label={busy ? 'Stop' : 'Send'}
+          onClick={busy ? onStop : undefined}
+          disabled={!busy && !input.trim()}
+          className="w-11 px-0"
+          data-ask-stop={busy ? '' : undefined}
+        >
+          {busy ? <Square aria-hidden="true" className="size-3.5 fill-current" /> : <Send aria-hidden="true" className="size-4" />}
+        </Button>
       </form>
       <p className="sr-only" role="status" aria-live="polite" aria-atomic="true" data-ask-announce="">
         {announcement}
+      </p>
+      <p className="sr-only" aria-live="polite" aria-atomic="true" data-ask-speak="">
+        {spoken?.map((part, i) => (
+          <Fragment key={i}>
+            {i > 0 ? ' ' : null}
+            <span lang={part.lang}>{part.text}</span>
+          </Fragment>
+        ))}
       </p>
     </div>
   );
@@ -364,8 +394,9 @@ function ChatBody({
  * requests and scoped questions go to /api/ai/ask, and any failure shows the
  * rule answer already computed. Every bubble says which one answered.
  *
- * AI answers stream outside the log (so a screen reader hears each answer once,
- * when it joins the log), arrive as verified sentences with source chips, and
+ * AI answers stream outside the log, which is silent; a screen reader hears each
+ * finished answer once, as plain text without its controls (spoken.ts). They
+ * arrive as verified sentences with source chips, and
  * carry the disclosure, Markdown copy, feedback, Regenerate, the quick answer and
  * a Details panel. A tool call runs through the action runner with an Undo. The
  * thread lives in the session area; requests carry only the visitor's questions
@@ -387,6 +418,7 @@ export function AskMeBot({
   const [live, setLive] = useState<LiveAsk | null>(null);
   const [freshId, setFreshId] = useState<number | null>(null);
   const [announcement, setAnnouncement] = useState('');
+  const [spoken, setSpoken] = useState<readonly SpokenPart[] | null>(null);
   const [healthWanted, setHealthWanted] = useState(false);
 
   const conv = useConversation();
@@ -402,7 +434,9 @@ export function AskMeBot({
   const panelRef = useRef<HTMLDivElement>(null);
   const logRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const submitRef = useRef<HTMLElement>(null);
   const timers = useRef(new Set<number>());
+  const speakSeq = useRef(0);
   const onOpenChangeRef = useRef(onOpenChange);
   const onBusyChangeRef = useRef(onBusyChange);
   const streamRef = useRef<Snapshot>(stream);
@@ -445,11 +479,42 @@ export function AskMeBot({
   const say = useCallback(
     (text: string) => {
       setAnnouncement('');
-      later(() => setAnnouncement(text), 60);
+      later(() => setAnnouncement(text), SAY_DELAY_MS);
       later(() => setAnnouncement((cur) => (cur === text ? '' : cur)), 7000);
     },
     [later],
   );
+
+  /**
+   * A message's words as plain text, once, when it joins the log; after any status line said with it.
+   * speak([]) silences one still waiting to be spoken.
+   */
+  const speak = useCallback(
+    (parts: readonly SpokenPart[]) => {
+      const seq = ++speakSeq.current;
+      setSpoken(null);
+      if (!parts.length) return;
+      const chars = parts.reduce((n, p) => n + p.text.length, 0);
+      later(() => {
+        if (speakSeq.current === seq) setSpoken(parts);
+      }, SPEAK_DELAY_MS);
+      later(() => setSpoken((cur) => (cur === parts ? null : cur)), SPEAK_DELAY_MS + Math.max(SPEAK_MIN_MS, chars * SPEAK_MS_PER_CHAR));
+    },
+    [later],
+  );
+
+  /**
+   * Call before a change that removes or disables the focused control (a starter, a
+   * follow-up, Send, Stop, Regenerate, Undo, the scope chip), or focus falls to <body>.
+   * It goes to the field under a fine pointer, else to the conversation, so no
+   * on-screen keyboard rises.
+   */
+  const holdFocus = () => {
+    const el = document.activeElement;
+    if (!(el instanceof HTMLElement) || el === inputRef.current || !el.closest('[data-ask-panel], [data-ask-sheet]')) return;
+    const target = finePointer ? inputRef.current : logRef.current?.querySelector<HTMLElement>('[role="log"]');
+    target?.focus({ preventScroll: true });
+  };
 
   const setOpen = (v: boolean) => {
     setOpenState(v);
@@ -478,7 +543,7 @@ export function AskMeBot({
       reason?: AiFallbackReason;
       english?: boolean;
     } = {},
-  ) =>
+  ) => {
     conv.add({
       from: 'bot',
       kind: 'rules',
@@ -486,6 +551,16 @@ export function AskMeBot({
       answer: rule,
       ...extra,
     });
+    speak(
+      ruleSpoken({
+        text: rule.text,
+        intent: rule.intent,
+        note: extra.note,
+        noteText: fallbackNoteText(extra.note, extra.reason),
+        english: extra.english,
+      }),
+    );
+  };
 
   /* ---- a tool call: run it, keep a step chip, offer Undo ---- */
 
@@ -493,6 +568,7 @@ export function AskMeBot({
     const m = messagesRef.current.find((x): x is AiMsg => x.id === id && x.from === 'bot' && x.kind === 'ai');
     const undo = m?.step?.undo;
     if (!m || !undo || m.step?.undone) return;
+    holdFocus();
     setUrlParams(undo);
     conv.update(id, (x) => (x.from === 'bot' && x.kind === 'ai' && x.step ? { ...x, step: { ...x.step, undone: true } } : x));
     say('Undone');
@@ -522,6 +598,8 @@ export function AskMeBot({
   /* ---- a settled stream becomes a message ---- */
 
   const finalize = (l: LiveAsk, s: Snapshot) => {
+    // A focused Stop turns back into Send, which is disabled while the field is empty.
+    if (document.activeElement === submitRef.current && !input.trim()) holdFocus();
     setLive(null);
     setHealthWanted(true);
     const english = Boolean(l.lang);
@@ -590,6 +668,17 @@ export function AskMeBot({
     setFreshId(id);
     if (call) runTool(call, id);
     if (s.status === 'stopped') say('Stopped');
+    const requested = safeLangTag(l.lang);
+    speak(
+      aiSpoken({
+        text: leaked ? '' : raw,
+        lang,
+        stopped: s.status === 'stopped',
+        degraded: leaked || Boolean(done?.degraded),
+        ruleText: l.rule.text,
+        englishFrom: requested && !lang ? LANG_NAMES[requested] : null,
+      }),
+    );
   };
 
   const finalizeRef = useRef(finalize);
@@ -626,6 +715,7 @@ export function AskMeBot({
     const scope = scopeNow ?? conv.scope;
     const lang = langFor(q, preferredLangs());
     const english = Boolean(lang && lang !== 'en');
+    holdFocus();
     conv.add({ from: 'user', text: q });
     setInput('');
 
@@ -683,6 +773,7 @@ export function AskMeBot({
 
   const regenerate = (msg: AiMsg) => {
     if (live || typing || !conv.takeRegen()) return;
+    holdFocus();
     conv.remove(msg.id);
     const prevCited = msg.cited.length ? msg.cited.slice(0, 12) : msg.request.prevCited;
     startAi(msg.question, msg.rule, { ...msg.request, ...(prevCited?.length ? { prevCited } : {}) }, msg.requestedLang);
@@ -694,6 +785,7 @@ export function AskMeBot({
     setTyping(false);
     setFreshId(null);
     conv.clear();
+    speak([]);
     say('New chat started');
     requestAnimationFrame(() => inputRef.current?.focus({ preventScroll: true }));
   };
@@ -895,7 +987,10 @@ export function AskMeBot({
       starters={starters}
       followUps={followUps}
       scope={conv.scope}
-      onClearScope={() => conv.setScope(null)}
+      onClearScope={() => {
+        holdFocus();
+        conv.setScope(null);
+      }}
       status={status}
       capNote={capNote}
       canHandOff={conv.questions.length >= 2 && !busy && !typing}
@@ -907,8 +1002,10 @@ export function AskMeBot({
       regenLeft={conv.regenLeft}
       handlers={handlers}
       announcement={announcement}
+      spoken={spoken}
       logRef={logRef}
       inputRef={inputRef}
+      submitRef={submitRef}
     />
   );
 

@@ -14,13 +14,8 @@
     max-height: 12rem;
   }
 
-  /* On phones the floating dock covers the bottom of the screen: a field or button
-     that takes focus scrolls far enough to land above it. */
-  @media (max-width: 639.98px) {
-    [data-contact-form] :is(input, textarea, select, button, a) {
-      scroll-margin-bottom: calc(var(--dock-height) + var(--dock-clearance) + 1rem);
-    }
-  }
+  /* Focused fields clear the floating dock through html's phone scroll-padding-bottom
+     (index.css); a scroll-margin here would add to it and land them twice as high. */
 
   @media (forced-colors: active) {
     [data-contact-form] textarea[name='message'][aria-busy='true'] {

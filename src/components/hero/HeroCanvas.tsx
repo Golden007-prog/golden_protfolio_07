@@ -1,6 +1,17 @@
 'use client';
 
-import { memo, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import {
+  memo,
+  Suspense,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type ReactNode,
+} from 'react';
 import { Canvas, useFrame, useThree, type RootState } from '@react-three/fiber';
 import { Environment, Lightformer, PerformanceMonitor, useGLTF } from '@react-three/drei';
 import { Bloom, EffectComposer, Vignette } from '@react-three/postprocessing';
@@ -9,12 +20,18 @@ import * as THREE from 'three';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useDeviceCapability } from '@/hooks/useDeviceCapability';
 import { useFrameloop } from '@/hooks/useFrameloop';
+import { isDialogOpen, subscribeDialogPresence } from '@/lib/dialogPresence';
 import { useRenderCount } from '@/lib/devRenderCount';
 import { heroScroll } from '@/lib/heroScrollStore';
 import { pointer } from '@/lib/pointerStore';
+import { prewarmPmrem, whenProgramsLinked, withRenderTarget } from './shaderWarmup';
 
 const MODEL_URL = '/models/hero-character.glb';
 const BLOOM_INTENSITY = 0.5;
+/** Cube size of the baked environment; the PMREM warm-up must match it to share programs. */
+const ENV_RESOLUTION = 512;
+/** Past this the model mounts or shows anyway, and a slow link finishes on the main thread. */
+const LINK_TIMEOUT_MS = 4000;
 // The framing was tuned on a ~0.9 (w/h) desktop column; narrower canvases zoom out to keep the bust whole.
 const FRAMED_ASPECT = 0.9;
 
@@ -45,10 +62,37 @@ const LIGHTFORMERS = (
   </group>
 );
 
-function CyborgModel({ onReady }: { onReady?: () => void }) {
+/**
+ * Renders its children once three's PMREM programs have linked in parallel. Without
+ * this, the model's first frame linked the GGX filter synchronously while baking the
+ * environment: one 0.4-0.7 s main-thread task on a cold desktop GPU, landing on the
+ * intro. The GLB keeps downloading meanwhile (HeroCanvasImpl preloads it).
+ */
+function PmremWarmupGate({ children }: { children: ReactNode }) {
+  const gl = useThree((s) => s.gl);
+  const [warm, setWarm] = useState(false);
+  useEffect(() => {
+    const warmup = prewarmPmrem(gl, ENV_RESOLUTION, LINK_TIMEOUT_MS);
+    let live = true;
+    void warmup.ready.then(() => {
+      if (live) setWarm(true);
+    });
+    return () => {
+      live = false;
+      warmup.dispose();
+    };
+  }, [gl]);
+  return warm ? children : null;
+}
+
+function CyborgModel({ onReady, postprocessed }: { onReady?: () => void; postprocessed: boolean }) {
   const { scene } = useGLTF(MODEL_URL);
+  const gl = useThree((s) => s.gl);
+  const camera = useThree((s) => s.camera);
+  const root = useThree((s) => s.scene);
   const group = useRef<THREE.Group>(null);
   const motion = useRef({ yaw: 0, pitch: 0, x: 0, y: 0 });
+  const [linked, setLinked] = useState(false);
 
   // Once per loaded scene, not per render: needsUpdate recompiles the shader.
   useLayoutEffect(() => {
@@ -70,12 +114,30 @@ function CyborgModel({ onReady }: { onReady?: () => void }) {
     });
   }, [scene]);
 
-  // Mounted means the GLB resolved; the next frame has the model on screen.
+  // The group stays hidden (render() skips it) while its programs link off the main
+  // thread. compile() takes hidden objects too, and bakes the environment's PMREM
+  // now, on the programs PmremWarmupGate linked. Runs after the material tweaks above.
+  // With post-processing the model draws into the composer's buffer, not the canvas,
+  // and the program has to be compiled for that target to be the one used.
   useEffect(() => {
-    if (!onReady) return;
+    const compile = () => gl.compile(scene, camera, root);
+    const wait = whenProgramsLinked(gl, postprocessed ? withRenderTarget(gl, compile) : compile(), LINK_TIMEOUT_MS);
+    let live = true;
+    void wait.ready.then(() => {
+      if (live) setLinked(true);
+    });
+    return () => {
+      live = false;
+      wait.cancel();
+    };
+  }, [gl, scene, camera, root, postprocessed]);
+
+  // Linked and visible: the next frame has the model on screen.
+  useEffect(() => {
+    if (!linked || !onReady) return;
     const id = requestAnimationFrame(() => onReady());
     return () => cancelAnimationFrame(id);
-  }, [onReady]);
+  }, [linked, onReady]);
 
   useFrame((state, delta) => {
     const g = group.current;
@@ -95,7 +157,7 @@ function CyborgModel({ onReady }: { onReady?: () => void }) {
   });
 
   return (
-    <group ref={group}>
+    <group ref={group} visible={linked}>
       <primitive object={scene} scale={1.4} position={[0, -0.2, 0]} />
     </group>
   );
@@ -145,6 +207,9 @@ function HeroCanvasImpl({ onReady }: Props) {
   useRenderCount('HeroCanvas');
   const hostRef = useRef<HTMLDivElement>(null);
   const frameloop = useFrameloop(hostRef);
+  // Any open dialog covers the hero (full-screen, or a 75% blurred backdrop): stop
+  // drawing under it, which also spares the backdrop blur a new frame every tick.
+  const underDialog = useSyncExternalStore(subscribeDialogPresence, isDialogOpen, () => false);
   const { isTouch } = useDeviceCapability();
   const { resolvedTheme } = useTheme();
   const [tier, setTier] = useState<Tier>(0);
@@ -172,19 +237,21 @@ function HeroCanvasImpl({ onReady }: Props) {
 
   return (
     <div ref={hostRef} className="absolute inset-0" data-hero-canvas="" data-tier={tier}>
-      <Canvas frameloop={frameloop} dpr={dpr} camera={CAMERA} gl={GL} onCreated={created}>
+      <Canvas frameloop={underDialog ? 'never' : frameloop} dpr={dpr} camera={CAMERA} gl={GL} onCreated={created}>
         <PerformanceMonitor flipflops={3} onDecline={decline} onFallback={fallback} />
         <FitCamera />
-        <Environment resolution={512}>{LIGHTFORMERS}</Environment>
+        <Environment resolution={ENV_RESOLUTION}>{LIGHTFORMERS}</Environment>
 
         <ambientLight intensity={0.05} />
         <directionalLight position={[3, 5, 2]} intensity={1.5} color="#ffffff" />
         <directionalLight position={[-4, 2, -3]} intensity={2.5} color="#ff4400" />
         <pointLight position={[0, -2, 2]} intensity={0.2} color="#7C3AED" />
 
-        <Suspense fallback={null}>
-          <CyborgModel onReady={ready} />
-        </Suspense>
+        <PmremWarmupGate>
+          <Suspense fallback={null}>
+            <CyborgModel onReady={ready} postprocessed={tier < 2} />
+          </Suspense>
+        </PmremWarmupGate>
 
         {tier < 2 ? <Effects light={resolvedTheme === 'light'} multisampling={isTouch ? 2 : 8} /> : null}
       </Canvas>

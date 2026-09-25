@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useSyncExternalStore, type RefObject } from 'react';
+import { useMotionPrefs } from './useMotionPrefs';
 
 function subscribeVisibility(fn: () => void) {
   document.addEventListener('visibilitychange', fn);
@@ -10,9 +11,12 @@ function subscribeVisibility(fn: () => void) {
 /**
  * R3F frameloop for a canvas wrapper: 'always' while the element is within
  * rootMargin of the viewport and the tab is visible, otherwise 'never'.
+ * While motion is paused it is 'demand': the idle loop (bobs, floats, spins)
+ * stops, but state changes such as a clicked sphere node still render.
  */
-export function useFrameloop(ref: RefObject<Element | null>, rootMargin = '200px'): 'always' | 'never' {
+export function useFrameloop(ref: RefObject<Element | null>, rootMargin = '200px'): 'always' | 'demand' | 'never' {
   const [near, setNear] = useState(false);
+  const { paused } = useMotionPrefs();
   const visible = useSyncExternalStore(
     subscribeVisibility,
     () => document.visibilityState === 'visible',
@@ -27,5 +31,6 @@ export function useFrameloop(ref: RefObject<Element | null>, rootMargin = '200px
     return () => io.disconnect();
   }, [ref, rootMargin]);
 
-  return near && visible ? 'always' : 'never';
+  if (!near || !visible) return 'never';
+  return paused ? 'demand' : 'always';
 }

@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { useEffect, useReducer, useState, type ReactNode } from 'react';
 import { ExplainSimply } from '@/components/ai/skills/ExplainSimply';
 import { SkillUsage } from '@/components/ai/skills/SkillUsage';
+import { findTwin } from '@/components/shared/focusCarry';
 import { LottieIcon } from '@/components/shared/LottieIcon';
 import { Button } from '@/components/ui/Button';
 import { CopyButton } from '@/components/ui/CopyButton';
@@ -15,6 +16,7 @@ import { useHotkeys } from '@/hooks/useHotkeys';
 import { useMotionPrefs } from '@/hooks/useMotionPrefs';
 import { openAssistant } from '@/lib/ai/bus';
 import { emit } from '@/lib/events';
+import { paperByline } from '@/lib/paperMeta';
 import { SITE } from '@/lib/site';
 import { loadSkillDetail, peekSkillDetail, SKILLS } from '@/lib/skills';
 import type { Skill, SkillDetail } from '@/types/skills';
@@ -54,6 +56,25 @@ function useSkillDetail(slug: string | undefined): DetailState {
       setAttempt((n) => n + 1);
     },
   };
+}
+
+const OPENER_KEYS = ['data-node', 'data-skill-pill'] as const;
+
+/**
+ * Where focus goes back to when the opener left the page while the dialog was
+ * open: the stage swaps the constellation for the sphere's node list (or back)
+ * underneath it. Its twin with the same slug stands in, else the section heading.
+ * Openers from outside the section get no stand-in.
+ */
+function standInFor(opener: HTMLElement): HTMLElement | null {
+  const key = OPENER_KEYS.find((k) => opener.hasAttribute(k));
+  const section = document.getElementById('skills');
+  if (!key || !section) return null;
+  const twin = findTwin(section, key, opener.getAttribute(key));
+  if (twin) return twin;
+  const heading = document.getElementById('skills-title');
+  if (heading && !heading.hasAttribute('tabindex')) heading.tabIndex = -1;
+  return heading;
 }
 
 function Heading({ children }: { children: ReactNode }) {
@@ -168,7 +189,7 @@ function DetailBody({ detail }: { detail: SkillDetail }) {
                   href={paper.url}
                   icon={<FileText className="size-5" />}
                   title={paper.title}
-                  meta={paper.authors}
+                  meta={paperByline(paper.authors)}
                 />
               </li>
             ))}
@@ -247,7 +268,8 @@ export function SkillModal() {
     const el = takeOpener();
     if (!el) return;
     const frame = requestAnimationFrame(() => {
-      if (el.isConnected && document.activeElement !== el) el.focus({ preventScroll: true });
+      const target = el.isConnected ? el : standInFor(el);
+      if (target && document.activeElement !== target) target.focus({ preventScroll: true });
     });
     return () => cancelAnimationFrame(frame);
   }, [isOpen, takeOpener]);

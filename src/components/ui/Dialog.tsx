@@ -1,11 +1,13 @@
 'use client';
 
-import { useEffect, useRef, type PointerEvent as ReactPointerEvent, type ReactNode, type RefObject } from 'react';
+import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode, type RefObject } from 'react';
 import { createPortal } from 'react-dom';
 import { AnimatePresence, motion, useDragControls, type PanInfo, type TargetAndTransition } from 'framer-motion';
 import { useFocusTrap } from '@/hooks/useFocusTrap';
 import { useHydrated } from '@/hooks/useHydrated';
 import { useScrollLock } from '@/hooks/useScrollLock';
+import { afterNextPaint } from '@/lib/afterPaint';
+import { holdDialogPresence } from '@/lib/dialogPresence';
 import { duration, ease } from '@/lib/motion';
 import { cn } from '@/utils/cn';
 
@@ -27,6 +29,20 @@ export type DialogProps = {
   panelClassName?: string;
   /** Shared-element id, so the panel can grow out of the element that opened it. */
   layoutId?: string;
+  /**
+   * Arm the focus trap, inert background and scroll lock after the opening frame
+   * has painted, and release them after the closing frame has painted. Inerting
+   * <body>'s children restyles the whole page (about 100 ms on a slow phone), so
+   * this keeps that work out of the tap's next paint. Only for a full-screen
+   * surface: its overlay catches every tap from the first frame, so the frame
+   * before the trap arms leaves nothing reachable by pointer.
+   */
+  deferTrap?: boolean;
+  /**
+   * Called after a close, once focus is back on the opener and the page is
+   * scrollable again (with deferTrap, a frame or so after `open` goes false).
+   */
+  onReleased?: () => void;
 };
 
 type Motion = { initial: TargetAndTransition; animate: TargetAndTransition; exit: TargetAndTransition };
@@ -76,7 +92,8 @@ const openStack: object[] = [];
  * scroll lock and Escape. A backdrop click closes it only when the press and the
  * release both land outside the panel, so a text selection dragged out of the
  * panel never dismisses it. The scroller carries data-lenis-prevent and
- * data-dialog-scroller.
+ * data-dialog-scroller. While open it counts in dialogPresence, which pauses the
+ * hero's WebGL loop underneath.
  */
 export function Dialog({
   open,
@@ -90,6 +107,8 @@ export function Dialog({
   className,
   panelClassName,
   layoutId,
+  deferTrap = false,
+  onReleased,
 }: DialogProps) {
   const hydrated = useHydrated();
   const rootRef = useRef<HTMLDivElement>(null);
@@ -97,14 +116,40 @@ export function Dialog({
   const pressedOutside = useRef(false);
   const dragControls = useDragControls();
   const active = open && hydrated;
+  // With deferTrap, `armed` follows `active` one painted frame later.
+  const [armed, setArmed] = useState(false);
+  const held = deferTrap ? armed : active;
 
-  useFocusTrap(rootRef, active, { initialFocusRef, fallbackFocusRef: panelRef });
-  useScrollLock(active);
+  useFocusTrap(rootRef, held, { initialFocusRef, fallbackFocusRef: panelRef });
+  useScrollLock(held);
+
+  useEffect(() => {
+    if (!deferTrap || armed === active) return;
+    return afterNextPaint(() => setArmed(active));
+  }, [deferTrap, active, armed]);
+
+  useEffect(() => (active ? holdDialogPresence() : undefined), [active]);
 
   const onCloseRef = useRef(onClose);
+  const onReleasedRef = useRef(onReleased);
   useEffect(() => {
     onCloseRef.current = onClose;
+    onReleasedRef.current = onReleased;
   });
+
+  // Every commit runs the trap's and the lock's cleanups before any effect body, so
+  // by the time this sees `held` false the page is already handed back. A close
+  // before a deferred trap armed releases at once.
+  const wasOpen = useRef(false);
+  useEffect(() => {
+    if (active) {
+      wasOpen.current = true;
+      return;
+    }
+    if (held || !wasOpen.current) return;
+    wasOpen.current = false;
+    onReleasedRef.current?.();
+  }, [active, held]);
 
   useEffect(() => {
     if (!active) return;

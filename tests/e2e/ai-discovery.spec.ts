@@ -372,6 +372,22 @@ async function pillBox(page: Page) {
   return page.locator('[data-tour-pill]').boundingBox();
 }
 
+/**
+ * Waits for an element to finish entering. The pill and each toast fade in while sliding
+ * up 16px (a toast also scales from 0.98), and the toast region eases its bottom when
+ * --ai-lift changes, so a box read earlier sits up to 16px below where the element rests.
+ */
+async function atRest(locator: Locator) {
+  await expect
+    .poll(() =>
+      locator.evaluate((el) => {
+        const style = getComputedStyle(el);
+        return style.transform === 'none' && style.opacity === '1' && !el.closest('[data-toast-region]')?.getAnimations().length;
+      }),
+    )
+    .toBe(true);
+}
+
 test.describe('guided tour (#196)', () => {
   test('a chip tour at 320px makes no request, starts below the hero, clears the dock and a toast, jumps with Next and ends on Esc', async ({ page }, info) => {
     test.skip(!smallReduced(info) && !primary(info), '320 under reduced motion, and desktop');
@@ -394,6 +410,7 @@ test.describe('guided tour (#196)', () => {
     expect(parseFloat(lift)).toBeGreaterThan(40);
 
     // Clear of the dock.
+    await atRest(pill);
     const box = await pillBox(page);
     for (const sel of ['[data-dock]', '[data-dock] .dock-inner']) {
       const dock = await page.locator(sel).first().boundingBox();
@@ -411,6 +428,7 @@ test.describe('guided tour (#196)', () => {
     await input.press('Enter');
     const toast = page.locator('[data-toast-region] [data-toast]').first();
     await expect(toast).toBeVisible();
+    await atRest(toast);
     const toastBox = await toast.boundingBox();
     const afterToast = await pillBox(page);
     expect(overlaps(toastBox, afterToast), 'a toast overlaps the tour pill').toBe(false);

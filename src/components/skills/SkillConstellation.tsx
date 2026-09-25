@@ -67,7 +67,9 @@ export function rovingIndex(nodes: readonly SkillNode[], selected: string | null
  * The sphere's nodes flattened to rows of stars, one row per category, for devices
  * that do not get WebGL (reduced motion, Data Saver, small low-power phones) and
  * while the sphere loads. Every star is a button that opens its skill. The drift is
- * CSS, so the reduced-motion and pause switches stop it.
+ * CSS, so the reduced-motion and pause switches stop it. A star's data-node slug
+ * matches its button in the sphere's hidden list: focus follows it across the
+ * swap (Deferred3D focusKey), and the modal finds its opener again by it.
  */
 export function SkillConstellation() {
   const { selected, hovered } = useSkillFocus();

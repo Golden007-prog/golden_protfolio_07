@@ -570,6 +570,19 @@ function ContactForm({ restore }: { restore: boolean }) {
   );
 }
 
+/** Lets an email address wrap after its @ before it breaks anywhere else. */
+function breakAfterAt(value: string): ReactNode {
+  const at = value.indexOf('@');
+  if (at < 0) return value;
+  return (
+    <>
+      {value.slice(0, at + 1)}
+      <wbr />
+      {value.slice(at + 1)}
+    </>
+  );
+}
+
 function ContactRow({
   icon,
   label,
@@ -596,7 +609,10 @@ function ContactRow({
         </span>
         <span className="min-w-0">
           <span className="sr-only">{label}: </span>
-          <span className="block truncate text-sm">{value}</span>
+          {/* Wraps instead of truncating: a visitor has to be able to read and retype all of it. */}
+          <span data-contact-value="" className="block text-sm [overflow-wrap:anywhere]">
+            {breakAfterAt(value)}
+          </span>
         </span>
       </a>
       <CopyButton value={value} label={copyLabel} toastMessage={toastMessage} iconOnly size="md" variant="ghost" />
@@ -619,6 +635,38 @@ function Poster({ onError }: { onError: () => void }) {
     </div>
   );
 }
+
+/** Full-bleed behind the whole section, not just the content column. */
+const CONTACT_BACKGROUND = (
+  <>
+    <BackgroundVideo
+      variant="dark"
+      src="/videos/contact-bg.mp4"
+      poster="/images/contact-bg.webp"
+      className="dark-only pointer-events-none absolute inset-0 -z-10 h-full w-full object-cover opacity-25"
+    />
+    <div
+      className="light-only pointer-events-none absolute inset-0 -z-10 overflow-clip"
+      style={{
+        maskImage: 'radial-gradient(ellipse 85% 75% at 50% 50%, #000 35%, rgb(0 0 0 / 0.35) 70%, transparent 100%)',
+        WebkitMaskImage: 'radial-gradient(ellipse 85% 75% at 50% 50%, #000 35%, rgb(0 0 0 / 0.35) 70%, transparent 100%)',
+      }}
+    >
+      <BackgroundVideo
+        variant="light"
+        src="/videos/contact-bg-light.mp4"
+        className="h-full w-full object-cover opacity-40"
+        style={{ filter: 'saturate(0.75) brightness(1.02)' }}
+      />
+    </div>
+    <div className="light-only pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-bg-base/50 via-transparent to-bg-base/70" />
+    <div className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-bg-base/60 via-transparent to-bg-base" />
+  </>
+);
+
+// The poster stays over the envelope until the envelope has compiled and starts its
+// 700ms fade-in, then fades out over the same time instead of leaving an empty box.
+const ENVELOPE_HANDOFF = { ready: '[data-contact-canvas][data-ready]', fadeMs: 700 };
 
 /**
  * Contact: a validated, draft-saving form that posts to FormSubmit, direct email
@@ -652,30 +700,7 @@ export function ContactSection() {
   const visual = !(posterFailed && fallbackFinal);
 
   return (
-    <SectionWrapper id="contact">
-      <BackgroundVideo
-        variant="dark"
-        src="/videos/contact-bg.mp4"
-        poster="/images/contact-bg.webp"
-        className="dark-only pointer-events-none absolute inset-0 -z-10 h-full w-full object-cover opacity-25"
-      />
-      <div
-        className="light-only pointer-events-none absolute inset-0 -z-10 overflow-clip"
-        style={{
-          maskImage: 'radial-gradient(ellipse 85% 75% at 50% 50%, #000 35%, rgb(0 0 0 / 0.35) 70%, transparent 100%)',
-          WebkitMaskImage: 'radial-gradient(ellipse 85% 75% at 50% 50%, #000 35%, rgb(0 0 0 / 0.35) 70%, transparent 100%)',
-        }}
-      >
-        <BackgroundVideo
-          variant="light"
-          src="/videos/contact-bg-light.mp4"
-          className="h-full w-full object-cover opacity-40"
-          style={{ filter: 'saturate(0.75) brightness(1.02)' }}
-        />
-      </div>
-      <div className="light-only pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-bg-base/50 via-transparent to-bg-base/70" />
-      <div className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-bg-base/60 via-transparent to-bg-base" />
-
+    <SectionWrapper id="contact" background={CONTACT_BACKGROUND}>
       <div ref={scrubRef}>
         <motion.div style={{ y: headingY }}>
           <SectionHeading
@@ -694,6 +719,7 @@ export function ContactSection() {
                 id="contact"
                 rootMargin="400px"
                 className="relative h-full min-h-[480px]"
+                handoff={ENVELOPE_HANDOFF}
                 onFallback={() => setFallbackFinal(true)}
                 fallback={<Poster onError={() => setPosterFailed(true)} />}
               >
@@ -710,8 +736,10 @@ export function ContactSection() {
                 <GlassCard strong className="p-6 sm:p-8 md:p-10">
                   <ContactForm key={hydrated ? 'client' : 'server'} restore={hydrated} />
 
-                  <div className="mt-10 border-t border-hairline pt-8">
-                    <div className="grid gap-3 sm:grid-cols-2">
+                  {/* The rows sit side by side only when the card itself has room for both
+                      full values (the viewport says little: at lg the card is 3/5 wide). */}
+                  <div className="@container mt-10 border-t border-hairline pt-8">
+                    <div className="grid gap-3 @xl:grid-cols-2">
                       <ContactRow
                         icon={<Mail aria-hidden="true" className="size-4" />}
                         label="Email"

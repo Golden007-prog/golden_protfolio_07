@@ -78,13 +78,27 @@ export function RoleTicker({ active = true, className }: Props) {
 
   return (
     <div ref={hostRef} className={className} data-role-ticker="">
-      <p aria-hidden="true" className="font-mono text-sm leading-relaxed text-violet-bright">
-        <span className="text-text-muted">&gt;_</span>{' '}
-        {/* React only ever renders the first role here; later roles are written by the decode. */}
-        <span ref={textRef} data-role-text="">
-          {ROLES[0]}
+      <p aria-hidden="true" className="relative font-mono text-sm leading-relaxed text-violet-bright">
+        {/* Every role, invisible and stacked in one grid cell, sizes the line to the
+            longest role at this width (the first one wraps at 320px), so rotating
+            roles never moves the hero. */}
+        <span className="invisible grid">
+          {ROLES.map((role) => (
+            <span key={role} className="[grid-area:1/1]">
+              &gt;_ {role}
+              <span className="typing-cursor animate-none" />
+            </span>
+          ))}
         </span>
-        <span className="typing-cursor" />
+        {/* The visible line sits over the sizers out of flow, so no decode frame can shift layout. */}
+        <span className="absolute inset-x-0 top-0">
+          <span className="text-text-muted">&gt;_</span>{' '}
+          {/* React only ever renders the first role here; later roles are written by the decode. */}
+          <span ref={textRef} data-role-text="">
+            {ROLES[0]}
+          </span>
+          <span className="typing-cursor" />
+        </span>
       </p>
       <ul className="sr-only">
         {ROLES.map((role) => (

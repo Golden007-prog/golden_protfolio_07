@@ -1,7 +1,6 @@
 'use client';
 
 import { createContext, useCallback, useContext, useEffect, useId, useState, useSyncExternalStore } from 'react';
-import dynamic from 'next/dynamic';
 import { Quote } from 'lucide-react';
 import { AIButton } from '@/components/ai/AIButton';
 import { Button } from '@/components/ui/Button';
@@ -10,6 +9,7 @@ import { takePending } from '@/lib/ai/bus';
 import type { LensId } from '@/lib/ai/fit';
 import type { FitOpenRequest } from '@/lib/ai/protocol';
 import { track } from '@/lib/analytics';
+import { preloadable } from '@/lib/preloadable';
 import { useAppEvent } from '@/lib/events';
 import { useUrlParam } from '@/lib/urlState';
 import { cn } from '@/utils/cn';
@@ -18,13 +18,12 @@ import { cn } from '@/utils/cn';
  * The only recruiter code on the first load of '/': two buttons, a lens-chip
  * slot and the open state they share. The fit sheet and the lens pitches are
  * separate chunks, fetched on the first open (the pitch chunk is warmed when About
- * nears the viewport) or for a ?lens link.
+ * nears the viewport) or for a ?lens link. Once a chunk is in, its dialog renders
+ * in the opening commit instead of suspending.
  */
 
-const loadFitCheck = () => import('./FitCheck');
-const FitCheck = dynamic(() => loadFitCheck().then((m) => m.FitCheck), { ssr: false });
-const loadRoleLens = () => import('./RoleLens');
-const RoleLens = dynamic(() => loadRoleLens().then((m) => m.RoleLens), { ssr: false });
+const FitCheck = preloadable(() => import('./FitCheck').then((m) => m.FitCheck));
+const RoleLens = preloadable(() => import('./RoleLens').then((m) => m.RoleLens));
 
 /* ---- the pitch dialog's state, shared with the lazy RoleLens ---- */
 
@@ -75,8 +74,14 @@ export function FitCheckTrigger() {
   const [request, setRequest] = useState<{ jd?: string; seq: number } | null>(null);
 
   const show = useCallback((req: FitOpenRequest | null) => {
-    setRequest((r) => ({ jd: req?.jd, seq: (r?.seq ?? 0) + 1 }));
-    setOpen(true);
+    const apply = () => {
+      setRequest((r) => ({ jd: req?.jd, seq: (r?.seq ?? 0) + 1 }));
+      setOpen(true);
+    };
+    // Opened once the sheet's chunk is in: a suspended first render would sit blank
+    // for up to 300ms after the chunk landed (React's Suspense retry throttle).
+    if (FitCheck.loaded()) apply();
+    else FitCheck.preload().then(apply, apply);
   }, []);
 
   // openFit() also fills the pending slot; drain it so a later mount doesn't reopen the sheet.
@@ -90,7 +95,7 @@ export function FitCheckTrigger() {
     return () => window.clearTimeout(t);
   }, [show]);
 
-  const preload = () => void loadFitCheck();
+  const preload = () => void FitCheck.preload().catch(() => {});
 
   return (
     <>
@@ -136,9 +141,9 @@ export function LensSlot({ className }: { className?: string }) {
   // Once mounted it stays mounted, so a closing pitch can play its exit.
   if (!mounted && (state.loaded || param !== null)) setMounted(true);
   useEffect(() => {
-    if (inView) loadRoleLens().catch(() => {});
+    if (inView) RoleLens.preload().catch(() => {});
   }, [inView]);
-  const warm = () => void loadRoleLens().catch(() => {});
+  const warm = () => void RoleLens.preload().catch(() => {});
 
   return (
     <div ref={ref} data-lens-slot="" className={cn('min-w-0', className)}>

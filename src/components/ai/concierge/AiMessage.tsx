@@ -13,12 +13,13 @@ import { LottieIcon } from '@/components/shared/LottieIcon';
 import { Button } from '@/components/ui/Button';
 import { DownloadCvButton } from '@/components/ui/DownloadCvButton';
 import { LANG_NAMES, type Lang } from '@/lib/ai/prompts/base';
-import type { AiSource } from '@/lib/ai/protocol';
+import type { AiFallbackReason, AiSource } from '@/lib/ai/protocol';
 import { safeLangTag } from '@/lib/ai/script';
 import { slugify } from '@/lib/slug';
 import { isRefusal, type AskAnswer } from '@/utils/askme';
 import { AnswerActions, answerMarkdown } from './AnswerActions';
 import { AnswerDetails } from './AnswerDetails';
+import { ASK_DIRECTLY, asksDirectly, DEGRADED_NOTE, englishOnlyNote, QUICK_IN_ENGLISH } from './spoken';
 import type { AiMsg, RuleMsg, RuleNote } from './useConversation';
 
 type Project = (typeof projects)[number];
@@ -51,7 +52,8 @@ export function MiniProject({ slug, onShow }: { slug: string; onShow: (slug: str
   const [imgOk, setImgOk] = useState(true);
   if (!p) return null;
   return (
-    <div data-ask-project={slug} className="flex gap-3 rounded-xl border border-glass-border bg-glass-fill p-2">
+    // min-w-0: a grid item otherwise sizes the track to its nowrap title, so the title never truncates and the card overflows narrow bubbles.
+    <div data-ask-project={slug} className="flex min-w-0 gap-3 rounded-xl border border-glass-border bg-glass-fill p-2">
       {imgOk && p.thumbnail ? (
         // Thumbnails are a mix of local and GitHub-hosted files, shown at 64px; next/image adds nothing here.
         // eslint-disable-next-line @next/next/no-img-element
@@ -122,7 +124,7 @@ export function RuleAnswerBody({
     <>
       <div>{renderInline(text)}</div>
       {answer && answer.projects.length > 0 ? (
-        <div className="mt-2.5 grid gap-2">
+        <div className="mt-2.5 grid grid-cols-1 gap-2">
           {answer.projects.map((slug) => (
             <MiniProject key={slug} slug={slug} onShow={handlers.onShowProject} />
           ))}
@@ -165,12 +167,19 @@ const NOTE_TEXT: Record<Exclude<RuleNote, 'unavailable'>, string> = {
   stopped: 'Stopped before an answer arrived. Here is the quick answer.',
 };
 
+/** The line a fallback bubble shows above the quick answer; AskMeBot speaks it too. */
+export function fallbackNoteText(note: RuleNote | undefined, reason?: AiFallbackReason): string | null {
+  if (!note) return null;
+  const copy = note === 'unavailable' ? FALLBACK_COPY[reason ?? 'upstream'] : null;
+  return copy
+    ? `${copy.text}${reason === 'rate-limited' ? ' Give it a minute.' : ''}`
+    : (NOTE_TEXT[note as Exclude<RuleNote, 'unavailable'>] ?? null);
+}
+
 function FallbackNote({ note, reason }: Pick<RuleMsg, 'note' | 'reason'>) {
   if (!note) return null;
   const copy = note === 'unavailable' ? FALLBACK_COPY[reason ?? 'upstream'] : null;
-  const text = copy
-    ? `${copy.text}${reason === 'rate-limited' ? ' Give it a minute.' : ''}`
-    : NOTE_TEXT[note as Exclude<RuleNote, 'unavailable'>];
+  const text = fallbackNoteText(note, reason);
   const Icon = (copy ?? FALLBACK_COPY[note === 'nothing' ? 'low-relevance' : 'quota']).icon;
   return (
     <p
@@ -194,7 +203,7 @@ function FallbackNote({ note, reason }: Pick<RuleMsg, 'note' | 'reason'>) {
 /** A rule-engine bubble: the greeting, a quick answer, or the quick answer shown after an AI fallback. */
 export function RuleBubble({ msg, handlers }: { msg: RuleMsg; handlers: BubbleHandlers }) {
   const a = msg.answer;
-  const nothing = msg.note === 'nothing' && (!a || a.intent === 'fallback');
+  const nothing = asksDirectly(msg.note, a?.intent);
   return (
     <div className="flex justify-start" data-ask-answer={a?.intent ?? 'greeting'} data-source="rules" data-note={msg.note}>
       <div className={BUBBLE}>
@@ -202,7 +211,7 @@ export function RuleBubble({ msg, handlers }: { msg: RuleMsg; handlers: BubbleHa
         <FallbackNote note={msg.note} reason={msg.reason} />
         {nothing ? (
           <div className="flex flex-wrap items-center gap-2">
-            <p className="basis-full">You can ask Oikantik directly; the question goes into the contact form for you to send.</p>
+            <p className="basis-full">{ASK_DIRECTLY}</p>
             <Button
               variant="primary"
               size="sm"
@@ -221,7 +230,7 @@ export function RuleBubble({ msg, handlers }: { msg: RuleMsg; handlers: BubbleHa
         ) : (
           <RuleAnswerBody answer={a} text={msg.text} handlers={handlers} />
         )}
-        {msg.english ? <p className="mt-2 text-xs text-text-muted">Quick answers are in English.</p> : null}
+        {msg.english ? <p className="mt-2 text-xs text-text-muted">{QUICK_IN_ENGLISH}</p> : null}
       </div>
     </div>
   );
@@ -331,9 +340,7 @@ export function AiBubble({
           </p>
         ) : null}
         {settled && requested && !lang && msg.text ? (
-          <p className="mt-2 text-xs text-text-muted">
-            Shown in English: the {langName(requested)} version couldn&apos;t be checked against it.
-          </p>
+          <p className="mt-2 text-xs text-text-muted">{englishOnlyNote(langName(requested))}</p>
         ) : null}
         {settled && lang && msg.en ? (
           <Button
@@ -368,15 +375,13 @@ export function AiBubble({
 
         {settled && msg.degraded ? (
           <div className="mt-2" data-ask-degraded="">
-            <p className="mb-2 rounded-xl border border-hairline bg-glass-fill px-3 py-2 text-xs text-text-secondary">
-              Some statements couldn&apos;t be checked against the site and were removed.
-            </p>
+            <p className="mb-2 rounded-xl border border-hairline bg-glass-fill px-3 py-2 text-xs text-text-secondary">{DEGRADED_NOTE}</p>
             <RuleAnswerBody answer={msg.rule} text={msg.rule.text} handlers={handlers} />
           </div>
         ) : null}
 
         {projectSlugs.length ? (
-          <div className="mt-2.5 grid gap-2">
+          <div className="mt-2.5 grid grid-cols-1 gap-2">
             {projectSlugs.map((slug) => (
               <MiniProject key={slug} slug={slug} onShow={handlers.onShowProject} />
             ))}

@@ -106,7 +106,7 @@ The site uses Google's Gemini API for a grounded assistant and a handful of smal
 
 **Fallbacks.** Every failure answers HTTP 200 `{mode: 'fallback', reason}`: no key, AI switched off, quota, a timeout, a blocked prompt, a refused request or an off-topic question. The client then shows the rule-based answer from `src/utils/askme.ts`, or lexical search results, with calm copy instead of an error. A request has one 25-second deadline shared by every model attempt. The fallback model is tried only after a 429 or 503 with at least 8 seconds left, a timeout is never retried (an aborted call is still billed), and a model that returned 429 is skipped by every later request on that instance for the delay Google asked for. After two hard failures in a row the browser session stops calling the AI, and a soft cap of 20 answers per session applies.
 
-**Abuse and cost controls.** `src/lib/ai/guard.server.ts` runs the cheapest checks first: POST, JSON only, a strict same-origin check (the site never sends `Access-Control-Allow-Origin`), a streamed byte cap, schema validation, the kill switches, BotID on Vercel, and a per-IP token bucket whose cost grows with input size. The bucket and the daily budget are per instance and reset on deploy, so the real ceilings are the per-model quotas on a dedicated Google key and the Vercel WAF rule. `robots.txt` keeps crawlers out of `/api/`.
+**Abuse and cost controls.** `src/lib/ai/guard.server.ts` runs the cheapest checks first: POST, JSON only, a strict same-origin check (the site never sends `Access-Control-Allow-Origin`), a streamed byte cap, schema validation, the kill switches, BotID on Vercel, and a per-IP token bucket whose cost grows with input size. The bucket and the daily budget are per instance and reset on deploy, so nothing in the code limits traffic across instances. That job falls to two settings made by hand outside the repository, the per-model quotas on a dedicated Google key and a Vercel WAF rate-limit rule on `/api/ai`, and the site cannot tell whether either is in place: see [Before going live](#before-going-live). `robots.txt` keeps crawlers out of `/api/`.
 
 **Precomputed content and review.** Content that is the same for every visitor (summaries, lenses, alt text, starter questions) is generated ahead of time with `npm run ai:generate` into `src/data/ai-generated/*.json`, and each entry is checked for faithfulness to its source and for inflated wording ('expert', 'led', 'senior' and similar, unless the source says it). Entries that make claims about Oikantik stay hidden in production until he approves them with `npm run ai:review`; preview and local builds show them marked 'Draft · not yet reviewed' so they can be read in place. The `/ai` lab adds three scripts that run directly rather than through npm, each as `node --env-file-if-exists=.env scripts/ai/<name>.mjs`: `eval` (it talks to a local `AI_EVAL=1 npx next start` in another terminal, never CI), `refresh-all` and `project-embeddings` (after `ai:embed`, it redraws the explorer map in `public/ai/projection.json`).
 
@@ -133,7 +133,7 @@ npm run test:e2e                     # starts next start on port 3100 by itself
 PW_BASE_URL=https://<preview>.vercel.app npx playwright test --project=1440x900-dark-motion
 ```
 
-CI (`.github/workflows/ci.yml`) runs on pushes to `main`, on pull requests and on demand, all on Node 24 and all without the Gemini key: `npm ci`, the type check, lint, unit tests, the AI corpus freshness check and retrieval recall floor, the build, the AI secret scan, the bundle budget, the Playwright suites in Chromium, and three mobile Lighthouse runs whose medians must stay within LCP 2.5 s, CLS 0.1 and TBT 300 ms.
+CI (`.github/workflows/ci.yml`) runs on pushes to `main`, on pull requests and on demand, all on Node 24 and all without the Gemini key: `npm ci`, the type check, lint, unit tests, the AI corpus freshness check and retrieval recall floor, the build, the AI secret scan, the bundle budget, the Playwright suites in Chromium, and three mobile Lighthouse runs whose medians are checked against LCP 2.5 s, CLS 0.1 and TBT 300 ms (CLS blocks; LCP and TBT are report-only warnings until the home page is within budget, see `LIGHTHOUSE_ENFORCE` in `ci.yml`).
 
 ## Deployment
 
@@ -155,6 +155,13 @@ To check a production build locally:
 npm run build
 npm start            # http://localhost:3000
 ```
+
+### Before going live
+
+The AI routes have two cost ceilings that hold across instances, and neither lives in this repository: each is a setting the owner makes by hand. Until both exist, the only limits are the per-instance token bucket and daily budget, and those multiply with every instance Vercel runs.
+
+1. **A Vercel WAF rate-limit rule.** In the project's Firewall settings, add a rate-limit rule for requests whose path starts with `/api/ai`: 20 requests per 60 seconds per IP, fixed window, answering 429. Hobby allows one rate-limit rule per project. It runs before the function, so a blocked request never starts one, and it counts per region. The browser already treats a non-JSON 429 as the calm rate-limited state. To confirm the rule is live, check that it is listed on the Firewall page, then send a burst the app refuses before any model call (no JSON content type, so it costs nothing): `for i in $(seq 25); do curl -s -o /dev/null -w '%{http_code} ' -X POST https://www.basuoikantik.in/api/ai/ask; done` should print a run of `200` and then `429` once the window's 20 requests are used. The AI routes themselves never answer 429 (every refusal is HTTP 200 with a reason), so a 429 there can only come from the rule.
+2. **Quotas on a dedicated Google key.** Use a production key from its own Google Cloud project, restricted to the Generative Language API, with per-model requests-per-day quota overrides for the two chat models and the embedding model, and Veo and Imagen quota set to 0. Budget alerts only warn; quotas are what stop spend. Set `AI_TIER` to match the project's tier so the privacy notice quotes the right terms.
 
 ## Credits and licences
 

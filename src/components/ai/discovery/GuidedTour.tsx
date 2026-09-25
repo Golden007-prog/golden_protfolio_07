@@ -122,6 +122,7 @@ function TourPicker({ open, onClose, onStart }: { open: boolean; onClose: () => 
   const descId = `${id}-desc`;
   const inputId = `${id}-goal`;
   const firstChip = useRef<HTMLElement>(null);
+  const goalRef = useRef<HTMLInputElement>(null);
   const [goal, setGoal] = useState('');
   const plan = useAiJson<TourResponse>('/api/ai/tour');
   // Cleared on close, so a request the visitor walked away from starts nothing.
@@ -198,6 +199,7 @@ function TourPicker({ open, onClose, onStart }: { open: boolean; onClose: () => 
           </label>
           <div className="mt-2 flex flex-col gap-2 sm:flex-row">
             <input
+              ref={goalRef}
               id={inputId}
               type="text"
               value={goal}
@@ -216,7 +218,7 @@ function TourPicker({ open, onClose, onStart }: { open: boolean; onClose: () => 
             {goal.length}/{AI_LIMITS.tourGoal}
           </p>
           {/* Only once a goal is typed: it asks /api/ai/health for the tier, and a chip tour must make no request. */}
-          {goal.trim() ? <AiNotice feature="tour" className="mt-3" /> : null}
+          {goal.trim() ? <AiNotice feature="tour" className="mt-3" onDismiss={() => goalRef.current?.focus()} /> : null}
           <AIDisclosure compact className="mt-3" />
         </form>
       </div>
@@ -252,6 +254,24 @@ function placeOf(t: TourTarget): { scrollTo: HTMLElement; mark: HTMLElement } | 
   if (!s) return null;
   const entry = s.querySelector<HTMLElement>(`[data-exp-index="${t.index}"]`);
   return entry ? { scrollTo: entry, mark: entry } : { scrollTo: s, mark: headingOf(s) };
+}
+
+const FOCUSABLE = 'a[href], button, input, select, textarea, summary, [tabindex]';
+
+/** Focuses `el` where it is, making it programmatically focusable first when it isn't. */
+function focusHere(el: HTMLElement): boolean {
+  if (!el.matches(FOCUSABLE)) el.tabIndex = -1;
+  el.focus({ preventScroll: true });
+  return document.activeElement === el;
+}
+
+/** Where focus lands when the tour ends on `t`: a project card's open button, else what the stop rings. */
+function focusTargetOf(t: TourTarget): HTMLElement | null {
+  if (t.kind === 'project') {
+    const button = document.getElementById(cardButtonId(t.slug));
+    if (button && button.getClientRects().length > 0) return button;
+  }
+  return placeOf(t)?.mark ?? null;
 }
 
 function TourPill({ tour, onExit }: { tour: Tour; onExit: () => void }) {
@@ -317,16 +337,31 @@ function TourPill({ tour, onExit }: { tour: Tour; onExit: () => void }) {
     };
   }, []);
 
+  /**
+   * Finish, Exit tour and Esc unmount the pill. When it holds focus, focus goes to the
+   * stop the tour ended on, where the visitor now is, so the next Tab carries on from
+   * there instead of from the top of the page. (Not back to the opener: the palette
+   * and the picker have both closed, and it is usually far up the page by now.)
+   */
+  const handBack = useCallback(() => {
+    const active = document.activeElement;
+    if (active && active !== document.body && !ref.current?.contains(active)) return;
+    const here = focusTargetOf(stop.target) ?? document.getElementById('main');
+    if (here) focusHere(here);
+  }, [stop]);
+
   const exit = useCallback(() => {
     announce('Tour ended');
+    handBack();
     onExit();
-  }, [onExit]);
+  }, [handBack, onExit]);
 
   useHotkeys({ escape: exit });
 
   const next = () => {
     if (last) {
       announce('That was the last stop. Tour finished.');
+      handBack();
       onExit();
       return;
     }

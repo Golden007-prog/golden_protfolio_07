@@ -75,8 +75,12 @@ type Props = {
   feature: AiFeature;
   /** Extra lines for this feature, under the data notice. */
   children?: ReactNode;
-  /** After 'Got it'; the notice has unmounted, so move focus somewhere sensible. */
-  onDismiss?: () => void;
+  /**
+   * Runs on 'Got it', just before the notice unmounts. Required: the pressed button
+   * goes with the notice, so this must move focus somewhere sensible (the field the
+   * notice sits over) or it falls to <body>.
+   */
+  onDismiss: () => void;
   className?: string;
 };
 
@@ -112,8 +116,8 @@ export function AiNotice({ feature, children, onDismiss, className }: Props) {
         className="mt-3"
         onClick={() => {
           safeStorage.set(NOTICE_KEY, '1');
+          onDismiss();
           setDismissed(true);
-          onDismiss?.();
         }}
       >
         Got it

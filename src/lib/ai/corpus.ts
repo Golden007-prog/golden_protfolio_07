@@ -437,8 +437,10 @@ function liveChunks(snapshot: CorpusLiveSnapshot | null): Draft[] {
   const out: Draft[] = [];
   const lc = snapshot.leetcode;
   if (lc && typeof lc.totalSolved === 'number') {
+    // LeetCode's userCalendar.streak is the longest run of active days, not a
+    // run still going today; calling it "current" hands the model a false fact.
     const extra = [
-      typeof lc.streak === 'number' ? `current streak ${lc.streak} days` : '',
+      typeof lc.streak === 'number' ? `longest streak ${lc.streak} days (not a current streak)` : '',
       typeof lc.totalActiveDays === 'number' ? `${lc.totalActiveDays} active days` : '',
       typeof lc.ranking === 'number' ? `ranking ${lc.ranking}` : '',
     ].filter(Boolean);

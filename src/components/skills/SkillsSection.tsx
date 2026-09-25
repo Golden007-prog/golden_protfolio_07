@@ -1,7 +1,6 @@
 'use client';
 
 import { AnimatePresence, motion } from 'framer-motion';
-import dynamic from 'next/dynamic';
 import { lazy, useEffect, useMemo, useState } from 'react';
 import { SectionWrapper } from '@/components/layout/SectionWrapper';
 import { Reveal } from '@/components/motion';
@@ -12,6 +11,7 @@ import { SectionHeading } from '@/components/shared/SectionHeading';
 import { Button } from '@/components/ui/Button';
 import { useMotionPrefs } from '@/hooks/useMotionPrefs';
 import { duration, ease } from '@/lib/motion';
+import { preloadable } from '@/lib/preloadable';
 import { ACCENT_MAP, CATEGORIES, findSkill, SKILLS } from '@/lib/skills';
 import { SentimentDemo } from './SentimentDemo';
 import { SkillCard } from './SkillCard';
@@ -19,14 +19,22 @@ import { SkillConstellation } from './SkillConstellation';
 import { SkillFilterBar } from './SkillFilterBar';
 import { SkillFocusProvider, useSkillActions, useSkillFocus, useSkillList, useSkillMode, useSkillModal } from './SkillFocusContext';
 
-const SkillSphere = lazy(() => import('./SkillSphere'));
+// The label font is ready before the sphere mounts, so its labels never suspend it.
+const SkillSphere = lazy(() =>
+  import('./SkillSphere').then(async (m) => {
+    await m.preloadLabels();
+    return m;
+  }),
+);
+// The constellation stays over the sphere until the sphere has drawn a full frame.
+const SPHERE_HANDOFF = { ready: '.skills-sphere[data-drawn]' };
 
 // The skill dialog (and its AI extras) loads when the section comes near or a
-// ?skill link opens it, never with the page.
-const loadSkillModal = () => import('./SkillModal');
-const SkillModal = dynamic(() => loadSkillModal().then((m) => m.SkillModal), { ssr: false });
+// ?skill link opens it, never with the page. Once loaded, the first open renders in
+// the click's own commit instead of suspending.
+const SkillModal = preloadable(() => import('./SkillModal').then((m) => m.SkillModal));
 // A ?skill link opens the dialog on arrival: fetch it while the page hydrates.
-if (typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('skill')) loadSkillModal().catch(() => {});
+if (typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('skill')) SkillModal.preload().catch(() => {});
 const WARM_MARGIN = '800px 0px';
 
 /** Mounts the dialog from the first open on, so it can play its exit and later opens are instant. */
@@ -38,7 +46,7 @@ function SkillModalHost() {
   // Warmed when the browser goes idle after load too, so a first open never waits on the network.
   useEffect(() => {
     if (wanted) return;
-    const load = () => void loadSkillModal().catch(() => {});
+    const load = () => void SkillModal.preload().catch(() => {});
     if (typeof window.requestIdleCallback === 'function') {
       const id = window.requestIdleCallback(load, { timeout: 4000 });
       return () => window.cancelIdleCallback(id);
@@ -54,7 +62,7 @@ function SkillModalHost() {
       ([entry]) => {
         if (!entry?.isIntersecting) return;
         io.disconnect();
-        loadSkillModal().catch(() => {});
+        SkillModal.preload().catch(() => {});
       },
       { rootMargin: WARM_MARGIN },
     );
@@ -107,7 +115,13 @@ function SkillStage() {
   return (
     <div className="lg:sticky lg:top-28">
       <div className="mx-auto aspect-square w-full max-w-[min(420px,88vw)] lg:max-w-none">
-        <Deferred3D id="skills" fallback={<SkillConstellation />} className="relative h-full w-full">
+        <Deferred3D
+          id="skills"
+          focusKey="data-node"
+          handoff={SPHERE_HANDOFF}
+          fallback={<SkillConstellation />}
+          className="relative h-full w-full"
+        >
           <SkillSphere />
         </Deferred3D>
       </div>
@@ -193,37 +207,41 @@ function SkillsHeading() {
   );
 }
 
+/** Full-bleed behind the whole section, not just the content column. */
+const SKILLS_BACKGROUND = (
+  <>
+    <BackgroundVideo
+      variant="dark"
+      src="/videos/skills-bg.mp4"
+      poster="/images/skills-bg.webp"
+      className="dark-only pointer-events-none absolute inset-0 -z-10 h-full w-full object-cover opacity-25"
+    />
+    <div
+      className="light-only pointer-events-none absolute inset-0 -z-10 overflow-clip"
+      style={{
+        maskImage: 'radial-gradient(ellipse 85% 75% at 50% 50%, #000 35%, rgb(0 0 0 / 0.35) 70%, transparent 100%)',
+        WebkitMaskImage: 'radial-gradient(ellipse 85% 75% at 50% 50%, #000 35%, rgb(0 0 0 / 0.35) 70%, transparent 100%)',
+      }}
+    >
+      <BackgroundVideo
+        variant="light"
+        src="/videos/skills-bg-light.mp4"
+        className="h-full w-full object-cover opacity-40"
+        style={{ filter: 'saturate(0.75) brightness(1.02)' }}
+      />
+    </div>
+    <div className="light-only pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-bg-base/50 via-transparent to-bg-base/70" />
+    <div
+      className="dark-only pointer-events-none absolute inset-0 -z-10 opacity-20 mix-blend-screen"
+      style={{ backgroundImage: 'url(/images/skills-neural.webp)', backgroundSize: 'cover', backgroundPosition: 'center' }}
+    />
+    <div className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-bg-base/70 via-transparent to-bg-base/90" />
+  </>
+);
+
 function SkillsBody() {
   return (
-    <SectionWrapper id="skills">
-      <BackgroundVideo
-        variant="dark"
-        src="/videos/skills-bg.mp4"
-        poster="/images/skills-bg.webp"
-        className="dark-only pointer-events-none absolute inset-0 -z-10 h-full w-full object-cover opacity-25"
-      />
-      <div
-        className="light-only pointer-events-none absolute inset-0 -z-10 overflow-clip"
-        style={{
-          maskImage: 'radial-gradient(ellipse 85% 75% at 50% 50%, #000 35%, rgb(0 0 0 / 0.35) 70%, transparent 100%)',
-          WebkitMaskImage: 'radial-gradient(ellipse 85% 75% at 50% 50%, #000 35%, rgb(0 0 0 / 0.35) 70%, transparent 100%)',
-        }}
-      >
-        <BackgroundVideo
-          variant="light"
-          src="/videos/skills-bg-light.mp4"
-          className="h-full w-full object-cover opacity-40"
-          style={{ filter: 'saturate(0.75) brightness(1.02)' }}
-        />
-      </div>
-      <div className="light-only pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-bg-base/50 via-transparent to-bg-base/70" />
-      <div
-        aria-hidden="true"
-        className="dark-only pointer-events-none absolute inset-0 -z-10 opacity-20 mix-blend-screen"
-        style={{ backgroundImage: 'url(/images/skills-neural.webp)', backgroundSize: 'cover', backgroundPosition: 'center' }}
-      />
-      <div className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-bg-base/70 via-transparent to-bg-base/90" />
-
+    <SectionWrapper id="skills" background={SKILLS_BACKGROUND}>
       <SkillsHeading />
 
       <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-5 lg:gap-8">

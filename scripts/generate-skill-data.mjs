@@ -50,10 +50,10 @@ Return ONLY a valid JSON object (no markdown fences) with EXACTLY these fields:
   "integrations": ["integration 1", "integration 2", "integration 3", "integration 4"],
   "useCases": ["real world use case 1", "use case 2", "use case 3"],
   "officialDocs": "https://...",
-  "researchPapers": [{"title": "Paper title", "url": "https://arxiv.org/...", "authors": "Authors"}]
+  "researchPapers": [{"title": "Paper title exactly as published", "url": "https://arxiv.org/abs/<id> or https://doi.org/<doi>"}]
 }
 
-Use Google Search to find CURRENT official documentation URLs and recent research papers from arxiv.org or major conferences. Only include real URLs. No commentary, JSON only.`;
+Use Google Search to find CURRENT official documentation URLs and recent research papers from arxiv.org or major conferences. Cite each paper by its arXiv abstract URL or its DOI URL, with the title exactly as that page shows it, and no authors. Only include real URLs. No commentary, JSON only.`;
 
   const res = await fetch(`${BASE}/models/${GROUND_MODEL}:generateContent`, {
     method: 'POST',
@@ -130,7 +130,9 @@ async function processSkill(name, category) {
     integrations: content.integrations || [],
     useCases: content.useCases || [],
     officialDocs: content.officialDocs || '',
-    researchPapers: content.researchPapers || [],
+    // Titles and links only: the model's author lines were invented. verify-skill-papers.mjs
+    // fills authors from the registry and drops links that open a different paper.
+    researchPapers: (content.researchPapers || []).map(({ title, url }) => ({ title, url })),
     relatedRepos: [],
     heroImage,
     sources: content.sources || [],
@@ -166,4 +168,5 @@ async function processSkill(name, category) {
 
   writeFileSync(outPath, JSON.stringify(results, null, 2));
   log(`=== DONE: ${results.length} skills in src/data/skills-detailed.json ===`);
+  log('next: node scripts/verify-skill-papers.mjs --write && npm run skills:index');
 })();

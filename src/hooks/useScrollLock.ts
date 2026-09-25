@@ -14,10 +14,13 @@ function lock() {
   saved = { overflow: body.style.overflow, paddingRight: body.style.paddingRight };
   // html has scrollbar-gutter: stable, so usually nothing shifts; pad only by
   // whatever width the page actually gained (browsers without gutter support).
-  const before = root.clientWidth;
+  // Measure the layout box, not clientWidth: with overflow hidden Chromium keeps
+  // the gutter reserved but stops subtracting it from clientWidth, which reads
+  // as a phantom 15px gain on classic (non-overlay) scrollbars.
+  const before = root.getBoundingClientRect().width;
   body.style.overflow = 'hidden';
-  const gained = root.clientWidth - before;
-  if (gained > 0) {
+  const gained = root.getBoundingClientRect().width - before;
+  if (gained > 0.5) {
     body.style.paddingRight = `${parseFloat(getComputedStyle(body).paddingRight) + gained}px`;
   }
   // LenisProvider reads this when an instance is created mid-lock.

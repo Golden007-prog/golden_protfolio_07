@@ -1,3 +1,5 @@
+import { INTRO_CAP_MS } from './intro-timing.ts';
+
 declare global {
   interface Window {
     /** Date.now() when the head bootstrap ran; the intro curtain caps its wall-clock time from here. */
@@ -14,12 +16,19 @@ declare global {
  * Keys: localStorage 'theme' (light|dark|system, default dark), localStorage
  * 'ob-motion' (reduced|full), sessionStorage 'ob-paused' and 'ob-seen-loader-v2'.
  * Keep in step with useMotionPrefs, ThemeContext and IntroContext.
+ *
+ * It also holds the intro curtain to INTRO_CAP_MS when hydration is late: if the
+ * page has not hydrated by then (a slow phone on a slow network), it ends the
+ * intro itself (data-intro=seen, the session flag set), so the curtain drops and
+ * the hero shows without waiting for the JS. The cap is re-read from
+ * window.__navStart when the timer fires, the same clock LoadingScreen uses.
  */
 export const BOOTSTRAP_SCRIPT = `(function(){
 var d=document.documentElement,w=window,n=navigator,l=location;
 function ls(k){try{return w.localStorage.getItem(k)}catch(e){return null}}
 function ss(k){try{return w.sessionStorage.getItem(k)}catch(e){return null}}
 function mq(q){try{return w.matchMedia(q).matches}catch(e){return false}}
+function cap(){if(d.getAttribute('data-intro')!=='pending'||d.classList.contains('hydrated'))return;var left=${INTRO_CAP_MS}-(Date.now()-w.__navStart);if(left>0){w.setTimeout(cap,left);return}d.setAttribute('data-intro','seen');try{w.sessionStorage.setItem('ob-seen-loader-v2','1')}catch(e){}}
 w.__navStart=Date.now();
 d.classList.add('js');
 var t=ls('theme');
@@ -36,6 +45,7 @@ var deep=/[?&](project|skill|lens)=/.test(l.search)||l.hash.length>1;
 var home=l.pathname==='/';
 var intro=home&&!deep&&!reduce&&!ss('ob-seen-loader-v2');
 d.setAttribute('data-intro',intro?'pending':'seen');
+if(intro)w.setTimeout(cap,${INTRO_CAP_MS});
 if(!home||deep){try{w.sessionStorage.setItem('ob-seen-loader-v2','1')}catch(e){}}
 var color=theme==='light'?'#F7F5F0':'#060609';
 function paint(){var m=document.querySelectorAll('meta[name="theme-color"]');for(var i=0;i<m.length;i++)m[i].setAttribute('content',color)}

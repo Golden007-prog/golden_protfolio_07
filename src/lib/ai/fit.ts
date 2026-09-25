@@ -21,7 +21,7 @@ import type { AiFallback, AiTarget } from './protocol.ts';
 import { redact } from './redact.ts';
 import { visible, type StoreEntry } from './reviewGate.ts';
 import { validTarget, type KnownTargets } from './sanitize.ts';
-import { numbersIn, tripwire, verifyClaims, type ClaimEntities } from './verify.ts';
+import { numbersIn, resolveId, tripwire, unlistedAffiliation, verifyClaims, type ClaimEntities, type FactSource } from './verify.ts';
 import { projectsForSkill } from '../skillProjects.ts';
 import { slugify } from '../slug.ts';
 import { matchesTech, techFamily } from '../tech.ts';
@@ -529,17 +529,74 @@ export function checkSynonym(requirement: string, synonym: string | undefined, v
 
 export type VerifyFitResult = { rows: FitRow[]; dropped: number; discarded: boolean };
 
+// Words a requirement may put around a site term and still ask for only that term:
+// 'Python programming', 'RAG pipelines', 'LangGraph agents'.
+const TERM_FILLER = new Set(
+  'a an as at be by e.g eg etc for from i.e ie in is it of on or our the to we you agent api apis application framework language library libraries model pipeline platform programming coding scripting service solution stack system tool tooling ecosystem similar equivalent'.split(
+    ' ',
+  ),
+);
+
+/** Lower-case words, each with its singular; bare numbers and versions ('3.10', '10+') are dropped. */
+function coverWords(text: string): string[][] {
+  return text
+    .toLowerCase()
+    .split(/[^a-z0-9+#.]+/)
+    .map((w) => w.replace(/^\.+|\.+$/g, ''))
+    .filter((w) => w && !/^[\d.]+\+?$/.test(w))
+    .map((w) => (w.length > 4 && w.endsWith('s') && !w.endsWith('ss') ? [w, w.slice(0, -1)] : [w]));
+}
+
+/**
+ * True when a requirement asks for nothing beyond the site terms it names:
+ * 'Python', 'Strong Python skills', 'Python and SQL', 'RAG pipelines'. 'Prior
+ * employment at OpenAI doing RLHF' and 'TensorFlow Developer Certificate' name a
+ * site term inside a larger ask, so an exact keyword alone cannot evidence them.
+ */
+export function onlySiteTerms(text: string, vocab: readonly VocabTerm[]): boolean {
+  const { exact } = requirementTerms(text, vocab);
+  if (!exact.length) return false;
+  const covered = new Set(exact.flatMap((t) => [...coverWords(t), ...coverWords(techFamily(t))].flat()));
+  return coverWords(text).every((forms) => forms.some((w) => covered.has(w) || STOPWORDS.has(w) || TERM_FILLER.has(w)));
+}
+
+// A credential ('TensorFlow Developer Certificate', 'AWS Certified ...', 'licensed').
+const CREDENTIAL = /\bcertif\w*|\blicen[cs](?:e|ed)\b|\baccredit\w*/i;
+
+/**
+ * Why a requirement cannot be evidenced or adjacent whatever the evidence says, or
+ * null: it asks for an employer, school or venue the profile doesn't list, or for a
+ * credential while no certification is listed (or none of the cited text mentions one).
+ */
+export function requirementCap(req: Pick<Requirement, 'text' | 'gloss'>, evidenceTexts: readonly string[], entities: ClaimEntities): string | null {
+  const texts = [req.text, req.gloss ?? ''].filter(Boolean);
+  for (const t of texts) {
+    const org = unlistedAffiliation(t, entities);
+    if (org) return `affiliation:${org}`;
+  }
+  if (texts.some((t) => CREDENTIAL.test(t))) {
+    const listed = (entities.certifications ?? []).length > 0;
+    if (!listed || !evidenceTexts.some((t) => CREDENTIAL.test(t))) return 'credential';
+  }
+  return null;
+}
+
 /**
  * Keeps the model's rows whose every evidence id is a known fact with a verbatim
  * quote (verifyClaims), downgrades an 'evidenced' row whose quotes name neither
- * the requirement's term nor a displayed synonym to 'adjacent', and fills any
- * requirement the model skipped or called 'not-listed' from the keyword pass
- * when the site names it exactly. More than 30% dropped discards the answer.
+ * the requirement's term nor a displayed synonym to 'adjacent', and fills a
+ * requirement from the keyword pass: 'evidenced' when the model skipped it, lost it
+ * to verification, or called it 'not-listed' and the requirement is nothing but site
+ * terms; 'adjacent' when the model skipped or lost a requirement that asks for more
+ * than the term it names. A model's 'not-listed' on a larger ask stands. Last, a
+ * requirement for an unlisted employer, school, venue or credential is capped at
+ * 'not-listed', keeping one piece of evidence as the closest thing on the site.
+ * More than 30% dropped discards the answer.
  */
 export function verifyFitRows(opts: {
   rows: readonly ModelFitRow[];
   requirements: readonly Requirement[];
-  facts: ReadonlyMap<string, string> | Readonly<Record<string, string>>;
+  facts: FactSource;
   entities: ClaimEntities;
   vocab: readonly VocabTerm[];
   /** Keyword evidence for a requirement, from the lexical pass. */
@@ -559,7 +616,10 @@ export function verifyFitRows(opts: {
       dropped += 1;
       continue;
     }
-    const evidence = (Array.isArray(raw.evidence) ? raw.evidence : []).filter((e) => e && typeof e.id === 'string' && typeof e.quote === 'string').slice(0, 3);
+    const evidence = (Array.isArray(raw.evidence) ? raw.evidence : [])
+      .filter((e) => e && typeof e.id === 'string' && typeof e.quote === 'string')
+      .slice(0, 3)
+      .map((e) => ({ id: resolveId(e.id, opts.facts), quote: e.quote }));
     if (evidence.length === 0) {
       if (status !== 'not-listed') {
         dropped += 1;
@@ -585,14 +645,24 @@ export function verifyFitRows(opts: {
     byIndex.set(index, row);
   }
 
+  const factText = (id: string): string => {
+    const f = opts.facts instanceof Map ? opts.facts.get(id) : (opts.facts as Readonly<Record<string, string>>)[id];
+    return typeof f === 'string' ? f : '';
+  };
   const rows: FitRow[] = [];
   requirements.forEach((req, i) => {
-    const row = byIndex.get(i);
+    const model = byIndex.get(i);
     const lexical = opts.lexical?.(req) ?? [];
-    if ((!row || row.status === 'not-listed') && lexical.length) {
-      rows.push({ requirement: req.text, kind: req.kind, status: 'evidenced', evidence: lexical.slice(0, 3), source: 'lexical' });
-    } else if (row) rows.push(row);
-    else rows.push({ requirement: req.text, kind: req.kind, status: 'not-listed', evidence: [], source: 'lexical' });
+    let row: FitRow;
+    const whole = lexical.length > 0 && onlySiteTerms(req.text, vocab);
+    if (lexical.length && (!model || (model.status === 'not-listed' && whole))) {
+      row = { requirement: req.text, kind: req.kind, status: whole ? 'evidenced' : 'adjacent', evidence: lexical.slice(0, 3), source: 'lexical' };
+    } else if (model) row = model;
+    else row = { requirement: req.text, kind: req.kind, status: 'not-listed', evidence: [], source: 'lexical' };
+    if (row.status !== 'not-listed' && requirementCap(req, row.evidence.map((e) => factText(e.id)), opts.entities)) {
+      row = { requirement: row.requirement, kind: row.kind, status: 'not-listed', evidence: row.evidence.slice(0, 1), source: row.source };
+    }
+    rows.push(row);
   });
   const maxDrop = opts.maxDrop ?? 0.3;
   return { rows, dropped, discarded: total > 0 && dropped / total > maxDrop };
@@ -886,6 +956,18 @@ export function focusSkillFor(view: FitView): string | null {
 
 const STATUS_LABEL: Record<FitStatus, string> = { evidenced: 'Evidenced', adjacent: 'Adjacent', 'not-listed': 'Not listed on this site' };
 
+/** The status as a copied report states it. The table's keyword hint does not survive a copy, so the label carries it. */
+export function statusLabel(r: Pick<FitRow, 'status' | 'source'>): string {
+  if (r.source === 'lexical' && r.status === 'evidenced') return 'Evidenced (exact keyword match)';
+  if (r.source === 'lexical' && r.status === 'adjacent') return 'Adjacent (keyword match, not the whole requirement)';
+  return STATUS_LABEL[r.status];
+}
+
+/** A not-listed row's evidence is the closest thing on the site, never a match. */
+function evidenceLead(r: Pick<FitRow, 'status'>): string {
+  return r.status === 'not-listed' ? 'closest on the site: ' : '';
+}
+
 function factAnswer(f: FactRow): string {
   return f.answer === null ? NOT_STATED : [f.answer, ...f.lines].join(' ');
 }
@@ -904,7 +986,7 @@ export function reportText(view: FitView, site: SiteLinks): string {
     lines.push('', 'Requirements');
     for (const r of view.rows) {
       const ev = r.evidence.map((e) => `"${e.quote}" (${e.label ?? e.id})`).join('; ');
-      lines.push(`- [${r.kind === 'must' ? 'Must' : 'Nice'}] ${r.requirement}: ${STATUS_LABEL[r.status]}${r.synonym ? ` (mapped by AI to ${r.synonym})` : ''}${ev ? ` — ${ev}` : ''}`);
+      lines.push(`- [${r.kind === 'must' ? 'Must' : 'Nice'}] ${r.requirement}: ${statusLabel(r)}${r.synonym ? ` (mapped by AI to ${r.synonym})` : ''}${ev ? ` — ${evidenceLead(r)}${ev}` : ''}`);
     }
   }
   if (view.facts.length) {
@@ -934,8 +1016,9 @@ export function reportMarkdown(view: FitView, site: SiteLinks): string {
   if (view.rows.length) {
     out.push('', '| Requirement | Must/Nice | Status | Evidence on the site |', '| --- | --- | --- | --- |');
     for (const r of view.rows) {
-      const ev = r.evidence.map((e) => `“${cell(e.quote)}” (${cell(e.label ?? e.id)})`).join('; ') || '—';
-      out.push(`| ${cell(r.requirement)} | ${r.kind === 'must' ? 'Must' : 'Nice'} | ${STATUS_LABEL[r.status]}${r.synonym ? ` (mapped by AI: ${cell(r.synonym)})` : ''} | ${ev} |`);
+      const listed = r.evidence.map((e) => `“${cell(e.quote)}” (${cell(e.label ?? e.id)})`).join('; ');
+      const ev = listed ? `${evidenceLead(r)}${listed}` : '—';
+      out.push(`| ${cell(r.requirement)} | ${r.kind === 'must' ? 'Must' : 'Nice'} | ${statusLabel(r)}${r.synonym ? ` (mapped by AI: ${cell(r.synonym)})` : ''} | ${ev} |`);
     }
   }
   if (view.facts.length) {
@@ -973,11 +1056,12 @@ export function verifyQuestions(qs: readonly Question[], sent: ReadonlyMap<strin
   const seen = new Set<string>();
   for (const q of qs ?? []) {
     const text = typeof q?.question === 'string' ? clip(stripMarkup(q.question), 300) : '';
-    const fact = typeof q?.id === 'string' ? sent.get(q.id) : undefined;
+    const id = typeof q?.id === 'string' ? resolveId(q.id, sent) : '';
+    const fact = id ? sent.get(id) : undefined;
     if (text.length < 10 || !fact || hasSoftener(text) || spellsNumber(text) || seen.has(text.toLowerCase())) continue;
     if (tripwire(text, [fact], entities) !== null) continue;
     seen.add(text.toLowerCase());
-    out.push({ question: text, id: q.id });
+    out.push({ question: text, id });
     if (out.length >= QUESTIONS_MAX) break;
   }
   return out;
@@ -1109,10 +1193,13 @@ export type BriefResponse = { claims: BriefClaim[]; projects: string[]; dropped:
  * (verbatim quotes, numbers, employers, degree status). Discarded when more than
  * 30% fail or nothing is left, and the client then shows the nearest preset lens.
  */
-export function verifyBrief(out: BriefModelOut, facts: ReadonlyMap<string, string> | Readonly<Record<string, string>>, entities: ClaimEntities, slugs: readonly string[]): { claims: BriefClaim[]; projects: string[]; dropped: number; discarded: boolean } {
+export function verifyBrief(out: BriefModelOut, facts: FactSource, entities: ClaimEntities, slugs: readonly string[]): { claims: BriefClaim[]; projects: string[]; dropped: number; discarded: boolean } {
   const claims = (Array.isArray(out?.claims) ? out.claims : [])
     .filter((c) => c && typeof c.text === 'string')
-    .map((c) => ({ text: stripMarkup(c.text), evidence: Array.isArray(c.evidence) ? c.evidence.slice(0, 3) : [] }));
+    .map((c) => ({
+      text: stripMarkup(c.text),
+      evidence: (Array.isArray(c.evidence) ? c.evidence.slice(0, 3) : []).map((e) => (e && typeof e.id === 'string' ? { ...e, id: resolveId(e.id, facts) } : e)),
+    }));
   const unsoftened = claims.filter((c) => !hasSoftener(c.text) && !spellsNumber(c.text));
   const check = verifyClaims(unsoftened, facts, entities);
   const dropped = claims.length - check.kept.length;

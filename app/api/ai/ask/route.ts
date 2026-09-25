@@ -12,8 +12,9 @@ import { aiGenerate, aiStream, deadline, isFallback, textOf, usageOf, type AiStr
 import { guard } from '@/lib/ai/guard.server';
 import { cacheable, cacheKey, Lru } from '@/lib/ai/lru';
 import { askUserTurn, buildAskSystem } from '@/lib/ai/prompts/ask';
+import { vetToolCall } from '@/lib/ai/prefillCheck';
 import { newCanary, type Lang } from '@/lib/ai/prompts/base';
-import type { AiFallbackReason, AiFrame, AiUsage, AskScope, RetrievalHit } from '@/lib/ai/protocol';
+import type { AiFallbackReason, AiFrame, AiToolCall, AiUsage, AskScope, RetrievalHit } from '@/lib/ai/protocol';
 import { fallback, logAi, ndjson } from '@/lib/ai/respond.server';
 import { rrf, tokenize } from '@/lib/ai/retrieval';
 import { cleanText, scrubContacts } from '@/lib/ai/sanitize';
@@ -37,8 +38,11 @@ export const maxDuration = 30;
  *   5. the system prompt (base honesty rules + prompts/ask.ts);
  *   6. aiStream on the chat tier, with the navigator's declarations only when
  *      the client asked for tools and the question reads as navigation;
- *   7. every sentence through the sentence filter before it leaves.
- * Frames: meta, verified deltas (and at most one validated tool call), done.
+ *   7. every sentence through the sentence filter before it leaves, and a tool
+ *      call through vetToolCall (a prefillContact draft gets the draft route's
+ *      checks); the call is framed only after the text has passed, so a canary
+ *      hit cancels it too.
+ * Frames: meta, verified deltas, at most one vetted tool call, done.
  * Questions in a non-Latin script get a buffered {en, local} answer instead: en
  * is filtered, local is shown only when it keeps en's numbers and names.
  */
@@ -49,6 +53,8 @@ const TOOL_DATA = toolDataFrom({
   skills: profile.skills,
 });
 const TOOL_DECLS = toolDeclarations(TOOL_DATA) as FunctionDeclaration[];
+// The site text whose numbers a prefilled draft may repeat, as /api/ai/draft allows.
+const PREFILL_FACTS = [profile.availability.openTo];
 
 const FOLLOWUP_NAMES: FollowupNames = {
   projects: PROJECTS.map((p) => p.name),
@@ -137,6 +143,7 @@ function filterFor(corpus: Corpus, packed: PackedContext, canary: string) {
 
 type Ctx = {
   started: number;
+  question: string;
   corpus: Corpus;
   packed: PackedContext;
   canary: string;
@@ -244,6 +251,7 @@ export async function POST(req: Request) {
     };
     const ctx: Ctx = {
       started,
+      question,
       corpus,
       packed,
       canary,
@@ -310,6 +318,7 @@ async function* streamed(ctx: Ctx, res: AiStreamResult): AsyncGenerator<AiFrame>
   let usage: AiUsage | undefined;
   let finishReason = 'STOP';
   let blocked = false;
+  let toolCall: AiToolCall | null = null;
   let toolSent = false;
   let withheld = 0;
   let dropped = 0;
@@ -352,21 +361,21 @@ async function* streamed(ctx: Ctx, res: AiStreamResult): AsyncGenerator<AiFrame>
         }
       }
 
-      if (tools && !toolSent) {
+      if (tools && !toolCall) {
         for (const part of chunk.candidates?.[0]?.content?.parts ?? []) {
           if (!part.functionCall) continue;
-          const call = validateToolCall(
+          const valid = validateToolCall(
             {
               name: part.functionCall.name,
               args: part.functionCall.args ?? {},
             },
             TOOL_DATA,
           );
+          const call = valid
+            ? vetToolCall(valid, { question: ctx.question, canary, entities: corpus.entities, facts: PREFILL_FACTS })
+            : null;
           if (!call) continue;
-          toolSent = true;
-          const f: AiFrame = { type: 'tool', call };
-          frames.push(f);
-          yield f;
+          toolCall = call;
           break;
         }
       }
@@ -393,6 +402,13 @@ async function* streamed(ctx: Ctx, res: AiStreamResult): AsyncGenerator<AiFrame>
         frames.push(f);
         yield f;
       }
+    }
+    // Held until the text has passed: a canary hit anywhere in the answer cancels the call.
+    if (toolCall && !blocked) {
+      toolSent = true;
+      const f: AiFrame = { type: 'tool', call: toolCall };
+      frames.push(f);
+      yield f;
     }
     dropped = end.dropped + withheld;
     const total = end.kept + end.dropped;

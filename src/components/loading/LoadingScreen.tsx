@@ -6,11 +6,13 @@ import { useIntro } from '@/contexts/IntroContext';
 import { useHydrated } from '@/hooks/useHydrated';
 import { getMotionPrefs } from '@/hooks/useMotionPrefs';
 import { useScrollLock } from '@/hooks/useScrollLock';
+import { INTRO_CAP_MS } from '@/lib/intro-timing';
 
 /** The curtain stays at least this long after navigation start... */
 const MIN_MS = 600;
-/** ...and never longer, whatever the fonts and the hero are doing. */
-const CAP_MS = 1400;
+/** ...and never longer, whatever the fonts and the hero are doing. Before hydration
+ *  the head bootstrap holds the same cap on its own. */
+const CAP_MS = INTRO_CAP_MS;
 const EXIT_MS = 750;
 
 const FIRST = 'Oikantik’s';
@@ -48,6 +50,8 @@ type Props = {
  * (no flash) and never appears without JS. After hydration it waits for the web
  * fonts and the hero, bounded to 600-1400ms from navigation start, then splits
  * open and calls markDone(). Skip, any key, a click or a wheel ends it early.
+ * When hydration comes later than the cap, BOOTSTRAP_SCRIPT has already ended
+ * the intro (html[data-intro]=seen), so the curtain is gone before this mounts.
  */
 export default function LoadingScreen({ pageRef }: Props) {
   const hydrated = useHydrated();

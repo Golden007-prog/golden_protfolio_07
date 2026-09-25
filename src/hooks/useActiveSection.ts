@@ -9,12 +9,19 @@ import { findTarget, readUrl, setUrlHash } from '@/lib/urlState';
 const IDS: readonly SectionId[] = SECTIONS.map((s) => s.id);
 const ID_SET = new Set<string>(IDS);
 
-/** A section is active once its top passes this fraction of the viewport height. */
-const PROBE = 0.45;
+/** A section is active once its top passes this line, in percent of the viewport height. */
+const PROBE_PCT = 45;
+/** Height of the observed band, which ends on the probe line. */
+const BAND_PCT = 1;
 const NAV_OFFSET = 88;
 
 let active: SectionId | null = null;
 let hashSync = false;
+// The probe line in viewport px as the observer measured it (its rootBounds
+// bottom). Chromium rounds the margins to whole pixels, so innerHeight * 45% can
+// sit up to a pixel off the band's edge, enough to miss a 1px-per-frame crossing.
+// Null until the first callback, and again after a resize.
+let probeLine: number | null = null;
 const listeners = new Set<() => void>();
 let io: IntersectionObserver | null = null;
 let retryTimer: ReturnType<typeof setTimeout> | null = null;
@@ -31,8 +38,7 @@ function writeHash(next: SectionId | null) {
   if ((next ?? '') !== hash) setUrlHash(next);
 }
 
-function compute() {
-  const line = window.innerHeight * PROBE;
+function compute(line = probeLine ?? (window.innerHeight * PROBE_PCT) / 100) {
   let next: SectionId | null = null;
   // Sections sit in document order, so the last one whose top has passed the
   // line wins; strips between sections (ToolsStrip) keep the one above active.
@@ -46,38 +52,61 @@ function compute() {
   writeHash(next);
 }
 
-function observeAll(attempt = 0) {
-  if (!io) return;
+function onIntersect(entries: IntersectionObserverEntry[]) {
+  const bottom = entries[0]?.rootBounds?.bottom;
+  if (bottom !== undefined) probeLine = bottom;
+  compute();
+}
+
+/** Observes every section in the DOM and returns how many were found. */
+function observeSections(): number {
   let found = 0;
   for (const id of IDS) {
     const el = document.getElementById(id);
     if (el) {
-      io.observe(el);
+      io?.observe(el);
       found += 1;
     }
   }
-  if (found < IDS.length && attempt < 10) {
+  return found;
+}
+
+function observeAll(attempt = 0) {
+  if (!io) return;
+  if (observeSections() < IDS.length && attempt < 10) {
     retryTimer = setTimeout(() => observeAll(attempt + 1), 500);
   }
 }
 
+// Re-observing makes the observer report every section afresh against the new
+// viewport, rootBounds included, instead of guessing the line from innerHeight.
+function onResize() {
+  if (!io) return;
+  probeLine = null;
+  io.disconnect();
+  observeSections();
+}
+
 function start() {
   if (typeof IntersectionObserver === 'undefined') return;
-  // A thin band on the probe line: the callback fires whenever a section edge
-  // crosses it, which is exactly when the answer can change.
-  io = new IntersectionObserver(compute, {
-    rootMargin: `-${PROBE * 100}% 0px -${100 - PROBE * 100 - 1}% 0px`,
+  // A thin band that ends on the probe line. A section's top entering the band
+  // from below is the only callback that section gets until its bottom leaves
+  // the band, so the band's lower edge must be the line itself; a band below the
+  // line would see the top arrive, find it short of the line, and then go quiet.
+  io = new IntersectionObserver(onIntersect, {
+    rootMargin: `-${PROBE_PCT - BAND_PCT}% 0px -${100 - PROBE_PCT}% 0px`,
   });
   observeAll();
-  window.addEventListener('resize', compute, { passive: true });
+  window.addEventListener('resize', onResize, { passive: true });
 }
 
 function stop() {
   io?.disconnect();
   io = null;
+  probeLine = null;
   if (retryTimer !== null) clearTimeout(retryTimer);
   retryTimer = null;
-  window.removeEventListener('resize', compute);
+  window.removeEventListener('resize', onResize);
 }
 
 function subscribe(fn: () => void) {

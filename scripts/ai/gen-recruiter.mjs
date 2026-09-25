@@ -17,7 +17,7 @@ import { hashText } from '../../src/lib/ai/corpus.ts';
 import { hasSoftener, LENS_AUDIENCES, LENSES, lensKey, lensProjects, lensSources, spellsNumber, stripMarkup, wordCount } from '../../src/lib/ai/fit.ts';
 import { newCanary } from '../../src/lib/ai/prompts/base.ts';
 import { lensSystem } from '../../src/lib/ai/prompts/brief.ts';
-import { tripwire } from '../../src/lib/ai/verify.ts';
+import { canonicalId, tripwire } from '../../src/lib/ai/verify.ts';
 import { apiKey, bannedPhrase, callGemini, exitSoft, faithful, loadCorpus, loadStore, MODELS, newEntry, saveStore, stale } from './lib.mjs';
 
 const PROMPT_VERSION = 'lens-v2';
@@ -35,8 +35,8 @@ const sentence = z.object({ text: z.string(), cites: z.array(z.string()).min(1).
 const version = z.array(sentence).min(3).max(8);
 const schema = z.object({ plain: version, manager: version, engineer: version });
 
-// The model sometimes echoes the prompt's '[c:id]' marker form inside cites.
-const citeId = (c) => String(c).trim().replace(/^\[?c:/, '').replace(/\]$/, '');
+// The model sometimes echoes the prompt's '[c:id]' marker form inside cites; the runtime verifiers strip it the same way.
+const citeId = (c) => canonicalId(c);
 
 /** The first reason a draft fails, or null. `allowed` are the lens's chunk ids. */
 function problemWith(draft, allowed) {

@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import { SITE_COPY } from '../../data/site-copy.ts';
 import { buildCorpus, entities, type CorpusSources } from './corpus.ts';
-import { bannedPhrase, faithful, normalizeDigits, numbersIn, quoteOk, tripwire, verifyClaims } from './verify.ts';
+import { bannedPhrase, canonicalId, faithful, normalizeDigits, numbersIn, quoteOk, resolveId, tripwire, unlistedAffiliation, verifyClaims } from './verify.ts';
 
 const read = (name: string) => JSON.parse(readFileSync(new URL(`../../data/${name}`, import.meta.url), 'utf8'));
 const src: CorpusSources = {
@@ -87,6 +87,8 @@ test("the in-progress Master's is never phrased as held", () => {
   const ev = [fact('edu:0')];
   assert.equal(tripwire("He holds a Master's in Data Science.", ev, ents), 'degree-held');
   assert.equal(tripwire("He has completed his Master's.", ev, ents), 'degree-held');
+  assert.equal(tripwire("His Master's in Data Science is complete.", ev, ents), 'degree-held');
+  assert.equal(tripwire("His Master's degree was conferred last year.", ev, ents), 'degree-held');
   assert.equal(tripwire("He is pursuing a Master's in Data Science.", ev, ents), null);
   assert.equal(tripwire("His Master's runs Sept 2025 - Feb 2027.", ev, ents), null);
 });
@@ -147,4 +149,116 @@ test("bannedPhrase rejects 'architected' unless the source says it", () => {
   assert.equal(bannedPhrase('He led the team.', fact('exp:0')), 'led');
   assert.equal(bannedPhrase('He labeled the data.', fact('exp:0')), null, "'labeled' is not 'led'");
   assert.equal(bannedPhrase('A world-class engineer.', ''), 'world-class');
+});
+
+test("a denied employer passes: 'has not worked at OpenAI' names an org without claiming it", () => {
+  const about = [fact('profile:about')];
+  const exp1 = [fact('exp:1')];
+  const kept = [
+    ['No, he does not work as an engineer at Google DeepMind.', about],
+    ['He has not been employed by OpenAI or Anthropic.', exp1],
+    ['He has not worked at OpenAI or Google DeepMind.', about],
+    ["He doesn't work at Google DeepMind.", about],
+    ['He is not a Google DeepMind engineer.', about],
+    ['The site does not list any role at OpenAI or Anthropic.', about],
+    ['No role at OpenAI is listed.', about],
+    ['He has not worked at OpenAI, but at Mindrift he evaluated GPT and Claude outputs.', exp1],
+    ['He did not study at MIT.', about],
+  ] as const;
+  for (const [s, ev] of kept) assert.equal(tripwire(s, ev, ents), null, s);
+});
+
+test('an employer claim still trips when a negation does not govern it', () => {
+  const about = [fact('profile:about')];
+  const dropped = [
+    ['He works at Google DeepMind.', 'Google DeepMind'],
+    ['He worked at Google DeepMind, not OpenAI.', 'Google DeepMind'],
+    ['He not only interned at OpenAI but also worked at Anthropic.', 'OpenAI'],
+    ["He didn't just evaluate for OpenAI; he worked there.", 'OpenAI'],
+    ["It's not surprising he worked at OpenAI.", 'OpenAI'],
+    ['It is not true that he has not worked at OpenAI.', 'OpenAI'],
+    ["He hasn't worked at OpenAI since then.", 'OpenAI'],
+    ["He doesn't work at OpenAI anymore.", 'OpenAI'],
+    ['He was not employed by Google but by OpenAI.', 'OpenAI'],
+    ['He is not only an engineer at OpenAI.', 'OpenAI'],
+    ['He never stopped working at OpenAI.', 'OpenAI'],
+  ] as const;
+  for (const [s, org] of dropped) assert.equal(tripwire(s, about, ents), `employer:${org}`, s);
+});
+
+test("canonicalId strips the prompt's [c:…] marker form, and verifyClaims looks ids up through it", () => {
+  assert.equal(canonicalId('exp:0'), 'exp:0');
+  assert.equal(canonicalId('c:exp:0'), 'exp:0');
+  assert.equal(canonicalId(' [c:project:urbancare-ai#stack] '), 'project:urbancare-ai#stack');
+  assert.equal(canonicalId('copy:contact'), 'copy:contact', "a kind that merely starts with 'c' is untouched");
+  const claim = (id: string) => ({ text: 'He builds with LangGraph.', evidence: [{ id, quote: 'LangGraph' }] });
+  const out = verifyClaims([claim('c:exp:0'), claim('[c:exp:0]'), claim('c:exp:9')], facts, ents, 1);
+  assert.equal(out.kept.length, 2, 'the prefixed real id passes; an unknown id still fails');
+  assert.equal(out.dropped, 1);
+});
+
+test("resolveId reads a kind-less id ('content-storyteller#stack') only when one known id fits it", () => {
+  assert.equal(resolveId('content-storyteller#stack', facts), 'project:content-storyteller#stack');
+  assert.equal(resolveId('c:content-storyteller#stack', facts), 'project:content-storyteller#stack');
+  assert.equal(resolveId('project:content-storyteller#stack', facts), 'project:content-storyteller#stack');
+  assert.equal(resolveId('exp:0', facts), 'exp:0');
+  // exp:0, edu:0, tool:0 and reading:0 all fit '0', and a bare number is never guessed at.
+  assert.equal(resolveId('0', facts), '0');
+  assert.equal(resolveId('0#h1', facts), '0#h1');
+  assert.equal(resolveId('rust-project#stack', facts), 'rust-project#stack', 'an invented slug stays unknown');
+  assert.equal(resolveId('stack', facts), 'stack');
+  assert.equal(resolveId('storyteller#stack', facts), 'storyteller#stack', 'only a whole kind is ever added back');
+  assert.equal(resolveId('content-storyteller#stack', { 'project:content-storyteller#stack': 'x' }), 'project:content-storyteller#stack', 'plain records work too');
+  // verifyClaims looks through it, and the quote must still be in the chunk it resolves to.
+  const claim = (id: string, quote: string) => ({ text: 'He used Terraform.', evidence: [{ id, quote }] });
+  const out = verifyClaims([claim('content-storyteller#stack', 'Terraform'), claim('content-storyteller#stack', 'Kafka'), claim('rust-project#stack', 'Rust')], facts, ents, 1);
+  assert.equal(out.kept.length, 1);
+  assert.equal(out.dropped, 2);
+});
+
+test('the employer tripwire reads Title Case job titles and sentence-initial verbs', () => {
+  const urbancare = [fact('project:urbancare-ai#summary')];
+  const exp1 = [fact('exp:1')];
+  const tripped = [
+    ['He was a Research Scientist at Google DeepMind.', urbancare, 'Google DeepMind'],
+    ['He was a Software Engineer at OpenAI.', exp1, 'OpenAI'],
+    ['He is a Senior Researcher at Anthropic.', exp1, 'Anthropic'],
+    ['Worked at OpenAI as a contractor.', exp1, 'OpenAI'],
+    ['Joined Anthropic after Mindrift.', exp1, 'Anthropic'],
+    ['Employed by OpenAI.', exp1, 'OpenAI'],
+    ['He Worked At Anthropic.', exp1, 'Anthropic'],
+    ['A Google DeepMind engineer built it.', urbancare, 'Google DeepMind'],
+  ] as const;
+  for (const [s, ev, org] of tripped) assert.equal(tripwire(s, ev, ents), `employer:${org}`, s);
+  assert.equal(tripwire('Studied at MIT.', [fact('profile:about')], ents), 'employer:MIT');
+  // Listed roles in Title Case, cited to their own chunk, still pass.
+  const kept = [
+    ['He is a Freelance AI Agent Specialist at Mindrift.', exp1],
+    ['He was a Data Science Intern at Unified Mentor.', [fact('exp:2')]],
+    ['Worked at Mindrift as a Freelance AI Agent Specialist.', exp1],
+    ['He has not worked at OpenAI.', exp1],
+  ] as const;
+  for (const [s, ev] of kept) assert.equal(tripwire(s, ev, ents), null, s);
+});
+
+test('unlistedAffiliation finds an employer, school or venue a job requirement asks for', () => {
+  const asked = [
+    ['Prior employment at OpenAI or Anthropic doing RLHF', 'OpenAI'],
+    ['Previously worked at OpenAI or Anthropic on RLHF', 'OpenAI'],
+    ['Research Scientist experience at Google DeepMind with Gemma models', 'Google DeepMind'],
+    ['Ex-Google engineer', 'Google'],
+    ['Former OpenAI researcher', 'OpenAI'],
+    ['Published papers at NeurIPS on LangGraph agents', 'NeurIPS'],
+  ] as const;
+  for (const [r, org] of asked) assert.equal(unlistedAffiliation(r, ents), org, r);
+  const tools = [
+    'Experience with Kubernetes',
+    'Experience in Python',
+    'Engineer for AWS Lambda deployments',
+    'Experience at a startup',
+    'Freelance AI Agent Specialist at Mindrift',
+    'Data Science Intern at Unified Mentor',
+    'Evaluate LLM outputs for RLHF',
+  ];
+  for (const r of tools) assert.equal(unlistedAffiliation(r, ents), null, r);
 });

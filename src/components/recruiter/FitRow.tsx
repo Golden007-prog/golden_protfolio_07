@@ -59,7 +59,11 @@ function MatchRow({ row, onEvidence }: { row: FitRowData; onEvidence: (e: FitEvi
             as <span className="text-text-secondary">{row.synonym}</span> · mapped by AI
           </span>
         ) : null}
-        {row.source === 'lexical' && row.status === 'evidenced' ? <span className="mt-1 block text-xs text-text-muted">exact keyword match</span> : null}
+        {row.source === 'lexical' && row.status !== 'not-listed' && row.evidence.length ? (
+          <span data-fit-keyword="" className="mt-1 block text-xs text-text-muted">
+            {row.status === 'evidenced' ? 'exact keyword match' : 'keyword match, not the whole requirement'}
+          </span>
+        ) : null}
       </td>
       <td role="cell" data-label="Evidence" className="fit-cell">
         {closest ? (

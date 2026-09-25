@@ -152,31 +152,108 @@ function orgMatches(candidate: string, known: readonly string[]): string | null 
   return null;
 }
 
+/*
+ * A regex source whose ASCII letters match in either case; escapes (\b, \s, \w) and
+ * character classes are copied as they are. The keywords below must match 'Research
+ * Scientist at' and a sentence-initial 'Worked at' while ORG stays case-sensitive,
+ * and the inline (?i:...) modifier is too new for some browsers that load this
+ * module through fit.ts.
+ */
+function anyCase(src: string): string {
+  let out = '';
+  let inClass = false;
+  for (let i = 0; i < src.length; i += 1) {
+    const ch = src[i];
+    if (ch === '\\') {
+      out += ch + (src[i + 1] ?? '');
+      i += 1;
+    } else if (inClass) {
+      out += ch;
+      if (ch === ']') inClass = false;
+    } else if (ch === '[') {
+      out += ch;
+      inClass = true;
+    } else {
+      out += /[a-z]/i.test(ch) ? `[${ch.toLowerCase()}${ch.toUpperCase()}]` : ch;
+    }
+  }
+  return out;
+}
+
 // Capitalised word runs, allowing the lower-case lead of names like 'iHUB'.
 const ORG = String.raw`((?:the\s+)?(?:[A-Z]|[a-z][A-Z])[\w&.'’@-]*(?:\s+(?:@|&|of|[A-Z][\w&.'’@-]*))*)`;
 const EMPLOYER_PATTERNS: readonly RegExp[] = [
   new RegExp(
-    String.raw`\b(?:work(?:s|ed|ing)?|employed|intern(?:s|ed|ing|ship)?|job|role|position|specialist|engineer|scientist|researcher|developer|analyst|consultant|contractor|freelancer|staff|employee|tenure|stint|evaluat\w*|annotat\w*)\s+(?:at|for)\s+${ORG}`,
+    anyCase(
+      String.raw`\b(?:work(?:s|ed|ing)?|employed|intern(?:s|ed|ing|ship)?|job|role|position|specialist|engineer|scientist|researcher|developer|analyst|consultant|contractor|freelancer|staff|employee|tenure|stint|evaluat\w*|annotat\w*)\s+(?:at|for)\s+`,
+    ) + ORG,
     'g',
   ),
-  new RegExp(String.raw`\b(?:employed|hired|contracted|recruited)\s+by\s+${ORG}`, 'g'),
-  new RegExp(String.raw`\b(?:employed|interned|contracted)\s+with\s+${ORG}`, 'g'),
-  new RegExp(String.raw`\bjoin(?:s|ed)\s+${ORG}`, 'g'),
-  new RegExp(String.raw`\b(?:an?|former|ex-)\s+${ORG}\s+(?:employee|engineer|intern|staffer|researcher|scientist)\b`, 'g'),
+  new RegExp(anyCase(String.raw`\b(?:employed|hired|contracted|recruited)\s+by\s+`) + ORG, 'g'),
+  new RegExp(anyCase(String.raw`\b(?:employed|interned|contracted)\s+with\s+`) + ORG, 'g'),
+  new RegExp(anyCase(String.raw`\bjoin(?:s|ed)\s+`) + ORG, 'g'),
+  // The role noun stays lower-case: in 'a Data Science Intern' the capitalised run is a job title, not an employer.
+  new RegExp(anyCase(String.raw`\b(?:an?|former|ex-)\s+`) + ORG + String.raw`\s+(?:employee|engineer|intern|staffer|researcher|scientist)\b`, 'g'),
 ];
 const SCHOOL_PATTERNS: readonly RegExp[] = [
-  new RegExp(String.raw`\b(?:stud(?:y|ies|ied|ying)|graduated|graduate|degree|alumn(?:us|a|i)|enrolled|B\.?Tech|Master['’]?s)\s+(?:at|from)\s+${ORG}`, 'g'),
+  new RegExp(anyCase(String.raw`\b(?:stud(?:y|ies|ied|ying)|graduated|graduate|degree|alumn(?:us|a|i)|enrolled|B\.?Tech|Master['’]?s)\s+(?:at|from)\s+`) + ORG, 'g'),
 ];
+
+/*
+ * A denial ('he has not worked at OpenAI', 'he is not a Google DeepMind engineer',
+ * 'the site does not list any role at Anthropic') names an organisation without
+ * claiming it, so a match whose own verb phrase is negated is not a candidate.
+ * The negation must sit right before the match, with only these words between;
+ * 'not only', 'not just' and 'It's not surprising he worked at' therefore still
+ * count as claims.
+ */
+const NEGATED_FILLER = [
+  'ever', 'been', 'be', 'currently', 'actually', 'formally', 'officially', 'previously', 'once', 'yet', 'really', 'directly',
+  'work', 'works', 'worked', 'working', 'serve', 'serves', 'served', 'as', 'a', 'an', 'any', 'the',
+  'list', 'lists', 'listed', 'mention', 'mentions', 'mentioned', 'show', 'shows', 'include', 'includes', 'state', 'states',
+  'name', 'names', 'have', 'has', 'had', 'hold', 'holds', 'held',
+].join('|');
+const NEGATED_LEAD = new RegExp(String.raw`(?:\b(?:not|never|no)|n['’]t)(?:\s+(?:${NEGATED_FILLER}))*\s*$`, 'i');
+const NEGATION_WORD = /\b(?:no|not|never|none|nor|neither|nobody|nothing)\b|n['’]t\b/gi;
+// 'hasn't worked at X since 2023' and 'doesn't work at X anymore' say he did.
+const PRESUPPOSES_TENURE = /^[^.;!?]*?\b(?:since|until|till|anymore|any\s+longer)\b/i;
+// 'not at X but at Y': the contrast names an organisation in bare prepositional form.
+const CONTRAST = /\b(?:but|instead|rather)\b/i;
+const CONTRAST_ORG = new RegExp(String.raw`\b(?:at|for|by)\s+${ORG}`, 'g');
+
+function negatedAt(claim: string, start: number, end: number): boolean {
+  const before = claim.slice(0, start);
+  if (!NEGATED_LEAD.test(before)) return false;
+  if (PRESUPPOSES_TENURE.test(claim.slice(end))) return false;
+  // Two negations in the clause ('it is not true that he has not worked at') cancel
+  // out, except a leading 'No' that answers the question ('No he has not worked at').
+  const clause = before.slice(Math.max(...[',', ';', ':', '—', '–', '('].map((b) => before.lastIndexOf(b))) + 1);
+  const count = (clause.match(NEGATION_WORD) ?? []).length;
+  return (/^\s*no\b/i.test(clause) && count > 1 ? count - 1 : count) === 1;
+}
+
+function splitOrgs(raw: string, out: string[]): void {
+  for (const part of raw.split(/\s+and\s+/)) {
+    const c = part.replace(/[\s.,;:@&-]+$/, '').replace(/\s+(?:of)$/, '').trim();
+    if (c) out.push(c);
+  }
+}
 
 function candidates(claim: string, patterns: readonly RegExp[]): string[] {
   const out: string[] = [];
   for (const re of patterns) {
     re.lastIndex = 0;
     for (const m of claim.matchAll(re)) {
-      for (const part of m[1].split(/\s+and\s+/)) {
-        const c = part.replace(/[\s.,;:@&-]+$/, '').replace(/\s+(?:of)$/, '').trim();
-        if (c) out.push(c);
+      const end = m.index + m[0].length;
+      if (!negatedAt(claim, m.index, end)) {
+        splitOrgs(m[1], out);
+        continue;
       }
+      const tail = claim.slice(end);
+      const contrast = CONTRAST.exec(tail);
+      if (!contrast) continue;
+      CONTRAST_ORG.lastIndex = 0;
+      for (const c of tail.slice(contrast.index).matchAll(CONTRAST_ORG)) splitOrgs(c[1], out);
     }
   }
   return out;
@@ -202,6 +279,34 @@ function foreignOrg(claim: string, evidence: string, entities: ClaimEntities): s
   return check(entities.companies, EMPLOYER_PATTERNS) ?? check(entities.institutions, SCHOOL_PATTERNS);
 }
 
+/*
+ * A job requirement names an affiliation in noun phrases as well as in the sentence
+ * forms above: 'Prior employment at OpenAI', 'Research Scientist experience at
+ * Google DeepMind', 'Ex-Google', 'Published at NeurIPS'. 'experience with' and
+ * 'experience in' are left out: they name tools ('experience with Kubernetes').
+ */
+const AFFILIATION_PATTERNS: readonly RegExp[] = [
+  ...EMPLOYER_PATTERNS,
+  new RegExp(anyCase(String.raw`\b(?:employment|tenure|stint|career)\s+(?:at|with|in|for)\s+`) + ORG, 'g'),
+  new RegExp(anyCase(String.raw`\b(?:experience|background)\s+at\s+`) + ORG, 'g'),
+  new RegExp(anyCase(String.raw`\b(?:publish(?:ed|ing)?|papers?|publications?)\s+(?:at|in)\s+`) + ORG, 'g'),
+  new RegExp(anyCase(String.raw`\bex-`) + ORG, 'g'),
+];
+
+/**
+ * The first organisation a job requirement asks him to have worked at, studied at
+ * or published in that the profile does not list, else null. The site can never
+ * evidence such a requirement, whatever skill it also names.
+ */
+export function unlistedAffiliation(requirement: string, entities: ClaimEntities): string | null {
+  const text = normalizeDigits(String(requirement ?? '')).replace(/\s+/g, ' ').trim();
+  for (const cand of [...candidates(text, AFFILIATION_PATTERNS), ...candidates(text, SCHOOL_PATTERNS)]) {
+    if (isNonOrg(cand, entities)) continue;
+    if (!orgMatches(cand, entities.companies) && !orgMatches(cand, entities.institutions)) return cand;
+  }
+  return null;
+}
+
 /* ---------------------------------------------------------------------------
  * Phrasing rules
  * ------------------------------------------------------------------------- */
@@ -218,7 +323,7 @@ const YEARS_OF_EXPERIENCE = new RegExp(
 );
 
 const MASTERS = /\bmaster['’]?s\b|\bmasters\b|\bMDS\b|\bpost-?graduate\b|\bM\.?Sc?\.?\s+(?:in|degree)\b/i;
-const HELD = /\b(?:holds?|held|holding|has|have|had|earned|completed|finished|graduated|received|obtained|awarded|attained|possesses|with)\b|\bgraduate\b|\balumn/i;
+const HELD = /\b(?:holds?|held|holding|has|have|had|earned|complete|completed|finished|graduated|received|obtained|awarded|attained|possesses|with|conferred)\b|\bgraduate\b|\balumn/i;
 const IN_PROGRESS =
   /\b(?:pursu\w*|in[- ]progress|ongoing|currently|enrolled|studying|expected|working\s+(?:on|toward|towards)|toward|towards|underway|will|until|through|candidate|student|midway|halfway)\b/i;
 
@@ -304,10 +409,41 @@ export function tripwire(
 
 export type Evidence = { id: string; quote: string };
 
-function factOf(facts: ReadonlyMap<string, string> | Readonly<Record<string, string>>, id: string): string | undefined {
-  if (facts instanceof Map) return facts.get(id);
+/**
+ * A chunk id as the corpus keys it. The prompt shows each chunk as '[c:<id>]', and
+ * the model sometimes copies that marker into a JSON id: 'c:exp:0' and '[c:exp:0]'
+ * both mean 'exp:0'. No chunk kind is 'c', so the strip cannot change a real id.
+ */
+export function canonicalId(id: string): string {
+  return String(id).trim().replace(/^\[?c:/i, '').replace(/\]$/, '');
+}
+
+export type FactSource = ReadonlyMap<string, string> | Readonly<Record<string, string>>;
+
+function lookup(facts: FactSource, key: string): string | undefined {
+  if (facts instanceof Map) return facts.get(key);
   const rec = facts as Readonly<Record<string, string>>;
-  return Object.prototype.hasOwnProperty.call(rec, id) ? rec[id] : undefined;
+  return Object.prototype.hasOwnProperty.call(rec, key) ? rec[key] : undefined;
+}
+
+/**
+ * The known id a model-written id names. Past the 'c:' marker, the model sometimes
+ * drops the chunk kind too ('content-storyteller#stack' for
+ * project:content-storyteller#stack). That form resolves only when exactly one known
+ * id is it with a kind in front and it starts with a letter, so an ambiguous '0'
+ * (exp:0, edu:0, tool:0) or an invented slug stays unknown and fails the lookup. The
+ * quote must still appear verbatim in the chunk the id resolves to.
+ */
+export function resolveId(raw: string, facts: FactSource): string {
+  const id = canonicalId(raw);
+  if (!id || lookup(facts, id) !== undefined || !/^[a-z]/i.test(id)) return id;
+  const keys = facts instanceof Map ? [...facts.keys()] : Object.keys(facts);
+  const hits = keys.filter((k) => k.indexOf(':') > 0 && k.slice(k.indexOf(':') + 1) === id);
+  return hits.length === 1 ? hits[0] : id;
+}
+
+function factOf(facts: FactSource, id: string): string | undefined {
+  return lookup(facts, resolveId(id, facts));
 }
 
 /**

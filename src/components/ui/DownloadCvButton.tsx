@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Download } from 'lucide-react';
 import { LottieIcon } from '@/components/shared/LottieIcon';
-import { Button, type ButtonSize, type ButtonVariant } from '@/components/ui/Button';
+import { Button, STATUS_LOTTIE_CLASS, type ButtonSize, type ButtonVariant } from '@/components/ui/Button';
 import { track } from '@/lib/analytics';
 import { SITE } from '@/lib/site';
 import { cn } from '@/utils/cn';
@@ -44,7 +44,7 @@ export function DownloadCvButton({
         play="once"
         loop={false}
         lazy={false}
-        className="-my-1 block size-6 shrink-0"
+        className={STATUS_LOTTIE_CLASS}
         fallback={<Download aria-hidden="true" className="size-4" />}
       />
     ) : (

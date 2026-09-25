@@ -316,7 +316,9 @@ test.describe('AskMeBot (#113, #114, #115)', () => {
     await expect(panel).toHaveAttribute('role', 'dialog');
     await expect(launcher).toHaveAttribute('aria-controls', (await panel.getAttribute('id'))!);
     await expect(panel.locator('[data-ask-subtitle]')).toHaveText("Answers from this site's data · AI-assisted for open questions");
-    await expect(panel.locator('[role="log"]')).toHaveAttribute('aria-live', 'polite');
+    // The log is silent (its bubbles hold buttons and links); each answer's words are spoken from [data-ask-speak].
+    await expect(panel.locator('[role="log"]')).toHaveAttribute('aria-live', 'off');
+    await expect(panel.locator('[data-ask-speak]')).toHaveAttribute('aria-live', 'polite');
     const input = panel.locator('input');
     await expect(input).toHaveAccessibleName('Ask a question');
     expect(await input.evaluate((el) => parseFloat(getComputedStyle(el).fontSize))).toBeGreaterThanOrEqual(16);
@@ -345,6 +347,8 @@ test.describe('AskMeBot (#113, #114, #115)', () => {
     test.skip(width(info) >= 640, 'phone projects only');
     await page.goto('/');
     await waitForDock(page);
+    // At 320x568 the dock stays tucked over the hero's calls to action; focus brings it back.
+    await page.locator('[data-ask-launcher]').focus();
     await page.locator('[data-ask-launcher]').click();
     const sheet = page.locator('[data-dialog-root] [role="dialog"]');
     await expect(sheet).toBeVisible();

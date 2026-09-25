@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, type RefObject } from 'react';
+import { runScramble } from './scramble';
 import { useMotionPrefs } from './useMotionPrefs';
 
 const DEFAULT_CHARSET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789#%&*+=<>/';
@@ -29,22 +30,16 @@ export function useScrambleText(ref: RefObject<HTMLElement | null>, text: string
       el.textContent = text;
       return;
     }
-    let raf = 0;
-    const start = performance.now();
-    const tick = (now: number) => {
-      const progress = Math.min(1, (now - start) / duration);
-      const settled = Math.floor(progress * text.length);
-      let out = text.slice(0, settled);
-      for (let i = settled; i < text.length; i++) {
-        const ch = text[i];
-        out += ch === ' ' ? ' ' : charset[Math.floor(Math.random() * charset.length)];
-      }
-      el.textContent = out;
-      if (progress < 1) raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
+    const stop = runScramble(
+      (frame) => {
+        el.textContent = frame;
+      },
+      text,
+      duration,
+      charset,
+    );
     return () => {
-      cancelAnimationFrame(raf);
+      stop();
       el.textContent = text;
     };
   }, [ref, text, duration, trigger, charset, paused]);

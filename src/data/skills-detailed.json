@@ -172,17 +172,17 @@
       {
         "title": "AutoGen: Enabling Next-Gen LLM Applications via Multi-Agent Conversation",
         "url": "https://arxiv.org/abs/2308.08155",
-        "authors": "Qingyun Wu, Gagan Bansal, Jieyu Zhang, Yiran Wu, Beibin Li, Erkang (Eric) Zhu, Li Jiang, Xiaoyun Zhang, Shaokun Zhang, Ahmed Awadallah, Ryen W. White, Doug Burger, Chi Wang"
+        "authors": "Qingyun Wu, Gagan Bansal, Jieyu Zhang et al."
       },
       {
         "title": "AutoGen Studio: A No-Code Developer Tool for Building and Debugging Multi-Agent Systems",
-        "url": "https://www.microsoft.com/en-us/research/publication/autogen-studio-a-no-code-developer-tool-for-building-and-debugging-multi-agent-systems/",
-        "authors": "Victor Dibia, Jingya Chen, Gagan Bansal, Suff Syed, Adam Fourney, Erkang (Eric) Zhu, Chi Wang, Saleema Amershi"
+        "url": "https://arxiv.org/abs/2408.15247",
+        "authors": "Victor Dibia, Jingya Chen, Gagan Bansal et al."
       },
       {
         "title": "Multimodal Multi-Agent Ransomware Analysis Using AutoGen",
         "url": "https://arxiv.org/abs/2601.20346",
-        "authors": "S. A. M. S. M. S. A. S. A."
+        "authors": "Asifullah Khan, Aimen Wadood, Mubashar Iqbal et al."
       }
     ],
     "relatedRepos": [],
@@ -247,22 +247,22 @@
       {
         "title": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks",
         "url": "https://arxiv.org/abs/2005.11401",
-        "authors": "Patrick Lewis, Ethan Perez, Aleksandra Piktus, Fabio Petroni, Vladimir Karpukhin, Naman Goyal, Heinrich Kuttler, Mike Lewis, Wen-tau Yih, Tim Rocktäschel, Sebastian Riedel, Douwe van der Wal"
+        "authors": "Patrick Lewis, Ethan Perez, Aleksandra Piktus et al."
       },
       {
         "title": "A Systematic Review of Key Retrieval-Augmented Generation (RAG) Systems: Progress, Gaps, and Future Directions",
         "url": "https://arxiv.org/abs/2507.18910",
-        "authors": "A. Asad Khan, S. A. Khan, M. A. Khan, M. A. Khan, M. A. Khan"
+        "authors": "Agada Joseph Oche, Ademola Glory Folashade, Tirthankar Ghosal et al."
       },
       {
         "title": "Retrieval-Augmented Generation: A Comprehensive Survey of Architectures, Enhancements, and Robustness Frontiers",
         "url": "https://arxiv.org/abs/2506.00054",
-        "authors": "Sahin Ahmed, Md. Mahbubur Rahman, Md. Saiful Islam, Md. Nazmul Islam"
+        "authors": "Chaitanya Sharma"
       },
       {
         "title": "Developing Retrieval Augmented Generation (RAG) based LLM Systems from PDFs: An Experience Report",
         "url": "https://arxiv.org/abs/2410.15944",
-        "authors": "Ayman Asad Khan, Muhammad Asad Khan, Muhammad Asad Khan, Muhammad Asad Khan, Muhammad Asad Khan"
+        "authors": "Ayman Asad Khan, Md Toufique Hasan, Kai Kristian Kemell et al."
       }
     ],
     "relatedRepos": [],
@@ -345,22 +345,22 @@
       {
         "title": "Chain-of-Thought Prompting Elicits Reasoning in Large Language Models",
         "url": "https://arxiv.org/abs/2201.11903",
-        "authors": "Jason Wei, Xuezhi Wang, Dale Schuurmans, Maarten Bosma, Ed H. Chi, Quoc V. Le, Denny Zhou"
+        "authors": "Jason Wei, Xuezhi Wang, Dale Schuurmans et al."
       },
       {
-        "title": "Automatic Chain of Thought Prompting",
+        "title": "Automatic Chain of Thought Prompting in Large Language Models",
         "url": "https://arxiv.org/abs/2210.03493",
-        "authors": "Zhuosheng Zhang, Aston Zhang, Mu Li, Yue Dong, Huan Zhang, Scott Lundberg, Alexandra Sasha Lu, Stan Brock"
+        "authors": "Zhuosheng Zhang, Aston Zhang, Mu Li et al."
       },
       {
-        "title": "Self-Consistency Improves Chain of Thought Reasoning in Large Language Models",
+        "title": "Self-Consistency Improves Chain of Thought Reasoning in Language Models",
         "url": "https://arxiv.org/abs/2203.11171",
-        "authors": "Xuezhi Wang, Jason Wei, Dale Schuurmans, Quoc V. Le, Ed H. Chi, Sharan Narang, Aakanksha Chowdhery, Denny Zhou"
+        "authors": "Xuezhi Wang, Jason Wei, Dale Schuurmans et al."
       },
       {
-        "title": "Hierarchical Chain-of-Thought Prompting: Enhancing LLM Reasoning Performance and Efficiency",
+        "title": "Hierarchical Chain-of-Thought: Enhancing LLM Reasoning Performance and Efficiency",
         "url": "https://arxiv.org/abs/2604.00130",
-        "authors": "Xingshuai Huang, Jianing Wang, Hongyu Li, Mingxuan Wang"
+        "authors": "Xingshuai Huang, Derek Li, Bahareh Nikpour et al."
       }
     ],
     "relatedRepos": [],
@@ -426,17 +426,17 @@
       {
         "title": "A Survey of Reinforcement Learning from Human Feedback",
         "url": "https://arxiv.org/abs/2312.14925",
-        "authors": "Timo Kaufmann et al."
+        "authors": "Timo Kaufmann, Paul Weng, Viktor Bengs et al."
       },
       {
         "title": "Safe RLHF: Safe Reinforcement Learning from Human Feedback",
         "url": "https://arxiv.org/abs/2310.12773",
-        "authors": "Josef Dai, Xuehai Pan, Ruiyang Sun, Jiaming Ji, Xinbo Xu, Mickel Liu, Yizhou Wang, Yaodong Yang"
+        "authors": "Josef Dai, Xuehai Pan, Ruiyang Sun et al."
       },
       {
         "title": "DPO Meets PPO: Reinforced Token Optimization for RLHF",
-        "url": "https://arxiv.org/abs/2402.09139",
-        "authors": "Han Zhong, Zikang Shan, Guhao Feng, Wei Xiong, Xinle Cheng, Li Zhao, Di He, Jiang Bian, Liwei Wang"
+        "url": "https://arxiv.org/abs/2404.18922",
+        "authors": "Han Zhong, Zikang Shan, Guhao Feng et al."
       }
     ],
     "relatedRepos": [],
@@ -699,37 +699,37 @@
       {
         "title": "GPT-4 Technical Report",
         "url": "https://arxiv.org/abs/2303.08774",
-        "authors": "OpenAI et al."
+        "authors": "OpenAI, Josh Achiam, Steven Adler et al."
       },
       {
         "title": "Sparks of Artificial General Intelligence: Early experiments with GPT-4",
         "url": "https://arxiv.org/abs/2303.12712",
-        "authors": "Sébastien Bubeck, Varun Chandrasekaran, Ronen Eldan, Johannes Gehrke, Eric Horvitz, Ece Kamar, Peter Lee, Yin Tat Lee, Yuanzhi Li, Scott Lundberg, Harsha Nori, Hamid Palangi, Marco Tulio Ribeiro, Yi Zhang"
+        "authors": "Sébastien Bubeck, Varun Chandrasekaran, Ronen Eldan et al."
       },
       {
         "title": "HumanEval on Latest GPT Models -- 2024",
         "url": "https://arxiv.org/abs/2402.14852",
-        "authors": "Daniel Li, Yuntian Deng"
+        "authors": "Daniel Li, Lincoln Murr"
       },
       {
         "title": "Exploiting Novel GPT-4 APIs",
-        "url": "https://arxiv.org/abs/2310.11588",
-        "authors": "Kellin Pelrine, Mohammad Taufeeque, Michał Zając, Euan McLean, Adam Gleave"
+        "url": "https://arxiv.org/abs/2312.14302",
+        "authors": "Kellin Pelrine, Mohammad Taufeeque, Michał Zając et al."
       },
       {
         "title": "An Empirical Study of OpenAI API Discussions on Stack Overflow",
         "url": "https://arxiv.org/abs/2505.04084",
-        "authors": "Xiang Chen, Chaoyang Gao, Yuxin Su, Shing-Chi Cheung, Michael R. Lyu"
+        "authors": "Xiang Chen, Jibin Wang, Chaoyang Gao et al."
       },
       {
-        "title": "Integrating External Tools with Large Language Models (LLM) to Improve Accuracy",
-        "url": "https://arxiv.org/abs/2507.02700",
-        "authors": "Krzysztof Goczyła, Mateusz Korytkowski, Paweł Korytkowski"
+        "title": "Integrating External Tools with Large Language Models to Improve Accuracy",
+        "url": "https://arxiv.org/abs/2507.08034",
+        "authors": "Nripesh Niketan, Hadj Batatia"
       },
       {
-        "title": "Using GPT Models for Qualitative and Quantitative News Analytics in the 2024 US Presidential Election Process",
-        "url": "https://arxiv.org/abs/2410.14690",
-        "authors": "Dmitry Karsybaev, Ekaterina Karsybaeva"
+        "title": "Using GPT Models for Qualitative and Quantitative News Analytics in the 2024 US Presidental Election Process",
+        "url": "https://arxiv.org/abs/2410.15884",
+        "authors": "Bohdan M. Pavlyshenko"
       }
     ],
     "relatedRepos": [],
@@ -801,12 +801,12 @@
       {
         "title": "Better Call Claude: Can LLMs Detect Changes of Writing Style?",
         "url": "https://arxiv.org/abs/2508.00680",
-        "authors": "Anonymous"
+        "authors": "Johannes Römisch, Svetlana Gorovaia, Mariia Halchynska et al."
       },
       {
         "title": "From LLM to NMT: Advancing Low-Resource Machine Translation with Claude",
         "url": "https://arxiv.org/abs/2404.13813",
-        "authors": "Anonymous"
+        "authors": "Maxim Enis, Mark Hopkins"
       }
     ],
     "relatedRepos": [],
@@ -986,17 +986,17 @@
       {
         "title": "Gemini: A Family of Highly Capable Multimodal Models",
         "url": "https://arxiv.org/abs/2312.11805",
-        "authors": "Google DeepMind and Google Research"
+        "authors": "Gemini Team, Rohan Anil, Sebastian Borgeaud et al."
       },
       {
         "title": "Gemini 1.5: Unlocking multimodal understanding across millions of tokens of context",
-        "url": "https://arxiv.org/abs/2403.08295",
-        "authors": "Google DeepMind and Google Research"
+        "url": "https://arxiv.org/abs/2403.05530",
+        "authors": "Gemini Team, Petko Georgiev, Ving Ian Lei et al."
       },
       {
         "title": "Gemini 2.5: Pushing the Frontier with Advanced Reasoning, Multimodality, Long Context, and Next Generation Agentic Capabilities",
         "url": "https://arxiv.org/abs/2507.06261",
-        "authors": "Google DeepMind and Google Research"
+        "authors": "Gheorghe Comanici, Eric Bieber, Mike Schaekermann et al."
       }
     ],
     "relatedRepos": [],
@@ -1072,18 +1072,18 @@
     "researchPapers": [
       {
         "title": "The Orchestration of Multi-Agent Systems: Architectures, Protocols, and Enterprise Adoption",
-        "url": "https://arxiv.org/abs/2501.09641",
-        "authors": "Various (as it's a survey/overview, specific authors not highlighted in snippet, but the paper itself would list them)"
+        "url": "https://arxiv.org/abs/2601.13671",
+        "authors": "Apoorva Adimulam, Rajesh Gupta, Sumit Kumar"
       },
       {
         "title": "Multi-Agent LLM Orchestration Achieves Deterministic, High-Quality Decision Support for Incident Response",
-        "url": "https://arxiv.org/abs/2601.02528",
-        "authors": "Various (specific authors not highlighted in snippet)"
+        "url": "https://arxiv.org/abs/2511.15755",
+        "authors": "Philip Drammeh"
       },
       {
         "title": "Multi-Agentic AI for Conflict-Aware rApp Policy Orchestration in Open RAN",
-        "url": "https://arxiv.org/abs/2603.04018",
-        "authors": "Various (specific authors not highlighted in snippet)"
+        "url": "https://arxiv.org/abs/2603.07375",
+        "authors": "Haiyuan Li, Yulei Wu, Dimitra Simeonidou"
       }
     ],
     "relatedRepos": [],
@@ -1355,32 +1355,32 @@
       {
         "title": "Agentic AI: A Comprehensive Survey of Architectures, Applications, and Future Directions",
         "url": "https://arxiv.org/abs/2510.25445",
-        "authors": "Multiple authors"
+        "authors": "Mohamad Abou Ali, Fadi Dornaika"
       },
       {
         "title": "The Auton Agentic AI Framework",
         "url": "https://arxiv.org/abs/2602.23720",
-        "authors": "Multiple authors"
+        "authors": "Sheng Cao, Zhao Chang, Chang Li et al."
       },
       {
         "title": "Agentics 2.0: Logical Transduction Algebra for Agentic Data Workflows",
-        "url": "https://arxiv.org/abs/2603.02372",
-        "authors": "Multiple authors"
+        "url": "https://arxiv.org/abs/2603.04241",
+        "authors": "Alfio Massimiliano Gliozzo, Junkyu Lee, Nahuel Defosse"
       },
       {
-        "title": "Large language model (LLM)-based agentic artificial intelligence tool streamlines research processes in biomarker studies: a proof of concept",
-        "url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10788321/",
-        "authors": "Y Ye et al."
+        "title": "Large language model (LLM)-based agentic artificial intelligence tool streamlines research processes in biomarker studies: a proof of concept.",
+        "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12795206/",
+        "authors": "Ye Y, Colombo M, Meessen J et al."
       },
       {
         "title": "Accelerating Contextualization in AI Large Language Models Using Vector Databases",
-        "url": "https://arxiv.org/abs/2406.08990",
-        "authors": "Multiple authors"
+        "url": "https://doi.org/10.1109/icoin59985.2024.10572088",
+        "authors": "Raad Bin Tareaf, Mohammed AbuJarour, Tom Engelman et al."
       },
       {
         "title": "Vectoring Languages",
-        "url": "https://arxiv.org/abs/2407.11202",
-        "authors": "Multiple authors"
+        "url": "https://arxiv.org/abs/2407.11766",
+        "authors": "Joseph Chen"
       }
     ],
     "relatedRepos": [],
@@ -1456,28 +1456,28 @@
     "researchPapers": [
       {
         "title": "Taming Uncertainty via Automation: Observing, Analyzing, and Optimizing Agentic AI Systems",
-        "url": "https://arxiv.org/abs/2507.08123",
-        "authors": "Anirudh K. S. et al."
+        "url": "https://arxiv.org/abs/2507.11277",
+        "authors": "Dany Moshkovich, Sergey Zeltyn"
       },
       {
         "title": "Optimizing Agentic Workflows using Meta-tools",
-        "url": "https://arxiv.org/abs/2602.00987",
-        "authors": "Shubham Singh et al."
+        "url": "https://arxiv.org/abs/2601.22037",
+        "authors": "Sami Abuzakuk, Anne-Marie Kermarrec, Rishi Sharma et al."
       },
       {
-        "title": "A CPU-Centric Perspective on Agentic AI",
+        "title": "Towards Understanding, Analyzing, and Optimizing Agentic AI Execution: A CPU-Centric Perspective",
         "url": "https://arxiv.org/abs/2511.00739",
-        "authors": "Siddharth Singh et al."
+        "authors": "Ritik Raj, Souvik Kundu, Ishita Vohra et al."
       },
       {
         "title": "A Survey on the Optimization of Large Language Model-based Agents",
         "url": "https://arxiv.org/abs/2503.12434",
-        "authors": "Yuan Li et al."
+        "authors": "Shangheng Du, Jiabao Zhao, Jinxin Shi et al."
       },
       {
         "title": "Mem0: Building Production-Ready AI Agents with Scalable Long-Term Memory",
-        "url": "https://arxiv.org/abs/2504.14876",
-        "authors": "Ankit Kumar et al."
+        "url": "https://arxiv.org/abs/2504.19413",
+        "authors": "Prateek Chhikara, Dev Khant, Saket Aryan et al."
       }
     ],
     "relatedRepos": [],
@@ -1549,17 +1549,17 @@
       {
         "title": "Beyond Accuracy: A Multi-Dimensional Framework for Evaluating Enterprise Agentic AI Systems",
         "url": "https://arxiv.org/abs/2511.14136",
-        "authors": "Sushant Mehta, Jeffrey Ip, Anirudh Koul, Aditya Ganeshan, David S. D. Wu, Andrew Ng"
+        "authors": "Sushant Mehta"
       },
       {
         "title": "REAL: Benchmarking Autonomous Agents on Deterministic Simulations of Real Websites",
         "url": "https://arxiv.org/abs/2504.11543",
-        "authors": "Sumeet Motwani, et al."
+        "authors": "Divyansh Garg, Shaun VanWeelden, Diego Caples et al."
       },
       {
         "title": "The Measurement Imbalance in Agentic AI Evaluation Undermines Industry Productivity Claims",
-        "url": "https://arxiv.org/abs/2509.07185",
-        "authors": "Sushant Mehta, Jeffrey Ip, Anirudh Koul, Aditya Ganeshan, David S. D. Wu, Andrew Ng"
+        "url": "https://arxiv.org/abs/2506.02064",
+        "authors": "Kiana Jafari Meimandi, Gabriela Aránguiz-Dias, Grace Ra Kim et al."
       }
     ],
     "relatedRepos": [],
@@ -1636,7 +1636,7 @@
       {
         "title": "Taming Uncertainty via Automation: Observing, Analyzing, and Optimizing Agentic AI Systems",
         "url": "https://arxiv.org/abs/2507.11277",
-        "authors": "Dany Moshkovich, Shai Zeltyn"
+        "authors": "Dany Moshkovich, Sergey Zeltyn"
       },
       {
         "title": "Agentic AI Process Observability: Discovering Behavioral Variability",
@@ -1646,12 +1646,12 @@
       {
         "title": "Adaptive Monitoring and Real-World Evaluation of Agentic AI Systems",
         "url": "https://arxiv.org/abs/2509.00115",
-        "authors": "Manish A. Shukla"
+        "authors": "Manish Shukla"
       },
       {
         "title": "Beyond Black-Box Benchmarking: Observability, Analytics, and Optimization of Agentic Systems",
         "url": "https://arxiv.org/abs/2503.06745",
-        "authors": "Dany Moshkovich, Haim Mulian, Shai Zeltyn, Nir Eder, Ilia Skarbovsky, Ron Abitbol"
+        "authors": "Dany Moshkovich, Hadar Mulian, Sergey Zeltyn et al."
       }
     ],
     "relatedRepos": [],
@@ -1715,22 +1715,22 @@
       {
         "title": "TRACE: Capability-Targeted Agentic Training",
         "url": "https://arxiv.org/abs/2604.05336",
-        "authors": "Hangoo Kang, et al."
+        "authors": "Hangoo Kang, Tarun Suresh, Jon Saad-Falcon et al."
       },
       {
         "title": "TraceSIR: A Multi-Agent Framework for Structured Analysis and Reporting of Agentic Execution Traces",
-        "url": "https://arxiv.org/abs/2402.18956",
-        "authors": "Shu-Xun Yang, Cunxiang Wang, Haoke Zhang, Wenbo Yu, Lindong Wu, Jiayi Gui, Dayong Yang, Yukuo Cen, Zhuoer Feng, Bosi Wen"
+        "url": "https://arxiv.org/abs/2603.00623",
+        "authors": "Shu-Xun Yang, Cunxiang Wang, Haoke Zhang et al."
       },
       {
         "title": "AgentTrace: A Structured Logging Framework for Agent System Observability",
         "url": "https://arxiv.org/abs/2602.10133",
-        "authors": "Adam AlSayyad, et al."
+        "authors": "Adam AlSayyad, Kelvin Yuxiang Huang, Richik Pal"
       },
       {
         "title": "Agentic AI Process Observability: Discovering Behavioral Variability",
         "url": "https://arxiv.org/abs/2505.20127",
-        "authors": "Fabiana Fournier, et al."
+        "authors": "Fabiana Fournier, Lior Limonad, Yuval David"
       }
     ],
     "relatedRepos": [],
@@ -1856,22 +1856,17 @@
       {
         "title": "SQL-R1: Training Natural Language to SQL Reasoning Model By Reinforcement Learning",
         "url": "https://arxiv.org/abs/2504.08600",
-        "authors": "Peixian Ma, Xialie Zhuang, Chengjin Xu, Xuhui Jiang, Ran Chen, Jian Guo"
-      },
-      {
-        "title": "SQL-CRAFT: Text-to-SQL through Interactive Refinement and Enhanced Reasoning",
-        "url": "https://arxiv.org/abs/2402.12878",
-        "authors": "Zhiyu Li, Yexin Wang, Shuo Wang, Zhaowei Wang, Yunjun Gao"
+        "authors": "Peixian Ma, Xialie Zhuang, Chengjin Xu et al."
       },
       {
         "title": "A Declarative Query Language for Scientific Machine Learning",
         "url": "https://arxiv.org/abs/2405.16159",
-        "authors": "M. T. Ozsu, R. J. Miller, M. J. Carey, D. J. DeWitt, J. M. Hellerstein, H. V. Jagadish, J. F. Naughton, R. Ramakrishnan, D. Shasha"
+        "authors": "Hasan M Jamil"
       },
       {
         "title": "Efficient and Accurate In-Database Machine Learning with SQL Code Generation in Python",
         "url": "https://arxiv.org/abs/2104.03224",
-        "authors": "Michael Kaufmann, Robert G. M. den Broeder, R. J. Miller"
+        "authors": "Michael Kaufmann, Gabriel Stechschulte, Anna Huber"
       }
     ],
     "relatedRepos": [],
@@ -1932,12 +1927,12 @@
       {
         "title": "Drawing Pandas: A Benchmark for LLMs in Generating Plotting Code",
         "url": "https://arxiv.org/abs/2412.02764",
-        "authors": "Not directly available in snippets, typically found on arXiv page"
+        "authors": "Timur Galimzyanov, Sergey Titov, Yaroslav Golubev et al."
       },
       {
-        "title": "An Empirical Studies on How the Developers Discussed about Pandas Topics",
-        "url": "https://arxiv.org/abs/2210.03061",
-        "authors": "Not directly available in snippets, typically found on arXiv page"
+        "title": "An Empirical Study on How the Developers Discussed about Pandas Topics",
+        "url": "https://arxiv.org/abs/2210.03519",
+        "authors": "Sajib Kumar Saha Joy, Farzad Ahmed, Al Hasib Mahamud et al."
       }
     ],
     "relatedRepos": [],
@@ -2246,12 +2241,12 @@
       {
         "title": "Multi hash embeddings in spaCy",
         "url": "https://arxiv.org/abs/2212.09255",
-        "authors": "Lester James Miranda"
+        "authors": "Lester James Miranda, Ákos Kádár, Adriane Boyd et al."
       },
       {
         "title": "Shona spaCy: A Morphological Analyzer for an Under-Resourced Bantu Language",
         "url": "https://arxiv.org/abs/2511.16680",
-        "authors": "Tawanda K. G. Chigwanda, Bruce W. Watson"
+        "authors": "Happymore Masoka"
       }
     ],
     "relatedRepos": [],
@@ -2364,18 +2359,18 @@
     "researchPapers": [
       {
         "title": "Veridical data science",
-        "url": "https://www.pnas.org/doi/10.1073/pnas.1917337117",
+        "url": "https://doi.org/10.1073/pnas.1901326117",
         "authors": "Bin Yu, Karl Kumbier"
       },
       {
         "title": "Approximating Bayes in the 21st Century",
-        "url": "https://arxiv.org/abs/2308.07921",
-        "authors": "Michael Betancourt, Simon Byrne, Andrew Gelman, Aki Vehtari"
+        "url": "https://arxiv.org/abs/2112.10342",
+        "authors": "Gael M. Martin, David T. Frazier, Christian P. Robert"
       },
       {
         "title": "Principal Fairness for Human and Algorithmic Decision-Making",
-        "url": "https://arxiv.org/abs/2305.02980",
-        "authors": "Alexandra Chouldechova, Aaron Roth, Michael Kearns"
+        "url": "https://arxiv.org/abs/2005.10400",
+        "authors": "Kosuke Imai, Zhichao Jiang"
       }
     ],
     "relatedRepos": [],
@@ -2445,23 +2440,23 @@
     "researchPapers": [
       {
         "title": "A Survey Of Regression Algorithms And Connections With Deep Learning",
-        "url": "https://arxiv.org/abs/2104.12513",
-        "authors": "Yingjie Li, Yujie Li, Yuxin Li, Yuxuan Li, Zhaojun Li, Zhaoyang Li"
+        "url": "https://arxiv.org/abs/2104.12647",
+        "authors": "Yunpeng Tai"
       },
       {
         "title": "Data Augmentation for Deep Learning Regression Tasks by Machine Learning Models",
         "url": "https://arxiv.org/abs/2501.03654",
-        "authors": "Assaf Shmuel, Teddy Lazebnik, Lior Rokach"
+        "authors": "Assaf Shmuel, Oren Glickman, Teddy Lazebnik"
       },
       {
         "title": "Accelerating Regression Tasks with Quantum Algorithms",
         "url": "https://arxiv.org/abs/2509.24757",
-        "authors": "Chenghua Liu, Yuxuan Li"
+        "authors": "Chenghua Liu, Zhengfeng Ji"
       },
       {
         "title": "Exploring Machine Learning Regression Models for Advancing Foreground Mitigation and Global 21cm Signal Parameter Extraction",
         "url": "https://arxiv.org/abs/2512.09361",
-        "authors": "Anshuman Tripathi, Abhirup Datta, S. K. Singh"
+        "authors": "Anshuman Tripathi, Abhirup Datta, Gursharanjit Kaur"
       }
     ],
     "relatedRepos": [],
@@ -2521,17 +2516,17 @@
       {
         "title": "Tuning the Tuner: Introducing Hyperparameter Optimization for Auto-Tuning",
         "url": "https://arxiv.org/abs/2509.26300",
-        "authors": "S. Mazumdar, V. K. Rakesh, T. Samanta, S. Pal, A. Das"
+        "authors": "Floris-Jan Willemsen, Rob V. van Nieuwpoort, Ben van Werkhoven"
       },
       {
-        "title": "Impact of Hyperparameter Optimization on the Accuracy of Lightweight Deep Learning Models for Real-Time Image Classification",
+        "title": "Analysis of Hyperparameter Optimization Effects on Lightweight Deep Models for Real-Time Image Classification",
         "url": "https://arxiv.org/abs/2507.23315",
-        "authors": "Vineet Kumar Rakesh, Soumya Mazumdar, Tapas Samanta, Sarbajit Pal, Amitabha Das"
+        "authors": "Vineet Kumar Rakesh, Soumya Mazumdar, Tapas Samanta et al."
       },
       {
         "title": "Multi-objective Hyperparameter Optimization in the Age of Deep Learning",
         "url": "https://arxiv.org/abs/2511.08371",
-        "authors": "Soham Basu, et al."
+        "authors": "Soham Basu, Frank Hutter, Danny Stoll"
       }
     ],
     "relatedRepos": [],
@@ -2595,17 +2590,17 @@
       {
         "title": "Towards Automated Cross-domain Exploratory Data Analysis through Large Language Models",
         "url": "https://arxiv.org/abs/2412.07214",
-        "authors": "Jun-Peng Zhu, Boyan Niu, Peng Cai, Zheming Ni, Jianwei Wan, Kai Xu, Jiajun Huang, Shengbo Ma, Bing Wang, Xuan Zhou, Guanglei Bao, Donghui Zhang, Liu Tang, Qi Liu"
+        "authors": "Jun-Peng Zhu, Boyan Niu, Peng Cai et al."
       },
       {
         "title": "QUIS: Question-guided Insights Generation for Automated Exploratory Data Analysis",
         "url": "https://arxiv.org/abs/2410.10270",
-        "authors": "Abhijit Manatkar, Ashlesha Akella, Srikanta Bedathur, Sourav Bhowmick"
+        "authors": "Abhijit Manatkar, Ashlesha Akella, Parthivi Gupta et al."
       },
       {
         "title": "Exploratory Data Analysis for Banking and Finance: Unveiling Insights and Patterns",
         "url": "https://arxiv.org/abs/2407.11976",
-        "authors": "Ankur Agarwal, Anjali Agarwal"
+        "authors": "Ankur Agarwal, Shashi Prabha, Raghav Yadav"
       },
       {
         "title": "Towards High-Performance Exploratory Data Analysis (EDA) Via Stable Equilibrium Point",
@@ -2718,12 +2713,12 @@
       {
         "title": "Auto-BI: Automatically Build BI-Models Leveraging Local Join Prediction and Global Schema Graph",
         "url": "https://arxiv.org/abs/2306.12515",
-        "authors": "Yiming Lin, et al."
+        "authors": "Yiming Lin, Yeye He, Surajit Chaudhuri"
       },
       {
         "title": "SiriusBI: A Comprehensive LLM-Powered Solution for Data Analytics in Business Intelligence",
         "url": "https://arxiv.org/abs/2411.06102",
-        "authors": "Yiming Lin, Yanyan Shen, Yeye He, et al."
+        "authors": "Jie Jiang, Haining Xie, Siqi Shen et al."
       }
     ],
     "relatedRepos": [],
@@ -2792,18 +2787,18 @@
     "researchPapers": [
       {
         "title": "Criticality: Scaffolding Decision-Making with Interactive Critical Thinking and Evidence-Based Reasoning Traces",
-        "url": "https://www.tableau.com/research/publications",
+        "url": "https://doi.org/10.1145/3742413.3789077",
         "authors": "Minsuk Chang, Arjun Srinivasan, Srishti Palani"
       },
       {
         "title": "Lexara: A User-Centered Toolkit for Evaluating Large Language Models for Conversational Visual Analytics",
-        "url": "https://www.tableau.com/research/publications",
+        "url": "https://arxiv.org/abs/2603.05832",
         "authors": "Srishti Palani, Vidya Setlur"
       },
       {
         "title": "Toward a Scalable Census of Dashboard Designs in the Wild: A Case Study with Tableau Public",
         "url": "https://arxiv.org/abs/2306.16513",
-        "authors": "Joanna Purich, Anamaria Crisan, Michael Correll, Vidya Setlur, Steven Franconeri, Arvind Satyanarayan"
+        "authors": "Joanna Purich, Arjun Srinivasan, Michael Correll et al."
       }
     ],
     "relatedRepos": [],
@@ -2858,17 +2853,17 @@
       {
         "title": "Weakly Supervised Medical Entity Extraction and Linking for Chief Complaints",
         "url": "https://arxiv.org/abs/2509.01899",
-        "authors": "Zhimeng Luo et al."
+        "authors": "Zhimeng Luo, Zhendong Wang, Rui Meng et al."
       },
       {
         "title": "Mining Unstructured Medical Texts With Conformal Active Learning",
         "url": "https://arxiv.org/abs/2502.04372",
-        "authors": "Juliano Genari and Guilherme Tegoni Goedert"
+        "authors": "Juliano Genari, Guilherme Tegoni Goedert"
       },
       {
         "title": "Knowledge-Infused Prompting: Assessing and Advancing Clinical Text Data Generation with Large Language Models",
-        "url": "https://arxiv.org/abs/2501.13401",
-        "authors": "Rui Zhang et al."
+        "url": "https://arxiv.org/abs/2311.00287",
+        "authors": "Ran Xu, Hejie Cui, Yue Yu et al."
       },
       {
         "title": "Automated Text Mining of Experimental Methodologies from Biomedical Literature",
@@ -2878,7 +2873,7 @@
       {
         "title": "Does Synthetic Data Generation of LLMs Help Clinical Text Mining?",
         "url": "https://arxiv.org/abs/2303.04360",
-        "authors": "Mohammadmahdi Nouriborji et al."
+        "authors": "Ruixiang Tang, Xiaotian Han, Xiaoqian Jiang et al."
       }
     ],
     "relatedRepos": [],
@@ -3165,14 +3160,14 @@
     "officialDocs": "https://docs.aws.amazon.com/amazondynamodb/",
     "researchPapers": [
       {
-        "title": "Optimizing FaaS Platforms for MCP-enabled Agentic Workflows",
+        "title": "FAME: QoS-aware Async Service Orchestration for Agentic Workflows",
         "url": "https://arxiv.org/abs/2601.14735",
-        "authors": "Varad Kulkarni, Vaibhav Jha, Nikhil Reddy, Yogesh Simmhan"
+        "authors": "Haseeb Abdullah Kollorath, Vaibhav Jha, Varad Kulkarni et al."
       },
       {
         "title": "A Chunked-Object Pattern for Multi-Region Large Payload Storage in Managed NoSQL Databases",
-        "url": "https://arxiv.org/abs/2512.04604",
-        "authors": "Not specified in snippet"
+        "url": "https://arxiv.org/abs/2512.06852",
+        "authors": "Manideep Reddy Chinthareddy"
       },
       {
         "title": "Building Scalable AI-Powered Applications with Cloud Databases: Architectures, Best Practices and Performance Considerations",
@@ -3308,13 +3303,13 @@
     "researchPapers": [
       {
         "title": "Performance Evaluation of a Dynamic RESTful API Using FastAPI, Docker and Nginx",
-        "url": "https://ieeexplore.ieee.org/document/10313837",
-        "authors": "Not explicitly listed in snippets, but from IEEE Xplore"
+        "url": "https://doi.org/10.1109/gec61857.2024.10881712",
+        "authors": "Ebenhezer Mabotha, Nkateko E Mabunda, Ahmed Ali"
       },
       {
         "title": "Model Algorithm Research based on Python Fast API",
         "url": "https://doi.org/10.54691/fse.v3i9.5591",
-        "authors": "Chen, J."
+        "authors": "Junqiao Chen"
       },
       {
         "title": "Django vs. FastAPI: A Comparative Study for High-Performance Web Applications",
@@ -3584,13 +3579,13 @@
     "researchPapers": [
       {
         "title": "Developers Are Victims Too : A Comprehensive Analysis of The VS Code Extension Ecosystem",
-        "url": "https://arxiv.org/abs/2411.06900",
-        "authors": "Muhammad Usama, Muhammad Zeeshan, Muhammad Shahzad"
+        "url": "https://arxiv.org/abs/2411.07479",
+        "authors": "Shehan Edirimannage, Charitha Elvitigala, Asitha Kottahachchi Kankanamge Don et al."
       },
       {
         "title": "A Prototype VS Code Extension to Improve Web Accessible Development",
         "url": "https://arxiv.org/abs/2503.09673",
-        "authors": "Elisa Calì, Tommaso Fulcini, Andrea S. M. P. Nardari, Alessandro S. M. P. Nardari, Andrea S. M. P. Nardari"
+        "authors": "Elisa Calì, Tommaso Fulcini, Riccardo Coppola et al."
       }
     ],
     "relatedRepos": [],

@@ -28,7 +28,8 @@ export type LottiePlayMode = 'auto' | 'hover' | 'click' | 'once' | 'inView' | 'c
 let playerPromise: Promise<Player> | null = null;
 function loadPlayer(): Promise<Player> {
   if (!playerPromise) {
-    playerPromise = import('lottie-react').then((m) => m.LottieLight);
+    // Not import('lottie-react'): that ships all three lottie-web engines (see lottie-player.ts).
+    playerPromise = import('@/lib/lottie-player').then((m) => m.LottieLight);
     playerPromise.catch(() => {
       playerPromise = null;
     });

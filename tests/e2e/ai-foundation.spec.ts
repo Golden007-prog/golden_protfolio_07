@@ -351,7 +351,8 @@ async function installAnnouncementCounter(page: Page, phrase: string) {
     };
     const scan = () => {
       document
-        .querySelectorAll('[aria-live]:not([aria-live="off"]), [role="status"], [role="alert"], [role="log"]')
+        // An explicit aria-live="off" silences a role that is live by default (the concierge's log).
+        .querySelectorAll('[aria-live]:not([aria-live="off"]), :is([role="status"], [role="alert"], [role="log"]):not([aria-live="off"])')
         .forEach((el) => {
           if (el.closest('[aria-hidden="true"]')) return;
           const now = spoken(el).includes(p);
@@ -375,6 +376,8 @@ async function openAssistant(page: Page) {
   const dock = page.locator('[data-dock]');
   await expect(dock).toHaveCount(1, { timeout: 15_000 });
   await expect(dock).not.toHaveAttribute('data-pre-intro', '');
+  // At 320x568 the dock stays tucked over the hero's calls to action; focus brings it back.
+  await page.locator('[data-ask-launcher]').focus();
   await page.locator('[data-ask-launcher]').click();
   const input = page.locator('[data-ask-panel] input, [data-ask-sheet] input').first();
   await expect(input).toBeVisible();

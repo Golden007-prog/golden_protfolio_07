@@ -83,6 +83,21 @@ test('live:github keeps only the repo and date, never the commit message or URL'
   assert.ok(!/https?:\/\//.test(c.text), 'URL leaked');
 });
 
+test('live:leetcode calls the streak the longest run, never a current streak', () => {
+  // userCalendar.streak is LeetCode's max streak; the heatmap labels it that way too.
+  const live = load();
+  live.liveSnapshot = { ...live.liveSnapshot, leetcode: { ...live.liveSnapshot!.leetcode!, streak: 13 } };
+  const c = buildCorpus(live).find((x) => x.id === 'live:leetcode');
+  assert.ok(c);
+  assert.match(c.text, /longest streak 13 days \(not a current streak\)/);
+  assert.doesNotMatch(c.text.replace('not a current streak', ''), /current(ly)? streak/i);
+
+  const committed = read('ai-corpus.json') as { chunks: { id: string; text: string }[] };
+  const saved = committed.chunks.find((x) => x.id === 'live:leetcode');
+  assert.ok(saved, 'committed corpus has no live:leetcode chunk');
+  assert.doesNotMatch(saved.text.replace('not a current streak', ''), /current(ly)? streak/i, 'rerun npm run ai:corpus');
+});
+
 test('self text stays under 40K characters', () => {
   const total = chunks.filter((c) => c.cls === 'self').reduce((n, c) => n + c.text.length, 0);
   assert.ok(total < 40_000, `self text is ${total} chars`);

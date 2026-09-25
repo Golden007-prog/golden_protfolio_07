@@ -1,7 +1,8 @@
 'use client';
 
 import { lazy, useEffect, useLayoutEffect, useRef } from 'react';
-import Image from 'next/image';
+import { preload } from 'react-dom';
+import Image, { getImageProps } from 'next/image';
 import { ChevronDown, Hand } from 'lucide-react';
 import { BackgroundVideo } from '@/components/shared/BackgroundVideo';
 import { Deferred3D } from '@/components/shared/Deferred3D';
@@ -63,17 +64,27 @@ const CUE_COLORS = { light: { '#E2F6FD': '#55555F' } };
 
 // The model still: Deferred3D's server and fallback render, shown by hero.css on
 // phones, under reduced motion and on lite devices (and lazy, so never fetched when hidden).
+const HERO_STILL_SRC = '/images/hero-still.webp';
+const HERO_STILL_SIZES = '(max-width: 767px) 82vw, (max-width: 1023px) 45vw, 58vw';
 const HERO_STILL = (
   <div data-depth="12" className="absolute inset-0">
     <Image
-      src="/images/hero-still.webp"
+      src={HERO_STILL_SRC}
       alt=""
       fill
-      sizes="(max-width: 767px) 82vw, (max-width: 1023px) 45vw, 58vw"
+      sizes={HERO_STILL_SIZES}
+      fetchPriority="high"
       className="hero-still object-contain object-center"
     />
   </div>
 );
+
+// On phones the still is the LCP element, but a lazy image is only requested after
+// CSS and layout. A preload in <head> starts it with the HTML, scoped by media to
+// where hero.css shows it (below 1024px, on coarse pointers, which mark the page
+// lite, and under reduced motion), so a desktop that never shows it never fetches it.
+const STILL_PRELOAD_MEDIA = '(max-width: 1023.98px), (pointer: coarse), (prefers-reduced-motion: reduce)';
+const { props: STILL_PROPS } = getImageProps({ src: HERO_STILL_SRC, alt: '', fill: true, sizes: HERO_STILL_SIZES });
 
 function WaveHello({ play }: { play: boolean }) {
   const hand = <Hand aria-hidden="true" className="size-4 text-text-secondary" />;
@@ -127,6 +138,13 @@ function ScrollCue() {
 export function HeroSection() {
   useRenderCount('HeroSection');
   usePointerTracking();
+  preload(STILL_PROPS.src, {
+    as: 'image',
+    imageSrcSet: STILL_PROPS.srcSet,
+    imageSizes: STILL_PROPS.sizes,
+    fetchPriority: 'high',
+    media: STILL_PRELOAD_MEDIA,
+  });
   const { reduce, lite, scale, finePointer, hover } = useMotionPrefs();
   const { isTouch } = useDeviceCapability();
   const { done, heroReady, setHeroReady } = useIntro();
@@ -447,7 +465,8 @@ export function HeroSection() {
             </p>
           </div>
 
-          <div className="hero-ctas">
+          {/* data-dock-avoid: the floating dock tucks away rather than cover these on short phones. */}
+          <div data-dock-avoid="" className="hero-ctas">
             <span data-hero-rise="" data-reveal="" className="hero-intro flex">
               <Button
                 href="#projects"
@@ -485,7 +504,7 @@ export function HeroSection() {
             </span>
           </div>
 
-          <div data-hero-rise="" data-reveal="" className="hero-intro hero-meta flex flex-wrap items-center gap-2">
+          <div data-hero-rise="" data-reveal="" data-dock-avoid="" className="hero-intro hero-meta flex flex-wrap items-center gap-2">
             <CopyButton value={SITE.email} label={SITE.email} variant="ghost" size="md" className="-ml-2" />
             <SocialLinks size="md" />
           </div>

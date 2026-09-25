@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ArrowRight, Search } from 'lucide-react';
@@ -37,6 +37,20 @@ export function NotFoundSuggest({ catalog, caseStudySlugs }: Props) {
   const query = useMemo(() => pathQuery(path), [path]);
   const search = useAiJson<RetrieveBody>('/api/ai/retrieve');
   const [asked, setAsked] = useState(false);
+  const spent = asked && (search.status === 'done' || search.status === 'fallback');
+  const buttonRef = useRef<HTMLElement>(null);
+  const resultsRef = useRef<HTMLDivElement>(null);
+  const wasSpent = useRef(false);
+
+  // 'Find it' runs once, so it disables itself when the search settles; the results
+  // take the focus it held, or it would fall to <body>.
+  useLayoutEffect(() => {
+    if (spent && !wasSpent.current) {
+      const active = document.activeElement;
+      if (!active || active === document.body || active === buttonRef.current) resultsRef.current?.focus({ preventScroll: true });
+    }
+    wasSpent.current = spent;
+  });
 
   const found = useMemo(() => {
     if (search.status !== 'done' || !search.data) return [];
@@ -90,9 +104,10 @@ export function NotFoundSuggest({ catalog, caseStudySlugs }: Props) {
 
       <div className="mt-4 flex flex-wrap items-center gap-3">
         <Button
+          ref={buttonRef}
           variant="secondary"
           onClick={findIt}
-          disabled={!query || asked}
+          disabled={!query || spent}
           status={search.status === 'loading' ? 'loading' : 'idle'}
           loadingLabel="Searching…"
           leadingIcon={<Search aria-hidden="true" className="size-4" />}
@@ -105,7 +120,7 @@ export function NotFoundSuggest({ catalog, caseStudySlugs }: Props) {
         ) : null}
       </div>
 
-      <div aria-live="polite" className="mt-3">
+      <div ref={resultsRef} tabIndex={-1} aria-live="polite" className="mt-3 rounded-lg ring-focus" data-find-results="">
         {search.status === 'done' ? (
           found.length ? (
             <>

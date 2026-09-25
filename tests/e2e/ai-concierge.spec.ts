@@ -102,6 +102,16 @@ async function slowAsk(page: Page, sentences = 30, gapMs = 350) {
   );
 }
 
+/**
+ * On the shortest phones the dock stays tucked at the top of the page, where it would
+ * cover the hero's calls to action; focus brings it back, as it does for a keyboard user.
+ */
+async function pressLauncher(page: Page) {
+  const launcher = page.locator('[data-ask-launcher]');
+  await launcher.focus();
+  await launcher.click();
+}
+
 async function openChat(page: Page) {
   await page.addInitScript(() => {
     try {
@@ -114,13 +124,19 @@ async function openChat(page: Page) {
   const dock = page.locator('[data-dock]');
   await expect(dock).toHaveCount(1, { timeout: 15_000 });
   await expect(dock).not.toHaveAttribute('data-pre-intro', '');
-  await page.locator('[data-ask-launcher]').click();
+  await pressLauncher(page);
   const input = chat(page).locator('input').first();
   await expect(input).toBeVisible();
   return input;
 }
 
 const chat = (page: Page) => page.locator('[data-ask-panel], [data-ask-sheet]').first();
+
+/**
+ * Finished AI answers only. A streaming answer sits after the log in [data-ask-live], and
+ * until it lands there the panel drops a new question and treats Esc as Stop.
+ */
+const doneAi = (page: Page) => chat(page).getByRole('log', { name: 'Conversation' }).locator('[data-ask-answer="ai"]');
 
 async function ask(input: ReturnType<Page['locator']>, q: string) {
   await input.fill(q);
@@ -379,9 +395,9 @@ test('the thread survives closing and reloading; requests carry only the visitor
   await ask(input, 'Which projects use Gemini?');
   await expect(chat(page).locator('[data-ask-answer="skill"]')).toHaveCount(1, { timeout: 3000 });
   await ask(input, OPEN);
-  await expect(chat(page).locator('[data-ask-answer="ai"]')).toHaveCount(1, { timeout: 10_000 });
+  await expect(doneAi(page)).toHaveCount(1, { timeout: 10_000 });
   await ask(input, 'Why does UrbanCare AI use MedGemma, in his own words?');
-  await expect(chat(page).locator('[data-ask-answer="ai"]')).toHaveCount(2, { timeout: 10_000 });
+  await expect(doneAi(page)).toHaveCount(2, { timeout: 10_000 });
 
   expect(bodies).toHaveLength(2);
   expect(bodies[0].history).toEqual(['Which projects use Gemini?']);
@@ -393,12 +409,12 @@ test('the thread survives closing and reloading; requests carry only the visitor
 
   await page.keyboard.press('Escape');
   await expect(chat(page)).toHaveCount(0);
-  await page.locator('[data-ask-launcher]').click();
+  await pressLauncher(page);
   await expect(chat(page).locator('[data-ask-answer="ai"]')).toHaveCount(2);
 
   await page.reload();
   await expect(page.locator('[data-dock]')).not.toHaveAttribute('data-pre-intro', '', { timeout: 15_000 });
-  await page.locator('[data-ask-launcher]').click();
+  await pressLauncher(page);
   await expect(chat(page).locator('[data-ask-answer="skill"]')).toHaveCount(1);
   await expect(chat(page).locator('[data-ask-answer="ai"]')).toHaveCount(2);
 
@@ -516,7 +532,8 @@ test('an answer in Hindi gets lang="hi" and a Show in English toggle; an unknown
   await expect(hindi).toContainText('UrbanCare AI uses MedGemma');
 
   await ask(chat(page).locator('input').first(), OPEN);
-  await expect(chat(page).locator('[data-ask-answer="ai"]')).toHaveCount(2, { timeout: 10_000 });
+  // The unknown tag arrives with the done frame, so judge the finished answer.
+  await expect(doneAi(page)).toHaveCount(2, { timeout: 10_000 });
   await expect(chat(page).locator('[lang="xx"]')).toHaveCount(0);
 });
 
@@ -531,7 +548,7 @@ test('under reduced motion an AI answer fetches no Lottie JSON (#190)', async ({
   await routeAsk(page, ANSWER);
   const input = await openChat(page);
   await ask(input, OPEN);
-  await expect(chat(page).locator('[data-ask-answer="ai"]')).toHaveCount(1, { timeout: 10_000 });
+  await expect(doneAi(page)).toHaveCount(1, { timeout: 10_000 });
   await ask(input, 'Which projects use Gemini?');
   await expect(chat(page).locator('[data-ask-answer="skill"]')).toHaveCount(1, { timeout: 3000 });
   await page.waitForTimeout(500);

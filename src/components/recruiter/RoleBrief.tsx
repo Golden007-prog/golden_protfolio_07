@@ -1,6 +1,6 @@
 'use client';
 
-import { useId, useState } from 'react';
+import { useId, useRef, useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import profile from '@/data/profile.json';
 import { PROJECTS } from '@/data/projects';
@@ -49,6 +49,7 @@ export function RoleBrief({ available, onLens, onOpen }: Props) {
   const [asked, setAsked] = useState<string | null>(null);
   const [shown, setShown] = useState<BriefResponse | null>(null);
   const [note, setNote] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const api = useAiJson<BriefResponse>('/api/ai/brief');
 
   const submit = async () => {
@@ -98,7 +99,7 @@ export function RoleBrief({ available, onLens, onOpen }: Props) {
       </h3>
       {expanded ? (
         <div className="mt-3 flex flex-col gap-3">
-          {asked === null ? <AiNotice feature="brief" /> : null}
+          {asked === null ? <AiNotice feature="brief" onDismiss={() => inputRef.current?.focus()} /> : null}
           <form
             className="flex flex-wrap items-end gap-2"
             onSubmit={(e) => {
@@ -110,6 +111,7 @@ export function RoleBrief({ available, onLens, onOpen }: Props) {
               I&apos;m hiring for:
             </label>
             <input
+              ref={inputRef}
               id={`${id}-role`}
               value={title}
               maxLength={AI_LIMITS.title}

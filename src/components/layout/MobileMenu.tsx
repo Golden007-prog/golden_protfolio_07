@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent, type RefObject } from 'react';
+import { useCallback, useRef, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent, type RefObject } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion, useDragControls, type PanInfo } from 'framer-motion';
@@ -29,19 +29,34 @@ type Props = {
   origin: MenuOrigin | null;
 };
 
-/** Runs after the dialog has released its focus trap and scroll lock (two frames). */
-function afterClose(fn: () => void) {
-  requestAnimationFrame(() => requestAnimationFrame(fn));
-}
-
 /**
  * Full-screen phone menu on Dialog: focus trap, inert page (the dock included),
  * scroll lock and Escape come from Dialog. It opens as an iris from the burger,
  * the numbered links rise through masks 50ms apart, and a pull down on the
  * header dismisses it. Navbar closes it when the viewport reaches 768px.
+ *
+ * deferTrap keeps the whole-page restyle of inerting (and un-inerting) out of the
+ * tap that opens or closes the menu; a slow phone paints the iris first.
  */
 export function MobileMenu({ open, onClose, origin }: Props) {
   const closeRef = useRef<HTMLButtonElement>(null);
+  const pending = useRef<(() => void) | null>(null);
+
+  // An action picked in the menu runs once Dialog has handed the page back: focus
+  // restored, the page no longer inert and the scroll lock off.
+  const closeThen = useCallback(
+    (fn: () => void) => {
+      pending.current = fn;
+      onClose();
+    },
+    [onClose],
+  );
+  const onReleased = useCallback(() => {
+    const fn = pending.current;
+    pending.current = null;
+    fn?.();
+  }, []);
+
   return (
     <Dialog
       open={open}
@@ -50,13 +65,21 @@ export function MobileMenu({ open, onClose, origin }: Props) {
       ariaLabel="Site menu"
       initialFocusRef={closeRef}
       panelClassName="bg-transparent"
+      deferTrap
+      onReleased={onReleased}
     >
-      <MenuSheet origin={origin} onClose={onClose} closeRef={closeRef} />
+      <MenuSheet origin={origin} onClose={onClose} closeThen={closeThen} closeRef={closeRef} />
     </Dialog>
   );
 }
 
-function MenuSheet({ origin, onClose, closeRef }: Omit<Props, 'open'> & { closeRef: RefObject<HTMLButtonElement | null> }) {
+type SheetProps = Omit<Props, 'open'> & {
+  /** Closes the menu, then runs `fn` once the page is released. */
+  closeThen: (fn: () => void) => void;
+  closeRef: RefObject<HTMLButtonElement | null>;
+};
+
+function MenuSheet({ origin, onClose, closeThen, closeRef }: SheetProps) {
   const pathname = usePathname();
   const router = useRouter();
   const onHome = pathname === '/';
@@ -72,8 +95,7 @@ function MenuSheet({ origin, onClose, closeRef }: Omit<Props, 'open'> & { closeR
       return;
     }
     e.preventDefault();
-    onClose();
-    afterClose(() => {
+    closeThen(() => {
       smoothScrollTo(id);
       setUrlHash(id);
     });
@@ -85,8 +107,7 @@ function MenuSheet({ origin, onClose, closeRef }: Omit<Props, 'open'> & { closeR
       return;
     }
     e.preventDefault();
-    onClose();
-    afterClose(() => {
+    closeThen(() => {
       smoothScrollTo(0, { focus: false });
       setUrlHash(null);
       document.getElementById('main')?.focus({ preventScroll: true });
@@ -98,8 +119,7 @@ function MenuSheet({ origin, onClose, closeRef }: Omit<Props, 'open'> & { closeR
   // through the bus's pending slots, so an idle-loaded dock or a lazy fit sheet
   // still picks them up.
   const askAi = () => {
-    onClose();
-    afterClose(() => {
+    closeThen(() => {
       openAssistant();
       if (!onHome) router.push('/');
     });
@@ -112,8 +132,7 @@ function MenuSheet({ origin, onClose, closeRef }: Omit<Props, 'open'> & { closeR
       return;
     }
     e.preventDefault();
-    onClose();
-    afterClose(() => {
+    closeThen(() => {
       // A jump, not a glide: the fit sheet opens at once and its scroll lock would stop a
       // glide partway, leaving About half in view behind it.
       smoothScrollTo('about', { focus: false, immediate: true });

@@ -2,13 +2,14 @@
 
 import { useEffect, useId, useRef, useState, type ButtonHTMLAttributes, type ReactNode } from 'react';
 import { motion } from 'framer-motion';
-import { Check, Square, Undo2 } from 'lucide-react';
+import { Check, Sparkles, Square, Undo2 } from 'lucide-react';
 import { AIButton } from '@/components/ai/AIButton';
 import { AIDisclosure } from '@/components/ai/AIDisclosure';
 import { AIErrorState } from '@/components/ai/AIErrorState';
 import { AiThinking } from '@/components/ai/AiThinking';
 import { fallbackFromResponse, recordOutcome, sessionGate } from '@/components/ai/useAiStream';
 import { Button } from '@/components/ui/Button';
+import { useMotionPrefs } from '@/hooks/useMotionPrefs';
 import { track } from '@/lib/analytics';
 import { AI_CLIENT_TIMEOUT_MS } from '@/lib/ai/config';
 import {
@@ -54,14 +55,28 @@ const FIELD =
   'w-full rounded-xl border border-glass-border-strong bg-glass-fill px-4 py-3 text-base text-text-primary ring-focus transition-colors placeholder:text-text-muted hover:border-violet-bright/50 focus:border-violet-bright';
 const SUBLABEL = 'text-sm font-medium leading-6 text-text-secondary';
 
-function Chip({ pressed, className, children, ...rest }: ButtonHTMLAttributes<HTMLButtonElement> & { pressed: boolean }) {
+/**
+ * A tone or length chip. `inactive` (while a draft streams) is aria-disabled rather
+ * than disabled, so a chip pressed to regenerate keeps focus instead of dropping it
+ * to <body>; its clicks are ignored meanwhile.
+ */
+function Chip({
+  pressed,
+  inactive = false,
+  className,
+  children,
+  onClick,
+  ...rest
+}: ButtonHTMLAttributes<HTMLButtonElement> & { pressed: boolean; inactive?: boolean }) {
   return (
     <button
       {...rest}
       type="button"
       aria-pressed={pressed}
+      aria-disabled={inactive || undefined}
+      onClick={inactive ? undefined : onClick}
       className={cn(
-        'tap-safe gap-2 rounded-full border px-4 text-sm ring-focus transition-colors disabled:cursor-not-allowed disabled:opacity-60',
+        'tap-safe gap-2 rounded-full border px-4 text-sm ring-focus transition-colors aria-disabled:cursor-not-allowed aria-disabled:opacity-60',
         pressed
           ? 'border-violet-bright bg-violet text-white'
           : 'border-glass-border bg-glass-fill text-text-secondary hover:border-glass-border-strong hover:text-text-primary',
@@ -113,6 +128,9 @@ export function DraftHelper({ message, subject, intent, intentLabel, onApply, on
   const [used, setUsed] = useState(0);
   const [said, setSaid] = useState('');
   const notesRef = useRef<HTMLTextAreaElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const runRef = useRef<HTMLElement>(null);
+  const { finePointer } = useMotionPrefs();
   const controller = useRef<AbortController | null>(null);
   const runId = useRef(0);
   // Async stream code reads the newest props through this, never a stale render's.
@@ -134,6 +152,24 @@ export function DraftHelper({ message, subject, intent, intentLabel, onApply, on
 
   const remember = (before: DraftFields) => setUndo((u) => [...u.slice(-(UNDO_MAX - 1)), before]);
 
+  /**
+   * Call before a change that removes or disables the focused control in the panel
+   * (Try again and the template buttons go with their fallback; the run button rests
+   * once the visit's last draft is spent), or focus falls to <body>. Focus goes to
+   * `to`, else to the notes under a fine pointer and the panel under a coarse one,
+   * so no on-screen keyboard rises.
+   */
+  const holdFocus = (to?: HTMLElement | null) => {
+    const el = document.activeElement;
+    if (!(el instanceof HTMLElement) || el === notesRef.current || !panelRef.current?.contains(el)) return;
+    const target = to ?? (finePointer ? notesRef.current : panelRef.current);
+    if (target && target !== el) target.focus({ preventScroll: true });
+  };
+  /** The run button is about to come back disabled: move focus off it if it has it. */
+  const releaseRun = () => {
+    if (document.activeElement === runRef.current) holdFocus();
+  };
+
   const stream = async (body: DraftRequest, before: DraftFields) => {
     runId.current += 1;
     const id = runId.current;
@@ -150,6 +186,8 @@ export function DraftHelper({ message, subject, intent, intentLabel, onApply, on
     const count = draftsUsed() + 1;
     safeStorage.set(DRAFT_COUNT_KEY, String(count), 'session');
     setUsed(count);
+    // Stop turns back into a disabled Write draft when this run settles.
+    const lastDraft = count >= DRAFT_SESSION_CAP;
 
     const ac = new AbortController();
     controller.current = ac;
@@ -190,6 +228,7 @@ export function DraftHelper({ message, subject, intent, intentLabel, onApply, on
         latest.current.onApply(before);
         setUndo((u) => u.slice(0, -1));
       }
+      if (lastDraft) releaseRun();
       setPhase(retryAfterSec ? { kind: 'fallback', reason, retryAfterSec } : { kind: 'fallback', reason });
       settle({ ok: false, reason });
     };
@@ -243,6 +282,7 @@ export function DraftHelper({ message, subject, intent, intentLabel, onApply, on
       if (!ended) return fail('upstream');
       show(true);
       if (!inserted) return fail('unverified');
+      if (lastDraft) releaseRun();
       setPhase({ kind: 'done', source: 'ai', model, dropped });
       setSaid('Draft added to your message. Fill in anything in [brackets] before you send.');
       track('ai_draft_insert', { feature: 'draft', intent: body.intent });
@@ -256,6 +296,7 @@ export function DraftHelper({ message, subject, intent, intentLabel, onApply, on
 
   const generate = (over: { tone?: DraftTone; length?: DraftLength } = {}) => {
     if (draftsUsed() >= DRAFT_SESSION_CAP) {
+      releaseRun();
       setUsed(draftsUsed());
       return;
     }
@@ -279,7 +320,16 @@ export function DraftHelper({ message, subject, intent, intentLabel, onApply, on
     setSaid('Template added to your message. Replace the [brackets] with your details.');
   };
 
+  /** A template button goes with the fallback it sits in; its [brackets] wait in the message. */
+  const pickTemplate = () => {
+    const el = document.activeElement;
+    if (finePointer && focusMessage && el instanceof HTMLElement && panelRef.current?.contains(el)) focusMessage();
+    else holdFocus();
+    insertTemplate();
+  };
+
   const stop = () => {
+    if (capReached) releaseRun();
     runId.current += 1;
     controller.current?.abort('stop');
     controller.current = null;
@@ -342,14 +392,17 @@ export function DraftHelper({ message, subject, intent, intentLabel, onApply, on
 
       {open ? (
         <motion.div
+          ref={panelRef}
           id={panelId}
           role="group"
           aria-label="Help me write this"
+          // Focus lands here when a pressed control goes away and a coarse pointer rules out the notes.
+          tabIndex={-1}
           data-draft-panel=""
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: duration.base, ease: ease.out }}
-          className="ai-draft-panel mt-3 space-y-4 rounded-2xl border border-hairline bg-surface-tint p-4 sm:p-6"
+          className="ai-draft-panel mt-3 space-y-4 rounded-2xl border border-hairline bg-surface-tint p-4 ring-focus sm:p-6"
         >
           <div>
             <div className="flex items-baseline justify-between gap-4">
@@ -394,7 +447,7 @@ export function DraftHelper({ message, subject, intent, intentLabel, onApply, on
                 <Chip
                   key={t.id}
                   pressed={tone === t.id}
-                  disabled={busy}
+                  inactive={busy}
                   data-draft-tone={t.id}
                   onClick={() => {
                     if (t.id === tone) return;
@@ -417,7 +470,7 @@ export function DraftHelper({ message, subject, intent, intentLabel, onApply, on
                 <Chip
                   key={id}
                   pressed={length === id}
-                  disabled={busy}
+                  inactive={busy}
                   data-draft-length={id}
                   onClick={() => {
                     if (id === length) return;
@@ -433,15 +486,23 @@ export function DraftHelper({ message, subject, intent, intentLabel, onApply, on
 
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              {busy ? (
-                <Button variant="secondary" size="md" onClick={stop} leadingIcon={<Square aria-hidden="true" className="size-3.5 fill-current" />} data-draft-stop="">
-                  Stop
-                </Button>
-              ) : (
-                <AIButton variant="primary" size="md" disabled={capReached} onClick={() => generate()} data-draft-generate="">
-                  {phase.kind === 'done' && phase.source === 'ai' ? 'Rewrite draft' : 'Write draft'}
-                </AIButton>
-              )}
+              {/* One node for Write draft and Stop, so a focused button survives the swap. It
+                  carries AIButton's sparkle and data-ai-button only while it sends notes. */}
+              <Button
+                ref={runRef}
+                variant={busy ? 'secondary' : 'primary'}
+                size="md"
+                disabled={!busy && capReached}
+                onClick={busy ? stop : () => generate()}
+                leadingIcon={
+                  busy ? <Square aria-hidden="true" className="size-3.5 fill-current" /> : <Sparkles aria-hidden="true" className="size-4 shrink-0" />
+                }
+                data-ai-button={busy ? undefined : ''}
+                data-draft-stop={busy ? '' : undefined}
+                data-draft-generate={busy ? undefined : ''}
+              >
+                {busy ? 'Stop' : phase.kind === 'done' && phase.source === 'ai' ? 'Rewrite draft' : 'Write draft'}
+              </Button>
               {undo.length ? (
                 <Button variant="ghost" size="md" onClick={undoLast} leadingIcon={<Undo2 aria-hidden="true" className="size-4" />} data-draft-undo="">
                   Undo
@@ -466,15 +527,27 @@ export function DraftHelper({ message, subject, intent, intentLabel, onApply, on
           {phase.kind === 'waiting' ? <AiThinking step="Drafting…" /> : null}
 
           {phase.kind === 'fallback' ? (
-            <AIErrorState reason={phase.reason} retryAfterSec={phase.retryAfterSec} onRetry={capReached ? undefined : () => generate()}>
-              <Button variant="secondary" size="md" onClick={() => insertTemplate()} data-draft-template="">
+            <AIErrorState
+              reason={phase.reason}
+              retryAfterSec={phase.retryAfterSec}
+              onRetry={
+                capReached
+                  ? undefined
+                  : () => {
+                      // Try again goes with this fallback; the run button turns into Stop and takes the focus.
+                      holdFocus(runRef.current);
+                      generate();
+                    }
+              }
+            >
+              <Button variant="secondary" size="md" onClick={pickTemplate} data-draft-template="">
                 Use a template instead
               </Button>
             </AIErrorState>
           ) : capReached && phase.kind !== 'done' && !busy ? (
             <div className="flex flex-wrap items-center gap-2">
               <p className="text-sm leading-6 text-text-secondary">A template still works, or write it your way.</p>
-              <Button variant="secondary" size="md" onClick={() => insertTemplate()} data-draft-template="">
+              <Button variant="secondary" size="md" onClick={pickTemplate} data-draft-template="">
                 Use a template
               </Button>
             </div>

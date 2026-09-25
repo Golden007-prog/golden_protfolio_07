@@ -266,6 +266,13 @@
     background-color: var(--color-bg-base);
     transition: background-color 0.4s ease;
   }
+  /* Below 640px the floating dock spans most of the bottom edge, so focus scrolling
+     (Tab, scrollIntoView) stops each control above it rather than underneath it. */
+  @media (max-width: 639.98px) {
+    html {
+      scroll-padding-bottom: calc(var(--dock-height) + var(--dock-clearance) + 1rem);
+    }
+  }
 
   body {
     background-color: var(--color-bg-base);
@@ -308,6 +315,20 @@
 
   h1 { font-size: var(--text-h1); }
   h2 { font-size: var(--text-h2); }
+
+  /* Tight tracking is for display sizes; card and panel headings get the h3 token. */
+  h3, h4, h5, h6 { letter-spacing: -0.01em; }
+
+  /* Clash Display's space is only ~0.155em, so at card and panel sizes words run
+     together ("AttentionIsAllYouNeed"). Open it by 0.12em up to 30px (the text-h3
+     range), tapering to nothing by 40px so display-size type keeps its tight set. */
+  :is(h1, h2, h3, h4, h5, h6):not(.font-mono),
+  .font-display {
+    word-spacing: clamp(0px, (40px - 1em) * 0.36, 0.12em);
+  }
+  /* The UA sheet resets word-spacing on buttons (preflight restores only
+     letter-spacing), so a title rendered as a button would miss the rule above. */
+  :where(button) { word-spacing: inherit; }
 
   p {
     font-family: var(--font-body);

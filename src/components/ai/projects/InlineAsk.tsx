@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { MessageCircle, Square } from 'lucide-react';
-import { useId, useState, type FormEvent } from 'react';
+import { useId, useLayoutEffect, useRef, useState, type FormEvent } from 'react';
 import { AIButton } from '@/components/ai/AIButton';
 import { AIDisclosure } from '@/components/ai/AIDisclosure';
 import { AIErrorState } from '@/components/ai/AIErrorState';
@@ -15,6 +15,7 @@ import { useAiActionRunner } from '@/components/ai/useAiActionRunner';
 import { useAiStream } from '@/components/ai/useAiStream';
 import { Button } from '@/components/ui/Button';
 import { getProjectBySlug } from '@/data/projects';
+import { useMotionPrefs } from '@/hooks/useMotionPrefs';
 import { openAssistant } from '@/lib/ai/bus';
 import { AI_LIMITS } from '@/lib/ai/config';
 import { projectQuickAnswer, projectStarters, type ProjectSource } from '@/lib/ai/prompts/projects';
@@ -44,18 +45,52 @@ export function InlineAsk({ slug }: { slug: string }) {
   const project = getProjectBySlug(slug);
   const stream = useAiStream('/api/ai/ask');
   const runAction = useAiActionRunner();
+  const { finePointer } = useMotionPrefs();
   const [draft, setDraft] = useState('');
   const [asked, setAsked] = useState<string | null>(null);
   const headingId = useId();
   const inputId = useId();
+  const sectionRef = useRef<HTMLElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const buttonRef = useRef<HTMLElement>(null);
+  const answerRef = useRef<HTMLDivElement>(null);
+  const focusAnswer = useRef(false);
+  const wasRunning = useRef(false);
+  const running = stream.status === 'submitted' || stream.status === 'streaming';
+
+  /**
+   * Call before a change that removes or disables the focused control (a suggested
+   * question, Ask, Retry, Stop), or focus falls to <body>. It goes to the field under
+   * a fine pointer, else to the answer, so no on-screen keyboard rises.
+   */
+  const holdFocus = () => {
+    const el = document.activeElement;
+    if (!(el instanceof HTMLElement) || el === inputRef.current || !sectionRef.current?.contains(el)) return;
+    if (finePointer) inputRef.current?.focus({ preventScroll: true });
+    else if (answerRef.current) answerRef.current.focus({ preventScroll: true });
+    // The first answer mounts in the commit this ask causes.
+    else focusAnswer.current = true;
+  };
+
+  useLayoutEffect(() => {
+    if (focusAnswer.current) {
+      focusAnswer.current = false;
+      answerRef.current?.focus({ preventScroll: true });
+    } else if (wasRunning.current && !running && !draft.trim() && document.activeElement === buttonRef.current) {
+      // An answer that settles under a focused Stop turns it back into Ask, disabled while the field is empty.
+      holdFocus();
+    }
+    wasRunning.current = running;
+  });
+
   if (!project) return null;
 
-  const running = stream.status === 'submitted' || stream.status === 'streaming';
   const scope = { project: project.slug };
 
   const ask = (text: string) => {
     const question = text.replace(/\s+/g, ' ').trim().slice(0, AI_LIMITS.question);
     if (!question || running) return;
+    holdFocus();
     setAsked(question);
     setDraft('');
     stream.start({ question, scope });
@@ -65,6 +100,11 @@ export function InlineAsk({ slug }: { slug: string }) {
   const onSubmit = (e: FormEvent) => {
     e.preventDefault();
     ask(draft);
+  };
+
+  const stop = () => {
+    holdFocus();
+    stream.stop();
   };
 
   const openSource = (s: AiSource) => {
@@ -93,7 +133,7 @@ export function InlineAsk({ slug }: { slug: string }) {
   );
 
   return (
-    <section aria-labelledby={headingId} className="flex flex-col gap-5" data-inline-ask="">
+    <section ref={sectionRef} aria-labelledby={headingId} className="flex flex-col gap-5" data-inline-ask="">
       <div>
         <h2 id={headingId} className="font-display text-2xl font-semibold text-text-primary sm:text-3xl">
           Ask about this project
@@ -111,6 +151,7 @@ export function InlineAsk({ slug }: { slug: string }) {
             Your question about {project.name}
           </label>
           <input
+            ref={inputRef}
             id={inputId}
             type="text"
             value={draft}
@@ -122,19 +163,25 @@ export function InlineAsk({ slug }: { slug: string }) {
             className="h-11 w-full rounded-full border border-glass-border-strong bg-glass-fill px-4 text-sm text-text-primary ring-focus transition-colors placeholder:text-text-muted hover:border-violet-bright"
           />
         </div>
-        {running ? (
-          <Button variant="secondary" onClick={stream.stop} leadingIcon={<Square aria-hidden="true" className="size-3.5 fill-current" />}>
-            Stop
-          </Button>
-        ) : (
-          <AIButton type="submit" disabled={!draft.trim()}>
-            Ask
-          </AIButton>
-        )}
+        {/* One node for Ask and Stop, so a focused button survives the swap. */}
+        <AIButton
+          ref={buttonRef}
+          type={running ? 'button' : 'submit'}
+          onClick={running ? stop : undefined}
+          disabled={!running && !draft.trim()}
+          leadingIcon={running ? <Square aria-hidden="true" className="size-3.5 fill-current" /> : undefined}
+        >
+          {running ? 'Stop' : 'Ask'}
+        </AIButton>
       </form>
 
       {asked ? (
-        <div className="flex flex-col gap-4 rounded-2xl border border-hairline bg-surface-tint p-4 md:p-5" data-inline-answer={stream.status}>
+        <div
+          ref={answerRef}
+          tabIndex={-1}
+          className="flex flex-col gap-4 rounded-2xl border border-hairline bg-surface-tint p-4 ring-focus md:p-5"
+          data-inline-answer={stream.status}
+        >
           <p className="text-xs text-text-muted">
             You asked: <span className="text-text-secondary">{asked}</span>
           </p>
@@ -175,6 +222,7 @@ export function InlineAsk({ slug }: { slug: string }) {
               reason={stream.fallback.reason}
               retryAfterSec={stream.fallback.retryAfterSec}
               onRetry={() => {
+                holdFocus();
                 stream.start({ question: asked, scope });
               }}
             >

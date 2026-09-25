@@ -2,8 +2,11 @@ import { AI_BUDGETS, type AiFeature } from './config.ts';
 
 /*
  * Best-effort, per-instance abuse limits. Every Fluid instance keeps its own
- * buckets and a deploy resets them, so these only blunt a single noisy client; the
- * global ceilings are the Google-side per-model quotas and the Vercel WAF rule.
+ * buckets and a deploy resets them, so these only blunt a single noisy client.
+ * Nothing in the code holds across instances: that takes the per-model quotas on a
+ * dedicated Google key and a Vercel WAF rate-limit rule on /api/ai, both set up by
+ * hand outside the repository (README, "Before going live"). Neither is guaranteed
+ * to exist.
  */
 
 /** Bucket key for a client address: IPv4 whole, IPv6 cut to its /64 (one host controls a whole /64). */

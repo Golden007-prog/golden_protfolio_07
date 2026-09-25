@@ -50,3 +50,6 @@ scripts/*.log
 # playwright
 test-results/
 playwright-report/
+
+# Playwright sharded-run blobs
+/blob-report/

@@ -27,12 +27,14 @@ import {
   nextStage,
   NOT_A_JD,
   NOT_STATED,
+  onlySiteTerms,
   plausibleId,
   PREFILL_MAX,
   rankProjectsByOverlap,
   reachOutPrefill,
   reportMarkdown,
   reportText,
+  requirementCap,
   roleFromJd,
   runExtract,
   spellsNumber,
@@ -248,17 +250,24 @@ test('verify: an evidenced quote that lacks the requirement term is downgraded; 
   assert.equal(out.rows[1].synonym, 'Chroma');
 });
 
-test('verify: the keyword pass overrides a wrong not-listed', () => {
+test('verify: the keyword pass overrides a wrong not-listed on a requirement that is only site terms', () => {
   const out = verifyFitRows({
-    rows: [{ index: 0, status: 'not-listed', evidence: [] }],
-    requirements: [req('Python')],
+    rows: [
+      { index: 0, status: 'not-listed', evidence: [] },
+      { index: 1, status: 'not-listed', evidence: [] },
+      { index: 2, status: 'not-listed', evidence: [] },
+    ],
+    requirements: [req('Python'), req('Strong Python skills'), req('Shipped Python services to 1M+ daily users')],
     facts,
     entities: ents,
     vocab,
     lexical: (r) => lexicalEvidenceFor(r, data, vocab),
   });
-  assert.equal(out.rows[0].status, 'evidenced');
-  assert.equal(out.rows[0].source, 'lexical');
+  assert.deepEqual(
+    out.rows.map((r) => [r.status, r.source]),
+    [['evidenced', 'lexical'], ['evidenced', 'lexical'], ['not-listed', 'ai']],
+    "the model's not-listed stands when the requirement asks for more than the keyword",
+  );
 });
 
 test('verify: the client drops rows whose ids the site cannot have', () => {
@@ -574,4 +583,230 @@ test('brief: mostly unverifiable or softened output is discarded', () => {
     [],
   );
   assert.equal(out.discarded, true);
+});
+
+/* ---- evidence ids written in the prompt's [c:<id>] marker form ---- */
+
+// The rows of a real gemini-3.8-flash jd-fit reply to the smoke JD: every quote
+// verbatim, every id prefixed with the prompt's 'c:' marker.
+const PREFIXED_ROWS = [
+  { index: 0, status: 'evidenced' as const, evidence: [{ id: 'c:exp:0', quote: 'Architecting multi-agent systems using ReAct framework and LangGraph' }, { id: 'c:skills:genai-llms', quote: 'LangGraph' }] },
+  { index: 1, status: 'evidenced' as const, evidence: [{ id: 'c:exp:0', quote: 'Building advanced RAG pipelines with LlamaIndex, LangChain, and vector databases' }, { id: 'c:exp:0#h1', quote: 'RAG pipelines with Chroma/FAISS optimization.' }] },
+  { index: 2, status: 'evidenced' as const, evidence: [{ id: 'c:profile:about', quote: 'Skilled in Python, SQL, and cloud platforms' }, { id: 'c:skills:data-science-ml', quote: 'Python' }] },
+  { index: 3, status: 'adjacent' as const, evidence: [{ id: 'c:tool:4', quote: 'Containers: Docker · Compose.' }, { id: 'c:project:bruhworking-nexusflow#stack', quote: 'Docker' }] },
+  { index: 4, status: 'evidenced' as const, evidence: [{ id: 'c:profile:about', quote: 'LangChain, LlamaIndex, AutoGen' }, { id: 'c:skills:genai-llms', quote: 'LlamaIndex' }] },
+];
+const SMOKE_REQS = [req('LLM agents with LangGraph'), req('RAG pipelines on vector databases'), req('Python'), req('Kubernetes'), req('LlamaIndex', 'nice')];
+const allFacts = new Map(chunks.map((c) => [c.id, c.text]));
+
+test("verify: a real reply whose ids carry the 'c:' marker keeps every correct row, with bare ids", () => {
+  const out = verifyFitRows({ rows: PREFIXED_ROWS, requirements: SMOKE_REQS, facts: allFacts, entities: ents, vocab });
+  assert.equal(out.dropped, 0);
+  assert.equal(out.discarded, false);
+  assert.deepEqual(
+    out.rows.map((r) => [r.status, r.source]),
+    [['evidenced', 'ai'], ['evidenced', 'ai'], ['evidenced', 'ai'], ['adjacent', 'ai'], ['evidenced', 'ai']],
+  );
+  for (const r of out.rows) for (const e of r.evidence) assert.ok(!e.id.startsWith('c:') && plausibleId(e.id, data), e.id);
+  assert.equal(out.rows[3].evidence[0].id, 'tool:4');
+});
+
+test("verify: '[c:exp:0]' is read as exp:0; a prefixed unknown id or a paraphrased quote still drops", () => {
+  const out = verifyFitRows({
+    rows: [
+      { index: 0, status: 'evidenced', evidence: [{ id: '[c:exp:0]', quote: 'LangGraph' }] },
+      { index: 1, status: 'evidenced', evidence: [{ id: 'c:exp:9', quote: 'Chroma' }] },
+      { index: 2, status: 'evidenced', evidence: [{ id: 'c:exp:0', quote: 'Kubernetes clusters' }] },
+      { index: 3, status: 'evidenced', evidence: [{ id: 'c:skills:data-science-ml', quote: 'Python' }] },
+    ],
+    requirements: REQS,
+    facts,
+    entities: ents,
+    vocab,
+    maxDrop: 1,
+  });
+  assert.equal(out.dropped, 2);
+  assert.deepEqual(out.rows[0].evidence, [{ id: 'exp:0', quote: 'LangGraph' }]);
+  assert.equal(out.rows[1].status, 'not-listed');
+  assert.equal(out.rows[2].status, 'not-listed');
+  assert.equal(out.rows[3].evidence[0].id, 'skills:data-science-ml');
+});
+
+test("questions: a 'c:'-prefixed id is matched and returned bare", () => {
+  const sent = new Map([['exp:0', facts.get('exp:0')!]]);
+  const kept = verifyQuestions(
+    [
+      { question: 'How did you tune retrieval in the LangGraph agents?', id: 'c:exp:0' },
+      { question: 'What made you pick LangGraph over plain LangChain chains?', id: '[c:exp:0]' },
+      { question: 'Tell me about the retrieval layer you built there.', id: 'c:exp:7' },
+    ],
+    sent,
+    ents,
+  );
+  assert.deepEqual(
+    kept.map((q) => q.id),
+    ['exp:0', 'exp:0'],
+  );
+  assert.equal(clientCheckQuestions(kept, sent).length, 2, 'the client re-check accepts what the server returns');
+});
+
+test("brief: 'c:'-prefixed evidence ids are verified and returned bare", () => {
+  const out = verifyBrief(
+    {
+      claims: [
+        { text: 'He builds multi-agent systems on LangGraph.', evidence: [{ id: 'c:exp:0', quote: 'LangGraph' }] },
+        { text: 'He ran RLHF evaluations of GPT and Claude outputs.', evidence: [{ id: '[c:exp:1]', quote: 'RLHF evaluations' }] },
+        { text: 'He tuned Chroma and FAISS retrieval.', evidence: [{ id: 'c:exp:0', quote: 'Chroma/FAISS' }] },
+      ],
+      projects: [],
+    },
+    facts,
+    ents,
+    [],
+  );
+  assert.equal(out.discarded, false);
+  assert.equal(out.claims.length, 3);
+  assert.deepEqual(
+    out.claims.flatMap((c) => c.evidence.map((e) => e.id)),
+    ['exp:0', 'exp:1', 'exp:0'],
+  );
+});
+
+/* ---- evidence ids written without their chunk kind ---- */
+
+// The rows of a real gemini-3.8-flash jd-fit reply that came back 'unverified': two
+// ids lost their 'project:' kind ('content-storyteller#stack'), though every quote
+// was verbatim in project:content-storyteller#stack.
+const KINDLESS_ROWS = [
+  { index: 0, status: 'adjacent' as const, evidence: [{ id: 'tool:4', quote: 'Docker · Compose' }] },
+  { index: 1, status: 'not-listed' as const, evidence: [] },
+  { index: 2, status: 'adjacent' as const, evidence: [{ id: 'content-storyteller#stack', quote: 'Pub/Sub' }] },
+  { index: 3, status: 'evidenced' as const, evidence: [{ id: 'content-storyteller#stack', quote: 'Terraform' }] },
+  { index: 4, status: 'evidenced' as const, evidence: [{ id: 'skills:data-science-ml', quote: 'Python' }, { id: 'profile:about', quote: 'Skilled in Python' }] },
+  { index: 5, status: 'not-listed' as const, evidence: [] },
+];
+const KINDLESS_REQS = [req('Kubernetes'), req('Apache Spark'), req('Kafka streaming pipelines'), req('Terraform infrastructure as code'), req('Python'), req('Scala', 'nice')];
+
+test("verify: a real reply whose project ids lost their 'project:' kind keeps every row, with full ids", () => {
+  const out = verifyFitRows({ rows: KINDLESS_ROWS, requirements: KINDLESS_REQS, facts: allFacts, entities: ents, vocab, lexical: (r) => lexicalEvidenceFor(r, data, vocab) });
+  assert.equal(out.dropped, 0);
+  assert.equal(out.discarded, false);
+  assert.deepEqual(
+    out.rows.map((r) => [r.status, r.source]),
+    [['adjacent', 'ai'], ['not-listed', 'ai'], ['adjacent', 'ai'], ['evidenced', 'ai'], ['evidenced', 'ai'], ['not-listed', 'ai']],
+  );
+  assert.equal(out.rows[3].evidence[0].id, 'project:content-storyteller#stack');
+  for (const r of out.rows) for (const e of r.evidence) assert.ok(plausibleId(e.id, data), e.id);
+});
+
+test('verify: an invented slug, a quote not in the resolved chunk, a bare part or an ambiguous number still drops', () => {
+  const out = verifyFitRows({
+    rows: [
+      { index: 0, status: 'evidenced', evidence: [{ id: 'rust-project#stack', quote: 'Rust' }] },
+      { index: 1, status: 'evidenced', evidence: [{ id: 'content-storyteller#stack', quote: 'Kafka' }] },
+      { index: 2, status: 'evidenced', evidence: [{ id: 'stack', quote: 'Python' }] },
+      { index: 3, status: 'evidenced', evidence: [{ id: '0', quote: 'LangGraph' }] },
+    ],
+    requirements: [req('Rust'), req('Kafka'), req('Python'), req('LangGraph')],
+    facts: allFacts,
+    entities: ents,
+    vocab,
+    maxDrop: 1,
+  });
+  assert.equal(out.dropped, 4);
+  assert.ok(out.rows.every((r) => r.status === 'not-listed' && r.evidence.length === 0));
+});
+
+test('questions and brief: a kind-less id resolves to the full id it names, and comes back in full', () => {
+  const sent = new Map([['project:content-storyteller#stack', allFacts.get('project:content-storyteller#stack')!]]);
+  const kept = verifyQuestions([{ question: 'Why did you pick Pub/Sub over a direct call between services?', id: 'content-storyteller#stack' }], sent, ents);
+  assert.deepEqual(
+    kept.map((q) => q.id),
+    ['project:content-storyteller#stack'],
+  );
+  assert.equal(clientCheckQuestions(kept, sent).length, 1);
+  const brief = verifyBrief(
+    { claims: [{ text: 'Content Storyteller runs on Cloud Run with Pub/Sub and Terraform.', evidence: [{ id: 'content-storyteller#stack', quote: 'Terraform' }] }], projects: [] },
+    allFacts,
+    ents,
+    [],
+  );
+  assert.equal(brief.discarded, false);
+  assert.equal(brief.claims[0].evidence[0].id, 'project:content-storyteller#stack');
+});
+
+/* ---- employer, venue and credential requirements are never evidenced ---- */
+
+// The requirements of a live jd-fit call that came back 'Strong': the keyword pass
+// had turned the model's answers into 'evidenced' through 'RLHF' and 'TensorFlow'.
+const AFFILIATION_REQS = [
+  req('Prior employment at OpenAI or Anthropic doing RLHF'),
+  req('Research Scientist experience at Google DeepMind with Gemma models'),
+  req('TensorFlow Developer Certificate'),
+  req('Led a team of 10+ engineers building RAG systems', 'nice'),
+  req('Python'),
+];
+
+test("verify: 'Prior employment at OpenAI' and a certificate are never evidenced, from the model or the keyword pass", () => {
+  const lexical = (r: Requirement) => lexicalEvidenceFor(r, data, vocab);
+  const honest = verifyFitRows({
+    rows: AFFILIATION_REQS.map((r, index) =>
+      r.text === 'Python' ? { index, status: 'evidenced', evidence: [{ id: 'skills:data-science-ml', quote: 'Python' }] } : { index, status: 'not-listed', evidence: [] },
+    ),
+    requirements: AFFILIATION_REQS,
+    facts,
+    entities: ents,
+    vocab,
+    lexical,
+  });
+  const eager = verifyFitRows({
+    rows: [
+      { index: 0, status: 'evidenced', evidence: [{ id: 'exp:1', quote: 'RLHF' }] },
+      { index: 1, status: 'adjacent', evidence: [{ id: 'skills:genai-llms', quote: 'Gemma' }] },
+      { index: 2, status: 'evidenced', evidence: [{ id: 'skills:data-science-ml', quote: 'TensorFlow' }] },
+      { index: 4, status: 'evidenced', evidence: [{ id: 'skills:data-science-ml', quote: 'Python' }] },
+    ],
+    requirements: AFFILIATION_REQS,
+    facts,
+    entities: ents,
+    vocab,
+    lexical,
+  });
+  const silent = verifyFitRows({ rows: [], requirements: AFFILIATION_REQS, facts, entities: ents, vocab, lexical });
+  for (const out of [honest, eager, silent]) {
+    assert.deepEqual(
+      out.rows.slice(0, 3).map((r) => r.status),
+      ['not-listed', 'not-listed', 'not-listed'],
+    );
+    assert.ok(out.rows.slice(0, 3).every((r) => r.evidence.length <= 1), 'at most the closest thing on the site');
+    assert.notEqual(computeBand(out.rows)?.band, 'Strong');
+    assert.equal(out.rows[4].status, 'evidenced');
+  }
+  // The team-lead ask is more than 'RAG': with no model row it is adjacent, never evidenced.
+  assert.deepEqual([silent.rows[3].status, silent.rows[3].source], ['adjacent', 'lexical']);
+  const view: FitView = { ...VIEW, rows: silent.rows, band: computeBand(silent.rows) };
+  const text = reportText(view, SITE_LINKS);
+  assert.ok(text.includes('- [Must] Prior employment at OpenAI or Anthropic doing RLHF: Not listed on this site — closest on the site: "RLHF"'), text);
+  assert.ok(text.includes('Led a team of 10+ engineers building RAG systems: Adjacent (keyword match, not the whole requirement)'), text);
+  assert.ok(text.includes('- [Must] Python: Evidenced (exact keyword match)'), text);
+  assert.ok(reportMarkdown(view, SITE_LINKS).includes('| Python | Must | Evidenced (exact keyword match) |'));
+  assert.ok(!/OpenAI|Certificate/.test(teamBlurbs(view, src.profile, SITE_LINKS).full));
+});
+
+test('requirementCap: employers, venues and credentials the profile does not list; a listed employer passes', () => {
+  assert.equal(requirementCap(req('Previously worked at OpenAI or Anthropic on RLHF'), [], ents), 'affiliation:OpenAI');
+  assert.equal(requirementCap(req('Published papers at NeurIPS on LangGraph agents'), [], ents), 'affiliation:NeurIPS');
+  assert.equal(requirementCap({ text: 'Vorherige Anstellung bei OpenAI', gloss: 'Prior employment at OpenAI' }, [], ents), 'affiliation:OpenAI', 'the English gloss is checked too');
+  assert.equal(requirementCap(req('AWS Certified Machine Learning Specialty'), [], ents), 'credential');
+  assert.equal(requirementCap(req('Freelance AI Agent Specialist at Mindrift'), [], ents), null);
+  assert.equal(requirementCap(req('Experience with Kubernetes'), [], ents), null);
+  // Once a certification is listed, a row citing text that states one may keep its status.
+  const certified = { ...ents, certifications: ['AWS Certified Machine Learning Specialty'] };
+  assert.equal(requirementCap(req('AWS Certified Machine Learning Specialty'), ['AWS Certified Machine Learning Specialty (2026)'], certified), null);
+  assert.equal(requirementCap(req('AWS Certified Machine Learning Specialty'), ['AWS Lambda'], certified), 'credential');
+});
+
+test('onlySiteTerms: a requirement that is just site terms, not a larger ask naming one', () => {
+  for (const t of ['Python', 'Strong Python skills', 'Python and SQL', 'RAG pipelines', 'Python 3.10+', 'Knowledge of Scikit-learn and Pandas libraries']) assert.equal(onlySiteTerms(t, vocab), true, t);
+  for (const t of ['Prior employment at OpenAI doing RLHF', 'TensorFlow Developer Certificate', 'Shipped Python services to 1M+ daily users', 'Kubernetes', 'Kafka streaming pipelines']) assert.equal(onlySiteTerms(t, vocab), false, t);
 });

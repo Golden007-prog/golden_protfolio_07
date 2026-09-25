@@ -12,7 +12,8 @@ import { buildSystem, untrusted } from './base.ts';
 
 const NO_SOFTENERS = `Never soften a gap. Forbidden phrasings include: ${SOFTENER_PHRASES.map((p) => `'${p}'`).join(', ')}, and anything else that guesses at what he might know.`;
 // buildSystem's honesty rules ask for [c:id] markers in prose; a JSON answer carries ids in its own fields.
-const JSON_CITES = 'In this JSON answer, ids go only in the evidence fields: write no [c:...] markers inside any text.';
+const JSON_CITES =
+  "In this JSON answer, ids go only in the evidence and id fields. Copy each id exactly as it follows 'c:' in the chunk's marker, kind included: for [c:exp:0] write exp:0, for [c:project:omni-lab#stack] write project:omni-lab#stack (never omni-lab#stack). Write no [c:...] markers inside any text.";
 
 /* ---- jd-extract (cheap tier) ---- */
 
@@ -45,9 +46,9 @@ Return one row per requirement index:
 - status 'evidenced' when a CONTEXT chunk names the requirement's skill, tool or experience itself;
 - 'adjacent' when CONTEXT shows something related but not the thing itself (Docker for Kubernetes);
 - 'not-listed' when nothing in CONTEXT covers it. Say so plainly: that is a useful answer.
-- evidence: for evidenced and adjacent rows, one to three items, each a CONTEXT chunk id and a short quote (2 to 12 words) copied character for character from that chunk, naming the thing. For a not-listed row give at most one item, the closest related thing on the site, or none.
+- evidence: for evidenced and adjacent rows, one to three items, each a full CONTEXT chunk id without the c: marker (exp:0 or project:omni-lab#stack, not c:exp:0) and a short quote (2 to 12 words) copied character for character from that chunk, naming the thing. For a not-listed row give at most one item, the closest related thing on the site, or none.
 - synonym: only when the requirement uses another word for something CONTEXT names (a 'vector DB' requirement and 'Chroma' in CONTEXT), the exact term as CONTEXT writes it, with its capitalisation. Never map a word to a different technology that merely looks alike: React (a UI library) is not ReAct (an agent pattern).
-Then, for each project listed under PROJECTS, give one quote (under 20 words) copied exactly from that project's own chunks that best shows why it fits these requirements.`;
+Then, for each project listed under PROJECTS, give its slug and one quote (under 20 words) copied exactly from that project's own chunks that best shows why it fits these requirements.`;
 
 const FIT_RULES = [
   NO_SOFTENERS,
@@ -63,7 +64,8 @@ export function fitSystem(opts: { context: string; canary: string }): string {
 export function fitUserTurn(requirements: readonly Requirement[], projects: readonly { slug: string; name: string }[]): string {
   const list = requirements.map((r, i) => `${i}. [${r.kind}] ${r.gloss ? `${r.text} (English: ${r.gloss})` : r.text}`).join('\n');
   const reqs = untrusted('job requirements', list);
-  const proj = projects.length ? `PROJECTS\n${projects.map((p) => `- ${p.slug}: ${p.name} (chunks project:${p.slug}#...)`).join('\n')}` : 'PROJECTS\n(none)';
+  // Each line leads with the full chunk-id prefix, not the bare slug, so evidence ids keep their 'project:' kind.
+  const proj = projects.length ? `PROJECTS\n${projects.map((p) => `- project:${p.slug}#... (${p.name}; slug ${p.slug})`).join('\n')}` : 'PROJECTS\n(none)';
   return `${reqs}\n\n${proj}`;
 }
 

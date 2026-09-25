@@ -1,8 +1,23 @@
 'use client';
 
-import { Suspense, useEffect, useEffectEvent, useId, useRef, useState, type ReactNode } from 'react';
+import { Suspense, useCallback, useEffect, useEffectEvent, useId, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { useDeviceCapability } from '../../hooks/useDeviceCapability';
+import { cn } from '../../utils/cn';
 import { CanvasBoundary } from './CanvasBoundary';
+import { carryFocus } from './focusCarry';
+
+/** Hands the stage from the fallback to the canvas only once the canvas has drawn. */
+export type Handoff = {
+  /**
+   * Matches an element in the canvas's DOM once the canvas has drawn its first full
+   * frame. Until then the fallback stays mounted on top of the canvas; then it fades out.
+   */
+  ready: string;
+  /** How long the fallback takes to fade out (ms). */
+  fadeMs?: number;
+};
+
+type Cover = 'on' | 'fading' | 'off';
 
 type Props = {
   /** Usually a React.lazy canvas, so its chunk is only fetched when it can mount. */
@@ -17,6 +32,18 @@ type Props = {
   className?: string;
   /** Called when the fallback is final: heavy 3D is not allowed here, or the canvas failed. */
   onFallback?: () => void;
+  /**
+   * An attribute whose value names the same control in the fallback and in the
+   * canvas's own DOM. Keyboard focus on such a control follows it across every swap
+   * instead of dropping to <body>.
+   */
+  focusKey?: string;
+  /**
+   * Keeps the fallback up until the canvas has drawn, instead of unmounting it when
+   * the chunk resolves: a committed canvas is blank until R3F has measured it and
+   * rendered a frame, and anything that suspends inside it shows the fallback again.
+   */
+  handoff?: Handoff;
 };
 
 /* ---------------------------------------------------------------------------
@@ -133,6 +160,16 @@ if (typeof window !== 'undefined' && !window.__deferred3d) {
   };
 }
 
+function isShown(el: Element): boolean {
+  return typeof el.checkVisibility === 'function' ? el.checkVisibility() : el.getClientRects().length > 0;
+}
+
+/** Suspense's fallback inside a handoff: whenever the canvas (re)suspends, the cover comes back. */
+function Suspended({ onShow }: { onShow: () => void }) {
+  useLayoutEffect(onShow, [onShow]);
+  return null;
+}
+
 /** Ids of the canvases currently mounted. */
 export function getLive3D(): string[] {
   return [...entries.values()].filter((e) => e.mounted).map((e) => e.id);
@@ -152,6 +189,8 @@ export function Deferred3D({
   unmountMargin = '150%',
   className,
   onFallback,
+  focusKey,
+  handoff,
 }: Props) {
   const key = useId();
   const ref = useRef<HTMLDivElement>(null);
@@ -167,6 +206,13 @@ export function Deferred3D({
   // only beyond unmountMargin.
   const wants = allowed && (isTouch ? near || (granted && kept) : seen);
   const showing = wants && granted;
+
+  // With a handoff, the fallback stays on top of a mounted canvas until it has drawn.
+  const [cover, setCover] = useState<Cover>('on');
+  if (!showing && cover !== 'on') setCover('on');
+  const coverUp = useCallback(() => setCover('on'), []);
+  const readySelector = handoff?.ready;
+  const fadeMs = handoff?.fadeMs ?? 300;
 
   // The two effects after this one list `id` too, so they refill a re-registered entry.
   useEffect(() => {
@@ -235,21 +281,105 @@ export function Deferred3D({
     };
   }, [showing]);
 
+  // Without a handoff the branches below never share DOM (Suspense even mounts a
+  // second copy of the fallback), so every swap unmounts whatever control had focus;
+  // with one, the fallback still goes when its fade ends.
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || !focusKey) return;
+    return carryFocus(el, focusKey);
+  }, [focusKey]);
+
+  // The canvas has drawn once its DOM matches the handoff selector outside the cover
+  // and is shown (a re-suspended canvas is hidden with display:none).
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || !readySelector || !showing || cover !== 'on') return;
+    const drawn = () => {
+      const coverEl = el.querySelector(':scope > [data-deferred3d-cover]');
+      for (const match of el.querySelectorAll(readySelector)) {
+        if (!coverEl?.contains(match) && isShown(match)) return true;
+      }
+      return false;
+    };
+    const check = () => {
+      if (!drawn()) return;
+      observer.disconnect();
+      cancelAnimationFrame(firstCheck);
+      setCover('fading');
+    };
+    const observer = new MutationObserver(check);
+    observer.observe(el, { subtree: true, childList: true, attributes: true });
+    // It may already match (a canvas revealed again after a re-suspend).
+    const firstCheck = requestAnimationFrame(check);
+    return () => {
+      observer.disconnect();
+      cancelAnimationFrame(firstCheck);
+    };
+  }, [readySelector, showing, cover]);
+
+  // transitionend normally ends the fade; this covers a missed event.
+  useEffect(() => {
+    if (cover !== 'fading') return;
+    const t = window.setTimeout(() => setCover('off'), fadeMs + 150);
+    return () => window.clearTimeout(t);
+  }, [cover, fadeMs]);
+
   const notifyFallback = useEffectEvent(() => onFallback?.());
   const fallbackFinal = ready && (!allowHeavy3D || failed);
   useEffect(() => {
     if (fallbackFinal) notifyFallback();
   }, [fallbackFinal]);
 
+  if (!handoff) {
+    return (
+      <div ref={ref} className={className} data-deferred3d={id} data-state={showing ? 'live' : 'fallback'}>
+        {showing ? (
+          <CanvasBoundary fallback={fallback} onError={() => setFailed(true)}>
+            <Suspense fallback={fallback}>{children}</Suspense>
+          </CanvasBoundary>
+        ) : (
+          fallback
+        )}
+      </div>
+    );
+  }
+
+  // The cover keeps its slot (the first child) from the first render until the fade
+  // ends, so the fallback on screen is the same instance throughout: no remount, no
+  // blank frame, and a focused control inside it stays focused. Before the grant it
+  // lays out as if unwrapped; over a live canvas it is an overlay. The canvas stays
+  // inert under it, so the stage never offers two sets of controls at once.
+  const covered = !showing || cover !== 'off';
   return (
-    <div ref={ref} className={className} data-deferred3d={id} data-state={showing ? 'live' : 'fallback'}>
+    <div
+      ref={ref}
+      className={className}
+      data-deferred3d={id}
+      data-state={showing ? 'live' : 'fallback'}
+      data-cover={showing ? cover : undefined}
+    >
+      {covered ? (
+        <div
+          data-deferred3d-cover=""
+          className={
+            showing ? cn('absolute inset-0 z-1 transition-opacity ease-out', cover === 'fading' && 'pointer-events-none opacity-0') : 'contents'
+          }
+          style={showing ? { transitionDuration: `${fadeMs}ms` } : undefined}
+          onTransitionEnd={(e) => {
+            if (e.target === e.currentTarget && e.propertyName === 'opacity' && cover === 'fading') setCover('off');
+          }}
+        >
+          {fallback}
+        </div>
+      ) : null}
       {showing ? (
-        <CanvasBoundary fallback={fallback} onError={() => setFailed(true)}>
-          <Suspense fallback={fallback}>{children}</Suspense>
-        </CanvasBoundary>
-      ) : (
-        fallback
-      )}
+        <div className="contents" inert={cover === 'on'}>
+          <CanvasBoundary fallback={null} onError={() => setFailed(true)}>
+            <Suspense fallback={<Suspended onShow={coverUp} />}>{children}</Suspense>
+          </CanvasBoundary>
+        </div>
+      ) : null}
     </div>
   );
 }

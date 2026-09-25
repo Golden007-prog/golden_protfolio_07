@@ -97,8 +97,10 @@ function projectReason(slug: string, quote: string | undefined, corpus: Corpus):
  * the full self corpus; years, location, visa and other logistics requirements
  * never reach it (facts.ts answers them on the client). Rows are verified before
  * they leave: unknown ids and non-verbatim quotes drop a row, an 'evidenced'
- * quote that doesn't name the requirement is downgraded, and more than 30%
- * dropped answers 'unverified'. The band is computed on the client from the rows.
+ * quote that doesn't name the requirement is downgraded, a requirement for an
+ * employer, venue or credential the site doesn't list is capped at 'not-listed',
+ * and more than 30% dropped answers 'unverified'. The band is computed on the
+ * client from the rows.
  */
 export async function POST(req: Request) {
   const started = Date.now();

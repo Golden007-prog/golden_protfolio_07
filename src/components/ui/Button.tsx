@@ -87,6 +87,12 @@ const VARIANT: Record<ButtonVariant, string> = {
   icon: 'border border-glass-border bg-glass-fill text-text-secondary hover:border-glass-border-strong hover:text-text-primary',
 };
 
+/**
+ * For a 24px Lottie standing in for a 16px (size-4) icon: the negative margin gives it
+ * the icon's 16px layout box, so swapping one for the other never resizes the button.
+ */
+export const STATUS_LOTTIE_CLASS = '-m-1 grid size-6 shrink-0 place-items-center';
+
 const SUCCESS_ON_ACCENT = { '#0E7490': '#FFFFFF', '#67E8F9': '#FFFFFF', '#22D3EE': '#FFFFFF' };
 const SUCCESS_COLORS_ON_ACCENT = { dark: SUCCESS_ON_ACCENT, light: SUCCESS_ON_ACCENT };
 
@@ -140,6 +146,7 @@ export const Button = forwardRef<HTMLElement, ButtonProps>(function Button(props
 
   const statusLabel =
     status === 'loading' ? loadingLabel : status === 'success' ? successLabel : status === 'error' ? errorLabel : undefined;
+  const showStatusLabel = statusLabel !== undefined && variant !== 'icon';
   const announcement = status === 'idle' ? '' : (statusLabel ?? DEFAULT_ANNOUNCEMENT[status]);
 
   // Warm the success animation while the action is still running.
@@ -263,7 +270,7 @@ export const Button = forwardRef<HTMLElement, ButtonProps>(function Button(props
           loop={false}
           lazy={false}
           colors={variant === 'primary' ? SUCCESS_COLORS_ON_ACCENT : undefined}
-          className="-my-1 block size-6 shrink-0"
+          className={STATUS_LOTTIE_CLASS}
           fallback={<Check aria-hidden="true" className="size-4" />}
         />
       ))
@@ -282,9 +289,27 @@ export const Button = forwardRef<HTMLElement, ButtonProps>(function Button(props
           <span className="absolute inset-y-0 -left-1/2 w-1/2 -translate-x-full -skew-x-12 bg-gradient-to-r from-transparent via-[rgb(255_255_255/0.28)] to-transparent transition-none group-hover/button:translate-x-[420%] group-hover/button:transition-transform group-hover/button:duration-700 group-hover/button:ease-out" />
         ) : null}
       </span>
-      {statusIcon ?? leadingIcon}
-      {statusLabel !== undefined && variant !== 'icon' ? <span>{statusLabel}</span> : label}
-      {status === 'idle' ? trailingIcon : null}
+      {showStatusLabel ? (
+        // The resting content stays in the same grid cell, invisible, so a shorter status
+        // label ('Copied' for an email address) never narrows the button and moves its neighbours.
+        <span className="grid place-items-center [gap:inherit]">
+          <span aria-hidden="true" className="invisible col-start-1 row-start-1 inline-flex items-center [gap:inherit]">
+            {leadingIcon}
+            {label}
+            {trailingIcon}
+          </span>
+          <span className="col-start-1 row-start-1 inline-flex items-center [gap:inherit]">
+            {statusIcon}
+            <span>{statusLabel}</span>
+          </span>
+        </span>
+      ) : (
+        <>
+          {statusIcon ?? leadingIcon}
+          {label}
+          {status === 'idle' ? trailingIcon : null}
+        </>
+      )}
       {newTab ? <span className="sr-only"> (opens in new tab)</span> : null}
       <span className="sr-only" aria-live="polite" aria-atomic="true">
         {announcement}

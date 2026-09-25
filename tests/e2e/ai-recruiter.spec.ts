@@ -157,6 +157,28 @@ async function grantClipboard(page: Page, info: TestInfo) {
 
 const clipboard = (page: Page) => page.evaluate(() => navigator.clipboard.readText());
 
+/** Matrix row headers with a word split across lines ('Pytho' / 'n'): two letters or digits in a row on different lines. */
+function midWordBreaks(page: Page): Promise<string[]> {
+  return page.locator('[data-fit-matrix] tbody th[scope="row"]').evaluateAll((ths) =>
+    ths.flatMap((th) => {
+      const chars: { ch: string; top: number }[] = [];
+      const walker = document.createTreeWalker(th, NodeFilter.SHOW_TEXT);
+      for (let node = walker.nextNode() as Text | null; node; node = walker.nextNode() as Text | null) {
+        for (let i = 0; i < node.length; i++) {
+          const range = document.createRange();
+          range.setStart(node, i);
+          range.setEnd(node, i + 1);
+          const rect = range.getClientRects()[0];
+          if (rect) chars.push({ ch: node.data[i], top: Math.round(rect.top) });
+        }
+      }
+      const word = /[\p{L}\p{N}]/u;
+      const split = chars.some((c, i) => i > 0 && word.test(c.ch) && word.test(chars[i - 1].ch) && c.top !== chars[i - 1].top);
+      return split ? [th.textContent?.trim() ?? ''] : [];
+    }),
+  );
+}
+
 test.beforeEach(async ({ request }) => {
   await assertSafeServer(request);
 });
@@ -219,6 +241,7 @@ test.describe('lexical-only path', () => {
     await expect(matrix).toContainText('Exact keyword matches (no AI)');
     await expect(matrix.locator('[data-fit-matrix-row="LangGraph"]')).toHaveCount(1);
     await expect(matrix.locator('[data-fit-matrix-row="ReAct"]')).toHaveCount(0);
+    expect(await midWordBreaks(page), 'row headers split mid-word').toEqual([]);
     await expect(page.locator('[data-ai-error]')).toHaveCount(0);
     await expect(page.locator('[data-fit-fact="visa"]')).toContainText('Not stated on this site');
   });
@@ -378,6 +401,12 @@ test.describe('projects and matrix', () => {
     const wrapper = matrix.locator('[data-fit-matrix-scroll]');
     expect(await wrapper.evaluate((el) => getComputedStyle(el).overflowX)).toBe('auto');
     expect(await wrapper.evaluate((el) => el.querySelector('section') === null && el.closest('main section[id]') === null)).toBe(true);
+    // Whole words in the 'In the JD' column: overflow-wrap:anywhere collapsed it to ~50px ('Pytho' / 'n').
+    expect(await midWordBreaks(page), 'row headers split mid-word').toEqual([]);
+    // Touch scrollbars are overlays, so a hint says the columns continue exactly when the table overflows.
+    const overflowing = await wrapper.evaluate((el) => el.scrollWidth > el.clientWidth + 1);
+    if (width(info) === 320) expect(overflowing, 'the 34rem table overflows at 320').toBe(true);
+    await expect(matrix.locator('[data-fit-matrix-hint]')).toBeVisible({ visible: overflowing });
     // Nothing else in the sheet is wider than the sheet. Clipped content doesn't count:
     // text inside an .sr-only live region (a 1px clipped box) and Button's hover shine,
     // which sweeps past the button's edge inside its overflow-clip layer.

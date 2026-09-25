@@ -154,3 +154,26 @@ test('degraded is set when more than 30% of sentences are dropped', () => {
   const fine = run(['He built UrbanCare AI [c:project:urbancare-ai#tagline]. Omni-Lab uses Veo [c:project:omni-lab#summary].']);
   assert.equal(fine.end.degraded, false);
 });
+
+test('a truthful denial of employment is released; an employer claim is still dropped', () => {
+  const denial = run(['No, he has not worked at OpenAI or Google DeepMind [c:profile:about]. ', 'He is a Freelance AI Agent Specialist at Mindrift [c:exp:1].']);
+  assert.match(denial.text, /has not worked at OpenAI or Google DeepMind/);
+  assert.equal(denial.end.dropped, 0);
+  assert.equal(denial.end.degraded, false);
+
+  const claim = run(['He works at Google DeepMind [c:profile:about]. ', 'He is a Freelance AI Agent Specialist at Mindrift [c:exp:1].']);
+  assert.ok(!claim.text.includes('DeepMind'), claim.text);
+  assert.equal(claim.end.dropped, 1);
+});
+
+test('a Title Case employer claim is withheld; a listed role in Title Case with its own citation is released', () => {
+  const r = run([
+    'He was a Research Scientist at Google DeepMind [c:project:urbancare-ai#summary]. ',
+    'He is a Senior Researcher at Anthropic [c:exp:1]. ',
+    'He is a Freelance AI Agent Specialist at Mindrift [c:exp:1].',
+  ]);
+  assert.ok(!/DeepMind|Anthropic/.test(r.text), r.text);
+  assert.match(r.text, /Freelance AI Agent Specialist at Mindrift/);
+  assert.equal(r.end.dropped, 2);
+  assert.equal(r.end.kept, 1);
+});
