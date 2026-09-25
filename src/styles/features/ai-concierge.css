@@ -1,0 +1,76 @@
+/* Package: ai-concierge. The AskMeBot additions: header status dot, the launcher's
+   streaming ring, and the answer Details disclosure. Colours are tokens only;
+   reduced motion keys off html[data-motion='reduced']. */
+
+@layer components {
+  @keyframes ask-busy-ring {
+    0%,
+    100% {
+      opacity: 0.35;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.9;
+      transform: scale(1.06);
+    }
+  }
+
+  /* A raised on-screen keyboard (AskMeBot sets data-ask-short from the visual viewport):
+     the sheet takes the visible height instead of leaving room for the nav it covers
+     anyway, and drops its subtitle (still the dialog's description), so the question
+     field stays in view. */
+  html[data-ask-short] .ask-sheet {
+    height: min(560px, calc(var(--ask-vvh, 100dvh) - 1rem));
+  }
+  html[data-ask-short] .ask-sheet [data-ask-subtitle] {
+    display: none;
+  }
+
+  /* While an answer streams with the panel closed, the launcher says so. */
+  .ask-launcher-busy {
+    position: absolute;
+    inset: -4px;
+    border: 2px solid var(--app-cyan-bright);
+    border-radius: 9999px;
+    pointer-events: none;
+    animation: ask-busy-ring 1.6s var(--ease-in-out) infinite;
+  }
+  html[data-motion='reduced'] .ask-launcher-busy {
+    animation: none;
+    opacity: 0.8;
+  }
+
+  .ask-status-dot {
+    display: inline-block;
+    box-shadow: 0 0 0 2px var(--color-surface-tint);
+  }
+
+  /* Details: a native disclosure, with its own chevron instead of the marker. */
+  .ask-details-summary {
+    list-style: none;
+  }
+  .ask-details-summary::-webkit-details-marker {
+    display: none;
+  }
+  .ask-details-chevron {
+    transition: transform var(--dur-quick) var(--ease-out-expo);
+  }
+  .ask-details[open] .ask-details-chevron {
+    transform: rotate(90deg);
+  }
+  html[data-motion='reduced'] .ask-details-chevron {
+    transition: none;
+  }
+  .ask-details-table {
+    overscroll-behavior-x: contain;
+    scrollbar-width: thin;
+  }
+
+  @media (forced-colors: active) {
+    .ask-status-dot,
+    .ask-launcher-busy {
+      forced-color-adjust: none;
+      border-color: Highlight;
+    }
+  }
+}

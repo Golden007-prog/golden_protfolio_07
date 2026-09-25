@@ -1,8 +1,9 @@
 'use client';
 
 import { useId, useMemo, useState } from 'react';
+import Link from 'next/link';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ArrowUpRight, BookOpen, FileText } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, BookOpen, FileText } from 'lucide-react';
 import { CopyButton } from '@/components/ui/CopyButton';
 import reading from '@/data/reading.json';
 import { cn } from '@/utils/cn';
@@ -20,6 +21,11 @@ type Item = {
 };
 
 const ITEMS = reading as Item[];
+
+/** Papers whose idea this site's own AI puts to work, and where /ai shows it. */
+const APPLIED: Readonly<Record<string, string>> = {
+  'Lost in the Middle: How Language Models Use Long Contexts': '/ai#context-order',
+};
 const TAGS = Array.from(new Set(ITEMS.map((i) => i.tag)));
 const KINDS: { kind: Kind; label: string }[] = [
   { kind: 'paper', label: 'Papers' },
@@ -124,8 +130,10 @@ export function ReadingList() {
       <ul data-reading-grid="" className="relative grid grid-cols-1 gap-3 md:auto-rows-fr md:grid-cols-2">
         <AnimatePresence mode="popLayout" initial={false}>
           {shown.map((item) => {
-            const id = `${baseId}-${ITEMS.indexOf(item)}`;
+            const index = ITEMS.indexOf(item);
+            const id = `${baseId}-${index}`;
             const arxiv = arxivId(item.url);
+            const applied = APPLIED[item.title];
             return (
               <motion.li
                 key={item.title}
@@ -139,6 +147,7 @@ export function ReadingList() {
                 <article
                   aria-labelledby={id}
                   data-reading-item=""
+                  data-reading-index={index}
                   className="flex h-full flex-col rounded-xl border border-hairline bg-surface-tint p-4 transition-colors hover:border-glass-border-strong"
                 >
                   <div className="flex flex-wrap items-center gap-2 font-mono text-[11px] uppercase tracking-wider text-text-dim">
@@ -170,7 +179,7 @@ export function ReadingList() {
                   </h4>
                   <p className="text-[11px] text-text-dim">{item.authors}</p>
                   <p className="mt-2 flex-1 text-xs leading-relaxed text-text-muted">{item.note}</p>
-                  <div className="mt-3 flex items-center border-t border-hairline pt-3">
+                  <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-hairline pt-3">
                     <CopyButton
                       value={citationFor(item)}
                       label="Copy citation"
@@ -179,6 +188,18 @@ export function ReadingList() {
                       size="sm"
                       className="-ml-2"
                     />
+                    {applied ? (
+                      <Link
+                        href={applied}
+                        prefetch={false}
+                        data-reading-applied=""
+                        className="tap-safe-sm ring-focus gap-1.5 rounded-full px-3 text-[13px] font-medium text-violet-bright transition-colors hover:text-text-primary"
+                      >
+                        See it applied
+                        <span className="sr-only"> on the How the AI works page</span>
+                        <ArrowRight aria-hidden="true" className="size-3.5 shrink-0" />
+                      </Link>
+                    ) : null}
                   </div>
                 </article>
               </motion.li>

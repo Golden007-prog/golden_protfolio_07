@@ -198,8 +198,9 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               data-toast-region=""
               role="status"
               aria-live="polite"
-              className="pointer-events-none fixed inset-x-0 z-toast flex flex-col items-center gap-2 px-4 sm:left-auto sm:right-6 sm:w-96 sm:items-end sm:px-0"
-              style={{ bottom: 'calc(var(--dock-clearance) + var(--dock-height) + 0.75rem)' }}
+              className="pointer-events-none fixed inset-x-0 z-toast flex flex-col items-center gap-2 px-4 transition-[bottom] duration-[var(--dur-base)] ease-[var(--ease-out-expo)] sm:left-auto sm:right-6 sm:w-96 sm:items-end sm:px-0"
+              // --ai-lift: set on <html> by the guided-tour pill so toasts clear it; unset, it adds nothing.
+              style={{ bottom: 'calc(var(--dock-clearance) + var(--dock-height) + 0.75rem + var(--ai-lift, 0px))' }}
             >
               <AnimatePresence initial={false}>
                 {items.map((item) => (

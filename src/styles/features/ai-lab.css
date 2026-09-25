@@ -1,0 +1,221 @@
+/* Package: ai-lab — the /ai page: pipeline diagram, recorded demo panes and the embedding explorer.
+   Tokens only, so both themes work. Reduced motion keys off html[data-motion="reduced"] (the OS setting
+   or the in-page override), never the media query directly.
+   Scale used here: text 12 / 14 / 16px, spacing on the 8px grid, radius 12px (boxes) and 8px (small). */
+
+@layer components {
+  /* ---------- Pipeline diagram ---------- */
+  .ai-lab-figure {
+    display: grid;
+    gap: 32px;
+    margin: 0;
+  }
+  @media (min-width: 1024px) {
+    .ai-lab-figure {
+      grid-template-columns: minmax(0, 24rem) minmax(0, 1fr);
+      align-items: start;
+      gap: 48px;
+    }
+  }
+
+  .ai-lab-diagram {
+    display: block;
+    width: 100%;
+    max-width: 26rem;
+    height: auto;
+    margin-inline: auto;
+    font-family: var(--font-body);
+  }
+
+  .ai-lab-node rect {
+    fill: var(--color-surface-tint);
+    stroke: var(--color-glass-border-strong);
+    stroke-width: 1;
+  }
+  .ai-lab-node[data-kind='check'] rect {
+    stroke: var(--app-violet-bright);
+  }
+  .ai-lab-node[data-kind='model'] rect {
+    stroke: var(--color-cyan-text);
+    stroke-width: 1.5;
+  }
+  .ai-lab-node[data-kind='io'] rect {
+    fill: var(--color-glass-fill-strong);
+  }
+
+  .ai-lab-title {
+    fill: var(--color-text-primary);
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .ai-lab-sub {
+    fill: var(--color-text-secondary);
+    font-size: 12px;
+  }
+  .ai-lab-mono {
+    fill: var(--color-text-primary);
+    font-family: var(--font-mono);
+    font-size: 11px;
+  }
+  .ai-lab-exit {
+    fill: var(--color-amber-text);
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .ai-lab-arrow {
+    stroke: var(--color-text-dim);
+    stroke-width: 1.5;
+  }
+  .ai-lab-arrowhead {
+    fill: var(--color-text-dim);
+  }
+
+  @media (forced-colors: active) {
+    .ai-lab-node rect {
+      fill: Canvas;
+      stroke: CanvasText;
+    }
+    .ai-lab-title,
+    .ai-lab-sub,
+    .ai-lab-mono,
+    .ai-lab-exit {
+      fill: CanvasText;
+    }
+    .ai-lab-arrow {
+      stroke: CanvasText;
+    }
+    .ai-lab-arrowhead {
+      fill: CanvasText;
+    }
+  }
+
+  /* ---------- Disclosures (eval misses, the points table) ---------- */
+  .ai-lab-details > summary {
+    list-style: none;
+    gap: 12px;
+  }
+  .ai-lab-details > summary::-webkit-details-marker {
+    display: none;
+  }
+  .ai-lab-details > summary::before {
+    content: '';
+    flex: none;
+    width: 8px;
+    height: 8px;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: rotate(-45deg);
+    transition: transform var(--dur-quick) var(--ease-out-expo);
+  }
+  .ai-lab-details[open] > summary::before {
+    transform: rotate(45deg);
+  }
+  html[data-motion='reduced'] .ai-lab-details > summary::before {
+    transition: none;
+  }
+
+  /* ---------- Recorded demo panes: wrap, so nothing scrolls sideways at 320px ---------- */
+  .ai-lab-pre {
+    margin: 0;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    background: var(--color-bg-sunken);
+  }
+
+  /* ---------- Embedding explorer ---------- */
+  .ai-lab-axis {
+    stroke: var(--color-hairline);
+    stroke-width: 1px;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .ai-lab-point {
+    fill: var(--app-violet-bright);
+    stroke: var(--color-bg-base);
+    stroke-width: 1px;
+    vector-effect: non-scaling-stroke;
+    cursor: pointer;
+    transform-box: fill-box;
+    transform-origin: center;
+    transition:
+      transform var(--dur-quick) var(--ease-out-expo),
+      stroke var(--dur-quick) var(--ease-out-expo);
+  }
+  .ai-lab-point[data-cls='reference'] {
+    fill: var(--color-cyan-text);
+  }
+  .ai-lab-point[data-cls='live'] {
+    fill: var(--color-amber-text);
+  }
+  .ai-lab-map .ai-lab-point:hover,
+  .ai-lab-point.is-active {
+    transform: scale(1.35);
+    stroke: var(--color-text-primary);
+    stroke-width: 1.5px;
+  }
+  /* The focus indicator is the point's own ring: SVG shapes draw outlines unreliably. */
+  .ai-lab-point:focus {
+    outline: none;
+  }
+  .ai-lab-point:focus-visible {
+    transform: scale(1.6);
+    stroke: var(--app-focus-ring);
+    stroke-width: 3px;
+  }
+
+  .ai-lab-qline {
+    stroke: var(--app-violet-bright);
+    stroke-width: 1.5px;
+    vector-effect: non-scaling-stroke;
+    animation: ai-lab-fade var(--dur-base) var(--ease-out-expo) both;
+  }
+  .ai-lab-qmark circle {
+    fill: color-mix(in oklab, var(--app-violet-bright) 22%, transparent);
+    stroke: var(--app-violet-bright);
+    stroke-width: 2px;
+    vector-effect: non-scaling-stroke;
+  }
+  .ai-lab-qmark .ai-lab-qdot {
+    fill: var(--app-violet-bright);
+    stroke: none;
+  }
+  .ai-lab-qmark {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: ai-lab-pop var(--dur-base) var(--ease-out-expo) both;
+  }
+
+  @keyframes ai-lab-fade {
+    from {
+      opacity: 0;
+    }
+  }
+  @keyframes ai-lab-pop {
+    from {
+      opacity: 0;
+      transform: scale(0.4);
+    }
+  }
+
+  html[data-motion='reduced'] .ai-lab-map .ai-lab-point,
+  html[data-motion='reduced'] .ai-lab-map .ai-lab-qline,
+  html[data-motion='reduced'] .ai-lab-map .ai-lab-qmark {
+    transition: none;
+    animation: none;
+  }
+
+  @media (forced-colors: active) {
+    .ai-lab-point,
+    .ai-lab-qmark circle {
+      fill: CanvasText;
+      stroke: Canvas;
+    }
+    .ai-lab-point:focus-visible,
+    .ai-lab-point.is-active {
+      stroke: Highlight;
+    }
+    .ai-lab-qline {
+      stroke: Highlight;
+    }
+  }
+}

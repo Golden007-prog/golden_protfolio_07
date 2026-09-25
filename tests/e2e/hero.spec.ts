@@ -648,6 +648,16 @@ test.describe('CTAs (#59)', () => {
     expect(small).toEqual([]);
   });
 
+  test('the CV view link reads View CV and is named as the PDF in a new tab', async ({ page }, info) => {
+    test.skip(isLight(info) || isReduced(info), 'one theme and motion setting per viewport');
+    await gotoHero(page);
+    const view = page.locator('#hero [data-cv-view]');
+    await expect(view).toBeVisible();
+    await expect(view).toHaveAccessibleName('View CV (PDF) (opens in new tab)');
+    await expect(view).toHaveAttribute('href', '/oikantik_basu_u.pdf');
+    await expect(view).toHaveAttribute('target', '_blank');
+  });
+
   test.describe('on a phone', () => {
     test.use({ viewport: { width: 360, height: 740 }, hasTouch: true, isMobile: true });
 

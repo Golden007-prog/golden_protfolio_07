@@ -1,0 +1,71 @@
+/* Package: ai-discovery — the guided-tour pill, the palette's 'By meaning' score bars and the section tools.
+   Tokens only; reduced motion keys off html[data-motion="reduced"] only (the OS setting or the in-page override). */
+
+@layer components {
+  @keyframes tour-stop-in {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes palette-score-in {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: none;
+    }
+  }
+
+  /* ---------- Guided tour pill ----------
+     Above the dock (and above it again when the dock lifts over the footer,
+     --tour-dock-lift), below every dialog and toast. The pill writes its own
+     height to --ai-lift on <html>, which the toast region adds to its offset. */
+  .tour-pill {
+    position: fixed;
+    left: max(1rem, env(safe-area-inset-left));
+    right: max(1rem, env(safe-area-inset-right));
+    bottom: calc(var(--dock-clearance) + var(--dock-height) + 0.75rem + var(--tour-dock-lift, 0px));
+    margin-inline: auto;
+    max-width: 26rem;
+  }
+  @media (min-width: 640px) {
+    /* The dock and the toasts sit bottom-right from here up, so the pill joins them. */
+    .tour-pill {
+      left: auto;
+      right: max(1.5rem, env(safe-area-inset-right));
+      width: 26rem;
+      margin-inline: 0;
+    }
+  }
+
+  /* Each stop's text settles in; a jump under reduced motion. */
+  .tour-stop {
+    animation: tour-stop-in var(--dur-quick) var(--ease-out-expo) both;
+  }
+  html[data-motion='reduced'] .tour-stop {
+    animation: none;
+  }
+
+  /* ---------- Command palette: 'By meaning' ---------- */
+  .palette-score > span {
+    transform-origin: left center;
+    animation: palette-score-in var(--dur-base) var(--ease-out-expo) both;
+  }
+  html[data-motion='reduced'] .palette-score > span {
+    animation: none;
+  }
+  @media (forced-colors: active) {
+    .palette-score {
+      border: 1px solid CanvasText;
+    }
+    .palette-score > span {
+      background: Highlight;
+    }
+  }
+}

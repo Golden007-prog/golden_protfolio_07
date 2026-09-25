@@ -120,8 +120,8 @@ test.describe('dialog (#25)', () => {
     const root = page.locator('[data-dialog-root]');
     await expect(root, 'ProjectModal should render through ui/Dialog').toBeVisible();
 
-    // Focus moved in, background inert.
-    expect(await page.evaluate(() => Boolean(document.activeElement?.closest('[data-dialog-root]')))).toBe(true);
+    // Focus moved in (the trap moves it a frame after the root appears), background inert.
+    await expect.poll(() => page.evaluate(() => Boolean(document.activeElement?.closest('[data-dialog-root]')))).toBe(true);
     expect(await page.evaluate(() => Boolean(document.getElementById('main')?.closest('[inert]')))).toBe(true);
 
     // Tab and Shift+Tab stay inside.

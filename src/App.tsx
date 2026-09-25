@@ -1,27 +1,48 @@
 'use client';
 
-import { useEffect, useRef, useSyncExternalStore, type ReactNode } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from 'react';
 import dynamic from 'next/dynamic';
 import { AboutSection } from './components/about/AboutSection';
-import { ContactSection } from './components/contact/ContactSection';
-import { ExperienceSection } from './components/experience/ExperienceSection';
 import { HeroSection } from './components/hero/HeroSection';
 import { Footer } from './components/layout/Footer';
 import { Navbar } from './components/layout/Navbar';
 import { SectionRail } from './components/layout/SectionRail';
 import { SectionTransition } from './components/layout/SectionTransition';
 import LoadingScreen from './components/loading/LoadingScreen';
-import { ProjectsSection } from './components/projects/ProjectsSection';
 import { BackToTop } from './components/shared/BackToTop';
 import { LazyMount } from './components/shared/LazyMount';
-import { PhilosophySection } from './components/shared/PhilosophySection';
-import { ToolsStrip } from './components/shared/ToolsStrip';
-import { SkillsSection } from './components/skills/SkillsSection';
+import type { SectionToolsRequest } from './components/ai/discovery/SectionTools';
+import { ServerInterestsContext } from './components/projects/projectsAi';
+import { LensChipsContext, type LensChip } from './components/recruiter/FitCheckTrigger';
 import { useIntro } from './contexts/IntroContext';
+import { smoothScrollTo, useLenis } from './contexts/LenisContext';
 import { useSectionHashSync } from './hooks/useActiveSection';
 import { useHotkeys } from './hooks/useHotkeys';
 import { useMediaQuery } from './hooks/useMediaQuery';
 import { useMotionPrefs } from './hooks/useMotionPrefs';
+import { openAssistant } from './lib/ai/bus';
+import type { InterestView } from './lib/ai/prompts/projects';
+import { SECTIONS } from './lib/site';
+import { findTarget } from './lib/urlState';
+
+// Below the fold, so each section is its own chunk. They still render on the server
+// (the page reads the same with no JavaScript) and next/dynamic preloads their
+// chunks alongside the first one, so the page still hydrates in one pass: nothing
+// on it is live before everything is. (A Suspense boundary here would let the hero
+// go first, but then 'hydrated' would no longer mean the whole page is.)
+const SkillsSection = dynamic(() => import('./components/skills/SkillsSection').then((m) => m.SkillsSection));
+const ToolsStrip = dynamic(() => import('./components/shared/ToolsStrip').then((m) => m.ToolsStrip));
+const ProjectsSection = dynamic(() => import('./components/projects/ProjectsSection').then((m) => m.ProjectsSection));
+const ExperienceSection = dynamic(() => import('./components/experience/ExperienceSection').then((m) => m.ExperienceSection));
+const PhilosophySection = dynamic(() => import('./components/shared/PhilosophySection').then((m) => m.PhilosophySection));
+const ContactSection = dynamic(() => import('./components/contact/ContactSection').then((m) => m.ContactSection));
+// A ?project or ?skill link opens its dialog on arrival. The dialogs load on demand, so
+// start that fetch with the first chunk rather than after the section's own chunk runs.
+if (typeof window !== 'undefined') {
+  const params = new URLSearchParams(window.location.search);
+  if (params.has('project')) import('./components/projects/ProjectModal').catch(() => {});
+  if (params.has('skill')) import('./components/skills/SkillModal').catch(() => {});
+}
 
 // Client-only and code-split: none of these are in the first chunk for '/'.
 // They are extras, so a chunk that fails to load (a dropped connection, a deploy
@@ -49,13 +70,41 @@ const ShortcutsDialog = dynamic(
   () => import('./components/layout/ShortcutsDialog').then((m) => m.ShortcutsDialog, () => renderNothing),
   { ssr: false },
 );
+// AI discovery surfaces load only when first asked for, never at idle: most visits never open them.
+const GuidedTour = dynamic(
+  () => import('./components/ai/discovery/GuidedTour').then((m) => m.GuidedTour, () => renderNothing),
+  { ssr: false },
+);
+const SectionTools = dynamic(
+  () => import('./components/ai/discovery/SectionTools').then((m) => m.SectionTools, () => renderNothing),
+  { ssr: false },
+);
 
 const SHEET = 'relative z-20 bg-bg-base';
 
-/* ---- palette and shortcuts state: a store, so opening them never re-renders the page ---- */
+/* ---- palette, shortcuts, tour and section tools: a store, so opening them never re-renders the page ---- */
 
-type DialogState = { palette: boolean; shortcuts: boolean; wanted: boolean };
-const CLOSED: DialogState = { palette: false, shortcuts: false, wanted: false };
+type DialogState = {
+  palette: boolean;
+  shortcuts: boolean;
+  wanted: boolean;
+  /** The tour's goal picker is open; tourWanted keeps the tour (and its pill) mounted once asked for. */
+  tour: boolean;
+  tourWanted: boolean;
+  tools: boolean;
+  toolsRequest: SectionToolsRequest;
+  toolsWanted: boolean;
+};
+const CLOSED: DialogState = {
+  palette: false,
+  shortcuts: false,
+  wanted: false,
+  tour: false,
+  tourWanted: false,
+  tools: false,
+  toolsRequest: 'simple',
+  toolsWanted: false,
+};
 let dialogs = CLOSED;
 const dialogListeners = new Set<() => void>();
 
@@ -76,6 +125,27 @@ const openPalette = () => setDialogs({ wanted: true, shortcuts: false, palette: 
 const openShortcuts = () => setDialogs({ wanted: true, palette: false, shortcuts: true });
 const closePalette = () => setDialogs({ palette: false });
 const closeShortcuts = () => setDialogs({ shortcuts: false });
+const openTour = () => setDialogs({ palette: false, shortcuts: false, tour: true, tourWanted: true });
+const closeTour = () => setDialogs({ tour: false });
+const openTools = (request: SectionToolsRequest) => setDialogs({ palette: false, shortcuts: false, tools: true, toolsRequest: request, toolsWanted: true });
+const closeTools = () => setDialogs({ tools: false });
+
+/** 'a' and mod+j. Not over another dialog: the assistant would open behind it, inert. */
+function askFromKeyboard() {
+  if (document.querySelector('[data-dialog-root]')) return;
+  openAssistant();
+}
+
+// The Konami code (KonamiCode.tsx) ends in B, A: that A belongs to the easter egg.
+const KONAMI_LEAD = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'KeyB'];
+let keyTrail: string[] = [];
+function trailKey(e: KeyboardEvent) {
+  keyTrail = [...keyTrail, e.code].slice(-(KONAMI_LEAD.length + 1));
+}
+function askFromSingleKey() {
+  const konami = keyTrail.length > KONAMI_LEAD.length && KONAMI_LEAD.every((k, i) => keyTrail[i] === k);
+  if (!konami) askFromKeyboard();
+}
 
 /** Idle-mounted until someone asks for it first; then it mounts at once. */
 function IdleOr({ now, children }: { now: boolean; children: ReactNode }) {
@@ -86,20 +156,39 @@ function ShellDialogs() {
   const state = useSyncExternalStore(subscribeDialogs, getDialogs, getServerDialogs);
   const { done } = useIntro();
 
+  // Capture phase: the trail includes this key before the hotkey handler reads it.
+  useEffect(() => {
+    window.addEventListener('keydown', trailKey, true);
+    return () => window.removeEventListener('keydown', trailKey, true);
+  }, []);
+
   useHotkeys(
     {
       'mod+k': () => (getDialogs().palette ? closePalette() : openPalette()),
       '/': openPalette,
       '?': openShortcuts,
+      'mod+j': askFromKeyboard,
+      // A single key, so the WCAG 2.1.4 switch in ShortcutsDialog turns it off with the others.
+      a: askFromSingleKey,
     },
     { enabled: done },
   );
 
   return (
-    <IdleOr now={state.wanted}>
-      <CommandPalette open={state.palette} onClose={closePalette} onShowShortcuts={openShortcuts} />
-      <ShortcutsDialog open={state.shortcuts} onClose={closeShortcuts} />
-    </IdleOr>
+    <>
+      <IdleOr now={state.wanted}>
+        <CommandPalette
+          open={state.palette}
+          onClose={closePalette}
+          onShowShortcuts={openShortcuts}
+          onStartTour={openTour}
+          onSectionTools={openTools}
+        />
+        <ShortcutsDialog open={state.shortcuts} onClose={closeShortcuts} />
+      </IdleOr>
+      {state.tourWanted ? <GuidedTour pickerOpen={state.tour} onClosePicker={closeTour} /> : null}
+      {state.toolsWanted ? <SectionTools open={state.tools} request={state.toolsRequest} onClose={closeTools} /> : null}
+    </>
   );
 }
 
@@ -110,13 +199,53 @@ function Cursor() {
   return prefs.finePointer && prefs.hover && !prefs.reduce && !forcedColors ? <CometCursor /> : null;
 }
 
+const SECTION_IDS: ReadonlySet<string> = new Set(SECTIONS.map((s) => s.id));
+
+/**
+ * Makes sure '/#projects' lands on its section once the split sections are in the
+ * page. The router's own hash scroll after a client navigation (a case study's 'All
+ * projects') can run against a page Lenis measured before they laid out; on a fresh
+ * load the browser has already jumped there and this does nothing. `id` is the
+ * hash seen at the first render (the scroll-driven hash sync may rewrite it); after
+ * a client navigation it can predate the new URL, so the current hash stands in.
+ * Lenis re-measures first: its resize check is debounced, and a stale page height
+ * would clamp the jump short of the section.
+ */
+function HashArrival({ id }: { id: string }) {
+  const lenis = useLenis();
+  useEffect(() => {
+    const target = SECTION_IDS.has(id) ? id : window.location.hash.slice(1);
+    if (!SECTION_IDS.has(target)) return;
+    const raf = requestAnimationFrame(() => {
+      const el = findTarget(target);
+      if (!el) return;
+      const top = el.getBoundingClientRect().top;
+      if (top > 0 && top < 160) return;
+      lenis?.resize();
+      smoothScrollTo(el, { immediate: true });
+    });
+    return () => cancelAnimationFrame(raf);
+    // Once, when the sections arrive; a Lenis created later is not a new arrival.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
+  return null;
+}
+
 function HashSync() {
   useSectionHashSync();
   return null;
 }
 
-function App() {
+type AppProps = {
+  /** Worked out on the server (app/page.tsx), so these chips are in the first paint. */
+  lensChips?: readonly LensChip[];
+  interests?: readonly InterestView[];
+};
+
+function App({ lensChips = [], interests = [] }: AppProps) {
   const pageRef = useRef<HTMLDivElement>(null);
+  // Read during the first render, before any effect can rewrite the hash; never rendered.
+  const [arrivalHash] = useState(() => (typeof window === 'undefined' ? '' : window.location.hash.slice(1)));
 
   useEffect(() => {
     console.log('%c👋 Hey, developer.', 'color:#A855F7; font-size:18px; font-weight:700;');
@@ -149,7 +278,9 @@ function App() {
             <HeroSection />
           </div>
           <SectionTransition className={SHEET}>
-            <AboutSection />
+            <LensChipsContext.Provider value={lensChips}>
+              <AboutSection />
+            </LensChipsContext.Provider>
           </SectionTransition>
           <SectionTransition className={SHEET}>
             <SkillsSection />
@@ -158,7 +289,9 @@ function App() {
             <ToolsStrip />
           </SectionTransition>
           <SectionTransition className={SHEET}>
-            <ProjectsSection />
+            <ServerInterestsContext.Provider value={interests}>
+              <ProjectsSection />
+            </ServerInterestsContext.Provider>
           </SectionTransition>
           <SectionTransition className={SHEET}>
             <ExperienceSection />
@@ -169,6 +302,7 @@ function App() {
           <div className="relative z-30 bg-bg-base">
             <ContactSection />
           </div>
+          <HashArrival id={arrivalHash} />
         </main>
 
         <Footer />

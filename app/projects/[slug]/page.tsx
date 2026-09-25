@@ -2,10 +2,14 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { InlineAskLazy } from '@/components/ai/projects/InlineAskLazy';
 import { Footer } from '@/components/layout/Footer';
 import { SubpageHeader } from '@/components/layout/SubpageHeader';
 import { ProjectCaseStudy } from '@/components/projects/ProjectCaseStudy';
+import aiStore from '@/data/ai-generated/projects.json';
 import { PROJECTS, getProjectBySlug, githubFacts, hasCaseStudy } from '@/data/projects';
+import { SHOW_UNREVIEWED } from '@/lib/ai/config';
+import { selectCaseStudyAi } from '@/lib/ai/prompts/projects';
 import { SITE } from '@/lib/site';
 
 // Only projects with a real problem statement and approach get a page; the rest
@@ -52,6 +56,8 @@ export default async function CaseStudyPage({ params }: Props) {
   const index = CASE_STUDIES.indexOf(project);
   const prev = CASE_STUDIES[(index - 1 + CASE_STUDIES.length) % CASE_STUDIES.length];
   const next = CASE_STUDIES[(index + 1) % CASE_STUDIES.length];
+  // Selected here, so the store stays on the server and only this project's slice reaches the page.
+  const ai = selectCaseStudyAi(aiStore, project, PROJECTS, SHOW_UNREVIEWED);
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -81,7 +87,11 @@ export default async function CaseStudyPage({ params }: Props) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
         />
         <div className="mx-auto max-w-6xl px-4 pb-16 pt-6 sm:px-8 sm:pt-10">
-          <ProjectCaseStudy project={project} variant="page" titleId="case-study-title" shareUrl={url} />
+          <ProjectCaseStudy project={project} variant="page" titleId="case-study-title" shareUrl={url} ai={ai} />
+
+          <div className="px-1 pb-10 sm:px-8">
+            <InlineAskLazy slug={project.slug} />
+          </div>
 
           <nav aria-label="More case studies" className="mt-4 grid gap-3 border-t border-hairline pt-8 sm:grid-cols-2">
             <Link

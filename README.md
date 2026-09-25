@@ -18,7 +18,7 @@ All copy comes from the data files in `src/data/` (the profile, projects and ski
 
 ## Getting started
 
-You need Node.js 20.9 or newer (CI uses Node 24).
+You need Node.js 22.18 or newer (CI and Vercel use Node 24); the unit tests and the AI scripts rely on Node's built-in TypeScript type stripping.
 
 ```bash
 git clone https://github.com/Golden007-prog/golden_protfolio_07.git
@@ -27,7 +27,7 @@ npm ci
 npm run dev          # http://localhost:3000
 ```
 
-No environment variables are needed to run the site locally.
+No environment variables are needed to run the site locally. Without `GOOGLE_AI_API_KEY` the AI features answer through their non-AI paths: the rule-based assistant and lexical search.
 
 ## Scripts
 
@@ -49,6 +49,12 @@ No environment variables are needed to run the site locally.
 | `npm run media:projects` | Rebuilds the self-hosted project stills and loops under `public/images/projects/` and `public/videos/projects/` (needs `ffmpeg` and `ffprobe`). |
 | `npm run lottie:fetch` / `npm run lottie:recolor` | Downloads, validates and recolours the Lottie files in `public/lottie/`. See [LOTTIE_CREDITS.md](LOTTIE_CREDITS.md). |
 | `npm run glb:envelope` | Simplifies and compresses the contact section's envelope model. |
+| `npm run ai:corpus` | Rebuilds `src/data/ai-corpus.json`, the citable grounding corpus, from `src/data` and `src/data/site-copy.ts`. `-- --check` exits 1 when the data changed without a rebuild (CI runs it). |
+| `npm run ai:embed` | Embeds new or changed corpus chunks into `src/data/ai-vectors.json` (needs the key; without one it prints `skipped: no key` and exits 0). |
+| `npm run ai:recall` | Keyless retrieval check: lexical recall@5 over `evals/retrieval.jsonl` must stay above its floor (CI runs it); it also reports hybrid recall when vectors exist. |
+| `npm run ai:generate` | Runs every `scripts/ai/gen-*.mjs` generator to refresh the precomputed AI content in `src/data/ai-generated/` (hash-gated; exits 0 without a key or on a 429). |
+| `npm run ai:review` | Owner review of precomputed AI content: interactive, or `-- --list`, `-- --approve store:key`, `-- --reject store:key`. |
+| `npm run ai:scan` | After a build: fails if a Google API key pattern appears in `.next/static`, the prerendered pages, `public/` or this README, if `@google/genai` or the key's variable name reaches client code, or if `next.config.ts`'s `env` block holds anything but its four allowed keys (CI runs it). |
 
 `npm run budget -- --budget /=900000` overrides one route's budget for a single run, which is handy when checking a change locally.
 
@@ -65,7 +71,16 @@ Only names are listed here; values live in the Vercel project settings or a loca
 | `GITHUB_TOKEN` | Optional | Raises the GitHub API rate limit for `/api/github`, `npm run github:facts` and `npm run live:snapshot`. Anonymous access works. |
 | `NEXT_PUBLIC_RENDER_COUNT` | Optional, `1` to enable | Builds with render counters (`window.__renders`) for performance tests. |
 | `PW_BASE_URL`, `PW_PORT` | Optional | Point Playwright at an already running server or a preview deployment, or change the port it starts `next start` on. |
-| `GOOGLE_AI_API_KEY` | Optional | Only for the one-off media generation scripts (`scripts/generate-media*.mjs`, `generate-skill-data.mjs`). The site never reads it. |
+| `GOOGLE_AI_API_KEY` | Vercel (a sensitive variable, all environments) or a local `.env` | The Gemini API key. The site reads it on the server only, in `src/lib/ai/config.server.ts`, and passes it explicitly to `@google/genai`; the `ai:*` scripts read it through `node --env-file-if-exists=.env`, as do the older one-off media scripts (`scripts/generate-media*.mjs`, `generate-skill-data.mjs`). There is no `NEXT_PUBLIC_` variant, and there must never be one: anything prefixed `NEXT_PUBLIC_` is inlined into the browser bundle. Without the key every AI route answers the `no-key` fallback. |
+| `AI_ENABLED` | Optional, `0` to switch off | The AI kill switch. `0` makes every AI route answer the `disabled` fallback without touching the key; retrieval keeps working lexically. |
+| `AI_FEATURES_OFF` | Optional | A comma list of features to switch off one by one: `ask`, `retrieve`, `tour`, `project-filters`, `sentiment`, `draft`, `jd-extract`, `jd-fit`, `jd-questions`, `brief`, plus `retrieve-embed` to keep retrieval on BM25 only. |
+| `AI_MODEL_PRIMARY`, `AI_MODEL_FALLBACK` | Optional | Override the chat model (`gemini-3.8-flash`) and the cheap and fallback model (`gemini-3.5-flash-lite`). Only pinned ids are accepted: `-latest` aliases, and anything that looks like a key, are ignored with a warning. |
+| `AI_TIER` | Optional, `free` or `paid` | Which Gemini API terms the data notice quotes. Unset reads as `unknown` and shows the stricter free-tier wording. |
+| `AI_DAILY_BUDGET` | Optional, default `2000` | Per-instance ceiling on AI cost units per UTC day, behind the per-IP token bucket. |
+| `NEXT_PUBLIC_AI_SHOW_UNREVIEWED` | Set by `next.config.ts` | `1` on preview and local builds, empty in production, where unreviewed claim-bearing AI content stays hidden. Do not set it yourself. |
+| `AI_FAKE_MODEL` | Tests only, `1` to enable | Replaces Gemini with a deterministic fake, so tests drive the real routes with no key and no network. Ignored on Vercel. |
+| `AI_EVAL` | Local only, `1` to enable | Raises the rate limit five-fold for a local evaluation run. Ignored on Vercel. |
+| `PW_REAL_AI` | Optional, `1` to enable | Lets the Playwright server keep the real key instead of the fake model. The AI specs still refuse to run against it (`assertSafeServer`). |
 
 ## How it is put together
 
@@ -81,9 +96,36 @@ Only names are listed here; values live in the Vercel project settings or a loca
 
 **Styling rules.** Colours are tokens with dark and light values in `src/index.css`; the lint guard rejects raw white/black alpha utilities because they vanish in the light theme. Touch targets are at least 44px, the z-index scale is fixed (`z-nav`, `z-dock`, `z-overlay`, `z-toast`, `z-cursor`), and each feature's global CSS sits in its own file inside `@layer components`. `src/styles/features/platform.css` also holds the print stylesheet, which prints a light single-column page with link targets spelled out.
 
+## AI features (Gemini)
+
+The site uses Google's Gemini API for a grounded assistant and a handful of smaller features. The rule is that the AI answers only from what this site already says, cites where it found it, says so when the site doesn't cover a question, and is never the only way to get an answer.
+
+**Server only.** `@google/genai` runs in route handlers under `app/api/ai/<feature>/route.ts` (Node runtime, POST only, `maxDuration` 30) and in the `scripts/ai/` scripts; `next.config.ts` keeps it out of the bundles with `serverExternalPackages`. The browser loads no AI library: `src/components/ai/useAiStream.ts` reads the routes' NDJSON stream with `fetch`. Model ids live only in `src/lib/ai/config.server.ts`: `gemini-3.8-flash` for answers, `gemini-3.5-flash-lite` for extraction, drafting and as the fallback, and `gemini-embedding-2` at 768 dimensions for retrieval. `GET /api/ai/health` reports what the server actually runs (enabled, configured, tier, active models, models cooling down) and never calls Gemini.
+
+**Grounding.** `npm run ai:corpus` turns the profile, projects, reading list, tools, skills index, live snapshot and site copy into citable chunks (`src/data/ai-corpus.json`). The profile's stats and the phone number are left out, the generic skill encyclopedia is tagged `reference` and never counts as evidence of his own use, and live data carries its capture date. Retrieval is BM25 plus embeddings (`src/lib/ai/retrieval.ts`) fused by reciprocal rank, and a relevance gate refuses to call the model when nothing about Oikantik matches. Answers stream one verified sentence at a time (`src/lib/ai/streamFilter.ts`): each sentence is stripped of markup, scrubbed of URLs, emails and phone numbers that are not on the site, checked for a prompt-leak canary, limited to citations from its own context, and checked against the cited text for numbers, employers, certifications and degrees that text does not state. Structured routes verify every quoted claim verbatim.
+
+**Fallbacks.** Every failure answers HTTP 200 `{mode: 'fallback', reason}`: no key, AI switched off, quota, a timeout, a blocked prompt, a refused request or an off-topic question. The client then shows the rule-based answer from `src/utils/askme.ts`, or lexical search results, with calm copy instead of an error. A request has one 25-second deadline shared by every model attempt. The fallback model is tried only after a 429 or 503 with at least 8 seconds left, a timeout is never retried (an aborted call is still billed), and a model that returned 429 is skipped by every later request on that instance for the delay Google asked for. After two hard failures in a row the browser session stops calling the AI, and a soft cap of 20 answers per session applies.
+
+**Abuse and cost controls.** `src/lib/ai/guard.server.ts` runs the cheapest checks first: POST, JSON only, a strict same-origin check (the site never sends `Access-Control-Allow-Origin`), a streamed byte cap, schema validation, the kill switches, BotID on Vercel, and a per-IP token bucket whose cost grows with input size. The bucket and the daily budget are per instance and reset on deploy, so the real ceilings are the per-model quotas on a dedicated Google key and the Vercel WAF rule. `robots.txt` keeps crawlers out of `/api/`.
+
+**Precomputed content and review.** Content that is the same for every visitor (summaries, lenses, alt text, starter questions) is generated ahead of time with `npm run ai:generate` into `src/data/ai-generated/*.json`, and each entry is checked for faithfulness to its source and for inflated wording ('expert', 'led', 'senior' and similar, unless the source says it). Entries that make claims about Oikantik stay hidden in production until he approves them with `npm run ai:review`; preview and local builds show them marked 'Draft · not yet reviewed' so they can be read in place. The `/ai` lab adds three scripts that run directly rather than through npm, each as `node --env-file-if-exists=.env scripts/ai/<name>.mjs`: `eval` (it talks to a local `AI_EVAL=1 npx next start` in another terminal, never CI), `refresh-all` and `project-embeddings` (after `ai:embed`, it redraws the explorer map in `public/ai/projection.json`).
+
+**Privacy.** Text a visitor types into an AI feature is sent to Google's Gemini API to produce the answer; the site stores none of it, and pasted job descriptions and notes have emails, phone numbers and token-bearing links removed first. Server logs record only the feature, model, timings, token counts, the top retrieval score, dropped sentences and the fallback reason, never the question, a job description, a draft or an IP address. On the free tier Google may use submitted text to improve its products, which the in-page notice says before anyone types; its wording follows `AI_TIER`.
+
+### AI incident runbook
+
+Use this when a key may have leaked (an `ai:scan` failure or a secret-scanning alert), when spend or quota runs away, or when the features are being abused.
+
+1. **Switch AI off.** Set `AI_ENABLED=0` in the Vercel project's environment variables and redeploy: environment changes only apply to new deployments. The site keeps working with rule-based answers and lexical search.
+2. **Revoke and rotate the key.** Delete the key in Google AI Studio (or the Cloud console), create a new one, store it in Vercel as the sensitive variable `GOOGLE_AI_API_KEY` and in your local `.env`, and paste it nowhere else. Redeploy once the new key is in place.
+3. **Confirm.** `curl https://www.basuoikantik.in/api/ai/health` reports `"enabled": false` while AI is off, and `"configured": true` with the expected models once it is back on. The response never contains the key.
+4. **Emergency brake.** If the traffic itself is the problem, turn on Vercel's Attack Challenge Mode in the project's Firewall settings. It challenges every visitor until you switch it off, which keeps most automated clients out.
+
 ## Testing
 
-`npm run test:unit` covers the pure modules. The Playwright suites in `tests/e2e/` run every spec in 28 projects: seven viewports (320×568 to 1440×900, including a 1024×768 touch tablet), each in the dark and light themes, with and without reduced motion. `smoke.spec.ts` checks the platform: no console errors or hydration warnings, no horizontal overflow, 44px targets, the skip link, reveals, the CV download, the case-study and 404 pages, the no-JavaScript fallback, the fonts, the metadata routes, the JSON-LD and the security headers.
+`npm run test:unit` covers the pure modules, including every AI module in `src/lib/ai/` that has a matching `*.test.ts`. The Playwright suites in `tests/e2e/` run every spec in 28 projects: seven viewports (320×568 to 1440×900, including a 1024×768 touch tablet), each in the dark and light themes, with and without reduced motion. `smoke.spec.ts` checks the platform: no console errors or hydration warnings, no horizontal overflow, 44px targets, the skip link, reveals, the CV download, the case-study and 404 pages, the no-JavaScript fallback, the fonts, the metadata routes, the JSON-LD and the security headers.
+
+No test ever calls the real Gemini API. `playwright.config.ts` starts `next start` with `AI_FAKE_MODEL=1` and a blank key (an empty value beats `.env`), so `ai-server.spec.ts` drives the real guard, retrieval, sentence filter and NDJSON path against a deterministic fake whose marker questions replay attacks and failures: a canary split across chunks, a split markdown link, a foreign email, an uncited certification claim, a 429, a 503, a hang and a slow stream. Browser specs mock the routes with the helpers in `tests/e2e/ai-mocks.ts`. Every AI spec first calls `assertSafeServer`, which fails unless `/api/ai/health` reports the fake model or AI switched off, so a reused local server that loaded the real key cannot spend quota.
 
 ```bash
 npm run build
@@ -91,7 +133,7 @@ npm run test:e2e                     # starts next start on port 3100 by itself
 PW_BASE_URL=https://<preview>.vercel.app npx playwright test --project=1440x900-dark-motion
 ```
 
-CI (`.github/workflows/ci.yml`) runs on pushes to `main`, on pull requests and on demand, all on Node 24: `npm ci`, the type check, lint, unit tests, the build, the bundle budget, the Playwright suites in Chromium, and three mobile Lighthouse runs whose medians must stay within LCP 2.5 s, CLS 0.1 and TBT 300 ms.
+CI (`.github/workflows/ci.yml`) runs on pushes to `main`, on pull requests and on demand, all on Node 24 and all without the Gemini key: `npm ci`, the type check, lint, unit tests, the AI corpus freshness check and retrieval recall floor, the build, the AI secret scan, the bundle budget, the Playwright suites in Chromium, and three mobile Lighthouse runs whose medians must stay within LCP 2.5 s, CLS 0.1 and TBT 300 ms.
 
 ## Deployment
 
@@ -101,7 +143,9 @@ The Vercel project was created while the site was a Vite app, so its framework p
 
 The canonical address is `https://www.basuoikantik.in`. The apex `basuoikantik.in` answers with a 308 redirect to `www`, which Vercel handles as a domain redirect. DNS is hosted at Hostinger: an `A` record on the apex pointing at Vercel (`216.198.79.1`) and a `CNAME` on `www` pointing at the Vercel DNS target shown in the project's Domains settings. Every page, the sitemap, the JSON-LD and the social cards use the `www` origin from `SITE.url` in `src/lib/site.ts`.
 
-Security headers come from `next.config.ts`: `Strict-Transport-Security: max-age=63072000` (two years, deliberately without `includeSubDomains` or `preload`), `nosniff`, a strict referrer policy, a restrictive permissions policy and `X-Frame-Options: SAMEORIGIN`. `/cv` and `/resume` redirect to the PDF.
+Security headers come from `next.config.ts`: `Strict-Transport-Security: max-age=63072000` (two years, deliberately without `includeSubDomains` or `preload`), `nosniff`, a strict referrer policy, a restrictive permissions policy (the microphone is allowed for this origin only, for the click-to-start voice input) and `X-Frame-Options: SAMEORIGIN`. `/cv` and `/resume` redirect to the PDF.
+
+`vercel.json` also turns on `supportsCancellation` for `app/api/ai/**`, so a visitor who closes the tab stops the model call instead of leaving it streaming into nothing. BotID guards the AI routes on Vercel only; if its check itself fails, the cheap features stay available and the heavy ones (the job-description fit and the role brief) fall back.
 
 Vercel Analytics and Speed Insights render only on Vercel builds; they also have to be enabled once in the project's Analytics and Speed Insights tabs before data arrives.
 

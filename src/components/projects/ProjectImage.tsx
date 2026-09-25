@@ -62,6 +62,12 @@ export type ProjectImageProps = {
   parallax?: boolean;
   /** Shared-element id for the card-to-dialog morph. */
   layoutId?: string;
+  /**
+   * Generated alt text for the still and the fallback artwork, passed only once
+   * it may show (reviewed, or a draft off production; see selectCaseStudyAi).
+   * The image keeps `alt` for whichever of the two has none.
+   */
+  aiAlt?: { still?: string; fallback?: string };
   className?: string;
 };
 
@@ -86,6 +92,7 @@ export function ProjectImage({
   reveal = false,
   parallax = false,
   layoutId,
+  aiAlt,
   className,
 }: ProjectImageProps) {
   const frameRef = useRef<HTMLDivElement>(null);
@@ -126,10 +133,12 @@ export function ProjectImage({
 
   const still = STILLS[project.slug];
   const src = failed || !still ? project.fallbackThumbnail : still;
+  const generated = src === still ? aiAlt?.still : aiAlt?.fallback;
   const image = (
     <Image
       src={src}
-      alt={alt}
+      alt={generated || alt}
+      data-alt-source={generated ? 'ai' : undefined}
       fill
       sizes={sizes}
       priority={priority}

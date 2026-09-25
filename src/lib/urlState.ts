@@ -2,7 +2,9 @@ import { useSyncExternalStore } from 'react';
 
 /*
  * The single writer of the query string and hash. Namespaces: shell owns the hash
- * (#<SectionId>), projects owns ?project ?q ?cat ?tech ?live, skills owns ?skill.
+ * (#<SectionId>), projects owns ?project ?q ?cat ?tech ?live, skills owns ?skill,
+ * recruiter owns ?lens. AI surfaces write the projects namespace only through
+ * useAiActionRunner's filter action.
  * Writes merge into the current URL, so features never wipe each other's state.
  */
 

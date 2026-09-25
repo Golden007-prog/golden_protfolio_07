@@ -290,12 +290,13 @@ test.describe('metadata routes and headers', () => {
     expect(body).toContain(`Sitemap: ${CANONICAL}/sitemap.xml`);
   });
 
-  test('sitemap.xml lists home, each case study and the CV, and every URL returns 200', async ({ request }) => {
+  test('sitemap.xml lists home, each case study, the CV and /ai, and every URL returns 200', async ({ request }) => {
     const xml = await (await expectOk(request, '/sitemap.xml')).text();
     const urls = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
-    expect(urls).toHaveLength(2 + CASE_STUDIES.length);
+    expect(urls).toHaveLength(3 + CASE_STUDIES.length);
     expect(urls).toContain(CANONICAL);
     expect(urls).toContain(`${CANONICAL}${CV_PATH}`);
+    expect(urls).toContain(`${CANONICAL}/ai`);
     for (const path of CASE_STUDIES) expect(urls).toContain(`${CANONICAL}${path}`);
     for (const url of urls) {
       expect(url.startsWith(CANONICAL), url).toBe(true);

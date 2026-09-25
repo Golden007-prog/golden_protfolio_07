@@ -32,7 +32,7 @@ if(reduce||ss('ob-paused')==='1')d.setAttribute('data-motion-paused','');
 var c=n.connection||{};
 var lite=mq('(pointer: coarse)')||(n.hardwareConcurrency||8)<=4||(n.deviceMemory||8)<=4||c.saveData===true;
 if(lite)d.setAttribute('data-lite','');
-var deep=/[?&](project|skill)=/.test(l.search)||l.hash.length>1;
+var deep=/[?&](project|skill|lens)=/.test(l.search)||l.hash.length>1;
 var home=l.pathname==='/';
 var intro=home&&!deep&&!reduce&&!ss('ob-seen-loader-v2');
 d.setAttribute('data-intro',intro?'pending':'seen');

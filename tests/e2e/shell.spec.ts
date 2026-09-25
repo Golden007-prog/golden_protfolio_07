@@ -178,13 +178,13 @@ test.describe('app shell (#36, #37)', () => {
   test("the first chunks for '/' carry no palette or Konami code; the idle widgets mount cleanly", async ({ page, request }, info) => {
     test.skip(width(info) !== 1440 || isReduced(info), 'one viewport is enough');
     const errors = collectPageErrors(page);
-    await page.goto('/');
-    const srcs = await page.evaluate(() =>
-      Array.from(document.querySelectorAll<HTMLScriptElement>('script[src]'))
-        .filter((s) => !s.src.includes('/_vercel/'))
-        .map((s) => s.src),
-    );
+    // The first chunks are the ones the server's HTML names. Read from the live DOM after
+    // 'load', the list could already hold a chunk the idle mount fetched (the Konami code).
+    const html = await (await request.get('/')).text();
+    const srcs = [...html.matchAll(/<script[^>]+src="([^"]+)"/g)].map((m) => m[1]).filter((src) => !src.includes('/_vercel/'));
+    expect(srcs.length).toBeGreaterThan(0);
     const initial = await Promise.all(srcs.map(async (src) => (await request.get(src)).text()));
+    await page.goto('/');
     for (const body of initial) {
       expect(body).not.toContain('Search sections, projects, skills');
       expect(body).not.toContain('Dev mode unlocked');
@@ -283,6 +283,26 @@ test.describe('theme (#39, #40)', () => {
     await toggle.click();
     await expect(toggle).toHaveAttribute('aria-pressed', isLight(info) ? 'true' : 'false');
     await expect(toggle).toHaveAccessibleName('Dark theme');
+  });
+
+  test('the toggle icon is a moon-sized crescent in dark and a rayed sun in light', async ({ page }) => {
+    await page.goto('/');
+    await hydrated(page);
+    const toggle = page.locator('#site-nav [data-theme-button]');
+    // The disk spans 18 of the 24 viewBox units as a moon and 10 as a sun; the old 10-unit
+    // moon under a 9-unit bite painted only a hairline arc.
+    const read = () =>
+      toggle.evaluate((el) => {
+        const svg = el.querySelector('svg.theme-icon')!.getBoundingClientRect();
+        const disk = el.querySelector('.theme-icon-disk')!.getBoundingClientRect();
+        const rays = Number(getComputedStyle(el.querySelector('.theme-icon-rays')!).opacity);
+        return `${document.documentElement.dataset.theme}:${(disk.width / svg.width).toFixed(2)}:${rays}`;
+      });
+    const expected = (theme: string | undefined) => (theme === 'light' ? 'light:0.42:1' : 'dark:0.75:0');
+    const first = await page.locator('html').getAttribute('data-theme');
+    await expect.poll(read).toBe(expected(first ?? 'dark'));
+    await toggle.click();
+    await expect.poll(read).toBe(expected(first === 'light' ? 'dark' : 'light'));
   });
 
   test('the caret opens a Dark/Light/System radiogroup; right-click keeps the native menu', async ({ page }, info) => {

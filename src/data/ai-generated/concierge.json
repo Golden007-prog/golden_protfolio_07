@@ -1,0 +1,224 @@
+{
+  "version": 1,
+  "entries": {
+    "project:bruhworking-nexusflow": {
+      "hash": "d118a103621cf6f4",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T12:11:23.654Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "questions": [
+          "How does he handle long-running agentic tasks without losing state?",
+          "How does he provide mid-run visibility during complex tasks?",
+          "What is the primary lesson he learned about agent orchestration?",
+          "What approach does he use to track per-agent token costs?"
+        ]
+      }
+    },
+    "project:content-storyteller": {
+      "hash": "e68e01dceddf4a9f",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T12:11:28.328Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "questions": [
+          "What kind of marketing assets does his platform transform from rough inputs?",
+          "What determines which pipeline stages run for each job?",
+          "Why are multimodal pipelines cheaper when inferring intent upfront?",
+          "Which services and primary language did he use for this project?"
+        ]
+      }
+    },
+    "project:drugs-side-effects-analysis": {
+      "hash": "0f0e406d34efffaf",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T12:11:31.232Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "questions": [
+          "How did he process the patient experience dataset?",
+          "How did he evaluate drug efficacy and safety profiles?"
+        ]
+      }
+    },
+    "project:ibm-hr-attrition-prediction": {
+      "hash": "a604a4e4a1a07634",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T12:11:32.707Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "questions": [
+          "What metrics did he achieve when predicting employee attrition?",
+          "How does his Flask web application process uploaded CSV files?"
+        ]
+      }
+    },
+    "project:mcq-tech-challenge": {
+      "hash": "a1fbd83e39523d2a",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T12:11:35.835Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "questions": [
+          "Where are the user scores synced?",
+          "What language did he use for development?"
+        ]
+      }
+    },
+    "project:netflix-content-analytics": {
+      "hash": "7bf4339bd09a8076",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T12:11:34.460Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "questions": [
+          "How does he handle data ingestion for this pipeline?",
+          "What statistical tests does he use in his analysis?",
+          "How can I run his interactive dashboard locally?"
+        ]
+      }
+    },
+    "project:omni-lab": {
+      "hash": "31be816f029a89bf",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T12:11:26.908Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "questions": [
+          "What is the role of the scientist agent?"
+        ]
+      }
+    },
+    "project:tcs-stock-forecasting": {
+      "hash": "eb72a150c4eace7a",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T12:11:29.595Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "questions": [
+          "How did he approach the feature engineering for this project?",
+          "What machine learning models did he compare for stock forecasting?",
+          "Can you explain how the interactive dashboard was built?",
+          "How are the buy and sell signals generated?"
+        ]
+      }
+    },
+    "project:urbancare-ai": {
+      "hash": "91e5a7abdd062100",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T12:11:22.192Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "questions": [
+          "How does he make the clinical AI model transparent?",
+          "What problem does his project solve for physicians?",
+          "What interface does he use to bridge semantics and vectors?"
+        ]
+      }
+    },
+    "project:vyapar-gyan": {
+      "hash": "08cc3d70c00cb3c2",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T12:11:25.369Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "questions": [
+          "What inspired him to build an AI marketplace for WhatsApp?",
+          "How does he handle voice-first shopping in multiple languages?",
+          "How did he solve the problem of non-English users?",
+          "What did he learn about building voice-first commerce funnels?"
+        ]
+      }
+    },
+    "section:about": {
+      "hash": "f6c015665a775aa4",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T12:11:12.948Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "questions": [
+          "What kind of roles is he open to?",
+          "How can someone contact him?"
+        ]
+      }
+    },
+    "section:contact": {
+      "hash": "441c5f04a22bf825",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T12:11:20.317Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "questions": [
+          "Does he take on freelance work?",
+          "How quickly does he usually reply?"
+        ]
+      }
+    },
+    "section:experience": {
+      "hash": "cdfc0386f5b0d8f2",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T12:11:17.710Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "questions": [
+          "How does he build autonomous reasoning for multi-agent systems?",
+          "Why does chunk order matter more than raw context length?",
+          "What book serves as his ground truth for building reliable backends?"
+        ]
+      }
+    },
+    "section:philosophy": {
+      "hash": "66a00a6bba3de3d7",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T12:11:19.023Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "questions": [
+          "Why does he prefer shipping the boring version first?",
+          "What does he consider essential for system observability?"
+        ]
+      }
+    },
+    "section:projects": {
+      "hash": "27ec3d6271bec3f8",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T12:11:16.173Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "questions": [
+          "How does he handle voice-first e-commerce and local dialects across multiple languages?",
+          "How does he optimize multimodal pipelines for generating marketing assets?"
+        ]
+      }
+    },
+    "section:skills": {
+      "hash": "dd2afa0dc0ae6c8e",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T12:11:14.629Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "questions": [
+          "How does he handle multi agent orchestration and vectorization?",
+          "Does he have experience with exploratory data analysis and visualization?",
+          "What does his daily development environment and editor setup look like?"
+        ]
+      }
+    }
+  }
+}

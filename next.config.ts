@@ -1,4 +1,5 @@
 import type { NextConfig } from 'next';
+import { withBotId } from 'botid/next/config';
 
 const BUILD_TIME = new Date().toISOString();
 const COMMIT = process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) || 'local';
@@ -14,7 +15,8 @@ const SECURITY_HEADERS = [
   { key: 'Strict-Transport-Security', value: 'max-age=63072000' },
   { key: 'X-Content-Type-Options', value: 'nosniff' },
   { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
-  { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(), browsing-topics=()' },
+  // microphone=(self): the AI kit's click-to-start VoiceInput uses SpeechRecognition.
+  { key: 'Permissions-Policy', value: 'camera=(), microphone=(self), geolocation=(), browsing-topics=()' },
   { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
 ];
 
@@ -30,7 +32,13 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_COMMIT: COMMIT,
     // Always defined so useRenderCount's guard is a build-time constant.
     NEXT_PUBLIC_RENDER_COUNT: process.env.NEXT_PUBLIC_RENDER_COUNT === '1' ? '1' : '',
+    // Unreviewed claim-bearing AI entries show as drafts on preview and local builds,
+    // so they can be reviewed in context; production hides them until approved.
+    // Nothing secret may ever be added here: ai:scan allows only these four keys.
+    NEXT_PUBLIC_AI_SHOW_UNREVIEWED: process.env.VERCEL_ENV === 'production' ? '' : '1',
   },
+  // Loaded from node_modules at runtime rather than bundled into each AI route.
+  serverExternalPackages: ['@google/genai'],
   images: {
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [360, 414, 640, 768, 1024, 1280, 1536, 1920],
@@ -56,4 +64,6 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+// BotID Basic: serves its challenge script through a same-origin rewrite. The
+// client side (instrumentation-client.ts) attaches the challenge to /api/ai/* POSTs.
+export default withBotId(nextConfig);

@@ -143,6 +143,68 @@
   }
 
   /* ============================
+     Theme toggle icon: one drawing keyed off html[data-theme]. Dark is a
+     crescent (a 9-unit disk with a 6.5-unit bite at its upper right); light is
+     a sun (the disk scaled to 5 units, the bite parked outside the viewBox,
+     rays in). Every in-between frame is a disk, with or without its bite, so
+     the glyph stays legible mid-morph. index.css drops these transitions during
+     a View Transition swap (the iris carries the change) and under reduced motion.
+     ============================ */
+  .theme-icon {
+    transition: transform 480ms var(--ease-out-expo);
+  }
+  .theme-icon-disk,
+  .theme-icon-bite,
+  .theme-icon-rays {
+    transform-box: view-box;
+    transform-origin: center;
+  }
+  .theme-icon-disk {
+    fill: var(--app-violet-bright);
+    transition:
+      transform 420ms var(--ease-out-expo),
+      fill 300ms ease;
+  }
+  .theme-icon-bite {
+    transition: transform 420ms var(--ease-out-expo);
+  }
+  .theme-icon-rays {
+    stroke: var(--app-amber-text);
+    opacity: 0;
+    transform: scale(0.5);
+    transition:
+      transform 280ms var(--ease-in-expo),
+      opacity 160ms ease;
+  }
+  :root[data-theme="light"] .theme-icon {
+    transform: rotate(180deg);
+  }
+  :root[data-theme="light"] .theme-icon-disk {
+    /* amber-text, not amber: amber is under 3:1 on the cream nav. */
+    fill: var(--app-amber-text);
+    transform: scale(0.5556);
+  }
+  :root[data-theme="light"] .theme-icon-bite {
+    transform: translate(12px, -12px);
+  }
+  :root[data-theme="light"] .theme-icon-rays {
+    opacity: 1;
+    transform: none;
+    transition:
+      transform 420ms var(--ease-out-expo) 60ms,
+      opacity 240ms ease 60ms;
+  }
+  @media (forced-colors: active) {
+    .theme-icon-disk,
+    :root[data-theme="light"] .theme-icon-disk {
+      fill: ButtonText;
+    }
+    .theme-icon-rays {
+      stroke: ButtonText;
+    }
+  }
+
+  /* ============================
      Section sheets (SectionTransition). Off on lite devices and under reduced
      motion, where the one scroll-scrubbed effect per viewport is the hero's.
      ============================ */

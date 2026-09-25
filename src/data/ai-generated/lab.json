@@ -1,0 +1,240 @@
+{
+  "version": 1,
+  "entries": {
+    "citation": {
+      "hash": "175a493a0dd9e2",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:00:35.429Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "title": "A citation, as fields",
+        "source": "reading:3",
+        "task": "Extract the bibliographic fields from this citation. Use null for an arXiv id the text does not contain.",
+        "input": "Liu et al. (2023). Lost in the Middle: How Language Models Use Long Contexts. https://arxiv.org/abs/2307.03172",
+        "schema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": "string",
+              "minLength": 1,
+              "description": "The work’s title, exactly as written"
+            },
+            "authors": {
+              "type": "string",
+              "minLength": 1,
+              "description": "The authors, exactly as written"
+            },
+            "year": {
+              "type": "integer",
+              "minimum": 1900,
+              "maximum": 2100
+            },
+            "arxivId": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^\\d{4}\\.\\d{4,5}$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The arXiv identifier, such as 1706.03762, or null"
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "paper",
+                "book"
+              ]
+            }
+          },
+          "required": [
+            "title",
+            "authors",
+            "year",
+            "arxivId",
+            "kind"
+          ],
+          "additionalProperties": false
+        },
+        "zodChecks": [
+          "The title must appear in the citation word for word, which JSON Schema can’t express.",
+          "The year must be a whole number from 1900 to 2100."
+        ],
+        "raw": "{\n  \"title\": \"Lost in the Middle: How Language Models Use Long Contexts\",\n  \"authors\": \"Liu et al.\",\n  \"year\": 2023,\n  \"arxivId\": \"2307.03172\",\n  \"kind\": \"paper\"\n}",
+        "parse": {
+          "success": true,
+          "data": {
+            "title": "Lost in the Middle: How Language Models Use Long Contexts",
+            "authors": "Liu et al.",
+            "year": 2023,
+            "arxivId": "2307.03172",
+            "kind": "paper"
+          }
+        },
+        "usage": {
+          "input": 98,
+          "output": 69,
+          "thoughts": 0
+        }
+      }
+    },
+    "glossary": {
+      "hash": "10cda72895494e",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:00:36.845Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "title": "A definition, as a glossary card",
+        "source": "ref:rag",
+        "task": "Turn this definition into a glossary card. Key phrases must be copied from the text exactly.",
+        "input": "RAG is an AI framework that enhances large language models by retrieving relevant information from external knowledge bases to ground generated responses.",
+        "schema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "term": {
+              "type": "string",
+              "minLength": 1
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "framework",
+                "technique",
+                "library",
+                "model",
+                "service",
+                "concept"
+              ]
+            },
+            "summary": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 90,
+              "description": "One plain sentence, at most 90 characters"
+            },
+            "keyPhrases": {
+              "minItems": 1,
+              "maxItems": 4,
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          },
+          "required": [
+            "term",
+            "kind",
+            "summary",
+            "keyPhrases"
+          ],
+          "additionalProperties": false
+        },
+        "zodChecks": [
+          "The term and every key phrase must appear in the definition word for word, which JSON Schema can’t express.",
+          "The summary must be at most 90 characters. The schema says so too, but the model isn’t bound by it, so zod enforces it."
+        ],
+        "raw": "{\n  \"term\": \"RAG\",\n  \"kind\": \"framework\",\n  \"summary\": \"RAG enhances large language models by retrieving relevant external knowledge.\",\n  \"keyPhrases\": [\n    \"AI framework\",\n    \"large language models\",\n    \"external knowledge bases\",\n    \"generated responses\"\n  ]\n}",
+        "parse": {
+          "success": true,
+          "data": {
+            "term": "RAG",
+            "kind": "framework",
+            "summary": "RAG enhances large language models by retrieving relevant external knowledge.",
+            "keyPhrases": [
+              "AI framework",
+              "large language models",
+              "external knowledge bases",
+              "generated responses"
+            ]
+          }
+        },
+        "usage": {
+          "input": 79,
+          "output": 75,
+          "thoughts": 0
+        }
+      }
+    },
+    "note-tag": {
+      "hash": "0cb25c1cd701e1",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:00:37.978Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "title": "A reading note, tagged",
+        "source": "reading:3",
+        "task": "Tag this reading-list note with one topic from the allowed list and pick the concepts it names. Concepts must be copied from the note exactly.",
+        "input": "Why chunk order and re-ranking matter more than raw context length.",
+        "schema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "topic": {
+              "type": "string",
+              "enum": [
+                "Foundations",
+                "RAG",
+                "Agents",
+                "Alignment",
+                "Systems"
+              ]
+            },
+            "concepts": {
+              "minItems": 1,
+              "maxItems": 3,
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "confidence": {
+              "type": "string",
+              "enum": [
+                "high",
+                "medium",
+                "low"
+              ]
+            }
+          },
+          "required": [
+            "topic",
+            "concepts",
+            "confidence"
+          ],
+          "additionalProperties": false
+        },
+        "zodChecks": [
+          "The topic must be one of the reading list’s own tags.",
+          "Every concept must appear in the note word for word, which JSON Schema can’t express."
+        ],
+        "raw": "{\n  \"topic\": \"RAG\",\n  \"concepts\": [\n    \"chunk order\",\n    \"re-ranking\",\n    \"raw context length\"\n  ],\n  \"confidence\": \"high\"\n}",
+        "parse": {
+          "success": true,
+          "data": {
+            "topic": "RAG",
+            "concepts": [
+              "chunk order",
+              "re-ranking",
+              "raw context length"
+            ],
+            "confidence": "high"
+          }
+        },
+        "usage": {
+          "input": 80,
+          "output": 49,
+          "thoughts": 0
+        }
+      }
+    }
+  }
+}

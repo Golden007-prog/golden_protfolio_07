@@ -1,8 +1,9 @@
 'use client';
 
 import { useId } from 'react';
+import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ArrowUp } from 'lucide-react';
+import { ArrowUp, Sparkles } from 'lucide-react';
 import { Marquee } from '@/components/motion';
 import { toggleReducedMotion } from '@/components/shared/MotionToggle';
 import { smoothScrollTo } from '@/contexts/LenisContext';
@@ -116,6 +117,12 @@ export function Footer() {
               Elsewhere
             </h2>
             <ul aria-labelledby="footer-elsewhere" className="mt-3 flex flex-col">
+              <li>
+                <Link href="/ai" prefetch={false} className={LINK} data-footer-ai-link="">
+                  <Sparkles aria-hidden="true" className="size-3.5 shrink-0 text-cyan-text" />
+                  How the AI works
+                </Link>
+              </li>
               {ELSEWHERE.map((l) => (
                 <li key={l.label}>
                   <a href={l.href} target="_blank" rel="noopener noreferrer" className={LINK}>

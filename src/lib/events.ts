@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import type { AskOpenRequest, FitOpenRequest } from './ai/protocol';
 
 export type AppEvents = {
   'project:open': { slug: string };
@@ -6,6 +7,10 @@ export type AppEvents = {
   'skill:focus': { name: string };
   'contact:prefill': { message?: string; subject?: string };
   'contact:status': { status: 'idle' | 'typing' | 'sending' | 'success' | 'error' };
+  /** Consumed only by AskMeBot (via the bus.ts pending slot). */
+  'ask:open': AskOpenRequest;
+  /** Consumed only by FitCheckTrigger (via the bus.ts pending slot). */
+  'fit:open': FitOpenRequest;
 };
 
 const PREFIX = 'ob:';

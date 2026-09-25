@@ -17,6 +17,9 @@ import { resolve } from 'node:path';
 // remove about 340 kB. Lower this to the integrated size plus a small margin.
 const BUDGETS = {
   '/': 950_000,
+  // The AI lab page is static prose plus one lazy explorer island; it must never
+  // outweigh the home page.
+  '/ai': 950_000,
 };
 
 const args = process.argv.slice(2);

@@ -12,14 +12,17 @@ export function isExpectedFailure(url: string): boolean {
 
 /**
  * Collects console errors, page errors and failed requests, minus the allowlist.
- * Call before page.goto; read `.errors` at the end of the test.
+ * Call before page.goto; read `.errors` at the end of the test. `allow` adds
+ * patterns for this test only, such as the 'Failed to load resource ... 429' line
+ * Chromium logs when a test mocks a WAF-style non-JSON 429.
  */
-export function collectPageErrors(page: Page): { errors: string[] } {
+export function collectPageErrors(page: Page, opts: { allow?: readonly RegExp[] } = {}): { errors: string[] } {
   const errors: string[] = [];
+  const allowed = (text: string) => opts.allow?.some((re) => re.test(text)) ?? false;
   page.on('console', (msg) => {
     if (msg.type() !== 'error') return;
     const url = msg.location().url ?? '';
-    if (isExpectedFailure(url) || isExpectedFailure(msg.text())) return;
+    if (isExpectedFailure(url) || isExpectedFailure(msg.text()) || allowed(msg.text())) return;
     errors.push(`console: ${msg.text()}`);
   });
   page.on('pageerror', (err) => errors.push(`pageerror: ${err.message}`));

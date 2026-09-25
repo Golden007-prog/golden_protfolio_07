@@ -3,6 +3,7 @@
 import type { ReactNode } from 'react';
 import { Mail } from 'lucide-react';
 import { useReferenceMonth } from '@/components/experience/TimelineCard';
+import { FitCheckTrigger, LensSlot } from '@/components/recruiter/FitCheckTrigger';
 import { GlassCard } from '@/components/shared/GlassCard';
 import { Button } from '@/components/ui/Button';
 import { DownloadCvButton } from '@/components/ui/DownloadCvButton';
@@ -21,8 +22,10 @@ const DEGREE = profile.education.find((e) => e.end !== null && /master/i.test(e.
 type Props = { className?: string };
 
 /**
- * The recruiter summary at the top of About: who, where, availability, and the
- * three actions (CV, email, profiles). Every string comes from profile.json via SITE.
+ * The recruiter summary at the top of About: who, where, availability, the
+ * actions (CV, email, profiles, the fit check and the 30-second pitch) and the
+ * lens chips. Every string comes from profile.json via SITE; the recruiter
+ * tools load their own chunks on first use.
  */
 export function AtAGlance({ className }: Props) {
   const reference = useReferenceMonth();
@@ -82,12 +85,16 @@ export function AtAGlance({ className }: Props) {
         ))}
       </dl>
 
-      <div className="mt-auto flex flex-wrap items-center gap-3">
-        <DownloadCvButton showMeta />
-        <Button href={SITE.mailtoHref} variant="secondary" cursor="open" leadingIcon={<Mail aria-hidden="true" className="size-4 shrink-0" />}>
-          Email me
-        </Button>
-        <SocialLinks />
+      <div className="mt-auto">
+        <LensSlot />
+        <div className="flex flex-wrap items-center gap-3">
+          <DownloadCvButton showMeta />
+          <Button href={SITE.mailtoHref} variant="secondary" cursor="open" leadingIcon={<Mail aria-hidden="true" className="size-4 shrink-0" />}>
+            Email me
+          </Button>
+          <FitCheckTrigger />
+          <SocialLinks />
+        </div>
       </div>
     </GlassCard>
   );

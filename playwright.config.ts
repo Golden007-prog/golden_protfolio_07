@@ -14,6 +14,15 @@ const VIEWPORTS: { width: number; height: number; coarse?: boolean }[] = [
   { width: 1024, height: 768, coarse: true },
   { width: 1440, height: 900 },
 ];
+// `next start` auto-loads .env, which holds the real GOOGLE_AI_API_KEY. The suite
+// runs the fake model and blanks the key (an empty value beats .env) unless
+// PW_REAL_AI=1 asks for the real API on purpose. The switches are pinned too, so a
+// local .env cannot turn features off under the specs.
+const AI_SERVER_ENV: Record<string, string> =
+  process.env.PW_REAL_AI === '1'
+    ? {}
+    : { AI_FAKE_MODEL: '1', GOOGLE_AI_API_KEY: '', AI_ENABLED: '1', AI_FEATURES_OFF: '', AI_EVAL: '' };
+
 const THEMES = ['dark', 'light'] as const;
 const MOTION = [
   { name: 'motion', reducedMotion: 'no-preference' },
@@ -64,8 +73,11 @@ export default defineConfig({
         // Serves the build the orchestrator made; run `next build` first.
         command: `npx next start -p ${PORT}`,
         url: BASE_URL,
+        // A reused server keeps its own env; the AI specs' assertSafeServer refuses
+        // one that would reach the real Gemini API.
         reuseExistingServer: !process.env.CI,
         timeout: 120_000,
+        env: AI_SERVER_ENV,
       },
   projects,
 });

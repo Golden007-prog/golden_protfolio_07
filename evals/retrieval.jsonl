@@ -1,0 +1,36 @@
+{"q":"urbancare","expect":["project:urbancare-ai#tagline"]}
+{"q":"What is UrbanCare AI?","expect":["project:urbancare-ai#tagline","project:urbancare-ai#summary"]}
+{"q":"auditable clinical AI physicians can trust","expect":["project:urbancare-ai#problem"]}
+{"q":"MedGemma and TxGemma models","expect":["project:urbancare-ai#full"]}
+{"q":"ReAct agents","expect":["exp:0#h0","ref:react"]}
+{"q":"Which role used the ReAct framework?","expect":["exp:0"]}
+{"q":"ReAct: Synergizing Reasoning and Acting","expect":["reading:2"]}
+{"q":"What is ReAct?","expect":["ref:react"]}
+{"q":"Which projects are built with React?","expect":["project:urbancare-ai#stack","project:omni-lab#stack","project:content-storyteller#stack"]}
+{"q":"React","expect":["project:urbancare-ai#stack","project:omni-lab#stack","project:content-storyteller#stack"]}
+{"q":"Where did he use ReAct?","expect":["exp:0","exp:0#h0"]}
+{"q":"WhatsApp voice commerce in Indian languages","expect":["project:vyapar-gyan#summary"]}
+{"q":"serverless agent swarm on Cloud Run","expect":["project:bruhworking-nexusflow#tagline"]}
+{"q":"AI tutor that turns a PDF into interactive lessons","expect":["project:omni-lab#solution"]}
+{"q":"polished marketing assets from rough inputs","expect":["project:content-storyteller#summary"]}
+{"q":"TCS stock LSTM forecasting","expect":["project:tcs-stock-forecasting#summary"]}
+{"q":"drug side effects and patient reviews","expect":["project:drugs-side-effects-analysis#summary"]}
+{"q":"employee attrition prediction with XGBoost","expect":["project:ibm-hr-attrition-prediction#summary"]}
+{"q":"Netflix catalog analysis with PostgreSQL","expect":["project:netflix-content-analytics#summary"]}
+{"q":"MCQ quiz app that syncs scores to a GitHub Gist","expect":["project:mcq-tech-challenge#summary"]}
+{"q":"RLHF evaluations at Mindrift","expect":["exp:1"]}
+{"q":"hallucination detection and evaluation metrics","expect":["exp:1#h2"]}
+{"q":"HR attrition accuracy","expect":["exp:2#m0"]}
+{"q":"Data Science Intern at Unified Mentor","expect":["exp:2"]}
+{"q":"Master's in Data Science at the University of Pittsburgh","expect":["edu:0"]}
+{"q":"B.Tech CGPA","expect":["edu:1"]}
+{"q":"Is he available for hire?","expect":["profile:availability"]}
+{"q":"open to remote or contract work","expect":["profile:availability"]}
+{"q":"How quickly does he reply?","expect":["copy:contact"]}
+{"q":"evals before vibes","expect":["copy:philosophy#1"]}
+{"q":"traces token counts cost dashboards","expect":["copy:philosophy#3"]}
+{"q":"Chroma and FAISS vector databases","expect":["exp:0#h1"]}
+{"q":"LeetCode problems solved","expect":["live:leetcode"]}
+{"q":"Which editor does he use?","expect":["tool:0"]}
+{"q":"Attention Is All You Need","expect":["reading:0"]}
+{"q":"Data Science & ML skills","expect":["skills:data-science-ml"]}

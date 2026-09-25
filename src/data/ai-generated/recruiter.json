@@ -1,0 +1,469 @@
+{
+  "version": 1,
+  "entries": {
+    "lens:data-science": {
+      "hash": "081c084901d777",
+      "model": "gemini-3.8-flash",
+      "generatedAt": "2026-09-25T11:07:04.998Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "id": "data-science",
+        "label": "Data science & analytics",
+        "versions": {
+          "plain": [
+            {
+              "text": "Oikantik worked as a Data Science Intern at Unified Mentor Private Limited in Gurgaon, Haryana.",
+              "cites": [
+                "exp:2"
+              ]
+            },
+            {
+              "text": "He studied company workforce data to uncover key reasons why workers decide to leave their jobs.",
+              "cites": [
+                "exp:2"
+              ]
+            },
+            {
+              "text": "His analysis on the workforce dataset reached an employee attrition accuracy level of 86%.",
+              "cites": [
+                "exp:2#m0"
+              ]
+            },
+            {
+              "text": "He created interactive visual displays to clearly present patterns found within structured information.",
+              "cites": [
+                "exp:2",
+                "exp:2#h2"
+              ]
+            },
+            {
+              "text": "He pulled and organized business information to track trends across 20y of stock data.",
+              "cites": [
+                "exp:2",
+                "exp:2#m1"
+              ]
+            },
+            {
+              "text": "His mathematical trend fit for the evaluated market patterns reached an R² value of 0.999.",
+              "cites": [
+                "exp:2#m2"
+              ]
+            },
+            {
+              "text": "His project work also includes an end-to-end data platform focused on drug side effects.",
+              "cites": [
+                "project:drugs-side-effects-analysis#tagline"
+              ]
+            }
+          ],
+          "manager": [
+            {
+              "text": "Oikantik served as a Data Science Intern at Unified Mentor Private Limited from Mar 2025 to Jun 2025.",
+              "cites": [
+                "exp:2"
+              ]
+            },
+            {
+              "text": "He executed exploratory data analysis and regression modeling using the IBM HR Analytics dataset.",
+              "cites": [
+                "exp:2",
+                "exp:2#h0"
+              ]
+            },
+            {
+              "text": "His workplace attrition evaluation delivered an 86% HR attrition accuracy metric for the project.",
+              "cites": [
+                "exp:2#m0"
+              ]
+            },
+            {
+              "text": "He uncovered critical attrition drivers by constructing interactive visualization dashboards for reporting findings.",
+              "cites": [
+                "exp:2",
+                "exp:2#h2"
+              ]
+            },
+            {
+              "text": "He extracted and transformed structured datasets to study 20y TCS stock trends over time.",
+              "cites": [
+                "exp:2",
+                "exp:2#m1"
+              ]
+            },
+            {
+              "text": "His time-series stock trend fit produced an R² 0.999 measurement during evaluation.",
+              "cites": [
+                "exp:2",
+                "exp:2#m2"
+              ]
+            },
+            {
+              "text": "He can apply skills in data storytelling, Tableau, Power BI, and exploratory data analysis.",
+              "cites": [
+                "skills:analytics-viz"
+              ]
+            }
+          ],
+          "engineer": [
+            {
+              "text": "Oikantik lists Python, SQL, Pandas, Scikit-learn, TensorFlow, PyTorch, JAX/Tunix, SpaCy, and NLTK as core skills.",
+              "cites": [
+                "skills:data-science-ml"
+              ]
+            },
+            {
+              "text": "His analytics skills include EDA, clinical text mining, sentiment analysis, Power BI, and Tableau.",
+              "cites": [
+                "skills:analytics-viz"
+              ]
+            },
+            {
+              "text": "At Unified Mentor Private Limited, he performed EDA and regression modeling on IBM HR Analytics.",
+              "cites": [
+                "exp:2",
+                "exp:2#h0"
+              ]
+            },
+            {
+              "text": "That modeling project yielded an 86% HR attrition accuracy on the dataset.",
+              "cites": [
+                "exp:2#m0"
+              ]
+            },
+            {
+              "text": "He built SQL-based data mining queries to transform structured datasets for time-series analysis.",
+              "cites": [
+                "exp:2",
+                "exp:2#h1"
+              ]
+            },
+            {
+              "text": "His analysis examined 20y TCS stock records and achieved an R² 0.999 trend fit.",
+              "cites": [
+                "exp:2#m1",
+                "exp:2#m2"
+              ]
+            },
+            {
+              "text": "He also built a TCS stock forecasting project combining ML, deep learning, and a dashboard.",
+              "cites": [
+                "project:tcs-stock-forecasting#tagline"
+              ]
+            }
+          ]
+        },
+        "projects": [
+          "tcs-stock-forecasting",
+          "drugs-side-effects-analysis",
+          "ibm-hr-attrition-prediction"
+        ]
+      }
+    },
+    "lens:freelance": {
+      "hash": "00a936ee5d2a58",
+      "model": "gemini-3.8-flash",
+      "generatedAt": "2026-09-25T11:07:14.843Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "id": "freelance",
+        "label": "Freelance & contract",
+        "versions": {
+          "plain": [
+            {
+              "text": "Oikantik Basu is available for hire for full-time and contract roles located in Bengaluru or remotely.",
+              "cites": [
+                "profile:availability"
+              ]
+            },
+            {
+              "text": "His primary focus centers on building production systems with large language models and retrieval-augmented generation.",
+              "cites": [
+                "profile:availability"
+              ]
+            },
+            {
+              "text": "He works as a remote Freelance AI Agent Specialist at Mindrift starting from Jun 2025.",
+              "cites": [
+                "exp:1"
+              ]
+            },
+            {
+              "text": "In this freelance position, he checks language model outputs to meet safety and accuracy guidelines.",
+              "cites": [
+                "exp:1",
+                "exp:1#h0"
+              ]
+            },
+            {
+              "text": "He evaluates Python code generation and reasoning traces using multi-agent setups to test performance.",
+              "cites": [
+                "exp:1",
+                "exp:1#h1"
+              ]
+            },
+            {
+              "text": "Oikantik finds and records model mistakes, then builds evaluation metrics that improve overall model reliability.",
+              "cites": [
+                "exp:1",
+                "exp:1#h2"
+              ]
+            },
+            {
+              "text": "In addition, he built Bruhworking NexusFlow as a serverless agent swarm for stateful orchestration.",
+              "cites": [
+                "project:bruhworking-nexusflow#tagline"
+              ]
+            }
+          ],
+          "manager": [
+            {
+              "text": "Oikantik Basu is currently available for hire for contract and full-time positions remotely or in Bengaluru.",
+              "cites": [
+                "profile:availability"
+              ]
+            },
+            {
+              "text": "His core focus is on production LLM agents and retrieval-augmented generation systems for practical use.",
+              "cites": [
+                "profile:availability"
+              ]
+            },
+            {
+              "text": "Since Jun 2025, he has served as a remote Freelance AI Agent Specialist at Mindrift.",
+              "cites": [
+                "exp:1"
+              ]
+            },
+            {
+              "text": "He conducts RLHF evaluations to align GPT and Claude models with defined safety and accuracy guidelines.",
+              "cites": [
+                "exp:1",
+                "exp:1#m0"
+              ]
+            },
+            {
+              "text": "His work includes reviewing Python code generation and reasoning traces via AutoGen multi-agent workflows.",
+              "cites": [
+                "exp:1",
+                "exp:1#m1"
+              ]
+            },
+            {
+              "text": "He identifies hallucinations and logic failures, creating evaluation metrics that directly improved model reliability.",
+              "cites": [
+                "exp:1",
+                "exp:1#h2"
+              ]
+            },
+            {
+              "text": "His independent project work features Bruhworking NexusFlow, a serverless agent swarm for stateful orchestration.",
+              "cites": [
+                "project:bruhworking-nexusflow#tagline"
+              ]
+            }
+          ],
+          "engineer": [
+            {
+              "text": "Oikantik Basu is available for hire for remote or Bengaluru contract and full-time engineering work.",
+              "cites": [
+                "profile:availability"
+              ]
+            },
+            {
+              "text": "His technical focus centers specifically on production LLM agents and retrieval-augmented generation architectures.",
+              "cites": [
+                "profile:availability"
+              ]
+            },
+            {
+              "text": "He operates remotely as a Freelance AI Agent Specialist at Mindrift starting in Jun 2025.",
+              "cites": [
+                "exp:1"
+              ]
+            },
+            {
+              "text": "His duties involve conducting RLHF feedback loops to align GPT and Claude against strict guidelines.",
+              "cites": [
+                "exp:1",
+                "exp:1#m2"
+              ]
+            },
+            {
+              "text": "He tests complex Python code generation and reasoning traces using AutoGen-based multi-agent execution workflows.",
+              "cites": [
+                "exp:1",
+                "exp:1#m1"
+              ]
+            },
+            {
+              "text": "Oikantik isolates hallucinations and logic failures across frontier models to build systematic eval metrics.",
+              "cites": [
+                "exp:1",
+                "exp:1#h2"
+              ]
+            },
+            {
+              "text": "He also developed Bruhworking NexusFlow, which functions as a serverless agent swarm for stateful orchestration.",
+              "cites": [
+                "project:bruhworking-nexusflow#tagline"
+              ]
+            }
+          ]
+        },
+        "projects": [
+          "bruhworking-nexusflow",
+          "tcs-stock-forecasting",
+          "drugs-side-effects-analysis"
+        ]
+      }
+    },
+    "lens:llm-agents": {
+      "hash": "00b2a04a5efd8c",
+      "model": "gemini-3.8-flash",
+      "generatedAt": "2026-09-25T11:07:00.089Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "id": "llm-agents",
+        "label": "LLM agents & RAG",
+        "versions": {
+          "plain": [
+            {
+              "text": "Oikantik Basu is available for hire for full-time or contract work based in Bengaluru or remotely.",
+              "cites": [
+                "profile:availability"
+              ]
+            },
+            {
+              "text": "His primary focus is building production systems that connect language models with external knowledge and tools.",
+              "cites": [
+                "profile:availability"
+              ]
+            },
+            {
+              "text": "In his current program, he creates setups where multiple digital assistants coordinate to solve problems step by step.",
+              "cites": [
+                "exp:0",
+                "exp:0#h0"
+              ]
+            },
+            {
+              "text": "He designs document lookup systems that break data into meaningful pieces to improve search accuracy.",
+              "cites": [
+                "exp:0",
+                "skills:agentic-ai"
+              ]
+            },
+            {
+              "text": "He also sets up monitoring and evaluation to track how reliably these assistant systems perform over time.",
+              "cites": [
+                "exp:0",
+                "exp:0#h2"
+              ]
+            },
+            {
+              "text": "Additionally, he connects these intelligent tools to online application services so users can access their answers directly.",
+              "cites": [
+                "exp:0",
+                "exp:0#m2"
+              ]
+            }
+          ],
+          "manager": [
+            {
+              "text": "Oikantik Basu is currently open to full-time and contract roles focused on production LLM agents and RAG systems.",
+              "cites": [
+                "profile:availability"
+              ]
+            },
+            {
+              "text": "In his role at iHUB DivyaSampark @ IIT Roorkee, he works with 4+ agent frameworks.",
+              "cites": [
+                "exp:0",
+                "exp:0#m0"
+              ]
+            },
+            {
+              "text": "He architectures multi-agent systems using LangGraph and the ReAct framework to handle autonomous reasoning workflows.",
+              "cites": [
+                "exp:0",
+                "exp:0#h0"
+              ]
+            },
+            {
+              "text": "Oikantik builds advanced retrieval-augmented generation pipelines, tuning 2× vector databases for optimal search performance.",
+              "cites": [
+                "exp:0",
+                "exp:0#m1"
+              ]
+            },
+            {
+              "text": "He implements LLMOps practices for production deployment, covering system evaluation frameworks and observability through tracing.",
+              "cites": [
+                "exp:0",
+                "exp:0#h2"
+              ]
+            },
+            {
+              "text": "He also delivers reliable serving layers by exposing functional endpoints via FastAPI for downstream integration.",
+              "cites": [
+                "exp:0",
+                "exp:0#m2"
+              ]
+            }
+          ],
+          "engineer": [
+            {
+              "text": "Oikantik Basu focuses on production LLM agents and RAG systems using frameworks like LangChain and LlamaIndex.",
+              "cites": [
+                "profile:availability",
+                "skills:genai-llms"
+              ]
+            },
+            {
+              "text": "At iHUB DivyaSampark @ IIT Roorkee, he builds multi-agent systems using LangGraph and the ReAct framework.",
+              "cites": [
+                "exp:0",
+                "exp:0#h0"
+              ]
+            },
+            {
+              "text": "He optimizes retrieval accuracy in RAG pipelines through semantic chunking, vectorization, and tuning Chroma and FAISS.",
+              "cites": [
+                "exp:0",
+                "skills:agentic-ai"
+              ]
+            },
+            {
+              "text": "His technical skillset includes AutoGen, CoT, RLHF, Hugging Face, AWS Bedrock, Gemma, Gemini, and Claude API.",
+              "cites": [
+                "skills:genai-llms"
+              ]
+            },
+            {
+              "text": "He deploys models by implementing LLMOps best practices, including agent observability, tracing, and evaluation frameworks.",
+              "cites": [
+                "exp:0",
+                "skills:agentic-ai"
+              ]
+            },
+            {
+              "text": "Oikantik delivers production-ready inference endpoints through REST API serving layers built with FastAPI.",
+              "cites": [
+                "exp:0",
+                "exp:0#m2"
+              ]
+            }
+          ]
+        },
+        "projects": [
+          "urbancare-ai",
+          "vyapar-gyan",
+          "bruhworking-nexusflow"
+        ]
+      }
+    }
+  }
+}

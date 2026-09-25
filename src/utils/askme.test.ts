@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
-import { answer, isMultiSentence, STARTERS, truncateSentences, type AskData } from './askme.ts';
+import { answer, historyFor, isMultiSentence, isOpenEnded, isRefusal, shouldEscalate, STARTERS, truncateSentences, type AskData } from './askme.ts';
 
 const read = (file: string) => JSON.parse(readFileSync(new URL(`../data/${file}`, import.meta.url), 'utf8'));
 const data: AskData = { profile: read('profile.json'), projects: read('projects.json') };
@@ -119,4 +119,78 @@ test('isMultiSentence drives the typing cue', () => {
   assert.equal(isMultiSentence("Here's my CV."), false);
   assert.equal(isMultiSentence('**RAG** is listed. No project uses it.'), true);
   assert.equal(isMultiSentence('line one\nline two'), true);
+});
+
+/* ---- rule-first escalation (#178) ---- */
+
+const escalates = (q: string, opts: { scoped?: boolean } = {}) => shouldEscalate(q, ask(q), opts);
+
+test('deterministic intents stay on the rules: no AI call', () => {
+  for (const q of [
+    ...STARTERS,
+    'Which projects use Gemini?',
+    'Tell me about UrbanCare',
+    'Can I see your resume?',
+    "What's your GitHub?",
+    'Do you know React?',
+    'hi',
+    '',
+  ]) {
+    assert.equal(escalates(q), false, q);
+  }
+});
+
+test('fallback, about and open-ended questions escalate', () => {
+  for (const q of [
+    'What kind of problems does he seem most curious about?',
+    'Why do you think his UrbanCare AI work matters, in your own words?',
+    'Tell me about yourself',
+    "What's his salary?",
+    'Did he work at Google DeepMind?',
+    'How does Omni-Lab route between models?',
+    'Compare UrbanCare AI and Vyapar-Gyan',
+    'What challenges did he face in Omni-Lab?',
+  ]) {
+    assert.equal(escalates(q), true, q);
+  }
+});
+
+test('navigation requests escalate unless the rule answer already offers the action', () => {
+  assert.equal(escalates('Filter the projects to Python ones'), true);
+  assert.equal(escalates('Take me to his experience'), true);
+  assert.equal(escalates('Download your CV'), false);
+  assert.equal(escalates('Open the UrbanCare project'), false);
+});
+
+test('a question in another language escalates even when a rule matches a name in it', () => {
+  assert.equal(escalates('UrbanCare AI में उन्होंने क्या बनाया?'), false);
+  assert.equal(shouldEscalate('UrbanCare AI में उन्होंने क्या बनाया?', ask('UrbanCare AI में उन्होंने क्या बनाया?'), { foreign: true }), true);
+});
+
+test('a scoped question always escalates; the rules know nothing about the scope', () => {
+  assert.equal(escalates('What stack?'), false);
+  assert.equal(escalates('What stack?', { scoped: true }), true);
+  assert.equal(escalates('hi', { scoped: true }), false);
+});
+
+test('isOpenEnded ignores visitor-action "how do I" questions', () => {
+  assert.equal(isOpenEnded('How do I hire you?'), false);
+  assert.equal(isOpenEnded('How can we get in touch?'), false);
+  assert.equal(isOpenEnded('How does the RAG pipeline in Omni-Lab work?'), true);
+});
+
+test('isRefusal spots "not on this site" answers, citations ignored', () => {
+  assert.equal(isRefusal("His salary isn't on this site. You can ask him through the contact form."), true);
+  assert.equal(isRefusal('Google DeepMind is not listed as an employer [c:exp:0].'), true);
+  assert.equal(isRefusal('He built UrbanCare AI with MedGemma [c:project:urbancare-ai#stack].'), false);
+});
+
+test('history carries at most 6 of the visitor questions, 2000 characters, exactly as typed', () => {
+  const qs = ['one?', 'two?', 'three?', 'four?', 'five?', 'six?', 'seven?'];
+  assert.deepEqual(historyFor(qs), qs.slice(1));
+  const long = ['a'.repeat(500), 'b'.repeat(500), 'c'.repeat(500), 'd'.repeat(500), 'e'.repeat(10)];
+  const h = historyFor(long);
+  assert.ok(h.reduce((n, q) => n + q.length, 0) <= 2000);
+  assert.deepEqual(h, long.slice(1));
+  assert.deepEqual(historyFor(['  Mixed Case?  ']), ['  Mixed Case?  ']);
 });

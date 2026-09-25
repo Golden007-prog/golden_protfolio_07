@@ -1,0 +1,38 @@
+/* Package: ai-skills. The skill modal's usage panel and "Explain simply", and the
+   sentiment demo's Gemini comparison and "Where lexicons break" gallery.
+   Colours come from the site tokens through the components' utilities; this file
+   only adds what utilities cannot express. Reduced motion keys off
+   html[data-motion="reduced"] (the OS setting or the in-page override). */
+
+@layer components {
+  /* A span that wraps onto a second line keeps its border and padding on both. */
+  .ai-span {
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+  }
+
+  .ai-span-text {
+    overflow-wrap: anywhere;
+  }
+
+  .ai-skill-quote {
+    quotes: '\201C' '\201D';
+  }
+
+  /* The gallery toggle's chevron turns with the disclosure. */
+  .ai-skills-chevron {
+    transition: transform var(--dur-quick) var(--ease-out-expo);
+  }
+  .ai-skills-chevron[data-open] {
+    transform: rotate(180deg);
+  }
+  html[data-motion='reduced'] .ai-skills-chevron {
+    transition: none;
+  }
+
+  @media (forced-colors: active) {
+    .ai-span {
+      border-color: Highlight;
+    }
+  }
+}

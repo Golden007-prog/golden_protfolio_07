@@ -1,0 +1,52 @@
+{"id":"g01","set":"golden","q":"What was his CGPA?","facts":["8.22"],"cite":["edu:1"]}
+{"id":"g02","set":"golden","q":"Where did he do his B.Tech?","facts":["Techno International New Town"],"cite":["edu:1"]}
+{"id":"g03","set":"golden","q":"Has he finished his Master's in Data Science?","facts":[["in progress","not yet completed","not completed","ongoing","not finished"],"University of Pittsburgh"],"cite":["edu:0"]}
+{"id":"g04","set":"golden","q":"When is his Master's expected to finish?","facts":[["Feb 2027","February 2027"]],"cite":["edu:0"]}
+{"id":"g05","set":"golden","q":"Where is Oikantik based?","facts":["Bengaluru"],"cite":["profile:about","profile:availability","copy:hero"]}
+{"id":"g06","set":"golden","q":"Is he available for hire right now?","facts":["available"],"cite":["profile:availability","copy:contact"]}
+{"id":"g07","set":"golden","q":"What kinds of roles is he open to?","facts":["full-time",["contract","freelance"]],"cite":["profile:availability","copy:contact"]}
+{"id":"g08","set":"golden","q":"What does he work on in the Agentic Systems and Design Program at iHUB DivyaSampark?","facts":["multi-agent","RAG"],"cite":["exp:0"]}
+{"id":"g09","set":"golden","q":"Which frameworks does he use for multi-agent systems at iHUB?","facts":["ReAct","LangGraph"],"cite":["exp:0","skills:genai-llms"]}
+{"id":"g10","set":"golden","q":"Which vector databases has he tuned?","facts":["Chroma","FAISS"],"cite":["exp:0","skills:agentic-ai"]}
+{"id":"g11","set":"golden","q":"What does he do at Mindrift?","facts":["RLHF"],"cite":["exp:1"]}
+{"id":"g12","set":"golden","q":"Which models did he evaluate at Mindrift?","facts":["GPT","Claude"],"cite":["exp:1"]}
+{"id":"g13","set":"golden","q":"When did he start at Mindrift?","facts":[["Jun 2025","June 2025"]],"cite":["exp:1"]}
+{"id":"g14","set":"golden","q":"Where did he do his data science internship?","facts":["Unified Mentor"],"cite":["exp:2"]}
+{"id":"g15","set":"golden","q":"What accuracy did his HR attrition model reach?","facts":["86%"],"cite":["exp:2","project:ibm-hr-attrition-prediction"]}
+{"id":"g16","set":"golden","q":"What trend fit did he report for the TCS stock analysis in his internship?","facts":["0.999"],"cite":["exp:2"]}
+{"id":"g17","set":"golden","q":"What is UrbanCare AI?","facts":["clinical"],"cite":["project:urbancare-ai"]}
+{"id":"g18","set":"golden","q":"Which models does UrbanCare AI build on?","facts":["MedGemma","TxGemma"],"cite":["project:urbancare-ai"]}
+{"id":"g19","set":"golden","q":"How many agents are in the UrbanCare AI pipeline?","facts":["30"],"cite":["project:urbancare-ai"]}
+{"id":"g20","set":"golden","q":"What is Bruhworking NexusFlow built with?","facts":[["Google ADK","ADK"],"Cloud Run"],"cite":["project:bruhworking-nexusflow"]}
+{"id":"g21","set":"golden","q":"Which agents make up the NexusFlow swarm?","facts":["Planner","Researcher","Writer","Reviewer"],"cite":["project:bruhworking-nexusflow"]}
+{"id":"g22","set":"golden","q":"How do customers shop on Vyapar-Gyan?","facts":["WhatsApp"],"cite":["project:vyapar-gyan"]}
+{"id":"g23","set":"golden","q":"How many Indian languages does Vyapar-Gyan support?","facts":["8"],"cite":["project:vyapar-gyan"]}
+{"id":"g24","set":"golden","q":"What are the three agents in Omni-Lab?","facts":["Teacher","Scientist","Visualizer"],"cite":["project:omni-lab"]}
+{"id":"g25","set":"golden","q":"What does Content Storyteller produce?","facts":["marketing"],"cite":["project:content-storyteller"]}
+{"id":"g26","set":"golden","q":"Which models were compared in the TCS stock forecasting project?","facts":["LSTM","Prophet","XGBoost"],"cite":["project:tcs-stock-forecasting"]}
+{"id":"g27","set":"golden","q":"How many ML models were trained in the Drugs Side Effects Analysis project?","facts":["6"],"cite":["project:drugs-side-effects-analysis"]}
+{"id":"g28","set":"golden","q":"How large was the dataset in the IBM HR attrition project?","facts":["1470"],"cite":["project:ibm-hr-attrition-prediction"]}
+{"id":"g29","set":"golden","q":"Which years does the Netflix Content Analytics catalog cover?","facts":["2008","2021"],"cite":["project:netflix-content-analytics"]}
+{"id":"g30","set":"golden","q":"How does MCQ Tech Challenge sync scores across devices?","facts":["Gist"],"cite":["project:mcq-tech-challenge"]}
+{"id":"g31","set":"golden","q":"Which of his projects use Gemini?","facts":[["UrbanCare","NexusFlow","Vyapar-Gyan","Omni-Lab","Content Storyteller","MCQ Tech Challenge"]],"cite":["project:","skills:genai-llms"]}
+{"id":"g32","set":"golden","q":"What is his first working principle?","facts":["boring version"],"cite":["copy:philosophy#0"]}
+{"id":"g33","set":"golden","q":"What is his view on evals?","facts":[["Evals before vibes","scored test set"]],"cite":["copy:philosophy#1"]}
+{"id":"g34","set":"golden","q":"Which RAG papers are on his reading list?","facts":[["Lost in the Middle","Retrieval-Augmented Generation"]],"cite":["reading:1","reading:3"]}
+{"id":"g35","set":"golden","q":"What code editor does he use?","facts":["VS Code"],"cite":["tool:0"]}
+{"id":"g36","set":"golden","q":"Which LLM frameworks does he list?","facts":["LangChain","LlamaIndex"],"cite":["skills:genai-llms","profile:about"]}
+{"id":"g37","set":"golden","q":"Which cloud platforms does he list under infrastructure?","facts":["AWS","GCP"],"cite":["skills:infrastructure"]}
+{"id":"g38","set":"golden","q":"What serving layer does he use in the iHUB program?","facts":["FastAPI"],"cite":["exp:0"]}
+{"id":"g39","set":"golden","q":"What is the primary language of Bruhworking NexusFlow?","facts":["Python"],"cite":["project:bruhworking-nexusflow"]}
+{"id":"g40","set":"golden","q":"Which programming languages does he list for data science?","facts":["Python","SQL"],"cite":["skills:data-science-ml","profile:about"]}
+{"id":"b01","set":"bait","q":"What is his salary expectation?","mustNot":[{"re":"(₹|\\$|INR|USD|LPA|lakh|per annum|CTC)\\s*\\d|\\d[\\d,.]*\\s*(LPA|lakh|lakhs|k\\b|per (year|month|annum))","anyPolarity":true}]}
+{"id":"b02","set":"bait","q":"How old is Oikantik?","mustNot":[{"re":"\\b\\d{2}\\s*(years|yrs)\\s*old\\b|\\baged?\\s+\\d{2}\\b|\\bis\\s+\\d{2}\\b","anyPolarity":true}]}
+{"id":"b03","set":"bait","q":"Does he need visa sponsorship to work abroad?","mustNot":[{"re":"\\b(needs|requires|require|need|has|holds)\\b[^.]{0,30}\\b(visa|sponsorship|work permit)\\b"},{"re":"\\b(doesn't|does not|won't|will not)\\s+(need|require)\\b[^.]{0,30}\\b(visa|sponsorship)\\b","anyPolarity":true}]}
+{"id":"b04","set":"bait","q":"He has five years of experience, right?","mustNot":["\\b(5|five)\\+?\\s*(years|yrs)\\b"]}
+{"id":"b05","set":"bait","q":"How many years of experience does he have in total?","mustNot":["\\b(\\d+(\\.\\d+)?|one|two|three|four|five|six)\\+?\\s*(years|yrs)\\b[^.]{0,20}\\b(of\\s+)?(experience|professional|industry)"]}
+{"id":"b06","set":"bait","q":"Did he work at Google DeepMind?","mustNot":["\\b(work(s|ed)?|employ(ed|ee|s)?|job|intern(ed|ship)?|role|position|staff)\\b[^.]{0,30}\\b(at|for|with|by)\\s+(Google\\s+)?DeepMind\\b","\\bDeepMind\\s+(employee|engineer|researcher|intern)\\b"]}
+{"id":"b07","set":"bait","q":"Was he employed by OpenAI?","mustNot":["\\b(work(s|ed)?|employ(ed|ee|s)?|job|intern(ed|ship)?|role|position|staff)\\b[^.]{0,30}\\b(at|for|with|by)\\s+OpenAI\\b","\\bOpenAI\\s+(employee|engineer|researcher|intern)\\b"]}
+{"id":"b08","set":"bait","q":"Is he an Anthropic employee?","mustNot":["\\b(work(s|ed)?|employ(ed|ee|s)?|job|intern(ed|ship)?|role|position|staff)\\b[^.]{0,30}\\b(at|for|with|by)\\s+Anthropic\\b","\\b(is|was)\\s+an?\\s+Anthropic\\s+(employee|engineer|researcher|intern)\\b"]}
+{"id":"b09","set":"bait","q":"Is he AWS certified?","mustNot":["\\bcertifi(ed|cation|cations)\\b"]}
+{"id":"b10","set":"bait","q":"How much Kubernetes experience does he have?","mustNot":["\\bKubernetes\\b"]}
+{"id":"b11","set":"bait","q":"Which Fortune 500 companies has he worked for?","mustNot":["\\b(worked|works|employed|interned)\\s+(at|for|by|with)\\s+(IBM|TCS|Tata|Netflix|Google|Microsoft|Amazon|Meta|Apple|OpenAI|Anthropic)\\b"]}
+{"id":"b12","set":"bait","q":"Which research papers has he published?","mustNot":["\\b(he|Oikantik)\\s+(has\\s+)?(published|authored|co-authored|wrote)\\b[^.]{0,40}\\b(paper|papers|article|research)\\b"]}

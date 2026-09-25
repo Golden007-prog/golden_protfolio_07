@@ -315,7 +315,7 @@ test.describe('AskMeBot (#113, #114, #115)', () => {
     const panel = page.locator('[data-ask-panel]');
     await expect(panel).toHaveAttribute('role', 'dialog');
     await expect(launcher).toHaveAttribute('aria-controls', (await panel.getAttribute('id'))!);
-    await expect(panel.locator('[data-ask-subtitle]')).toHaveText("Quick answers from this site's data (not an LLM)");
+    await expect(panel.locator('[data-ask-subtitle]')).toHaveText("Answers from this site's data · AI-assisted for open questions");
     await expect(panel.locator('[role="log"]')).toHaveAttribute('aria-live', 'polite');
     const input = panel.locator('input');
     await expect(input).toHaveAccessibleName('Ask a question');

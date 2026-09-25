@@ -11,9 +11,21 @@ import { scrollState, subscribeScroll, usePointerTracking } from '@/lib/pointerS
 const HIDE_AFTER_PX = 32;
 // Near the top of the page the dock always shows.
 const ALWAYS_SHOW_ABOVE_PX = 200;
+// While a field is focused, how often to notice it left the page without a focusout.
+const FOCUS_POLL_MS = 500;
+
+const NO_KEYBOARD_INPUTS = new Set(['button', 'checkbox', 'color', 'file', 'hidden', 'image', 'radio', 'range', 'reset', 'submit']);
 
 function findFooter(): HTMLElement | null {
   return document.getElementById('site-footer') ?? document.querySelector<HTMLElement>('body footer');
+}
+
+/** A field that raises the on-screen keyboard: text-like inputs, textareas, selects and editable content. */
+function isTextEntry(el: Element | null): el is HTMLElement {
+  if (!el || !(el instanceof HTMLElement)) return false;
+  if (el instanceof HTMLTextAreaElement || el instanceof HTMLSelectElement) return true;
+  if (el instanceof HTMLInputElement) return !NO_KEYBOARD_INPUTS.has(el.type);
+  return el.isContentEditable;
 }
 
 /**
@@ -23,13 +35,19 @@ function findFooter(): HTMLElement | null {
  * a downward scroll and returns on an upward one (or when anything in it takes
  * focus), and rides up above #site-footer while the footer is on screen, so every
  * footer link stays clickable. Where that would put it under the nav, or over a
- * toast, it hides instead. Scroll work writes attributes directly: no re-renders.
+ * toast, it hides instead. While a text field elsewhere on the page has focus
+ * (the on-screen keyboard is up, and the dock would sit on the field) it hides,
+ * and it returns when the field loses focus; fields inside a dialog are left
+ * alone, since the dialog already covers the dock. While a chat answer streams
+ * the launcher stays in view. Scroll work writes attributes directly: no re-renders.
  */
 export function FloatingDock() {
   usePointerTracking();
   const { done } = useIntro();
   const rootRef = useRef<HTMLDivElement>(null);
   const askOpen = useRef(false);
+  const askBusy = useRef(false);
+  const scheduleRef = useRef<() => void>(() => {});
 
   useEffect(() => {
     const root = rootRef.current;
@@ -41,6 +59,8 @@ export function FloatingDock() {
     let frame = 0;
     let lift = -1;
     let hidden = false;
+    let typing = false;
+    let poll = 0;
     const navOffset = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--nav-offset')) || 88;
 
     const setHidden = (v: boolean) => {
@@ -50,12 +70,27 @@ export function FloatingDock() {
       else root.removeAttribute('data-hidden');
     };
 
+    const typingElsewhere = () => {
+      const el = document.activeElement;
+      return isTextEntry(el) && !root.contains(el) && !el.closest('[data-dialog-root]');
+    };
+
     const update = () => {
       frame = 0;
       const y = scrollState.y;
       const dy = y - lastY;
       lastY = y;
       travel = dy > 0 ? Math.max(0, travel) + dy : dy < 0 ? 0 : travel;
+
+      const wasTyping = typing;
+      typing = typingElsewhere();
+      if (typing !== wasTyping) {
+        root.toggleAttribute('data-typing', typing);
+        window.clearInterval(poll);
+        poll = typing ? window.setInterval(schedule, FOCUS_POLL_MS) : 0;
+        // Back from the keyboard: the dock returns wherever the page now is.
+        if (!typing) travel = 0;
+      }
 
       let wanted = 0;
       let blocked = false;
@@ -76,7 +111,9 @@ export function FloatingDock() {
       }
 
       if (askOpen.current) setHidden(false);
+      else if (typing) setHidden(true);
       else if (blocked) setHidden(true);
+      else if (askBusy.current || wasTyping) setHidden(false);
       else if (y < ALWAYS_SHOW_ABOVE_PX || dy < 0) setHidden(false);
       else if (travel > HIDE_AFTER_PX) setHidden(true);
     };
@@ -84,9 +121,15 @@ export function FloatingDock() {
     const schedule = () => {
       if (!frame) frame = requestAnimationFrame(update);
     };
+    scheduleRef.current = schedule;
 
     const unsubscribe = subscribeScroll(schedule);
     window.addEventListener('resize', schedule, { passive: true });
+    // Focus moving in or out of a field; visualViewport follows the on-screen keyboard.
+    document.addEventListener('focusin', schedule);
+    document.addEventListener('focusout', schedule);
+    const vv = window.visualViewport;
+    vv?.addEventListener('resize', schedule, { passive: true });
 
     let io: IntersectionObserver | null = null;
     const watchFooter = () => {
@@ -113,12 +156,17 @@ export function FloatingDock() {
 
     schedule();
     return () => {
+      scheduleRef.current = () => {};
       unsubscribe();
       window.removeEventListener('resize', schedule);
+      document.removeEventListener('focusin', schedule);
+      document.removeEventListener('focusout', schedule);
+      vv?.removeEventListener('resize', schedule);
       io?.disconnect();
       toastObserver.disconnect();
       window.clearTimeout(retry);
       window.clearTimeout(toastRetry);
+      window.clearInterval(poll);
       cancelAnimationFrame(frame);
     };
   }, []);
@@ -126,6 +174,12 @@ export function FloatingDock() {
   const onAskOpenChange = (open: boolean) => {
     askOpen.current = open;
     if (open) rootRef.current?.removeAttribute('data-hidden');
+    scheduleRef.current();
+  };
+
+  const onAskBusyChange = (busy: boolean) => {
+    askBusy.current = busy;
+    scheduleRef.current();
   };
 
   return (
@@ -133,7 +187,7 @@ export function FloatingDock() {
       <div className="dock-inner relative">
         <LiveStatusBar />
         <AmbientSoundToggle />
-        <AskMeBot onOpenChange={onAskOpenChange} />
+        <AskMeBot onOpenChange={onAskOpenChange} onBusyChange={onAskBusyChange} />
       </div>
     </div>
   );

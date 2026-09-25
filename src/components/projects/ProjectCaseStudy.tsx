@@ -1,32 +1,59 @@
 'use client';
 
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { motion, type PanInfo, type Variants } from 'framer-motion';
 import {
   AlertCircle,
   ArrowUpRight,
   BookOpen,
+  Captions,
   ExternalLink,
+  GitCompare,
   Github,
   Layers,
   Lightbulb,
+  MessagesSquare,
   Share2,
+  SlidersHorizontal,
   Sparkles,
   Target,
   TrendingUp,
   Wrench,
 } from 'lucide-react';
-import { useEffect, useMemo, useState, type ReactNode, type RefObject } from 'react';
+import { Suspense, useContext, useEffect, useId, useMemo, useState, type ReactNode, type RefObject } from 'react';
+import { AIButton } from '@/components/ai/AIButton';
+import { AIDisclosure } from '@/components/ai/AIDisclosure';
 import { revealVariants } from '@/components/motion/Reveal';
 import { Button } from '@/components/ui/Button';
 import { CopyButton } from '@/components/ui/CopyButton';
-import { githubFacts, hasCaseStudy, relatedTo, sharedTech, type Project } from '@/data/projects';
+import { PROJECTS, githubFacts, hasCaseStudy, relatedTo, sharedTech, type Project } from '@/data/projects';
 import { useDeviceCapability } from '@/hooks/useDeviceCapability';
 import { useMotionPrefs } from '@/hooks/useMotionPrefs';
+import { openAssistant } from '@/lib/ai/bus';
+import type { CaseStudyAi } from '@/lib/ai/prompts/projects';
+import type { Provenance } from '@/lib/ai/reviewGate';
 import { track } from '@/lib/analytics';
 import { stagger, staggerContainer } from '@/lib/motion';
 import { cn } from '@/utils/cn';
 import { mediaLayoutId, ProjectImage, titleLayoutId } from './ProjectImage';
+import { CaseStudyHostContext, useProjectsAi } from './projectsAi';
+
+// Re-exported for existing importers; the grid imports './projectsAi' directly so
+// this module (the dialog's content) can load as its own chunk.
+export { CaseStudyHostContext, loadProjectsAi, useProjectsAi } from './projectsAi';
+
+const EMPTY_AI: CaseStudyAi = { levels: [], questions: null, compare: {}, alt: {}, demo: null, neighbours: [] };
+
+const renderNothing = () => null;
+const LevelSwitch = dynamic(() => import('@/components/ai/projects/LevelSwitch').then((m) => m.LevelSwitch, () => renderNothing));
+const CompareTable = dynamic(() => import('@/components/ai/projects/CompareTable').then((m) => m.CompareTable, () => renderNothing));
+const AskQuestions = dynamic(() => import('@/components/ai/projects/AskQuestions').then((m) => m.AskQuestions, () => renderNothing));
+const SemanticNeighbours = dynamic(() =>
+  import('@/components/ai/projects/RelatedWork').then((m) => m.SemanticNeighbours, () => renderNothing),
+);
+
+const STARS: Readonly<Record<string, number>> = Object.fromEntries(PROJECTS.map((p) => [p.slug, githubFacts(p.slug)?.stars ?? p.stars]));
 
 export type ProjectCaseStudyProps = {
   project: Project;
@@ -47,9 +74,23 @@ export type ProjectCaseStudyProps = {
   onSelectTech?: (family: string) => void;
   /** The dialog's scroller, for the table of contents; the page scrolls the window. */
   scrollContainer?: RefObject<HTMLElement | null>;
+  /** AI extras selected on the server (the static page). Without it the dialog loads them. */
+  ai?: CaseStudyAi;
 };
 
-type SectionKey = 'problem' | 'approach' | 'overview' | 'how' | 'outcomes' | 'challenges' | 'lessons' | 'glance' | 'related';
+type SectionKey =
+  | 'levels'
+  | 'problem'
+  | 'approach'
+  | 'overview'
+  | 'how'
+  | 'outcomes'
+  | 'challenges'
+  | 'lessons'
+  | 'questions'
+  | 'glance'
+  | 'compare'
+  | 'related';
 
 type Section = { key: SectionKey; toc: string; heading: string; icon: ReactNode; body: ReactNode };
 
@@ -70,6 +111,12 @@ function Metric({ value, label }: { value: string; label: string }) {
       </dd>
     </div>
   );
+}
+
+/** A related project's link from the case-study page: its own page, or the home-page dialog. */
+function caseStudyHref(slug: string): string {
+  const p = PROJECTS.find((x) => x.slug === slug);
+  return p && hasCaseStudy(p) ? `/projects/${slug}` : `/?project=${slug}`;
 }
 
 const CHIP =
@@ -108,6 +155,38 @@ function ShareProject({ project, url }: { project: Project; url: string }) {
 }
 
 /**
+ * 'Describe this demo' (#207): the reviewed description of a demo loop. It is
+ * visible whenever loops are off; while one plays it stays available to screen
+ * readers and keyboard users (the loop itself is aria-hidden) and shows on focus.
+ */
+function DescribeDemo({ text, provenance, visible }: { text: string; provenance: Provenance; visible: boolean }) {
+  const [open, setOpen] = useState(false);
+  const id = useId();
+  return (
+    <div className={cn('mt-4', !visible && 'ai-sr-until-focus')} data-ai-demo="">
+      <Button
+        variant="ghost"
+        size="sm"
+        aria-expanded={open}
+        aria-controls={id}
+        onClick={() => setOpen((o) => !o)}
+        leadingIcon={<Captions aria-hidden="true" className="size-4" />}
+        className="-ml-3"
+      >
+        {open ? 'Hide the demo description' : 'Describe this demo'}
+      </Button>
+      <div id={id} hidden={!open} className="mt-2 max-w-2xl rounded-xl border border-hairline bg-surface-tint p-4">
+        <p className="text-sm leading-relaxed text-text-secondary">{text}</p>
+        <p className="mt-2 text-xs text-text-muted" data-ai-provenance="">
+          {provenance}
+        </p>
+        <AIDisclosure compact className="mt-2" />
+      </div>
+    </div>
+  );
+}
+
+/**
  * A project's full write-up, shared by the dialog and the static case-study page:
  * hero, actions, a table of contents listing only the sections this project has,
  * the sections, repository facts from the build-time github-facts.json, and
@@ -124,13 +203,23 @@ export function ProjectCaseStudy({
   onSelectProject,
   onSelectTech,
   scrollContainer,
+  ai: serverAi,
 }: ProjectCaseStudyProps) {
   const { reduce, lite, paused } = useMotionPrefs();
   const { allowVideo, isTouch } = useDeviceCapability();
+  const host = useContext(CaseStudyHostContext);
   const facts = githubFacts(project.slug);
   const related = useMemo(() => relatedTo(project.slug), [project.slug]);
   const shared = useMemo(() => sharedTech(project), [project]);
+  const others = useMemo(() => PROJECTS.filter((p) => p.slug !== project.slug), [project.slug]);
+  const loaded = useProjectsAi(!serverAi);
+  const ai = useMemo(() => serverAi ?? loaded?.select(project) ?? EMPTY_AI, [serverAi, loaded, project]);
   const page = variant === 'page';
+  // In the dialog the extras mount once the AI store arrives, often while it is already
+  // open: each gets its own boundary, or its chunk would suspend the dialog's and hide
+  // the whole dialog (and drop its focus). The static page renders them inline on the
+  // server, where a boundary would stream them behind a script and hide them without JS.
+  const extra = (node: ReactNode) => (page ? node : <Suspense fallback={null}>{node}</Suspense>);
   const Title = page ? 'h1' : 'h2';
   const Heading = page ? 'h2' : 'h3';
   const idFor = (key: SectionKey) => `${page ? '' : 'dialog-'}${project.slug}-${key}`;
@@ -145,6 +234,15 @@ export function ProjectCaseStudy({
   if (facts && facts.forks >= MIN_SOCIAL_COUNT) glance.push({ value: String(facts.forks), label: 'Forks' });
 
   const sections: Section[] = [];
+  if (ai.levels.length) {
+    sections.push({
+      key: 'levels',
+      toc: 'At your level',
+      heading: 'Explain it at your level',
+      icon: icon(SlidersHorizontal),
+      body: extra(<LevelSwitch levels={ai.levels} />),
+    });
+  }
   if (project.problem) {
     sections.push({
       key: 'problem',
@@ -221,6 +319,15 @@ export function ProjectCaseStudy({
       body: <p className="text-base italic leading-relaxed text-text-muted">{project.lessons}</p>,
     });
   }
+  if (ai.questions) {
+    sections.push({
+      key: 'questions',
+      toc: 'Questions to ask',
+      heading: 'Good questions to ask',
+      icon: icon(MessagesSquare),
+      body: extra(<AskQuestions projectName={project.name} items={ai.questions.items} provenance={ai.questions.provenance} />),
+    });
+  }
   sections.push({
     key: 'glance',
     toc: 'At a glance',
@@ -252,7 +359,14 @@ export function ProjectCaseStudy({
       </div>
     ),
   });
-  if (related.length > 0 || shared.length > 0) {
+  sections.push({
+    key: 'compare',
+    toc: 'Compare',
+    heading: 'Compare with another project',
+    icon: icon(GitCompare),
+    body: extra(<CompareTable project={project} others={others} compare={ai.compare} stars={STARS} />),
+  });
+  if (related.length > 0 || shared.length > 0 || ai.neighbours.length > 0) {
     sections.push({
       key: 'related',
       toc: 'Related work',
@@ -260,7 +374,9 @@ export function ProjectCaseStudy({
       icon: icon(ArrowUpRight),
       body: (
         <div className="flex flex-col gap-6">
-          {related.length > 0 ? (
+          {ai.neighbours.length > 0 ? (
+            extra(<SemanticNeighbours items={ai.neighbours} onSelectProject={onSelectProject} hrefFor={caseStudyHref} />)
+          ) : related.length > 0 ? (
             <ul className="grid gap-3 sm:grid-cols-3">
               {related.map((r) => {
                 const inner = (
@@ -377,6 +493,7 @@ export function ProjectCaseStudy({
       project={project}
       sizes={page ? '(min-width: 1280px) 1200px, 100vw' : '(min-width: 1024px) 1024px, 100vw'}
       alt={`${project.name} cover`}
+      aiAlt={ai.alt}
       priority={page}
       loop="inView"
       allowVideo={allowVideo && !paused}
@@ -456,7 +573,22 @@ export function ProjectCaseStudy({
                 <Link href={`/projects/${project.slug}`}>Full case study</Link>
               </Button>
             ) : null}
+            {!page ? (
+              <AIButton
+                data-ask-project={project.slug}
+                onClick={() => {
+                  track('ai_handoff', { feature: 'ask', intent: 'project' });
+                  if (host) host.askAbout(project.slug);
+                  else openAssistant({ scope: { project: project.slug } });
+                }}
+              >
+                Ask about this project
+              </AIButton>
+            ) : null}
           </div>
+          {project.demoVideo && ai.demo ? (
+            <DescribeDemo text={ai.demo.text} provenance={ai.demo.provenance} visible={!(allowVideo && !paused)} />
+          ) : null}
         </div>
       </header>
 

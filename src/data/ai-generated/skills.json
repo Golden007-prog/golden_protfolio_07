@@ -1,0 +1,1689 @@
+{
+  "version": 1,
+  "entries": {
+    "explain:agent-observability": {
+      "hash": "ddfcc17939d24774",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:47:41.324Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "skill": "Agent observability",
+        "sentences": [
+          "Agent observability provides deep visibility into the internal states and actions of autonomous systems.",
+          "It can debug problems, monitor performance, track data access, and detect unusual behavior.",
+          "This is important for finding root causes, ensuring safety, and building trust in artificial intelligence."
+        ],
+        "sources": [
+          "ref:agent-observability"
+        ]
+      }
+    },
+    "explain:api-gateway": {
+      "hash": "1acaf6b969150f4e",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:47:52.728Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "skill": "API Gateway",
+        "sentences": [
+          "API Gateway is used as a single, secure entry point to manage complex backend services.",
+          "It can handle security checks, manage traffic limits, and translate requests between different formats.",
+          "That matters because it centralizes important tasks so developers can focus on core business logic."
+        ],
+        "sources": [
+          "ref:api-gateway"
+        ]
+      }
+    },
+    "explain:autogen": {
+      "hash": "9073d10529e8a53f",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:47:29.482Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "skill": "AutoGen",
+        "sentences": [
+          "AutoGen simplifies the automation and organization of complex workflows using multiple conversable agents.",
+          "It can generate code, integrate human input, and coordinate tasks across agents.",
+          "This allows for more robust and efficient task completion."
+        ],
+        "sources": [
+          "ref:autogen"
+        ]
+      }
+    },
+    "explain:aws-bedrock": {
+      "hash": "3b4be5b4f8ec7358",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:47:35.269Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "skill": "AWS Bedrock",
+        "sentences": [
+          "AWS Bedrock is for simplifying the development and deployment of generative AI applications without managing infrastructure.",
+          "It can provide access to foundation models, customize them with proprietary data, and build conversational AI.",
+          "That matters because businesses can securely integrate AI capabilities at scale."
+        ],
+        "sources": [
+          "ref:aws-bedrock"
+        ]
+      }
+    },
+    "explain:aws-lambda": {
+      "hash": "c443f6d93fbd734b",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:47:52.728Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "skill": "AWS Lambda",
+        "sentences": [
+          "AWS Lambda is used to run code without managing servers or underlying infrastructure.",
+          "It can automatically scale to match incoming requests and run functions only when specific events occur.",
+          "That matters because it allows faster development and saves money by only charging for the exact compute time used."
+        ],
+        "sources": [
+          "ref:aws-lambda"
+        ]
+      }
+    },
+    "explain:chroma": {
+      "hash": "9e56e0ef97da7788",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:47:35.270Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "skill": "Chroma",
+        "sentences": [
+          "Chroma is for efficiently managing high-dimensional vector data for artificial intelligence applications.",
+          "It can store vectors, perform similarity searches, and support retrieval-augmented generation.",
+          "That matters because it provides AI agents with long-term memory and context-aware responses."
+        ],
+        "sources": [
+          "ref:chroma"
+        ]
+      }
+    },
+    "explain:ci-cd": {
+      "hash": "7c1535adc9e287f5",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:47:52.729Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "skill": "CI/CD",
+        "sentences": [
+          "CI/CD is used to automate the process of building, testing, and deploying software.",
+          "It can check new code automatically and push updates to various environments safely.",
+          "That matters because it speeds up delivery, catches issues early, and reduces manual errors."
+        ],
+        "sources": [
+          "ref:ci-cd"
+        ]
+      }
+    },
+    "explain:claude-api": {
+      "hash": "922967dfb29c97c3",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:47:35.269Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "skill": "Claude API",
+        "sentences": [
+          "Claude API is for adding language understanding, reasoning, code generation, vision, and tool use to applications.",
+          "It can engage in complex reasoning, generate text, analyze images, and interact with external tools safely.",
+          "That matters because it allows applications to solve problems reliably."
+        ],
+        "sources": [
+          "ref:claude-api"
+        ]
+      }
+    },
+    "explain:clinical-text-mining": {
+      "hash": "794f281d7d384fd1",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:47:46.643Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "skill": "Clinical text mining",
+        "sentences": [
+          "Clinical text mining extracts insights from unstructured textual data in healthcare.",
+          "It can recognize medical concepts, summarize notes, and extract relations.",
+          "That matters because it enables better decision-making and patient care."
+        ],
+        "sources": [
+          "ref:clinical-text-mining"
+        ]
+      }
+    },
+    "explain:cot": {
+      "hash": "9f5217d2d3db696b",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:47:29.483Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "skill": "CoT",
+        "sentences": [
+          "CoT makes the internal thought process of language models sequential and transparent.",
+          "It can improve problem-solving abilities and reduce logical errors on complex tasks.",
+          "This enhances the accuracy and reliability of the model responses."
+        ],
+        "sources": [
+          "ref:cot"
+        ]
+      }
+    },
+    "explain:data-storytelling": {
+      "hash": "c3d109aeeb744c5f",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:47:46.643Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "skill": "Data storytelling",
+        "sentences": [
+          "Data storytelling makes complex information easier to understand for a broad audience.",
+          "It can transform raw data into compelling narratives that explain insights.",
+          "That matters because it bridges the gap between technical analysis and decision-making."
+        ],
+        "sources": [
+          "ref:data-storytelling"
+        ]
+      }
+    },
+    "explain:dynamodb": {
+      "hash": "7e1ed1a9d3c63d71",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:47:52.728Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "skill": "DynamoDB",
+        "sentences": [
+          "DynamoDB is used as a serverless database that handles vast datasets and rapidly changing workloads.",
+          "It can deliver very fast performance with automatic scaling and high availability.",
+          "That matters because it ensures low-latency performance and reliable data storage at any scale."
+        ],
+        "sources": [
+          "ref:dynamodb"
+        ]
+      }
+    },
+    "explain:eda": {
+      "hash": "cacbb0db19c55861",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:47:46.642Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "skill": "EDA",
+        "sentences": [
+          "EDA helps understand raw data before formal modeling or hypothesis testing.",
+          "It can assess data quality, discover patterns, and identify outliers.",
+          "That matters because it ensures data quality and leads to more robust models."
+        ],
+        "sources": [
+          "ref:eda"
+        ]
+      }
+    },
+    "explain:evaluation-metrics": {
+      "hash": "ae7150ef22fa94b0",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:47:41.324Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "skill": "Evaluation metrics",
+        "sentences": [
+          "Evaluation metrics are used to track how well artificial intelligence agents perform and where they fail.",
+          "They can pinpoint specific workflow errors, compare different models, and ensure ethical guidelines are met.",
+          "This helps teams diagnose failures quickly and deploy reliable systems responsibly."
+        ],
+        "sources": [
+          "ref:evaluation-metrics"
+        ]
+      }
+    },
+    "explain:faiss": {
+      "hash": "fd598aaa98742f46",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:47:35.270Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "skill": "FAISS",
+        "sentences": [
+          "FAISS is for finding similar items within massive, high-dimensional datasets efficiently.",
+          "It can perform fast nearest-neighbor searches and cluster dense vectors across billions of items.",
+          "That matters because it gives agents fast long-term memory and contextual understanding."
+        ],
+        "sources": [
+          "ref:faiss"
+        ]
+      }
+    },
+    "explain:fastapi": {
+      "hash": "ce543f4209bfc738",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:47:52.729Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "skill": "FastAPI",
+        "sentences": [
+          "FastAPI is used to build fast and robust web applications with Python.",
+          "It can automatically create documentation, validate data, and handle concurrent requests very quickly.",
+          "That matters because it helps developers create high-performance services with fewer bugs and less time."
+        ],
+        "sources": [
+          "ref:fastapi"
+        ]
+      }
+    },
+    "explain:firebase": {
+      "hash": "b521f43df2c1506f",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:47:52.729Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "skill": "Firebase",
+        "sentences": [
+          "Firebase is used to simplify app development by providing a serverless backend infrastructure.",
+          "It can sync data in real time, handle user logins, and scale automatically as user numbers change.",
+          "That matters because it lets creators focus on user experience instead of managing complex servers."
+        ],
+        "sources": [
+          "ref:firebase"
+        ]
+      }
+    },
+    "explain:gcp": {
+      "hash": "b3c4a47c797b2ec9",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:47:52.728Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "skill": "GCP",
+        "sentences": [
+          "GCP is used to provide remotely hosted computing resources instead of maintaining physical IT infrastructure.",
+          "It can run data analytics, machine learning, and flexible computing environments on demand.",
+          "That matters because it helps businesses innovate faster and reduce operational burdens without heavy upfront costs."
+        ],
+        "sources": [
+          "ref:gcp"
+        ]
+      }
+    },
+    "explain:gemini": {
+      "hash": "fd4ae52b2d7161f3",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:47:35.269Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "skill": "Gemini",
+        "sentences": [
+          "Gemini is for revolutionizing natural language processing and human-computer interactions.",
+          "It can understand multiple media types, perform sophisticated reasoning, generate code, and process long contexts.",
+          "That matters because it solves complex problems and enhances productivity with advanced AI assistance."
+        ],
+        "sources": [
+          "ref:gemini"
+        ]
+      }
+    },
+    "explain:gemma": {
+      "hash": "9dcd2122da8d5791",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:47:35.269Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "skill": "Gemma",
+        "sentences": [
+          "Gemma is for democratizing access to advanced AI capabilities by providing open-access language models.",
+          "It can generate text and code, handle multiple media types, and solve problems across various domains.",
+          "That matters because it fosters innovation and allows deployment across diverse hardware."
+        ],
+        "sources": [
+          "ref:gemma"
+        ]
+      }
+    },
+    "explain:git": {
+      "hash": "7da6c9b28fd2252d",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:47:52.729Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "skill": "Git",
+        "sentences": [
+          "Git is used to track and manage changes to files over time, especially when working with others.",
+          "It can record versions, merge different edits, and undo past changes.",
+          "That matters because it keeps code and configuration changes organized, auditable, and reproducible."
+        ],
+        "sources": [
+          "ref:git"
+        ]
+      }
+    },
+    "explain:gpt-api": {
+      "hash": "278b0104d957d11c",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:47:29.484Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "skill": "GPT API",
+        "sentences": [
+          "The GPT API integrates advanced artificial intelligence capabilities into applications.",
+          "It can generate text, create content, analyze data, and process images.",
+          "This allows developers to build intelligent features without managing complex underlying infrastructure."
+        ],
+        "sources": [
+          "ref:gpt-api"
+        ]
+      }
+    },
+    "explain:hugging-face": {
+      "hash": "ebbb4c37728ea930",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:47:29.484Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "skill": "Hugging Face",
+        "sentences": [
+          "Hugging Face provides access to machine learning models and tools to help users build applications.",
+          "It can host pre-trained models, share datasets, and simplify model training and deployment.",
+          "This makes advanced technology easier to use without needing extensive resources."
+        ],
+        "sources": [
+          "ref:hugging-face"
+        ]
+      }
+    },
+    "explain:jax-tunix": {
+      "hash": "5e01b259dc3e079a",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:47:41.327Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "skill": "JAX/Tunix",
+        "sentences": [
+          "Tunix provides a toolkit for post-training, fine-tuning, and alignment of large language models.",
+          "It can run supervised fine-tuning, reinforcement learning algorithms, and knowledge distillation strategies.",
+          "This gives practitioners efficient and scalable support to train advanced models at scale."
+        ],
+        "sources": [
+          "ref:jax-tunix"
+        ]
+      }
+    },
+    "explain:langchain": {
+      "hash": "c06df724d467cd7f",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:47:29.481Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "skill": "LangChain",
+        "sentences": [
+          "LangChain helps build complex applications by connecting language models with outside data and tools.",
+          "It can connect to various language models, access external sources, and manage memory across interactions.",
+          "This allows developers to create context-aware and interactive artificial intelligence applications."
+        ],
+        "sources": [
+          "ref:langchain"
+        ]
+      }
+    },
+    "explain:langgraph": {
+      "hash": "46bcf16122dee5d5",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:47:29.484Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "skill": "LangGraph",
+        "sentences": [
+          "LangGraph builds adaptable artificial intelligence agent systems that require loops and multi-agent collaboration.",
+          "It can persist through failures, manage memory, and allow for human oversight during execution.",
+          "This provides enhanced control and reliability for complex decision-making processes."
+        ],
+        "sources": [
+          "ref:langgraph"
+        ]
+      }
+    },
+    "explain:llamaindex": {
+      "hash": "2ab9459a60cb7f6e",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:47:29.482Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "skill": "LlamaIndex",
+        "sentences": [
+          "LlamaIndex connects language models with private or domain-specific data.",
+          "It can organize diverse data formats, build retrieval pipelines, and perform natural language queries without retraining.",
+          "This helps improve accuracy by grounding responses in real information."
+        ],
+        "sources": [
+          "ref:llamaindex"
+        ]
+      }
+    },
+    "explain:model-tuning": {
+      "hash": "7f8eca5c3e1ab5eb",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:47:46.642Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "skill": "Model tuning",
+        "sentences": [
+          "Model tuning addresses suboptimal model performance caused by non-ideal settings.",
+          "It can systematically search for the best hyperparameters and automate their selection.",
+          "That matters because it ensures models generalize well and avoid overfitting."
+        ],
+        "sources": [
+          "ref:model-tuning"
+        ]
+      }
+    },
+    "explain:multi-agent-orchestration": {
+      "hash": "5250ba920c7d74ba",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:47:35.270Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "skill": "Multi-agent orchestration",
+        "sentences": [
+          "Multi-agent orchestration is for helping specialized AI agents collaborate to handle complex business challenges.",
+          "It can route tasks, share context, and manage communication protocols securely.",
+          "That matters because it makes AI investments scalable and reliable."
+        ],
+        "sources": [
+          "ref:multi-agent-orchestration"
+        ]
+      }
+    },
+    "explain:nltk": {
+      "hash": "0d395122bc467dee",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:47:46.641Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "skill": "NLTK",
+        "sentences": [
+          "NLTK provides tools for performing text analysis to help machines understand human language.",
+          "It can tokenize text, stem words, assign grammatical roles, and classify documents.",
+          "That matters because it helps preprocess text data and build language models."
+        ],
+        "sources": [
+          "ref:nltk"
+        ]
+      }
+    },
+    "explain:pandas": {
+      "hash": "14c3b3d651062cf0",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:47:41.325Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "skill": "Pandas",
+        "sentences": [
+          "Pandas is designed to handle and process messy tabular and time-series data.",
+          "It can load files, clean missing values, sort information, and calculate descriptive statistics.",
+          "This makes raw data suitable for various stages of data science and machine learning workflows."
+        ],
+        "sources": [
+          "ref:pandas"
+        ]
+      }
+    },
+    "explain:performance-tuning": {
+      "hash": "65a49be845af1218",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:47:35.271Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "skill": "Performance tuning",
+        "sentences": [
+          "Performance tuning is for ensuring consistent, reliable, and cost-effective operation of agentic AI systems.",
+          "It can reduce latency, improve accuracy, and optimize resource utilization.",
+          "That matters because it achieves desired business outcomes when agents handle complex tasks."
+        ],
+        "sources": [
+          "ref:performance-tuning"
+        ]
+      }
+    },
+    "explain:power-bi": {
+      "hash": "7e23e352585d7936",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:47:46.643Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "skill": "Power BI",
+        "sentences": [
+          "Power BI transforms raw, disparate data into meaningful insights.",
+          "It can connect to data sources, build reports, and use artificial intelligence.",
+          "That matters because it fosters data-driven decision-making across an organization."
+        ],
+        "sources": [
+          "ref:power-bi"
+        ]
+      }
+    },
+    "explain:python": {
+      "hash": "01bf34d7645daf0a",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:47:41.325Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "skill": "Python",
+        "sentences": [
+          "Python is a programming language used for data manipulation, analysis, visualization, and model building.",
+          "It can transform large datasets, create visual charts, and build predictive machine learning models.",
+          "This helps people efficiently extract insights and deploy data-driven applications across many fields."
+        ],
+        "sources": [
+          "ref:python"
+        ]
+      }
+    },
+    "explain:pytorch": {
+      "hash": "0f45db659947577a",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:47:41.326Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "skill": "PyTorch",
+        "sentences": [
+          "PyTorch is a tool used to build and train complex neural networks using a flexible programming style.",
+          "It can use graphics hardware for high-performance computing and scale models across multiple machines.",
+          "This makes rapid prototyping and debugging much easier for research and development."
+        ],
+        "sources": [
+          "ref:pytorch"
+        ]
+      }
+    },
+    "explain:rag": {
+      "hash": "13c410f437c9f752",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:47:29.482Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "skill": "RAG",
+        "sentences": [
+          "RAG provides language models with real-time and domain-specific context.",
+          "It can reduce factual errors and give models access to current information beyond their training data.",
+          "This makes outputs more accurate and trustworthy without expensive model retraining."
+        ],
+        "sources": [
+          "ref:rag"
+        ]
+      }
+    },
+    "explain:react": {
+      "hash": "97dd3103913c6036",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:47:29.483Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "skill": "ReAct",
+        "sentences": [
+          "ReAct combines step-by-step reasoning with the use of external tools.",
+          "It can gather real-time information and dynamically adjust its approach to solve problems.",
+          "This leads to more accurate responses and reduces errors."
+        ],
+        "sources": [
+          "ref:react"
+        ]
+      }
+    },
+    "explain:regression": {
+      "hash": "fee946b7b1e8e365",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:47:46.642Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "skill": "Regression",
+        "sentences": [
+          "Regression predicts continuous outcomes by establishing relationships between variables.",
+          "It can forecast future trends and quantify relationships between variables.",
+          "That matters because it helps make data-driven decisions in fields like finance."
+        ],
+        "sources": [
+          "ref:regression"
+        ]
+      }
+    },
+    "explain:rlhf": {
+      "hash": "0ec6e8463e9e7ca3",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:47:29.483Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "skill": "RLHF",
+        "sentences": [
+          "RLHF aligns artificial intelligence outputs with human expectations and ethical standards.",
+          "It can reduce bias, improve safety, and make interactions more helpful and natural.",
+          "This transforms raw models into trustworthy systems for real-world use."
+        ],
+        "sources": [
+          "ref:rlhf"
+        ]
+      }
+    },
+    "explain:scikit-learn": {
+      "hash": "cfd163f7eb3d7c2a",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:47:41.326Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "skill": "Scikit-learn",
+        "sentences": [
+          "Scikit-learn is a collection of algorithms that streamlines statistical modeling and machine learning.",
+          "It can perform classification, clustering, data preprocessing, and model evaluation without building methods from scratch.",
+          "This allows users to focus on higher-level insights and create practical business value."
+        ],
+        "sources": [
+          "ref:scikit-learn"
+        ]
+      }
+    },
+    "explain:semantic-chunking": {
+      "hash": "1b5121d4f7243fbf",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:47:35.270Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "skill": "Semantic chunking",
+        "sentences": [
+          "Semantic chunking is for preventing context fragmentation by keeping related information together in large language models.",
+          "It can adaptively segment text to respect natural topic shifts and logical flow.",
+          "That matters because it improves retrieval quality and reduces AI hallucinations."
+        ],
+        "sources": [
+          "ref:semantic-chunking"
+        ]
+      }
+    },
+    "explain:sentiment-analysis": {
+      "hash": "af830f4cd05bd194",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:47:52.727Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "skill": "Sentiment analysis",
+        "sentences": [
+          "Sentiment analysis is used to read text and understand public opinion and customer emotions without doing it by hand.",
+          "It can sort text into positive, negative, or neutral, score emotion intensity, and detect specific feelings like joy or anger.",
+          "That matters because it helps businesses make data-driven decisions and improve their reputation at a large scale."
+        ],
+        "sources": [
+          "ref:sentiment-analysis"
+        ]
+      }
+    },
+    "explain:spacy": {
+      "hash": "0fc2f4e201191e12",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:47:46.641Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "skill": "SpaCy",
+        "sentences": [
+          "SpaCy processes and understands large volumes of unstructured text data efficiently.",
+          "It can segment text, assign grammatical roles, and identify named entities.",
+          "That matters because it enables the creation of robust language applications."
+        ],
+        "sources": [
+          "ref:spacy"
+        ]
+      }
+    },
+    "explain:sql": {
+      "hash": "9b36b16f6fdd8d4f",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:47:41.325Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "skill": "SQL",
+        "sentences": [
+          "SQL is a tool used to interact with structured data and analyze large datasets efficiently.",
+          "It can query specific records, filter and sort information, and combine multiple data tables.",
+          "This serves as a bridge to prepare clean data for modeling and gain useful analytical insights."
+        ],
+        "sources": [
+          "ref:sql"
+        ]
+      }
+    },
+    "explain:statistics": {
+      "hash": "c5b332eca3df7542",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:47:46.641Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "skill": "Statistics",
+        "sentences": [
+          "Statistics provides the mathematical foundation for understanding data behavior and evaluating outcomes.",
+          "It can summarize datasets, test hypotheses, and quantify uncertainty.",
+          "That matters because it enables the transformation of raw data into reliable predictions."
+        ],
+        "sources": [
+          "ref:statistics"
+        ]
+      }
+    },
+    "explain:tableau": {
+      "hash": "95a25002489e58e2",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:47:46.643Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "skill": "Tableau",
+        "sentences": [
+          "Tableau makes complex data accessible and understandable for a wide range of users.",
+          "It can connect to diverse data sources and create interactive dashboards.",
+          "That matters because it empowers organizations to derive actionable insights from their data."
+        ],
+        "sources": [
+          "ref:tableau"
+        ]
+      }
+    },
+    "explain:tensorflow": {
+      "hash": "1e51a4d8204ddf76",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:47:41.326Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "skill": "TensorFlow",
+        "sentences": [
+          "TensorFlow helps build and execute advanced machine learning and deep neural network models.",
+          "It can run computations across diverse hardware devices and track performance with companion tools.",
+          "This simplifies the process of developing scalable analytics applications across different industries."
+        ],
+        "sources": [
+          "ref:tensorflow"
+        ]
+      }
+    },
+    "explain:tracing": {
+      "hash": "45a88185951cc29a",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:47:41.325Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "skill": "Tracing",
+        "sentences": [
+          "Tracing is used to understand and debug non-deterministic artificial intelligence agents that make autonomous decisions.",
+          "It can record every decision point, tool use, and reasoning step to reveal the exact cause of an error.",
+          "This helps developers fix problems, measure performance, and keep complex systems safe and reliable."
+        ],
+        "sources": [
+          "ref:tracing"
+        ]
+      }
+    },
+    "explain:vectorization": {
+      "hash": "d7d2e559cce39be6",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:47:35.270Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "skill": "Vectorization",
+        "sentences": [
+          "Vectorization is for helping AI agents understand unstructured data based on semantic meaning rather than keywords.",
+          "It can process multiple media types and support semantic search and recommendation systems.",
+          "That matters because it gives AI agents long-term memory and context-aware decision-making."
+        ],
+        "sources": [
+          "ref:vectorization"
+        ]
+      }
+    },
+    "explain:vs-code": {
+      "hash": "ac289ea4d93113fc",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:47:52.730Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "skill": "VS Code",
+        "sentences": [
+          "VS Code is used as a single environment to write and manage infrastructure code.",
+          "It can support multiple languages, connect to remote systems, and offer smart code completion.",
+          "That matters because it makes daily development and operations work much faster and simpler."
+        ],
+        "sources": [
+          "ref:vs-code"
+        ]
+      }
+    },
+    "gallery:01-negation-scope": {
+      "hash": "b1bcc3e01d32a4a0",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:47:56.781Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "text": "I wouldn't say the new build is fast.",
+        "trap": "Negation scope",
+        "note": "“wouldn't” sits six words before “fast”, outside the lexicon's three-word negation window, so “fast” still counts as praise.",
+        "intended": "negative",
+        "label": "negative",
+        "score": -0.6,
+        "rationale": "Negation combined with slow performance implies a negative view.",
+        "aspects": [
+          {
+            "text": "wouldn't say the new build is fast",
+            "start": 2,
+            "end": 36,
+            "polarity": "negative"
+          }
+        ]
+      }
+    },
+    "gallery:02-sarcasm": {
+      "hash": "6ed90b710c518a81",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:48:01.064Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "text": "Oh great, another outage. Just what I needed on a Friday.",
+        "trap": "Sarcasm",
+        "note": "“great” is the only word on its lists, and a word list can't hear irony, so the complaint scores as praise.",
+        "intended": "negative",
+        "label": "negative",
+        "score": -0.9,
+        "rationale": "Sarcastic exclamation and complaining phrase establish strong negative sentiment.",
+        "aspects": [
+          {
+            "text": "Oh great",
+            "start": 0,
+            "end": 8,
+            "polarity": "negative"
+          },
+          {
+            "text": "another outage",
+            "start": 10,
+            "end": 24,
+            "polarity": "negative"
+          },
+          {
+            "text": "Just what I needed",
+            "start": 26,
+            "end": 44,
+            "polarity": "negative"
+          }
+        ]
+      }
+    },
+    "gallery:03-technical-idiom": {
+      "hash": "671ff5ab2a995f5b",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:48:05.217Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "text": "Kill the stuck process and the error is gone.",
+        "trap": "Technical idiom",
+        "note": "“error” is on its negative list, so a fix that makes the error go away reads as bad news.",
+        "intended": "positive",
+        "label": "neutral",
+        "score": 0,
+        "rationale": "The phrase kill the process functions as a technical idiom indicating problem resolution without emotional content.",
+        "aspects": []
+      }
+    },
+    "gallery:04-contrast": {
+      "hash": "039640e678ac865a",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:48:09.084Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "text": "The docs are good but the API is a mess.",
+        "trap": "Contrast",
+        "note": "“good” and “mess” cancel out to exactly zero, so two strong opinions average into neutral.",
+        "intended": "mixed",
+        "label": "mixed",
+        "score": 0,
+        "rationale": "Contrast between the positive view on the docs and the negative view on the API determines the mixed sentiment.",
+        "aspects": [
+          {
+            "text": "good",
+            "start": 13,
+            "end": 17,
+            "polarity": "positive"
+          },
+          {
+            "text": "a mess",
+            "start": 33,
+            "end": 39,
+            "polarity": "negative"
+          }
+        ]
+      }
+    },
+    "gallery:05-double-negative": {
+      "hash": "f97966abd124ca0c",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:48:13.159Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "text": "I can't say I didn't enjoy it.",
+        "trap": "Double negative",
+        "note": "“didn't” flips “enjoy” to negative, and the lexicon never sees that “can't say” flips it back.",
+        "intended": "positive",
+        "label": "positive",
+        "score": 0.6,
+        "rationale": "Double negation reveals a positive underlying sentiment.",
+        "aspects": [
+          {
+            "text": "can't say I didn't enjoy it",
+            "start": 2,
+            "end": 29,
+            "polarity": "positive"
+          }
+        ]
+      }
+    },
+    "gallery:06-domain-meaning": {
+      "hash": "b54af5e57d28b667",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:48:17.129Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "text": "The model's error rate dropped to almost nothing.",
+        "trap": "Domain meaning",
+        "note": "“error” is on its negative list; it cannot tell that a falling error rate is good news.",
+        "intended": "positive",
+        "label": "positive",
+        "score": 0.9,
+        "rationale": "The positive sentiment is driven by the phrase indicating a significant reduction in the error rate.",
+        "aspects": [
+          {
+            "text": "dropped to almost nothing",
+            "start": 23,
+            "end": 48,
+            "polarity": "positive"
+          }
+        ]
+      }
+    },
+    "gallery:07-slang": {
+      "hash": "bc0c763b2d3254fa",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:48:21.024Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "text": "This release slaps, zero crashes all week.",
+        "trap": "Slang",
+        "note": "“slaps” isn't in its vocabulary and “zero” isn't one of its negators, so “crashes” counts against the release.",
+        "intended": "positive",
+        "label": "positive",
+        "score": 0.9,
+        "rationale": "Slang praise and reliable performance indicate strong positive sentiment.",
+        "aspects": [
+          {
+            "text": "slaps",
+            "start": 13,
+            "end": 18,
+            "polarity": "positive"
+          },
+          {
+            "text": "zero crashes all week",
+            "start": 20,
+            "end": 41,
+            "polarity": "positive"
+          }
+        ]
+      }
+    },
+    "gallery:08-sarcasm-intensifier": {
+      "hash": "de87a743c240247f",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:48:25.005Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "text": "Really love waiting ten minutes for a build.",
+        "trap": "Sarcasm with an intensifier",
+        "note": "“Really” multiplies “love” by 1.6, so the sarcasm scores as strong praise.",
+        "intended": "negative",
+        "label": "negative",
+        "score": -0.8,
+        "rationale": "Sarcasm conveyed through love combined with a tedious wait decides the negative tone.",
+        "aspects": [
+          {
+            "text": "Really love",
+            "start": 0,
+            "end": 11,
+            "polarity": "negative"
+          },
+          {
+            "text": "waiting ten minutes",
+            "start": 12,
+            "end": 31,
+            "polarity": "negative"
+          }
+        ]
+      }
+    },
+    "gallery:09-elliptical-answer": {
+      "hash": "eef4049fd318d55d",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:48:28.988Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "text": "Is it fast? Not really.",
+        "trap": "Elliptical answer",
+        "note": "A negator only affects the words after it, and “really” carries no sentiment, so “fast” in the question still counts as praise.",
+        "intended": "negative",
+        "label": "negative",
+        "score": -0.6,
+        "rationale": "Direct negation of speed decides the negative sentiment.",
+        "aspects": [
+          {
+            "text": "Not really",
+            "start": 12,
+            "end": 22,
+            "polarity": "negative"
+          }
+        ]
+      }
+    },
+    "gallery:10-idiomatic-negation": {
+      "hash": "223665251e029e18",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:48:32.960Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "text": "Hardly a day goes by without a crash.",
+        "trap": "Idiom with a negator",
+        "note": "“without” flips “crash” into a positive; the lexicon can't see that the sentence means crashes happen almost daily.",
+        "intended": "negative",
+        "label": "negative",
+        "score": -0.8,
+        "rationale": "The word crash clearly expresses persistent frustration and system instability.",
+        "aspects": [
+          {
+            "text": "crash",
+            "start": 31,
+            "end": 36,
+            "polarity": "negative"
+          }
+        ]
+      }
+    },
+    "summary:agent-observability": {
+      "hash": "de6c0ee4562e779b",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:49:32.396Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "skill": "Agent observability",
+        "text": "Agent observability appears in his skills under Agentic AI. The practice is named in the Agentic Systems and Design Program at iHUB DivyaSampark @ IIT Roorkee.",
+        "evidence": [
+          "exp:0"
+        ],
+        "sources": [
+          "exp:0"
+        ]
+      }
+    },
+    "summary:autogen": {
+      "hash": "60b02323c1abc835",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:49:27.766Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "skill": "AutoGen",
+        "text": "AutoGen appears in the Freelance AI Agent Specialist at Mindrift. It is listed among his GenAI and LLMs skills.",
+        "evidence": [
+          "exp:1"
+        ],
+        "sources": [
+          "exp:1"
+        ]
+      }
+    },
+    "summary:aws-bedrock": {
+      "hash": "55fe0dd396289fdb",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:49:27.767Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "skill": "AWS Bedrock",
+        "text": "AWS Bedrock is listed in the tech stack for the project Vyapar-Gyan. The site also includes it under his GenAI and LLMs skills.",
+        "evidence": [
+          "project:vyapar-gyan"
+        ],
+        "sources": [
+          "project:vyapar-gyan#tagline"
+        ]
+      }
+    },
+    "summary:aws-lambda": {
+      "hash": "88604cb9572c6874",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:49:41.393Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "skill": "AWS Lambda",
+        "text": "AWS Lambda appears in the tech stack of the Vyapar-Gyan project on his site. It is also listed under Infrastructure in his skills section.",
+        "evidence": [
+          "project:vyapar-gyan"
+        ],
+        "sources": [
+          "project:vyapar-gyan#tagline"
+        ]
+      }
+    },
+    "summary:chroma": {
+      "hash": "71b086488d86f5cd",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:49:32.394Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "skill": "Chroma",
+        "text": "Chroma is listed in his skills under Agentic AI. The technology is named in the Agentic Systems and Design Program at iHUB DivyaSampark @ IIT Roorkee.",
+        "evidence": [
+          "exp:0"
+        ],
+        "sources": [
+          "exp:0"
+        ]
+      }
+    },
+    "summary:dynamodb": {
+      "hash": "f0f2b4fa0e9bf8ca",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:49:41.394Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "skill": "DynamoDB",
+        "text": "DynamoDB appears in the tech stack for the Vyapar-Gyan project. The skill is also listed under Infrastructure on his portfolio site.",
+        "evidence": [
+          "project:vyapar-gyan"
+        ],
+        "sources": [
+          "project:vyapar-gyan#tagline"
+        ]
+      }
+    },
+    "summary:eda": {
+      "hash": "4288c37766136183",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:49:41.392Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "skill": "EDA",
+        "text": "EDA appears in the Data Science Intern at Unified Mentor Private Limited role, where he worked on EDA and regression on IBM HR Analytics. The skill is also listed under Analytics and Viz on his portfolio site.",
+        "evidence": [
+          "exp:2"
+        ],
+        "sources": [
+          "exp:2"
+        ]
+      }
+    },
+    "summary:evaluation-metrics": {
+      "hash": "ac0b323eff0b7a20",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:49:32.395Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "skill": "Evaluation metrics",
+        "text": "Evaluation metrics is included in his skills under Agentic AI. The term appears in the Freelance AI Agent Specialist role at Mindrift.",
+        "evidence": [
+          "exp:1"
+        ],
+        "sources": [
+          "exp:1"
+        ]
+      }
+    },
+    "summary:faiss": {
+      "hash": "c6f3fe9941fd1926",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:49:32.394Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "skill": "FAISS",
+        "text": "FAISS is included in his skills under Agentic AI. The technology is named in the Agentic Systems and Design Program at iHUB DivyaSampark @ IIT Roorkee.",
+        "evidence": [
+          "exp:0"
+        ],
+        "sources": [
+          "exp:0"
+        ]
+      }
+    },
+    "summary:fastapi": {
+      "hash": "e84c1825a0795486",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:49:48.692Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "skill": "FastAPI",
+        "text": "FastAPI appears in the tech stack for Bruhworking — NexusFlow. He also used it during the Agentic Systems and Design Program at iHUB DivyaSampark @ IIT Roorkee for LLMOps serving.",
+        "evidence": [
+          "exp:0",
+          "project:bruhworking-nexusflow"
+        ],
+        "sources": [
+          "project:bruhworking-nexusflow#tagline",
+          "exp:0"
+        ]
+      }
+    },
+    "summary:gcp": {
+      "hash": "c6e9d8970ab1f36e",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:49:41.395Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "skill": "GCP",
+        "text": "GCP appears in the tech stack of the UrbanCare AI project on his site. The skill is also listed under Infrastructure in his skills section.",
+        "evidence": [
+          "project:urbancare-ai"
+        ],
+        "sources": [
+          "project:urbancare-ai#tagline"
+        ]
+      }
+    },
+    "summary:gemini": {
+      "hash": "f2e1f0580bf8d304",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:49:32.393Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "skill": "Gemini",
+        "text": "Gemini appears in his skills under GenAI and LLMs. The technology is included in the tech stacks of UrbanCare AI, Bruhworking - NexusFlow, Vyapar-Gyan, Omni-Lab, Content Storyteller, and MCQ Tech Challenge.",
+        "evidence": [
+          "project:bruhworking-nexusflow",
+          "project:content-storyteller",
+          "project:mcq-tech-challenge",
+          "project:omni-lab",
+          "project:urbancare-ai",
+          "project:vyapar-gyan"
+        ],
+        "sources": [
+          "project:urbancare-ai#tagline",
+          "project:bruhworking-nexusflow#tagline",
+          "project:vyapar-gyan#tagline",
+          "project:omni-lab#tagline",
+          "project:content-storyteller#tagline",
+          "project:mcq-tech-challenge#tagline"
+        ]
+      }
+    },
+    "summary:gemma": {
+      "hash": "9d9137cc2b946b72",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:49:32.392Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "skill": "Gemma",
+        "text": "Gemma is listed in his skills under GenAI and LLMs. The technology appears in the tech stack of the project UrbanCare AI.",
+        "evidence": [
+          "project:urbancare-ai"
+        ],
+        "sources": [
+          "project:urbancare-ai#tagline"
+        ]
+      }
+    },
+    "summary:langchain": {
+      "hash": "da5c2cc2e6987f05",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:49:27.762Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "skill": "LangChain",
+        "text": "LangChain is used in the project UrbanCare AI. He also mentions this skill in the Agentic Systems and Design Program at iHUB DivyaSampark @ IIT Roorkee.",
+        "evidence": [
+          "exp:0",
+          "project:urbancare-ai"
+        ],
+        "sources": [
+          "project:urbancare-ai#tagline",
+          "exp:0"
+        ]
+      }
+    },
+    "summary:langgraph": {
+      "hash": "4ffcb54d2771079c",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:49:27.766Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "skill": "LangGraph",
+        "text": "LangGraph is listed under his GenAI and LLMs skills. He includes it in the Agentic Systems and Design Program at iHUB DivyaSampark @ IIT Roorkee.",
+        "evidence": [
+          "exp:0"
+        ],
+        "sources": [
+          "exp:0"
+        ]
+      }
+    },
+    "summary:llamaindex": {
+      "hash": "e568c1884fdef77c",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:49:27.765Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "skill": "LlamaIndex",
+        "text": "LlamaIndex appears in the Agentic Systems and Design Program at iHUB DivyaSampark @ IIT Roorkee. The site lists it under GenAI and LLMs.",
+        "evidence": [
+          "exp:0"
+        ],
+        "sources": [
+          "exp:0"
+        ]
+      }
+    },
+    "summary:nltk": {
+      "hash": "0e6b3057727f0168",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:49:37.042Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "skill": "NLTK",
+        "text": "NLTK appears under Data Science & ML. It is listed in the tech stack for the project Drugs Side Effects Analysis.",
+        "evidence": [
+          "project:drugs-side-effects-analysis"
+        ],
+        "sources": [
+          "project:drugs-side-effects-analysis#tagline"
+        ]
+      }
+    },
+    "summary:pandas": {
+      "hash": "32d970d6a8fe9e5a",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:49:37.039Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "skill": "Pandas",
+        "text": "Pandas appears under Data Science & ML. It is listed in the tech stack for the project Netflix Content Analytics.",
+        "evidence": [
+          "project:netflix-content-analytics"
+        ],
+        "sources": [
+          "project:netflix-content-analytics#tagline"
+        ]
+      }
+    },
+    "summary:python": {
+      "hash": "908877484f334469",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:49:37.034Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "skill": "Python",
+        "text": "Python appears under Data Science & ML and is part of the tech stack for Bruhworking — NexusFlow, TCS Stock Forecasting, Drugs Side Effects Analysis, IBM HR Attrition Prediction, and Netflix Content Analytics. He also worked with Python code generation and reasoning traces as a Freelance AI Agent Specialist at Mindrift.",
+        "evidence": [
+          "exp:1",
+          "project:bruhworking-nexusflow",
+          "project:drugs-side-effects-analysis",
+          "project:ibm-hr-attrition-prediction",
+          "project:netflix-content-analytics",
+          "project:tcs-stock-forecasting"
+        ],
+        "sources": [
+          "project:bruhworking-nexusflow#tagline",
+          "project:tcs-stock-forecasting#tagline",
+          "project:drugs-side-effects-analysis#tagline",
+          "project:ibm-hr-attrition-prediction#tagline",
+          "project:netflix-content-analytics#tagline",
+          "exp:1"
+        ]
+      }
+    },
+    "summary:rag": {
+      "hash": "437a914e688d2141",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:49:27.766Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "skill": "RAG",
+        "text": "RAG is featured in the Agentic Systems and Design Program at iHUB DivyaSampark @ IIT Roorkee. This skill is categorised under GenAI and LLMs on the site.",
+        "evidence": [
+          "exp:0"
+        ],
+        "sources": [
+          "exp:0"
+        ]
+      }
+    },
+    "summary:react": {
+      "hash": "d95a6f5f821c7a5d",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:49:27.766Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "skill": "ReAct",
+        "text": "ReAct is part of the Agentic Systems and Design Program at iHUB DivyaSampark @ IIT Roorkee. It appears within his GenAI and LLMs skills.",
+        "evidence": [
+          "exp:0"
+        ],
+        "sources": [
+          "exp:0"
+        ]
+      }
+    },
+    "summary:regression": {
+      "hash": "61b0d36840004a68",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:49:37.043Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "skill": "Regression",
+        "text": "Regression appears under Data Science & ML and is named in the Data Science Intern role at Unified Mentor Private Limited. He performed exploratory data analysis and regression modeling on the IBM HR Analytics dataset.",
+        "evidence": [
+          "exp:2"
+        ],
+        "sources": [
+          "exp:2"
+        ]
+      }
+    },
+    "summary:rlhf": {
+      "hash": "2d4fb9b785cddb19",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:49:27.766Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "skill": "RLHF",
+        "text": "RLHF is included in the Freelance AI Agent Specialist at Mindrift. The site lists this skill under GenAI and LLMs.",
+        "evidence": [
+          "exp:1"
+        ],
+        "sources": [
+          "exp:1"
+        ]
+      }
+    },
+    "summary:scikit-learn": {
+      "hash": "e52d6510bbcc7b8d",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:49:37.040Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "skill": "Scikit-learn",
+        "text": "Scikit-learn appears under Data Science & ML. It is listed in the tech stack for TCS Stock Forecasting, Drugs Side Effects Analysis, and IBM HR Attrition Prediction.",
+        "evidence": [
+          "project:drugs-side-effects-analysis",
+          "project:ibm-hr-attrition-prediction",
+          "project:tcs-stock-forecasting"
+        ],
+        "sources": [
+          "project:tcs-stock-forecasting#tagline",
+          "project:drugs-side-effects-analysis#tagline",
+          "project:ibm-hr-attrition-prediction#tagline"
+        ]
+      }
+    },
+    "summary:semantic-chunking": {
+      "hash": "dbfdf500bad43a9c",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:49:32.394Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "skill": "Semantic chunking",
+        "text": "Semantic chunking appears in his skills under Agentic AI. The concept is named in the Agentic Systems and Design Program at iHUB DivyaSampark @ IIT Roorkee.",
+        "evidence": [
+          "exp:0"
+        ],
+        "sources": [
+          "exp:0"
+        ]
+      }
+    },
+    "summary:sql": {
+      "hash": "90a18b8ecf13ad73",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:49:37.038Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "skill": "SQL",
+        "text": "SQL appears under Data Science & ML. He used SQL for data mining to extract and transform structured datasets during the Data Science Intern role at Unified Mentor Private Limited.",
+        "evidence": [
+          "exp:2"
+        ],
+        "sources": [
+          "exp:2"
+        ]
+      }
+    },
+    "summary:tensorflow": {
+      "hash": "50087c4495172571",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:49:37.041Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "skill": "TensorFlow",
+        "text": "TensorFlow appears under Data Science & ML. It is included in the tech stack for TCS Stock Forecasting.",
+        "evidence": [
+          "project:tcs-stock-forecasting"
+        ],
+        "sources": [
+          "project:tcs-stock-forecasting#tagline"
+        ]
+      }
+    },
+    "summary:tracing": {
+      "hash": "25edb693a9151bb1",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:49:37.028Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "skill": "Tracing",
+        "text": "Tracing appears under Agentic AI and is named in the Agentic Systems and Design Program at iHUB DivyaSampark @ IIT Roorkee. He implemented LLMOps best practices including agent observability and tracing.",
+        "evidence": [
+          "exp:0"
+        ],
+        "sources": [
+          "exp:0"
+        ]
+      }
+    },
+    "summary:vectorization": {
+      "hash": "fd7f5cfea879036b",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:49:32.395Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "skill": "Vectorization",
+        "text": "Vectorization is listed in his skills under Agentic AI. The process is named in the Agentic Systems and Design Program at iHUB DivyaSampark @ IIT Roorkee.",
+        "evidence": [
+          "exp:0"
+        ],
+        "sources": [
+          "exp:0"
+        ]
+      }
+    }
+  }
+}

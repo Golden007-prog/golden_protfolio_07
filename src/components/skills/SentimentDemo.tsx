@@ -1,9 +1,11 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { RotateCcw, Sparkles } from 'lucide-react';
-import { useEffect, useId, useMemo, useState } from 'react';
+import { ChevronDown, RotateCcw, Sparkles } from 'lucide-react';
+import { lazy, Suspense, useEffect, useId, useMemo, useRef, useState } from 'react';
+import { GeminiCompare } from '@/components/ai/skills/GeminiCompare';
 import { LottieIcon } from '@/components/shared/LottieIcon';
+import { Button } from '@/components/ui/Button';
 import { emit } from '@/lib/events';
 import { duration, ease } from '@/lib/motion';
 import { analyze, INTENSIFIER_FACTOR, type Polarity, type SentimentHit } from '@/lib/sentiment';
@@ -16,6 +18,11 @@ const EXAMPLES = [
 ];
 
 const ANNOUNCE_DELAY_MS = 700;
+
+// Its own chunk (and the AI store's), fetched only when the visitor opens it.
+const DisagreementGallery = lazy(() =>
+  import('@/components/ai/skills/DisagreementGallery').then((m) => ({ default: m.DisagreementGallery })),
+);
 
 const LABEL_TONE: Record<Polarity, string> = {
   positive: 'text-positive',
@@ -42,14 +49,24 @@ function describeHit(hit: SentimentHit): string {
  * A lexicon sentiment model that runs in the browser (src/lib/sentiment.ts). Each
  * scored word is listed with what changed its weight (¬ negated, ×1.6 intensified),
  * the polarity bar grows from the centre with scaleX, and the verdict is announced
- * politely once typing pauses.
+ * politely once typing pauses. The lexicon stays the default; comparing with
+ * Gemini is opt-in (GeminiCompare), and "Where lexicons break" shows prepared
+ * examples without any request.
  */
 export function SentimentDemo() {
   const [text, setText] = useState(EXAMPLES[0]);
   const result = useMemo(() => analyze(text), [text]);
   const inputId = useId();
   const hintId = useId();
+  const galleryId = useId();
   const empty = !text.trim();
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const [galleryOpen, setGalleryOpen] = useState(false);
+
+  const tryText = (next: string) => {
+    setText(next);
+    inputRef.current?.focus();
+  };
 
   const [announcement, setAnnouncement] = useState('');
   useEffect(() => {
@@ -100,6 +117,7 @@ export function SentimentDemo() {
         Text to analyse
       </label>
       <textarea
+        ref={inputRef}
         id={inputId}
         aria-describedby={hintId}
         value={text}
@@ -195,6 +213,30 @@ export function SentimentDemo() {
       {result.hits.length > 0 ? (
         <p className="mt-2 font-mono text-[10px] text-text-dim">¬ negated · ×{INTENSIFIER_FACTOR} intensified</p>
       ) : null}
+
+      <GeminiCompare text={text} lexicon={result} />
+
+      <div className="mt-6 border-t border-hairline pt-4">
+        <Button
+          variant="ghost"
+          size="md"
+          className="-ml-3"
+          aria-expanded={galleryOpen}
+          aria-controls={galleryOpen ? galleryId : undefined}
+          onClick={() => setGalleryOpen((v) => !v)}
+          trailingIcon={<ChevronDown aria-hidden="true" className="ai-skills-chevron size-4" data-open={galleryOpen || undefined} />}
+          data-lexicon-gallery-toggle=""
+        >
+          Where lexicons break
+        </Button>
+        {galleryOpen ? (
+          <div id={galleryId}>
+            <Suspense fallback={<p className="mt-4 text-sm text-text-muted">Loading the examples…</p>}>
+              <DisagreementGallery onTry={tryText} />
+            </Suspense>
+          </div>
+        ) : null}
+      </div>
 
       <p aria-live="polite" aria-atomic="true" className="sr-only" data-sentiment-live="">
         {announcement}

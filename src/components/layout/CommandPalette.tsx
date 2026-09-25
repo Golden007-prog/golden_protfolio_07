@@ -1,9 +1,20 @@
 'use client';
 
-import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type ReactNode, type RefObject } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent as ReactKeyboardEvent,
+  type ReactNode,
+  type RefObject,
+} from 'react';
 import {
   ArrowRight,
   AtSign,
+  BookOpenText,
   Code2,
   Copy,
   Download,
@@ -12,7 +23,10 @@ import {
   Github,
   Hash,
   Keyboard,
+  Languages,
   Linkedin,
+  Map as MapIcon,
+  MessageCircleQuestionMark,
   Monitor,
   Moon,
   Pause,
@@ -25,6 +39,8 @@ import {
 } from 'lucide-react';
 import profile from '@/data/profile.json';
 import projects from '@/data/projects.json';
+import type { SectionToolsRequest } from '@/components/ai/discovery/SectionTools';
+import { useAiActionRunner } from '@/components/ai/useAiActionRunner';
 import { LottieIcon } from '@/components/shared/LottieIcon';
 import { toggleReducedMotion } from '@/components/shared/MotionToggle';
 import { Dialog } from '@/components/ui/Dialog';
@@ -33,6 +49,11 @@ import { smoothScrollTo } from '@/contexts/LenisContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useSingleKeyShortcuts } from '@/hooks/useHotkeys';
 import { setPaused, useMotionPrefs, usePaused } from '@/hooks/useMotionPrefs';
+import { sectionOf } from '@/lib/ai/actions';
+import { openAssistant } from '@/lib/ai/bus';
+import { AI_LIMITS } from '@/lib/ai/config';
+import type { AiTarget } from '@/lib/ai/protocol';
+import { isFallbackBody } from '@/lib/ai/stream';
 import { track } from '@/lib/analytics';
 import { emit } from '@/lib/events';
 import { safeStorage } from '@/lib/safeStorage';
@@ -40,23 +61,36 @@ import { SECTIONS, SITE, slugify } from '@/lib/site';
 import { setUrlHash } from '@/lib/urlState';
 import { cn } from '@/utils/cn';
 
-type GroupName = 'Recent' | 'Sections' | 'Projects' | 'Skills' | 'Links' | 'Actions';
+type GroupName = 'Recent' | 'Sections' | 'Projects' | 'Skills' | 'Links' | 'Actions' | 'By meaning';
 
 type Item = {
   id: string;
-  group: Exclude<GroupName, 'Recent'>;
+  group: Exclude<GroupName, 'Recent' | 'By meaning'>;
   label: string;
   hint?: string;
   keywords?: string;
   icon: ReactNode;
   run: () => void;
+  /** 0..1 similarity, shown as a small bar ('By meaning' rows only). */
+  score?: number;
+  /** Query-specific rows (Ask AI) never enter Recent. */
+  transient?: boolean;
 };
 
 type Group = { name: GroupName; items: Item[] };
 
+
 const RECENT_KEY = 'ob-palette-recent';
 const RECENT_MAX = 5;
-const GROUP_ORDER: Exclude<GroupName, 'Recent'>[] = ['Sections', 'Projects', 'Skills', 'Links', 'Actions'];
+const GROUP_ORDER: Exclude<GroupName, 'Recent' | 'By meaning'>[] = ['Sections', 'Projects', 'Skills', 'Links', 'Actions'];
+const ASK_ID = 'action:ask-ai';
+
+/* Semantic matches: asked for only when the lexical search is thin. */
+const SEMANTIC_MIN_CHARS = 3;
+const SEMANTIC_BELOW = 3;
+const SEMANTIC_SETTLE_MS = 400;
+const SEMANTIC_TIMEOUT_MS = 8000;
+const SEMANTIC_MAX = 5;
 
 const SKILLS: { name: string; category: string }[] = Object.entries(profile.skills as Record<string, string[]>).flatMap(
   ([category, names]) => names.map((name) => ({ name, category })),
@@ -111,18 +145,119 @@ function openExternal(url: string) {
   window.open(url, '_blank', 'noopener,noreferrer');
 }
 
+/* ---- 'By meaning': POST /api/ai/retrieve, once per settled query, cached for the page's life ---- */
+
+type SemanticHit = { id: string; label: string; target: AiTarget; score: number; cosine: number | null; bm25: number };
+
+/** Normalised query -> hits, or null when retrieval failed (the group is then omitted). */
+const semanticCache = new Map<string, SemanticHit[] | null>();
+
+const semanticKey = (q: string) => q.trim().replace(/\s+/g, ' ').toLowerCase().slice(0, AI_LIMITS.retrieveQuery);
+
+function isHit(x: unknown): x is SemanticHit {
+  if (!x || typeof x !== 'object') return false;
+  const h = x as Partial<SemanticHit>;
+  return typeof h.id === 'string' && typeof h.label === 'string' && !!h.target && typeof h.target === 'object' && typeof h.bm25 === 'number';
+}
+
+async function fetchSemantic(query: string, signal: AbortSignal): Promise<SemanticHit[] | null> {
+  try {
+    const res = await fetch('/api/ai/retrieve', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ query, k: 6, scope: 'all' }),
+      signal,
+      cache: 'no-store',
+    });
+    if (!res.ok || !(res.headers.get('content-type') ?? '').includes('application/json')) return null;
+    const body: unknown = await res.json();
+    if (isFallbackBody(body) || !body || typeof body !== 'object') return null;
+    const hits = (body as { hits?: unknown }).hits;
+    return Array.isArray(hits) ? hits.filter(isHit) : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Semantic hits for `query` once it has settled for 400ms (or on flush(), for
+ * Enter). A query already asked is answered from memory; a newer query aborts
+ * an older request still in flight. A failure or a timeout is remembered too,
+ * and simply omits the group.
+ */
+function useSemantic(query: string, wanted: boolean) {
+  const key = semanticKey(query);
+  const active = wanted && key.length >= SEMANTIC_MIN_CHARS;
+  // Rendered state; the controller itself lives in a ref, read only in callbacks.
+  const [pendingKey, setPendingKey] = useState<string | null>(null);
+  const inflight = useRef<{ key: string; ac: AbortController } | null>(null);
+
+  const fire = useCallback((k: string) => {
+    if (semanticCache.has(k) || inflight.current?.key === k) return;
+    inflight.current?.ac.abort();
+    const ac = new AbortController();
+    inflight.current = { key: k, ac };
+    setPendingKey(k);
+    const timer = window.setTimeout(() => ac.abort(), SEMANTIC_TIMEOUT_MS);
+    void fetchSemantic(k, ac.signal).then((hits) => {
+      window.clearTimeout(timer);
+      // Superseded by a newer query, or the palette closed: not an answer.
+      if (inflight.current?.ac !== ac) return;
+      inflight.current = null;
+      semanticCache.set(k, hits);
+      setPendingKey((p) => (p === k ? null : p));
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!active || semanticCache.has(key)) return;
+    const t = window.setTimeout(() => fire(key), SEMANTIC_SETTLE_MS);
+    return () => window.clearTimeout(t);
+  }, [active, key, fire]);
+
+  useEffect(
+    () => () => {
+      const current = inflight.current;
+      inflight.current = null;
+      current?.ac.abort();
+    },
+    [],
+  );
+
+  const cached = active && semanticCache.has(key);
+  return {
+    hits: active ? (semanticCache.get(key) ?? null) : null,
+    loading: active && pendingKey === key,
+    /** True while a request for this query is still to be sent. */
+    due: active && !cached && pendingKey !== key,
+    flush: () => {
+      if (active) fire(key);
+    },
+  };
+}
+
 type Props = {
   open: boolean;
   onClose: () => void;
   onShowShortcuts?: () => void;
+  /** 'Show me around': opens the guided tour's goal picker. */
+  onStartTour?: () => void;
+  /** 'Explain this section simply' / 'Read this section in …'. */
+  onSectionTools?: (request: SectionToolsRequest) => void;
 };
 
 /** Command palette (Dialog 'palette'): a combobox over a grouped listbox with aria-activedescendant. */
-export function CommandPalette({ open, onClose, onShowShortcuts }: Props) {
+export function CommandPalette({ open, onClose, onShowShortcuts, onStartTour, onSectionTools }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   return (
     <Dialog open={open} onClose={onClose} variant="palette" ariaLabel="Command palette" initialFocusRef={inputRef}>
-      <PaletteBody inputRef={inputRef} onClose={onClose} onShowShortcuts={onShowShortcuts} />
+      <PaletteBody
+        inputRef={inputRef}
+        onClose={onClose}
+        onShowShortcuts={onShowShortcuts}
+        onStartTour={onStartTour}
+        onSectionTools={onSectionTools}
+      />
     </Dialog>
   );
 }
@@ -131,16 +266,15 @@ function PaletteBody({
   inputRef,
   onClose,
   onShowShortcuts,
-}: {
-  inputRef: RefObject<HTMLInputElement | null>;
-  onClose: () => void;
-  onShowShortcuts?: () => void;
-}) {
+  onStartTour,
+  onSectionTools,
+}: Omit<Props, 'open'> & { inputRef: RefObject<HTMLInputElement | null> }) {
   const baseId = useId();
   const listId = `${baseId}-list`;
   const listRef = useRef<HTMLDivElement>(null);
   const [query, setQuery] = useState('');
-  const [active, setActive] = useState(0);
+  // The highlighted row by id, so a 'By meaning' group arriving late never moves the highlight.
+  const [activeId, setActiveId] = useState<string | null>(null);
   // Read once per opening: the body mounts each time the palette opens.
   const [recent] = useState(readRecent);
 
@@ -149,6 +283,7 @@ function PaletteBody({
   const paused = usePaused();
   const [singleKeys, setSingleKeys] = useSingleKeyShortcuts();
   const { toast } = useToast();
+  const runTarget = useAiActionRunner();
 
   useEffect(() => {
     track('palette_open');
@@ -264,6 +399,40 @@ function PaletteBody({
       },
     );
 
+    if (onStartTour) {
+      list.push({
+        id: 'action:tour',
+        group: 'Actions',
+        label: 'Show me around',
+        hint: 'A short guided tour',
+        keywords: 'tour guide walkthrough overview highlights',
+        icon: icon(MapIcon),
+        run: onStartTour,
+      });
+    }
+    if (onSectionTools) {
+      list.push(
+        {
+          id: 'action:explain',
+          group: 'Actions',
+          label: 'Explain this section simply',
+          hint: 'Plain-English version, with Listen',
+          keywords: 'plain english simplify eli5 read aloud listen',
+          icon: icon(BookOpenText),
+          run: () => onSectionTools('simple'),
+        },
+        {
+          id: 'action:translate',
+          group: 'Actions',
+          label: 'Read this section in …',
+          hint: 'हिन्दी · বাংলা · Español',
+          keywords: 'translate translation language hindi bengali bangla spanish espanol',
+          icon: icon(Languages),
+          run: () => onSectionTools('translate'),
+        },
+      );
+    }
+
     const nextTheme = resolvedTheme === 'dark' ? 'light' : 'dark';
     list.push({
       id: 'action:theme',
@@ -326,12 +495,14 @@ function PaletteBody({
       });
     }
     return list;
-  }, [theme, resolvedTheme, reduce, paused, singleKeys, setSingleKeys, setTheme, toggleTheme, toast, onShowShortcuts]);
+  }, [theme, resolvedTheme, reduce, paused, singleKeys, setSingleKeys, setTheme, toggleTheme, toast, onShowShortcuts, onStartTour, onSectionTools]);
 
-  const groups = useMemo<Group[]>(() => {
+  const byId = useMemo(() => new Map(items.map((i) => [i.id, i])), [items]);
+
+  // The lexical search, before semantic matches and the Ask AI row join it.
+  const lexical = useMemo(() => {
     const q = query.trim();
     if (!q) {
-      const byId = new Map(items.map((i) => [i.id, i]));
       const recentItems = recent.map((id) => byId.get(id)).filter((i): i is Item => Boolean(i));
       const out: Group[] = recentItems.length ? [{ name: 'Recent', items: recentItems }] : [];
       // Fifty skills would bury everything else: they appear once there is a query.
@@ -339,7 +510,7 @@ function PaletteBody({
         if (name === 'Skills') continue;
         out.push({ name, items: items.filter((i) => i.group === name && !recent.includes(i.id)) });
       }
-      return out.filter((g) => g.items.length > 0);
+      return { groups: out.filter((g) => g.items.length > 0), count: 0 };
     }
     const scored = items
       .map((item) => ({
@@ -353,21 +524,75 @@ function PaletteBody({
       if (inGroup.length) out.push({ name, items: inGroup.slice(0, 8).map((r) => r.item), best: inGroup[0].score });
     }
     // The group holding the best match leads, so Enter takes it.
-    return out.sort((a, b) => b.best - a.best);
-  }, [items, query, recent]);
+    return { groups: out.sort((a, b) => b.best - a.best).map(({ name, items: groupItems }) => ({ name, items: groupItems })), count: scored.length };
+  }, [items, byId, query, recent]);
+
+  const q = query.trim();
+  const semantic = useSemantic(q, lexical.count < SEMANTIC_BELOW);
+
+  const meaningItems = useMemo<Item[]>(() => {
+    if (!semantic.hits?.length) return [];
+    const shown = new Set(lexical.groups.flatMap((g) => g.items.map((i) => i.id)));
+    const out: Item[] = [];
+    for (const h of semantic.hits) {
+      const base = itemForTarget(h.target, byId);
+      const id = base?.id ?? `meaning:${h.id}`;
+      if (shown.has(id) || out.some((i) => i.id === id)) continue;
+      const value = Math.max(0, Math.min(1, h.cosine ?? h.bm25));
+      out.push(
+        base
+          ? { ...base, score: value }
+          : {
+              id,
+              group: 'Sections',
+              label: h.label,
+              hint: sectionLabelOf(h.target),
+              icon: <Hash aria-hidden="true" className="size-4" />,
+              run: () => runTarget(h.target),
+              score: value,
+              // No row of its own to come back to, so it never enters Recent.
+              transient: true,
+            },
+      );
+      if (out.length >= SEMANTIC_MAX) break;
+    }
+    return out;
+  }, [semantic.hits, lexical.groups, byId, runTarget]);
+
+  const groups = useMemo<Group[]>(() => {
+    if (!q) return lexical.groups;
+    const out: Group[] = lexical.groups.map((g) => ({ ...g, items: [...g.items] }));
+    if (meaningItems.length) out.push({ name: 'By meaning', items: meaningItems });
+    const question = q.slice(0, AI_LIMITS.question);
+    const ask: Item = {
+      id: ASK_ID,
+      group: 'Actions',
+      label: `Ask AI: “${question}”`,
+      hint: 'Opens the assistant with this question',
+      icon: <MessageCircleQuestionMark aria-hidden="true" className="size-4" />,
+      transient: true,
+      run: () => openAssistant({ question, send: true }),
+    };
+    const actions = out.find((g) => g.name === 'Actions');
+    if (actions) actions.items.push(ask);
+    else out.push({ name: 'Actions', items: [ask] });
+    return out;
+  }, [q, lexical.groups, meaningItems]);
 
   const flat = useMemo(() => groups.flatMap((g) => g.items), [groups]);
   // Index of each group's first option in the flat list.
   const starts = useMemo(() => groups.map((_, gi) => groups.slice(0, gi).reduce((n, g) => n + g.items.length, 0)), [groups]);
-  const current = Math.min(active, Math.max(0, flat.length - 1));
+  const found = activeId ? flat.findIndex((i) => i.id === activeId) : -1;
+  const current = found >= 0 ? found : 0;
   const optionId = (i: number) => `${baseId}-opt-${i}`;
+  const noMatches = Boolean(q) && lexical.count === 0 && meaningItems.length === 0;
 
   useEffect(() => {
     listRef.current?.querySelector(`[data-index="${current}"]`)?.scrollIntoView({ block: 'nearest' });
   }, [current]);
 
   const runItem = (item: Item) => {
-    pushRecent(item.id);
+    if (!item.transient) pushRecent(item.id);
     onClose();
     afterClose(item.run);
   };
@@ -377,22 +602,37 @@ function PaletteBody({
       e.preventDefault();
       if (!flat.length) return;
       const step = e.key === 'ArrowDown' ? 1 : -1;
-      setActive((current + step + flat.length) % flat.length);
+      setActiveId(flat[(current + step + flat.length) % flat.length].id);
     } else if (e.key === 'Enter') {
       const item = flat[current];
       if (!item || e.nativeEvent.isComposing) return;
       e.preventDefault();
+      // 'Ask AI' is highlighted only because nothing else matched (not chosen with the
+      // arrows) and the meaning search is still pending: the first Enter searches by
+      // meaning now instead of waiting.
+      if (item.id === ASK_ID && activeId === null && semantic.due) {
+        semantic.flush();
+        return;
+      }
       runItem(item);
     } else if (e.key === 'Escape' && query) {
       // First Escape clears the query; the dialog closes on the next.
       e.preventDefault();
       setQuery('');
-      setActive(0);
+      setActiveId(null);
     } else if (e.key.toLowerCase() === 'k' && (e.metaKey || e.ctrlKey)) {
       e.preventDefault();
       onClose();
     }
   };
+
+  const status = !q
+    ? ''
+    : semantic.loading
+      ? 'Searching by meaning…'
+      : lexical.count + meaningItems.length === 0
+        ? 'No matches. Ask AI is available.'
+        : `${lexical.count + meaningItems.length} ${lexical.count + meaningItems.length === 1 ? 'result' : 'results'}`;
 
   return (
     <div className="flex min-h-0 flex-1 flex-col" data-command-palette="">
@@ -415,7 +655,7 @@ function PaletteBody({
           value={query}
           onChange={(e) => {
             setQuery(e.target.value);
-            setActive(0);
+            setActiveId(null);
           }}
           onKeyDown={onKeyDown}
           className="h-14 min-w-0 flex-1 bg-transparent text-base text-text-primary outline-none placeholder:text-text-muted sm:text-[15px]"
@@ -423,16 +663,9 @@ function PaletteBody({
         <kbd className="hidden shrink-0 rounded-md border border-hairline px-1.5 py-0.5 font-mono text-[11px] text-text-muted sm:inline">Esc</kbd>
       </div>
 
-      <div
-        ref={listRef}
-        id={listId}
-        role="listbox"
-        aria-label="Results"
-        data-lenis-prevent=""
-        className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-2"
-      >
-        {flat.length === 0 ? (
-          <div className="flex flex-col items-center gap-3 px-6 py-10 text-center">
+      <div data-lenis-prevent="" className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-2">
+        {noMatches ? (
+          <div className="flex flex-col items-center gap-2 px-6 pb-4 pt-8 text-center" data-palette-empty="">
             <LottieIcon
               name="emptySearch"
               play="once"
@@ -440,18 +673,22 @@ function PaletteBody({
               className="block size-20"
               fallback={<SearchX aria-hidden="true" className="size-8 text-text-muted" />}
             />
-            <p className="text-sm text-text-secondary">No matches for “{query.trim()}”</p>
-            <p className="text-[13px] text-text-muted">Try a section, a project or a skill.</p>
+            <p className="text-sm text-text-secondary">No matches for “{q}”</p>
+            <p className="text-[13px] text-text-muted">{semantic.loading ? 'Searching by meaning…' : 'Ask the AI assistant instead:'}</p>
           </div>
-        ) : (
-          groups.map((g, gi) => (
-            <div key={g.name} role="group" aria-label={g.name} className="mb-2 last:mb-0">
+        ) : null}
+
+        {/* Only options and their groups live in the listbox, so the combobox pattern stays valid. */}
+        <div ref={listRef} id={listId} role="listbox" aria-label="Results">
+          {groups.map((g, gi) => (
+            <div key={g.name} role="group" aria-label={g.name} className="mb-2 last:mb-0" data-palette-group={g.name}>
               <div aria-hidden="true" className="px-3 pb-1 pt-2 font-mono text-[11px] uppercase tracking-[0.2em] text-text-muted">
                 {g.name}
               </div>
               {g.items.map((item, j) => {
                 const i = starts[gi] + j;
                 const selected = i === current;
+                const pct = item.score !== undefined ? Math.round(item.score * 100) : null;
                 return (
                   <div
                     key={`${g.name}-${item.id}`}
@@ -459,32 +696,42 @@ function PaletteBody({
                     role="option"
                     aria-selected={selected}
                     data-index={i}
+                    data-item-id={item.id}
                     onPointerMove={() => {
-                      if (!selected) setActive(i);
+                      if (!selected) setActiveId(item.id);
                     }}
                     onClick={() => runItem(item)}
                     className={cn(
                       'flex min-h-11 cursor-pointer items-center gap-3 rounded-xl px-3 py-2 text-sm',
                       selected ? 'bg-surface-tint text-text-primary' : 'text-text-secondary',
+                      item.id === ASK_ID && 'palette-ask',
                     )}
                   >
-                    <span className={cn('shrink-0', selected ? 'text-violet-bright' : 'text-text-muted')}>{item.icon}</span>
+                    <span className={cn('shrink-0', selected || item.id === ASK_ID ? 'text-violet-bright' : 'text-text-muted')}>{item.icon}</span>
                     <span className="min-w-0 flex-1">
                       <span className="block truncate">{item.label}</span>
                       {item.hint ? <span className="block truncate text-[13px] text-text-muted">{item.hint}</span> : null}
                     </span>
+                    {pct !== null ? (
+                      <span className="flex w-10 shrink-0 items-center" data-semantic-score={item.score!.toFixed(2)}>
+                        <span aria-hidden="true" className="palette-score block h-1 w-full overflow-clip rounded-full bg-glass-border-strong">
+                          <span className="block h-full rounded-full bg-violet-bright" style={{ width: `${Math.max(pct, 6)}%` }} />
+                        </span>
+                        <span className="sr-only">, {pct}% match</span>
+                      </span>
+                    ) : null}
                     {selected ? <ArrowRight aria-hidden="true" className="size-4 shrink-0 text-text-muted" /> : null}
                   </div>
                 );
               })}
             </div>
-          ))
-        )}
+          ))}
+        </div>
       </div>
 
       <div className="flex shrink-0 items-center justify-between gap-4 border-t border-hairline px-4 py-2.5 text-[12px] text-text-muted">
-        <span aria-live="polite" aria-atomic="true">
-          {query.trim() ? `${flat.length} ${flat.length === 1 ? 'result' : 'results'}` : ''}
+        <span aria-live="polite" aria-atomic="true" data-palette-status="">
+          {status}
         </span>
         <span aria-hidden="true" className="hidden sm:inline">
           ↑ ↓ to move · Enter to open · Esc to close
@@ -492,4 +739,23 @@ function PaletteBody({
       </div>
     </div>
   );
+}
+
+/** The palette's own row for a retrieval target, so a meaning match opens exactly like a typed one. */
+function itemForTarget(t: AiTarget, byId: Map<string, Item>): Item | undefined {
+  switch (t.kind) {
+    case 'project':
+      return byId.get(`project:${t.slug}`);
+    case 'skill':
+      return byId.get(`skill:${slugify(t.name)}`);
+    case 'section':
+      return byId.get(`section:${t.id}`);
+    default:
+      return undefined;
+  }
+}
+
+function sectionLabelOf(t: AiTarget): string | undefined {
+  const id = sectionOf(t);
+  return id ? SECTIONS.find((s) => s.id === id)?.label : undefined;
 }

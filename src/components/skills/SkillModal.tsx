@@ -1,9 +1,11 @@
 'use client';
 
 import { motion, type PanInfo } from 'framer-motion';
-import { BookOpen, ChevronLeft, ChevronRight, ExternalLink, FileText, Github, X } from 'lucide-react';
+import { BookOpen, ChevronLeft, ChevronRight, ExternalLink, FileText, X } from 'lucide-react';
 import Image from 'next/image';
 import { useEffect, useReducer, useState, type ReactNode } from 'react';
+import { ExplainSimply } from '@/components/ai/skills/ExplainSimply';
+import { SkillUsage } from '@/components/ai/skills/SkillUsage';
 import { LottieIcon } from '@/components/shared/LottieIcon';
 import { Button } from '@/components/ui/Button';
 import { CopyButton } from '@/components/ui/CopyButton';
@@ -11,9 +13,10 @@ import { Dialog } from '@/components/ui/Dialog';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { useHotkeys } from '@/hooks/useHotkeys';
 import { useMotionPrefs } from '@/hooks/useMotionPrefs';
+import { openAssistant } from '@/lib/ai/bus';
 import { emit } from '@/lib/events';
 import { SITE } from '@/lib/site';
-import { loadSkillDetail, peekSkillDetail, projectsUsing, SKILLS } from '@/lib/skills';
+import { loadSkillDetail, peekSkillDetail, SKILLS } from '@/lib/skills';
 import type { Skill, SkillDetail } from '@/types/skills';
 import { useSkillActions, useSkillList, useSkillModal } from './SkillFocusContext';
 
@@ -205,49 +208,6 @@ function DetailBody({ detail }: { detail: SkillDetail }) {
   );
 }
 
-function UsedIn({ skill, onOpenProject }: { skill: Skill; onOpenProject: (slug: string) => void }) {
-  const projects = projectsUsing(skill.name);
-  if (projects.length === 0) return null;
-  return (
-    <section data-skill-projects="">
-      <Heading>Used in projects</Heading>
-      <ul className="grid gap-3 md:grid-cols-2">
-        {projects.map((p) => (
-          <li key={p.slug} className="flex flex-col gap-3 rounded-xl border border-hairline bg-surface-tint p-4">
-            <div>
-              <p className="text-sm font-semibold text-text-primary">{p.name}</p>
-              {p.tagline ? <p className="mt-1 text-xs leading-relaxed text-text-muted">{p.tagline}</p> : null}
-            </div>
-            <div className="mt-auto flex flex-wrap items-center gap-2">
-              <Button size="sm" variant="secondary" cursor="open" onClick={() => onOpenProject(p.slug)}>
-                Open project
-              </Button>
-              {p.githubUrl ? (
-                <Button
-                  href={p.githubUrl}
-                  size="sm"
-                  variant="icon"
-                  aria-label={`${p.name} on GitHub`}
-                  leadingIcon={<Github aria-hidden="true" className="size-4" />}
-                />
-              ) : null}
-              {p.liveUrl ? (
-                <Button
-                  href={p.liveUrl}
-                  size="sm"
-                  variant="icon"
-                  aria-label={`${p.name} live demo`}
-                  leadingIcon={<ExternalLink aria-hidden="true" className="size-4" />}
-                />
-              ) : null}
-            </div>
-          </li>
-        ))}
-      </ul>
-    </section>
-  );
-}
-
 /**
  * The one skill dialog. It follows ?skill=<slug>, loads the write-up on demand
  * (skeleton, then content, or a retry), and pages through the skills the filter
@@ -304,6 +264,12 @@ export function SkillModal() {
     close();
     // After the dialog releases its focus trap, so the project dialog can take it.
     requestAnimationFrame(() => emit('project:open', { slug }));
+  };
+
+  // The exact profile name ('ReAct', never 'React'): it is the scope the route validates.
+  const askAbout = (s: Skill) => {
+    close();
+    requestAnimationFrame(() => openAssistant({ scope: { skill: s.name }, question: `How has Oikantik used ${s.name}?`, send: true }));
   };
 
   const onSwipe = (_: unknown, info: PanInfo) => {
@@ -398,6 +364,13 @@ export function SkillModal() {
             onDragEnd={onSwipe}
             className="space-y-10 p-5 md:p-10"
           >
+            <div className="space-y-4" data-skill-reference="">
+              <p className="text-xs leading-relaxed text-text-muted" data-skill-provenance="">
+                Reference text generated with Gemini + Google Search; it describes the technology, not Oikantik&rsquo;s use of it.
+              </p>
+              <ExplainSimply skill={current} />
+            </div>
+
             {detail.status === 'ready' && detail.data ? (
               <DetailBody detail={detail.data} />
             ) : detail.status === 'error' ? (
@@ -415,7 +388,7 @@ export function SkillModal() {
               </div>
             )}
 
-            <UsedIn skill={current} onOpenProject={openProject} />
+            <SkillUsage skill={current} onOpenProject={openProject} onAsk={askAbout} />
 
             {siblings.length > 0 ? (
               <section>

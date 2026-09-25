@@ -8,14 +8,11 @@ import {
   type KeyboardEvent as ReactKeyboardEvent,
   type PointerEvent as ReactPointerEvent,
 } from 'react';
-import { motion } from 'framer-motion';
 import { ChevronDown, Monitor, Moon, Sun } from 'lucide-react';
 import { useTheme, type Theme, type ThemeOrigin } from '@/contexts/ThemeContext';
 import { useHotkeys } from '@/hooks/useHotkeys';
-import { useMotionPrefs } from '@/hooks/useMotionPrefs';
 import { Button } from '@/components/ui/Button';
 import { track } from '@/lib/analytics';
-import { ease } from '@/lib/motion';
 import { cn } from '@/utils/cn';
 
 type Props = {
@@ -44,7 +41,6 @@ function centreOf(el: Element | null): ThemeOrigin | undefined {
 
 export function ThemeToggle({ className, showCaret = true, hotkey = true, menuPlacement = 'bottom' }: Props) {
   const { theme, resolvedTheme, setTheme, toggleTheme } = useTheme();
-  const { reduce } = useMotionPrefs();
   const isDark = resolvedTheme === 'dark';
   // useId can contain characters that break url(#...) references.
   const maskId = `tt-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`;
@@ -95,7 +91,12 @@ export function ThemeToggle({ className, showCaret = true, hotkey = true, menuPl
 
   const close = (refocus: boolean) => {
     setOpen(false);
-    if (refocus) (caretRef.current ?? toggleRef.current)?.focus({ preventScroll: true });
+    if (!refocus) return;
+    // On coarse pointers the caret is display:none (the choice opened by long-press), and
+    // focusing it would drop focus to <body>; hand it back to the toggle instead.
+    const caret = caretRef.current;
+    const target = caret && caret.getClientRects().length > 0 ? caret : toggleRef.current;
+    target?.focus({ preventScroll: true });
   };
 
   const onMenuKeyDown = (e: ReactKeyboardEvent<HTMLDivElement>) => {
@@ -139,8 +140,6 @@ export function ThemeToggle({ className, showCaret = true, hotkey = true, menuPl
     if (s && Math.hypot(e.clientX - s.x, e.clientY - s.y) > 10) cancelPress();
   };
 
-  const iconTransition = reduce ? { duration: 0 } : { type: 'spring' as const, stiffness: 180, damping: 22 };
-
   return (
     <span className={cn('relative inline-flex items-center', className)} data-theme-toggle="">
       <Button
@@ -165,36 +164,16 @@ export function ThemeToggle({ className, showCaret = true, hotkey = true, menuPl
         }}
         className={cn('size-11', showCaret && 'pointer-fine:rounded-r-md')}
       >
-        <motion.svg
-          viewBox="0 0 24 24"
-          aria-hidden="true"
-          className="relative size-5"
-          initial={false}
-          animate={{ rotate: isDark ? 0 : 180 }}
-          transition={iconTransition}
-        >
+        {/* shell.css drives the sun/moon from html[data-theme] (set before paint), not React state,
+            so the server markup is right in both themes and the icon never flips at hydration. */}
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" className="theme-icon size-5">
           <defs>
-            <mask id={maskId}>
+            <mask id={maskId} maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
               <rect x="0" y="0" width="24" height="24" fill="white" />
-              <motion.circle
-                r="9"
-                fill="black"
-                initial={false}
-                animate={{ cx: isDark ? 16 : 30, cy: isDark ? 8 : -6 }}
-                transition={iconTransition}
-              />
+              <circle className="theme-icon-bite" cx="16.5" cy="7.5" r="6.5" fill="black" />
             </mask>
           </defs>
-          <motion.g
-            stroke="currentColor"
-            strokeWidth="1.6"
-            strokeLinecap="round"
-            className="text-amber-text"
-            initial={false}
-            animate={{ opacity: isDark ? 0 : 1, scale: isDark ? 0.4 : 1 }}
-            transition={reduce ? { duration: 0 } : { duration: 0.35, ease: ease.out }}
-            style={{ transformOrigin: '12px 12px' }}
-          >
+          <g className="theme-icon-rays" fill="none" strokeWidth="1.6" strokeLinecap="round">
             <line x1="12" y1="2.2" x2="12" y2="4.6" />
             <line x1="12" y1="19.4" x2="12" y2="21.8" />
             <line x1="2.2" y1="12" x2="4.6" y2="12" />
@@ -203,15 +182,12 @@ export function ThemeToggle({ className, showCaret = true, hotkey = true, menuPl
             <line x1="17.4" y1="17.4" x2="19.1" y2="19.1" />
             <line x1="4.9" y1="19.1" x2="6.6" y2="17.4" />
             <line x1="17.4" y1="6.6" x2="19.1" y2="4.9" />
-          </motion.g>
-          <circle
-            cx="12"
-            cy="12"
-            r="5"
-            mask={`url(#${maskId})`}
-            className={cn('transition-[fill] duration-300', isDark ? 'fill-violet-bright' : 'fill-amber')}
-          />
-        </motion.svg>
+          </g>
+          {/* The mask sits on an untransformed group so scaling the disk never scales the bite. */}
+          <g mask={`url(#${maskId})`}>
+            <circle className="theme-icon-disk" cx="12" cy="12" r="9" />
+          </g>
+        </svg>
       </Button>
 
       {showCaret ? (
@@ -222,7 +198,6 @@ export function ThemeToggle({ className, showCaret = true, hotkey = true, menuPl
             ref={caretRef}
             variant="icon"
             aria-label="Theme options"
-            aria-haspopup="true"
             aria-expanded={open}
             aria-controls={open ? menuId : undefined}
             onClick={() => setOpen((v) => !v)}

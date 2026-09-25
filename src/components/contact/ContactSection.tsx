@@ -1,9 +1,12 @@
 'use client';
 
 import { lazy, useEffect, useId, useRef, useState, type ChangeEvent, type FormEvent, type ReactNode } from 'react';
+import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import { motion, useMotionValue, useScroll, useTransform, type MotionStyle } from 'framer-motion';
 import { ArrowRight, Check, CircleAlert, Mail, Phone } from 'lucide-react';
+import { DraftHelper, type DraftFields } from '@/components/ai/contact/DraftHelper';
+import { MessageCheck } from '@/components/ai/contact/MessageCheck';
 import { SectionWrapper } from '@/components/layout/SectionWrapper';
 import { Reveal } from '@/components/motion';
 import { BackgroundVideo } from '@/components/shared/BackgroundVideo';
@@ -19,6 +22,7 @@ import { smoothScrollTo } from '@/contexts/LenisContext';
 import { useHydrated } from '@/hooks/useHydrated';
 import { useMotionPrefs } from '@/hooks/useMotionPrefs';
 import { track } from '@/lib/analytics';
+import { MESSAGE_MAX, MESSAGE_MIN, SUBJECT_MAX, appendText, applyPrefill } from '@/lib/ai/prefill';
 import { emit, useAppEvent, type AppEvents } from '@/lib/events';
 import { safeStorage } from '@/lib/safeStorage';
 import { SITE } from '@/lib/site';
@@ -26,12 +30,14 @@ import { cn } from '@/utils/cn';
 
 const ContactCanvas = lazy(() => import('./ContactCanvas'));
 
+// Dictation renders only where the browser supports it, so it skips the server
+// render and loads on its own.
+const VoiceInput = dynamic(() => import('@/components/ai/VoiceInput').then((m) => m.VoiceInput), { ssr: false });
+
 const ENDPOINT = `https://formsubmit.co/ajax/${process.env.NEXT_PUBLIC_FORMSUBMIT_ID || SITE.email}`;
 const DRAFT_KEY = 'ob-contact-draft';
 const SUBMIT_TIMEOUT_MS = 15_000;
 const RESET_MS = 5_000;
-const MESSAGE_MIN = 10;
-const MESSAGE_MAX = 2000;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 // Straight from the subtitle: "Open to research, full-time AI/ML roles, and ambitious freelance work."
@@ -69,14 +75,19 @@ function readDraft(): Draft {
       email: typeof d.email === 'string' ? d.email : '',
       message: typeof d.message === 'string' ? d.message.slice(0, MESSAGE_MAX) : '',
       intent,
-      subject: typeof d.subject === 'string' ? d.subject : null,
+      subject: typeof d.subject === 'string' ? d.subject.slice(0, SUBJECT_MAX) : null,
     };
   } catch {
     return EMPTY;
   }
 }
 
-const hasContent = (d: Draft) => Boolean(d.name.trim() || d.email.trim() || d.message.trim());
+const hasContent = (d: Draft) => Boolean(d.name.trim() || d.email.trim() || d.message.trim() || d.subject?.trim());
+
+/** The subject sent with the message: the visitor's own, else the topic chip's. */
+function topicOf(d: Draft): string | undefined {
+  return d.subject?.trim() || INTENTS.find((i) => i.id === d.intent)?.subject;
+}
 
 function validate(field: FieldName, value: string): string | null {
   const v = value.trim();
@@ -104,7 +115,8 @@ function classify(err: unknown): Failure {
 }
 
 function mailtoFor(d: Draft): string {
-  const subject = d.subject ?? (d.intent ? `Portfolio inquiry: ${INTENTS.find((i) => i.id === d.intent)?.subject}` : 'Portfolio inquiry');
+  const topic = topicOf(d);
+  const subject = topic ? `Portfolio inquiry: ${topic}` : 'Portfolio inquiry';
   const body = `${d.message.slice(0, 1600)}\n\n${d.name}${d.email ? ` <${d.email}>` : ''}`.trim();
   return `mailto:${SITE.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }
@@ -124,7 +136,7 @@ function Field({
   children,
 }: {
   id: string;
-  label: string;
+  label: ReactNode;
   error: string | null;
   hint?: ReactNode;
   children: ReactNode;
@@ -162,6 +174,8 @@ function ContactForm({ restore }: { restore: boolean }) {
   const [touched, setTouched] = useState<Record<FieldName, boolean>>({ name: false, email: false, message: false });
   const [status, setStatus] = useState<Status>('idle');
   const [failure, setFailure] = useState<Failure | null>(null);
+  // An AI draft is streaming into the message field, which stays read-only meanwhile.
+  const [drafting, setDrafting] = useState(false);
 
   const ids = useId();
   const fieldId = (f: FieldName) => `${ids}-${f}`;
@@ -259,8 +273,7 @@ function ContactForm({ restore }: { restore: boolean }) {
     preloadLottie('send');
     preloadLottie('error');
     finish('sending');
-    const intent = INTENTS.find((i) => i.id === draft.intent);
-    const topic = draft.subject ?? intent?.subject;
+    const topic = topicOf(draft);
     try {
       const res = await fetch(ENDPOINT, {
         method: 'POST',
@@ -295,16 +308,13 @@ function ContactForm({ restore }: { restore: boolean }) {
     }
   };
 
-  // AskMeBot (or anything else) can hand over a draft: fill it, bring the field into view, focus it.
+  // The contact:prefill contract, which the concierge, recruiter and discovery
+  // hand-offs rely on (applyPrefill in src/lib/ai/draft.ts): the message is
+  // appended below what the visitor wrote, skipped when the field already holds
+  // it, and capped at MESSAGE_MAX; a subject applies only while the visitor's own
+  // subject is empty. Nothing is ever sent: the field is brought into view and focused.
   useAppEvent('contact:prefill', (d: AppEvents['contact:prefill']) => {
-    const patch: Partial<Draft> = {};
-    // Never clobber what the visitor already wrote: a handoff is appended below it.
-    const current = draft.message.trim();
-    if (d.message && !current.includes(d.message)) {
-      patch.message = (current ? `${current}\n\n${d.message}` : d.message).slice(0, MESSAGE_MAX);
-    }
-    if (d.subject) patch.subject = d.subject;
-    update(patch);
+    update(applyPrefill({ message: draft.message, subject: draft.subject }, d, MESSAGE_MAX));
     const field = messageRef.current;
     if (!field) return;
     smoothScrollTo(field, { offset: -160, focus: false });
@@ -326,6 +336,12 @@ function ContactForm({ restore }: { restore: boolean }) {
           ? FAILURE_COPY[failure]
           : '';
   const length = draft.message.length;
+  const subjectId = `${ids}-subject`;
+  // AI drafts and dictation go through update(), so autosave and validation see them like typing.
+  const applyDraft = (fields: DraftFields) => update({ message: fields.message, subject: fields.subject });
+  const dictate = (phrase: string) => {
+    if (!drafting) update({ message: appendText(draft.message, phrase, MESSAGE_MAX) });
+  };
   const describedBy = (f: FieldName, extra?: string) => [errors[f] ? `${fieldId(f)}-error` : null, extra].filter(Boolean).join(' ') || undefined;
 
   return (
@@ -395,39 +411,79 @@ function ContactForm({ restore }: { restore: boolean }) {
             className={FIELD}
           />
         </Field>
+        <div className="md:col-span-2">
+          <Field
+            id={subjectId}
+            label={
+              <>
+                Subject <span className="normal-case tracking-normal">(optional)</span>
+              </>
+            }
+            error={null}
+          >
+            <input
+              id={subjectId}
+              name="subject"
+              type="text"
+              autoComplete="off"
+              maxLength={SUBJECT_MAX}
+              value={draft.subject ?? ''}
+              onChange={(e) => update({ subject: e.target.value.slice(0, SUBJECT_MAX) || null })}
+              placeholder={INTENTS.find((i) => i.id === draft.intent)?.subject ?? 'A few words on what it is about'}
+              className={FIELD}
+              data-contact-subject=""
+            />
+          </Field>
+        </div>
       </div>
 
-      <Field
-        id={fieldId('message')}
-        label="Message"
-        error={errors.message}
-        hint={
-          <span
-            id={`${fieldId('message')}-count`}
-            className={cn('font-mono text-xs tabular-nums', length > MESSAGE_MAX ? 'text-danger' : 'text-text-muted')}
-            data-char-count=""
-          >
-            {length.toLocaleString('en-US')} / {MESSAGE_MAX.toLocaleString('en-US')}
-          </span>
-        }
-      >
-        <textarea
-          ref={messageRef}
+      <div>
+        <Field
           id={fieldId('message')}
-          name="message"
-          required
-          rows={5}
-          minLength={MESSAGE_MIN}
-          maxLength={MESSAGE_MAX + 200}
-          value={draft.message}
-          onChange={onField('message')}
-          onBlur={onBlur('message')}
-          aria-invalid={errors.message ? true : undefined}
-          aria-describedby={describedBy('message', `${fieldId('message')}-count`)}
-          placeholder="Tell me about the project…"
-          className={cn(FIELD, 'min-h-36 resize-y')}
+          label="Message"
+          error={errors.message}
+          hint={
+            <span
+              id={`${fieldId('message')}-count`}
+              className={cn('font-mono text-xs tabular-nums', length > MESSAGE_MAX ? 'text-danger' : 'text-text-muted')}
+              data-char-count=""
+            >
+              {length.toLocaleString('en-US')} / {MESSAGE_MAX.toLocaleString('en-US')}
+            </span>
+          }
+        >
+          <textarea
+            ref={messageRef}
+            id={fieldId('message')}
+            name="message"
+            required
+            rows={5}
+            minLength={MESSAGE_MIN}
+            maxLength={MESSAGE_MAX + 200}
+            value={draft.message}
+            readOnly={drafting}
+            aria-busy={drafting || undefined}
+            onChange={onField('message')}
+            onBlur={onBlur('message')}
+            aria-invalid={errors.message ? true : undefined}
+            aria-describedby={describedBy('message', `${fieldId('message')}-count`)}
+            placeholder="Tell me about the project…"
+            className={cn(FIELD, 'min-h-36 resize-y')}
+          />
+        </Field>
+        <DraftHelper
+          message={draft.message}
+          subject={draft.subject}
+          intent={draft.intent}
+          intentLabel={INTENTS.find((i) => i.id === draft.intent)?.label ?? null}
+          onApply={applyDraft}
+          onBusyChange={setDrafting}
+          focusMessage={() => messageRef.current?.focus()}
+          tools={<VoiceInput onText={dictate} />}
         />
-      </Field>
+      </div>
+
+      <MessageCheck message={draft.message} intent={draft.intent} intents={INTENTS} onIntent={(id) => update({ intent: id })} />
 
       {/* Spam trap: people never see or reach it; bots that fill every field do. */}
       <div aria-hidden="true" className="absolute -left-[9999px] top-auto size-px overflow-hidden">
@@ -647,42 +703,46 @@ export function ContactSection() {
           ) : null}
 
           <Reveal delay={0.1} className={visual ? 'lg:col-span-3' : 'lg:col-span-5'}>
-            <div className="relative rounded-[1.25rem]">
-              <GlassCard strong className="p-6 sm:p-8 md:p-10">
-                <ContactForm key={hydrated ? 'client' : 'server'} restore={hydrated} />
+            {/* On phones the floating dock covers the bottom of the screen; this room
+                lets the last fields and Send scroll clear of it. */}
+            <div data-contact-shell="" className="max-sm:pb-[calc(var(--dock-height)+var(--dock-clearance))]">
+              <div className="relative rounded-[1.25rem]">
+                <GlassCard strong className="p-6 sm:p-8 md:p-10">
+                  <ContactForm key={hydrated ? 'client' : 'server'} restore={hydrated} />
 
-                <div className="mt-10 border-t border-hairline pt-8">
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <ContactRow
-                      icon={<Mail aria-hidden="true" className="size-4" />}
-                      label="Email"
-                      value={SITE.email}
-                      href={SITE.mailtoHref}
-                      copyLabel="Copy email address"
-                      toastMessage="Email address copied"
-                    />
-                    <ContactRow
-                      icon={<Phone aria-hidden="true" className="size-4" />}
-                      label="Phone"
-                      value={SITE.phone}
-                      href={SITE.phoneHref}
-                      copyLabel="Copy phone number"
-                      toastMessage="Phone number copied"
-                    />
+                  <div className="mt-10 border-t border-hairline pt-8">
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <ContactRow
+                        icon={<Mail aria-hidden="true" className="size-4" />}
+                        label="Email"
+                        value={SITE.email}
+                        href={SITE.mailtoHref}
+                        copyLabel="Copy email address"
+                        toastMessage="Email address copied"
+                      />
+                      <ContactRow
+                        icon={<Phone aria-hidden="true" className="size-4" />}
+                        label="Phone"
+                        value={SITE.phone}
+                        href={SITE.phoneHref}
+                        copyLabel="Copy phone number"
+                        toastMessage="Phone number copied"
+                      />
+                    </div>
+                    <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
+                      <SocialLinks include={['github', 'linkedin', 'leetcode', 'email']} />
+                      <LocalTime showOffset />
+                    </div>
                   </div>
-                  <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
-                    <SocialLinks include={['github', 'linkedin', 'leetcode', 'email']} />
-                    <LocalTime showOffset />
-                  </div>
-                </div>
-              </GlassCard>
-              <motion.span
-                aria-hidden="true"
-                data-contact-border=""
-                data-static={scrub ? undefined : ''}
-                className="contact-border"
-                style={{ '--contact-sweep': sweep } as MotionStyle}
-              />
+                </GlassCard>
+                <motion.span
+                  aria-hidden="true"
+                  data-contact-border=""
+                  data-static={scrub ? undefined : ''}
+                  className="contact-border"
+                  style={{ '--contact-sweep': sweep } as MotionStyle}
+                />
+              </div>
             </div>
           </Reveal>
         </div>

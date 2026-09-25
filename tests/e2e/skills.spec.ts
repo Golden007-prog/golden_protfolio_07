@@ -299,11 +299,16 @@ test.describe('stage: sphere or constellation (#77, #79, #80, #81, #91)', () => 
       await stage.locator('[data-skills-mode="sphere"]').waitFor({ timeout: 15000 }).catch(() => {});
     }
     await page.waitForTimeout(500);
-    const first = stage.locator('[data-node-list] [data-node][tabindex="0"]').first();
-    await first.focus();
-    await page.keyboard.press('ArrowRight');
-    const focusedLabel = await page.evaluate(() => document.activeElement?.getAttribute('aria-label') ?? '');
-    expect(focusedLabel).toMatch(/, /);
+    // Under a loaded full-matrix run the sphere can still swap in after the wait above
+    // and take the focused constellation node with it, so the focus-and-arrow step is
+    // retried until it lands on a node that stays.
+    let focusedLabel = '';
+    await expect(async () => {
+      await stage.locator('[data-node-list] [data-node][tabindex="0"]').first().focus();
+      await page.keyboard.press('ArrowRight');
+      focusedLabel = await page.evaluate(() => document.activeElement?.getAttribute('aria-label') ?? '');
+      expect(focusedLabel).toMatch(/, /);
+    }).toPass({ timeout: 15_000 });
     const [name, category] = focusedLabel.split(', ');
     await expect(page.locator('[data-skills-selection]')).toHaveText(`${name} selected, ${category}`);
     await page.keyboard.press('Enter');

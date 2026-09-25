@@ -33,6 +33,8 @@ export function ShortcutsDialog({ open, onClose }: Props) {
   const rows: Row[] = [
     { keys: [mac ? '⌘' : 'Ctrl', 'K'], label: 'Open the command palette' },
     { keys: ['/'], label: 'Open the command palette', single: true },
+    { keys: [mac ? '⌘' : 'Ctrl', 'J'], label: 'Ask the AI assistant' },
+    { keys: ['A'], label: 'Ask the AI assistant', single: true },
     { keys: ['T'], label: 'Switch between dark and light', single: true },
     { keys: ['M'], label: 'Sound on or off', single: true },
     { keys: ['?'], label: 'Show these shortcuts', single: true },

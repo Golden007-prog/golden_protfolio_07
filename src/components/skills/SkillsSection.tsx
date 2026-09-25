@@ -1,6 +1,7 @@
 'use client';
 
 import { AnimatePresence, motion } from 'framer-motion';
+import dynamic from 'next/dynamic';
 import { lazy, useEffect, useMemo, useState } from 'react';
 import { SectionWrapper } from '@/components/layout/SectionWrapper';
 import { Reveal } from '@/components/motion';
@@ -16,10 +17,53 @@ import { SentimentDemo } from './SentimentDemo';
 import { SkillCard } from './SkillCard';
 import { SkillConstellation } from './SkillConstellation';
 import { SkillFilterBar } from './SkillFilterBar';
-import { SkillFocusProvider, useSkillActions, useSkillFocus, useSkillList, useSkillMode } from './SkillFocusContext';
-import { SkillModal } from './SkillModal';
+import { SkillFocusProvider, useSkillActions, useSkillFocus, useSkillList, useSkillMode, useSkillModal } from './SkillFocusContext';
 
 const SkillSphere = lazy(() => import('./SkillSphere'));
+
+// The skill dialog (and its AI extras) loads when the section comes near or a
+// ?skill link opens it, never with the page.
+const loadSkillModal = () => import('./SkillModal');
+const SkillModal = dynamic(() => loadSkillModal().then((m) => m.SkillModal), { ssr: false });
+// A ?skill link opens the dialog on arrival: fetch it while the page hydrates.
+if (typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('skill')) loadSkillModal().catch(() => {});
+const WARM_MARGIN = '800px 0px';
+
+/** Mounts the dialog from the first open on, so it can play its exit and later opens are instant. */
+function SkillModalHost() {
+  const { skill } = useSkillModal();
+  const [wanted, setWanted] = useState(false);
+  if (skill && !wanted) setWanted(true);
+
+  // Warmed when the browser goes idle after load too, so a first open never waits on the network.
+  useEffect(() => {
+    if (wanted) return;
+    const load = () => void loadSkillModal().catch(() => {});
+    if (typeof window.requestIdleCallback === 'function') {
+      const id = window.requestIdleCallback(load, { timeout: 4000 });
+      return () => window.cancelIdleCallback(id);
+    }
+    const t = window.setTimeout(load, 2000);
+    return () => window.clearTimeout(t);
+  }, [wanted]);
+
+  useEffect(() => {
+    const el = document.getElementById('skills');
+    if (wanted || !el || typeof IntersectionObserver === 'undefined') return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry?.isIntersecting) return;
+        io.disconnect();
+        loadSkillModal().catch(() => {});
+      },
+      { rootMargin: WARM_MARGIN },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [wanted]);
+
+  return wanted ? <SkillModal /> : null;
+}
 
 const SUBTITLE = {
   sphere: "Spin it, or tap a node to lock it center-stage. Every one is something I've shipped production code with.",
@@ -196,7 +240,7 @@ function SkillsBody() {
         <SentimentDemo />
       </Reveal>
 
-      <SkillModal />
+      <SkillModalHost />
     </SectionWrapper>
   );
 }

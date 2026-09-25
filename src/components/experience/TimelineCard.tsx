@@ -2,12 +2,14 @@
 
 import { useId, useState, useSyncExternalStore } from 'react';
 import { motion } from 'framer-motion';
-import { Briefcase, Calendar, ChevronDown, MapPin } from 'lucide-react';
+import { Briefcase, Calendar, ChevronDown, MapPin, MessageCircle } from 'lucide-react';
 import { GlassCard } from '@/components/shared/GlassCard';
 import { LottieIcon } from '@/components/shared/LottieIcon';
 import { Button } from '@/components/ui/Button';
 import { useSmoothScrollTo } from '@/contexts/LenisContext';
+import profile from '@/data/profile.json';
 import { useMotionPrefs } from '@/hooks/useMotionPrefs';
+import { openAssistant } from '@/lib/ai/bus';
 import { emit } from '@/lib/events';
 import { duration as DURATION, ease } from '@/lib/motion';
 import { durationLabel, formatYearMonth, isoToYearMonth, toYearMonth } from '@/utils/dates';
@@ -72,7 +74,68 @@ export function skillsInText(text: string, terms: readonly string[]): string[] {
   return hits.sort((a, b) => a.at - b.at).map((h) => h.term);
 }
 
+/** The role's place in profile.experience: the [data-exp-index] anchor and the assistant's scope. */
+export function experienceIndex(exp: Pick<Experience, 'company' | 'start'>): number {
+  return profile.experience.findIndex((e) => e.company === exp.company && e.start === exp.start);
+}
+
+/**
+ * Three starter questions per role, built from its own fields. They are
+ * questions, not claims, so nothing here needs review; the answers come from
+ * the assistant scoped to this entry alone.
+ */
+export function roleStarters(exp: Pick<Experience, 'company' | 'metrics'>): string[] {
+  const org = exp.company.split('@')[0].replace(/\s+(?:Private Limited|Pvt\.? Ltd\.?|Limited|Ltd\.?)$/i, '').trim();
+  const metric = exp.metrics?.[0];
+  return [
+    `What did he work on at ${org}?`,
+    `Which tools and frameworks did he use at ${org}?`,
+    metric ? `What is behind "${metric.value} ${metric.label}" at ${org}?` : `What came out of his time at ${org}?`,
+  ];
+}
+
 /* ---- pieces ---- */
+
+const STARTER =
+  'tap-safe w-full justify-start rounded-2xl px-3 py-2 text-left text-sm leading-snug text-text-secondary ring-focus transition-colors hover:bg-surface-tint hover:text-text-primary';
+
+/** 'Ask about this role': three starters that open the assistant scoped to this entry, plus 'your own question'. */
+function AskAboutRole({ index, exp }: { index: number; exp: Experience }) {
+  const [open, setOpen] = useState(false);
+  const starters = roleStarters(exp);
+  return (
+    <div data-ask-role={index} className="mt-5 border-t border-hairline pt-4">
+      <button
+        type="button"
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+        data-ask-role-toggle=""
+        className="tap-safe ring-focus -ml-2 gap-2 rounded-full px-2 text-sm font-medium text-cyan-text transition-colors hover:text-text-primary"
+      >
+        <MessageCircle aria-hidden="true" className="size-4 shrink-0" />
+        Ask about this role
+        <span className="sr-only">: {exp.role}</span>
+        <ChevronDown aria-hidden="true" className={`size-3.5 shrink-0 transition-transform duration-300 ${open ? 'rotate-180' : ''}`} />
+      </button>
+      {open ? (
+        <ul aria-label={`Questions about ${exp.role}`} className="mt-2 flex flex-col gap-1">
+          {starters.map((question) => (
+            <li key={question}>
+              <button type="button" data-ask-role-starter="" className={STARTER} onClick={() => openAssistant({ scope: { experience: index }, question, send: true })}>
+                {question}
+              </button>
+            </li>
+          ))}
+          <li>
+            <button type="button" data-ask-role-own="" className={`${STARTER} text-cyan-text`} onClick={() => openAssistant({ scope: { experience: index } })}>
+              Ask your own question…
+            </button>
+          </li>
+        </ul>
+      ) : null}
+    </div>
+  );
+}
 
 function PresentBadge() {
   return (
@@ -143,9 +206,18 @@ export function TimelineCard({ exp, skills }: Props) {
   const short = durationLabel(exp.start, exp.end, now);
   const long = durationLabel(exp.start, exp.end, now, 'long');
   const terms = exp.description ? skillsInText(exp.description, skills) : [];
+  const index = experienceIndex(exp);
 
   return (
-    <GlassCard as="article" strong spotlight aria-labelledby={titleId} data-role-card="" className="p-6 md:p-8">
+    <GlassCard
+      as="article"
+      strong
+      spotlight
+      aria-labelledby={titleId}
+      data-role-card=""
+      data-exp-index={index >= 0 ? index : undefined}
+      className="p-6 md:p-8"
+    >
       {(kind || current) && (
         <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
           {kind && (
@@ -238,6 +310,8 @@ export function TimelineCard({ exp, skills }: Props) {
           ))}
         </ul>
       )}
+
+      {index >= 0 ? <AskAboutRole index={index} exp={exp} /> : null}
     </GlassCard>
   );
 }

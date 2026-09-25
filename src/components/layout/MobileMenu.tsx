@@ -2,8 +2,9 @@
 
 import { useRef, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent, type RefObject } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { motion, useDragControls, type PanInfo } from 'framer-motion';
+import { BriefcaseBusiness, Sparkles } from 'lucide-react';
 import { MotionToggle } from '@/components/shared/MotionToggle';
 import { ThemeToggle } from '@/components/shared/ThemeToggle';
 import { Button } from '@/components/ui/Button';
@@ -14,6 +15,7 @@ import { SocialLinks } from '@/components/ui/SocialLinks';
 import { smoothScrollTo } from '@/contexts/LenisContext';
 import { useActiveSection } from '@/hooks/useActiveSection';
 import { useMotionPrefs } from '@/hooks/useMotionPrefs';
+import { openAssistant, openFit } from '@/lib/ai/bus';
 import { ease } from '@/lib/motion';
 import { SECTIONS, SITE, sectionHref, type SectionId } from '@/lib/site';
 import { setUrlHash } from '@/lib/urlState';
@@ -56,6 +58,7 @@ export function MobileMenu({ open, onClose, origin }: Props) {
 
 function MenuSheet({ origin, onClose, closeRef }: Omit<Props, 'open'> & { closeRef: RefObject<HTMLButtonElement | null> }) {
   const pathname = usePathname();
+  const router = useRouter();
   const onHome = pathname === '/';
   const active = useActiveSection();
   const { reduce } = useMotionPrefs();
@@ -87,6 +90,35 @@ function MenuSheet({ origin, onClose, closeRef }: Omit<Props, 'open'> & { closeR
       smoothScrollTo(0, { focus: false });
       setUrlHash(null);
       document.getElementById('main')?.focus({ preventScroll: true });
+    });
+  };
+
+  // Phones have no palette button and the dock tucks away on scroll, so the menu
+  // offers the assistant and the recruiter fit check itself. Both requests go
+  // through the bus's pending slots, so an idle-loaded dock or a lazy fit sheet
+  // still picks them up.
+  const askAi = () => {
+    onClose();
+    afterClose(() => {
+      openAssistant();
+      if (!onHome) router.push('/');
+    });
+  };
+
+  const checkFit = (e: ReactMouseEvent<HTMLAnchorElement>) => {
+    if (!onHome) {
+      openFit();
+      onClose();
+      return;
+    }
+    e.preventDefault();
+    onClose();
+    afterClose(() => {
+      // A jump, not a glide: the fit sheet opens at once and its scroll lock would stop a
+      // glide partway, leaving About half in view behind it.
+      smoothScrollTo('about', { focus: false, immediate: true });
+      setUrlHash('about');
+      openFit();
     });
   };
 
@@ -164,6 +196,27 @@ function MenuSheet({ origin, onClose, closeRef }: Omit<Props, 'open'> & { closeR
           })}
         </ol>
       </nav>
+
+      <div className="flex flex-col gap-1 border-t border-hairline px-5 py-3" data-mobile-ai="">
+        <button
+          type="button"
+          onClick={askAi}
+          className="flex min-h-11 w-full items-center gap-3 rounded-2xl px-2 text-left text-base text-text-primary ring-focus transition-colors hover:bg-surface-tint"
+          data-mobile-ask=""
+        >
+          <Sparkles aria-hidden="true" className="size-5 shrink-0 text-cyan-text" />
+          Ask AI
+        </button>
+        <Link
+          href={sectionHref('about', pathname)}
+          onClick={checkFit}
+          className="flex min-h-11 w-full items-center gap-3 rounded-2xl px-2 text-base text-text-primary ring-focus transition-colors hover:bg-surface-tint"
+          data-mobile-fit=""
+        >
+          <BriefcaseBusiness aria-hidden="true" className="size-5 shrink-0 text-cyan-text" />
+          For recruiters: check job fit
+        </Link>
+      </div>
 
       <div className="flex flex-col gap-4 border-t border-hairline px-5 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-5">
         <div className="flex flex-wrap items-center gap-2">

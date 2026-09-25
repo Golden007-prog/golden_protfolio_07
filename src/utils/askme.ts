@@ -8,6 +8,7 @@
  * stack overview and the featured projects. Skill answers only say where a skill is
  * listed and which projects put it in their stack; they never claim more.
  */
+import { wantsNavigation } from '../lib/ai/tools.ts';
 import { slugify } from '../lib/slug.ts';
 import { matchesTech, techFamily } from '../lib/tech.ts';
 
@@ -414,4 +415,66 @@ export function answer(question: string, data: AskData): AskAnswer {
   if (has(q, RE.projects)) return featuredAnswer(data);
 
   return { intent: 'fallback', text: FALLBACK_TEXT, ...none };
+}
+
+/* ---------------------------------------------------------------------------
+ * Rule-first escalation (the AI concierge)
+ *
+ * answer() always runs first. Its deterministic intents render instantly; only
+ * questions it cannot really answer go to the model: its 'fallback' and 'about'
+ * intents, open-ended questions (why, how does, compare, what kind of ...), a
+ * request to navigate that its answer doesn't already offer, and anything asked
+ * inside a scope (the rules know nothing about "this project").
+ * ------------------------------------------------------------------------- */
+
+const OPEN_ENDED: readonly RegExp[] = [
+  /^\s*(?:why|how come)\b/i,
+  // 'How does it work?' is open; 'How do I hire you?' is a hire question.
+  /^\s*how (?:does|did|do|would|could|can|is|was|has|well|much|many)\b(?!\s+(?:i|we)\b)/i,
+  /\b(?:explain|describe|compare[sd]?|comparison|summari[sz]e|elaborate|walk me through|in (?:your|his) own words|what makes|what kinds? of|what sorts? of|what types? of|strengths?|weakness(?:es)?|trade-?offs?|pros and cons|difference between|differ(?:s|ent)? from|stand(?:s)? out|learn(?:ed|t)?|lessons?|challenges?|approach(?:ed|es)?|motivat\w*|curious|passionate|good fit|suited|recommend|think|opinion|impact|matters?)\b/i,
+];
+
+const OPEN_ENDED_WORDS = 16;
+
+/** Questions the rule engine can't answer well: reasons, explanations, comparisons, opinions, long questions. */
+export function isOpenEnded(question: string): boolean {
+  const q = question.trim();
+  if (!q) return false;
+  if (OPEN_ENDED.some((re) => re.test(q))) return true;
+  return q.split(/\s+/).length >= OPEN_ENDED_WORDS;
+}
+
+// Rule answers that already carry the action a navigation request asks for.
+const ACTIONABLE: ReadonlySet<AskIntent> = new Set<AskIntent>(['cv', 'links', 'hire', 'project']);
+
+/**
+ * Whether a question should go to the model after its rule answer has been
+ * computed. `foreign` is a question not in English: the rules only match English
+ * and answer in English, so it goes to the model, which answers in its language.
+ */
+export function shouldEscalate(question: string, rule: AskAnswer, opts: { scoped?: boolean; foreign?: boolean } = {}): boolean {
+  if (rule.intent === 'empty' || rule.intent === 'greeting') return false;
+  if (opts.scoped || opts.foreign) return true;
+  if (rule.intent === 'fallback' || rule.intent === 'about') return true;
+  if (isOpenEnded(question)) return true;
+  return wantsNavigation(question) && !ACTIONABLE.has(rule.intent);
+}
+
+const REFUSAL =
+  /\b(?:isn['’]t|is not|aren['’]t|are not|not (?:listed|stated|mentioned|shown|given|covered|included|available|on this site)|no (?:information|details|mention|record)|doesn['’]t (?:say|mention|list|state|show|cover)|does not (?:say|mention|list|state|show|cover)|(?:couldn['’]t|can['’]t|could not|cannot) (?:find|see|confirm|answer)|(?:don['’]t|do not) (?:have|know)|contact form|write to (?:him|Oikantik))\b/i;
+
+/** True when an AI answer says the site doesn't cover the question (such an answer needs no citation). */
+export function isRefusal(text: string): boolean {
+  return REFUSAL.test(text.replace(/\[c:[^\]]*\]/g, ''));
+}
+
+/**
+ * The visitor's earlier questions for a request, exactly as typed: the latest
+ * `maxTurns`, then the oldest dropped until they total at most `maxChars`.
+ */
+export function historyFor(questions: readonly string[], maxTurns = 6, maxChars = 2000): string[] {
+  const out = questions.filter((q) => typeof q === 'string' && q.length > 0).slice(-maxTurns);
+  const total = () => out.reduce((n, q) => n + q.length, 0);
+  while (out.length && total() > maxChars) out.shift();
+  return out;
 }

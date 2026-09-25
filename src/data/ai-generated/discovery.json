@@ -1,0 +1,449 @@
+{
+  "version": 1,
+  "entries": {
+    "section:about:bn": {
+      "hash": "0aef089c",
+      "model": "gemini-3.8-flash",
+      "generatedAt": "2026-09-25T10:40:04.811Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "lang": "bn",
+        "blocks": [
+          {
+            "text": "Data Science এবং Gen AI ডেভেলপার, যার LLM fine-tuning, RAG সিস্টেম, agentic AI আর্কিটেকচার এবং প্রোডাকশন ML ডিপ্লয়মেন্টে বাস্তব অভিজ্ঞতা রয়েছে। LangChain, LlamaIndex, AutoGen এবং শীর্ষস্থানীয় LLM API (GPT, Claude, Bedrock, Gemini) ব্যবহার করে সমাধান তৈরি ও ডিপ্লয় করতে পারদর্শী। এক্সপ্লোরেটরি ডেটা অ্যানালাইসিস, ডেটা ভিজ্যুয়ালাইজেশন, ভেক্টর ডেটাবেস অপ্টিমাইজেশন (Chroma/FAISS) এবং মডেলের ফলাফলকে কার্যকর ব্যবসায়িক সিদ্ধান্তে রূপান্তর করতে অভিজ্ঞ। Python, SQL এবং ক্লাউড প্ল্যাটফর্মে (AWS, GCP) দক্ষ, সাথে রয়েছে পরিসংখ্যান ও মেশিন লার্নিংয়ের শক্তিশালী ভিত্তি। University of Pittsburgh থেকে Data Science-এ Master's সম্পন্ন করছি।"
+          }
+        ]
+      }
+    },
+    "section:about:es": {
+      "hash": "5e75ec64",
+      "model": "gemini-3.8-flash",
+      "generatedAt": "2026-09-25T10:40:06.710Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "lang": "es",
+        "blocks": [
+          {
+            "text": "Desarrollador de Data Science y Gen AI con experiencia práctica en fine-tuning de LLM, sistemas RAG, arquitecturas de agentic AI e implementaciones de ML en producción. Competente en la creación e implementación de soluciones utilizando LangChain, LlamaIndex, AutoGen y las principales API de LLM (GPT, Claude, Bedrock, Gemini). Con experiencia en análisis exploratorio de datos, visualización de datos, optimización de bases de datos vectoriales (Chroma/FAISS) y en traducir los resultados de los modelos en información estratégica empresarial procesable. Capacitado en Python, SQL y plataformas en la nube (AWS, GCP), con una sólida base en estadística y machine learning. Cursando un Master's in Data Science en la University of Pittsburgh."
+          }
+        ]
+      }
+    },
+    "section:about:hi": {
+      "hash": "0d3b29fd",
+      "model": "gemini-3.8-flash",
+      "generatedAt": "2026-09-25T10:40:02.815Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "lang": "hi",
+        "blocks": [
+          {
+            "text": "LLM fine-tuning, RAG प्रणालियों, agentic AI आर्किटेक्चर और प्रोडक्शन ML डिप्लॉयमेंट में व्यावहारिक अनुभव रखने वाला Data Science और Gen AI डेवलपर। LangChain, LlamaIndex, AutoGen, और प्रमुख LLM API (GPT, Claude, Bedrock, Gemini) का उपयोग करके समाधान तैयार करने और तैनात करने में कुशल। एक्सप्लोरेट्री डेटा एनालिसिस, डेटा विज़ुअलाइज़ेशन, वेक्टर डेटाबेस ऑप्टिमाइज़ेशन (Chroma/FAISS), और मॉडल आउटपुट को उपयोगी व्यावसायिक इनसाइट्स में बदलने का अनुभव। Python, SQL, और क्लाउड प्लेटफ़ॉर्म (AWS, GCP) में कुशल, साथ ही सांख्यिकी और मशीन लर्निंग में एक मजबूत आधार। University of Pittsburgh से Data Science में Master's कर रहा हूँ।"
+          }
+        ]
+      }
+    },
+    "section:about:simple": {
+      "hash": "b7eabc20",
+      "model": "gemini-3.8-flash",
+      "generatedAt": "2026-09-25T10:43:49.680Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "lang": "en",
+        "blocks": [
+          {
+            "text": "Oikantik Basu is a developer in Data Science and Gen AI. He has practical experience with LLM fine-tuning, RAG systems, agentic AI architectures, and launching ML systems into production. He is skilled at building and launching solutions using LangChain, LlamaIndex, AutoGen, and major LLM APIs, including GPT, Claude, Bedrock, and Gemini. He has experience exploring data, showing data visually, fine-tuning Chroma and FAISS vector databases, and turning what models produce into useful business actions. He is skilled in Python, SQL, and cloud platforms like AWS and GCP, with a strong base in statistics and machine learning. He is currently studying for a Master's in Data Science at the University of Pittsburgh."
+          }
+        ]
+      }
+    },
+    "section:contact:bn": {
+      "hash": "e9fbfaad",
+      "model": "gemini-3.8-flash",
+      "generatedAt": "2026-09-25T10:40:41.058Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "lang": "bn",
+        "blocks": [
+          {
+            "text": "গবেষণা, ফুল-টাইম AI/ML ভূমিকা এবং উচ্চাকাঙ্ক্ষী ফ্রিল্যান্স কাজের জন্য আগ্রহী। আমি সাধারণত এক দিনের মধ্যে উত্তর দিই।"
+          },
+          {
+            "text": "কাজের জন্য প্রস্তুত। প্রোডাকশন LLM agents ও RAG systems। ফুল-টাইম ও চুক্তিভিত্তিক · Remote / Bengaluru।"
+          }
+        ]
+      }
+    },
+    "section:contact:es": {
+      "hash": "be9262e5",
+      "model": "gemini-3.8-flash",
+      "generatedAt": "2026-09-25T10:40:42.949Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "lang": "es",
+        "blocks": [
+          {
+            "text": "Abierto a investigación, puestos a tiempo completo de AI/ML y proyectos freelance ambiciosos. Suelo responder en un día."
+          },
+          {
+            "text": "Disponible para contratación. Agentes LLM en producción y sistemas RAG. A tiempo completo y por contrato · Remoto / Bengaluru."
+          }
+        ]
+      }
+    },
+    "section:contact:hi": {
+      "hash": "a7afdd88",
+      "model": "gemini-3.8-flash",
+      "generatedAt": "2026-09-25T10:40:39.637Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "lang": "hi",
+        "blocks": [
+          {
+            "text": "रिसर्च, फुल-टाइम AI/ML भूमिकाओं और महत्वाकांक्षी फ्रीलांस काम के लिए उपलब्ध। मैं आम तौर पर एक दिन के भीतर जवाब देता हूँ।"
+          },
+          {
+            "text": "हायरिंग के लिए उपलब्ध। प्रोडक्शन LLM एजेंट्स और RAG सिस्टम्स। फुल-टाइम और कॉन्ट्रैक्ट · रिमोट / Bengaluru।"
+          }
+        ]
+      }
+    },
+    "section:contact:simple": {
+      "hash": "44b83ef3",
+      "model": "gemini-3.8-flash",
+      "generatedAt": "2026-09-25T10:44:01.922Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "lang": "en",
+        "blocks": [
+          {
+            "text": "He is open to research, full-time AI/ML roles, and ambitious freelance work. He usually replies within a day."
+          },
+          {
+            "text": "He is available for hire to build production LLM agents and RAG systems, which search information for AI models. He is open to full-time and contract work, either remote or in Bengaluru."
+          }
+        ]
+      }
+    },
+    "section:experience:bn": {
+      "hash": "d5f78b19",
+      "model": "gemini-3.8-flash",
+      "generatedAt": "2026-09-25T10:40:14.574Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "lang": "bn",
+        "blocks": [
+          {
+            "text": "Internship, ফ্রিল্যান্স AI কাজ, এবং চলমান Master's — সবই একই দিকে এগিয়ে চলেছে।"
+          },
+          {
+            "heading": "Agentic Systems and Design Program · iHUB DivyaSampark @ IIT Roorkee",
+            "text": "Jan 2026 - Present। স্বায়ত্তশাসিত যুক্তির জন্য ReAct framework এবং LangGraph ব্যবহার করে multi-agent systems তৈরি করছি। LlamaIndex, LangChain, এবং vector databases (Chroma/FAISS) দিয়ে উন্নত RAG pipelines তৈরি করছি, semantic chunking এবং vectorization-এর মাধ্যমে retrieval-এর নির্ভুলতা বৃদ্ধি করছি। Agent observability (tracing), evaluation frameworks, এবং FastAPI-র মাধ্যমে REST API serving সহ production deployment-এর জন্য LLMOps-এর সেরা পদ্ধতিগুলি বাস্তবায়ন করছি।"
+          },
+          {
+            "heading": "Freelance AI Agent Specialist · Mindrift",
+            "text": "Jun 2025 - Present। নিরাপত্তা এবং নির্ভুলতার নির্দেশিকাগুলির সাথে LLMs (GPT, Claude)-কে সংগতিপূর্ণ করতে RLHF মূল্যায়ন পরিচালনা করছি। AutoGen-ভিত্তিক multi-agent workflows ব্যবহার করে জটিল Python code generation এবং reasoning traces মূল্যায়ন করছি। স্টেট-অফ-দ্য-আর্ট মডেলগুলিতে hallucinations এবং যুক্তিগত ত্রুটিগুলি চিহ্নিত ও নথিভুক্ত করছি, যা মডেলের নির্ভরযোগ্যতা উন্নত করার মতো evaluation metrics তৈরি করেছে।"
+          },
+          {
+            "heading": "Data Science Intern · Unified Mentor Private Limited",
+            "text": "Mar 2025 - Jun 2025। IBM HR Analytics ডেটাসেটে exploratory data analysis এবং regression modeling সম্পন্ন করেছি, যা interactive visualizations-এর মাধ্যমে কর্মী চলে যাওয়ার মূল কারণগুলি উন্মোচন করেছে। Structured ডেটাসেটগুলি extract এবং transform করার জন্য SQL-ভিত্তিক data mining queries তৈরি করেছি, যা time-series analysis-এর মাধ্যমে TCS stock trends-এর কার্যকরী অন্তর্দৃষ্টি প্রদান করেছে।"
+          }
+        ]
+      }
+    },
+    "section:experience:es": {
+      "hash": "a2c14141",
+      "model": "gemini-3.8-flash",
+      "generatedAt": "2026-09-25T10:40:17.317Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "lang": "es",
+        "blocks": [
+          {
+            "text": "Pasantías, trabajo freelance en AI y un Master's en curso: todo avanzando en la misma dirección."
+          },
+          {
+            "heading": "Agentic Systems and Design Program · iHUB DivyaSampark @ IIT Roorkee",
+            "text": "Jan 2026 - Present. Diseñando sistemas multiagente utilizando el framework ReAct y LangGraph para el razonamiento autónomo. Construyendo pipelines avanzados de RAG con LlamaIndex, LangChain y bases de datos vectoriales (Chroma/FAISS), optimizando la precisión de recuperación mediante fragmentación semántica y vectorización. Implementando las mejores prácticas de LLMOps para el despliegue en producción, incluyendo observabilidad de agentes (trazabilidad), frameworks de evaluación y servicio de REST API a través de FastAPI."
+          },
+          {
+            "heading": "Freelance AI Agent Specialist · Mindrift",
+            "text": "Jun 2025 - Present. Realizando evaluaciones de RLHF para alinear LLMs (GPT, Claude) con pautas de seguridad y precisión. Evaluando la generación compleja de código en Python y las trazas de razonamiento mediante flujos de trabajo multiagente basados en AutoGen. Identificando y documentando alucinaciones y fallos de lógica en modelos de vanguardia, creando métricas de evaluación que mejoraron la fiabilidad de los modelos."
+          },
+          {
+            "heading": "Data Science Intern · Unified Mentor Private Limited",
+            "text": "Mar 2025 - Jun 2025. Realicé análisis exploratorio de datos y modelos de regresión en el conjunto de datos IBM HR Analytics, descubriendo factores clave de desgaste mediante visualizaciones interactivas. Creé consultas de minería de datos basadas en SQL para extraer y transformar conjuntos de datos estructurados, proporcionando información práctica sobre las tendencias de las acciones de TCS a través de análisis de series temporales."
+          }
+        ]
+      }
+    },
+    "section:experience:hi": {
+      "hash": "f4a3185c",
+      "model": "gemini-3.8-flash",
+      "generatedAt": "2026-09-25T10:40:12.102Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "lang": "hi",
+        "blocks": [
+          {
+            "text": "Internships, freelance AI काम, और प्रगति पर एक Master's — सब एक ही दिशा में अग्रसर।"
+          },
+          {
+            "heading": "Agentic Systems and Design Program · iHUB DivyaSampark @ IIT Roorkee",
+            "text": "Jan 2026 - Present. स्वायत्त तार्किक क्षमता के लिए ReAct framework और LangGraph का उपयोग करके multi-agent systems की वास्तुकला तैयार करना। LlamaIndex, LangChain और vector databases (Chroma/FAISS) के साथ उन्नत RAG pipelines का निर्माण करना, और semantic chunking तथा vectorization के माध्यम से retrieval सटीकता को अनुकूलित करना। प्रोडक्शन डिप्लॉयमेंट के लिए LLMOps के सर्वोत्तम तरीकों को लागू करना, जिसमें agent observability (tracing), मूल्यांकन ढांचे, और FastAPI के माध्यम से REST API serving शामिल हैं।"
+          },
+          {
+            "heading": "Freelance AI Agent Specialist · Mindrift",
+            "text": "Jun 2025 - Present. LLMs (GPT, Claude) को सुरक्षा और सटीकता दिशानिर्देशों के साथ संरेखित करने के लिए RLHF मूल्यांकन का संचालन करना। AutoGen-आधारित multi-agent workflows का उपयोग करके जटिल Python कोड निर्माण और तार्किक ट्रेस का मूल्यांकन करना। अत्याधुनिक मॉडलों में मतिभ्रम (hallucinations) और तार्किक विफलताओं की पहचान और दस्तावेजीकरण करना, और मूल्यांकन मेट्रिक्स विकसित करना जिससे मॉडल की विश्वसनीयता में सुधार हुआ।"
+          },
+          {
+            "heading": "Data Science Intern · Unified Mentor Private Limited",
+            "text": "Mar 2025 - Jun 2025. IBM HR Analytics डेटासेट पर खोजपूर्ण डेटा विश्लेषण और रिग्रेशन मॉडलिंग की, इंटरैक्टिव विज़ुअलाइज़ेशन के माध्यम से कर्मचारियों के नौकरी छोड़ने (attrition) के प्रमुख कारणों को उजागर किया। संरचित डेटासेट को निकालने और रूपांतरित करने के लिए SQL-आधारित डेटा माइनिंग क्वेरीज़ बनाईं, और time-series analysis के माध्यम से TCS स्टॉक रुझानों पर कार्रवाई योग्य अंतर्दृष्टि प्रदान की।"
+          }
+        ]
+      }
+    },
+    "section:experience:simple": {
+      "hash": "a1b93e7f",
+      "model": "gemini-3.8-flash",
+      "generatedAt": "2026-09-25T10:43:53.377Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "lang": "en",
+        "blocks": [
+          {
+            "text": "His internships, freelance work in artificial intelligence, and his ongoing Master's degree all move toward the same goal."
+          },
+          {
+            "heading": "Agentic Systems and Design Program · iHUB DivyaSampark @ IIT Roorkee",
+            "text": "Jan 2026 - Present. He designs systems where multiple smart tools work together using the ReAct framework and LangGraph so they can think on their own. He builds search setups called RAG pipelines using LlamaIndex, LangChain, and storage tools like Chroma and FAISS. He improves how well these tools find the right information by breaking text into meaningful pieces and turning words into computer numbers. He also follows standard steps to run these models in real products. This includes tracking what the tools do, testing how well they work, and sharing them over the web using FastAPI."
+          },
+          {
+            "heading": "Freelance AI Agent Specialist · Mindrift",
+            "text": "Jun 2025 - Present. He tests large language models like GPT and Claude using human feedback, known as RLHF, to align them with safety and accuracy guidelines. He checks complex code written in Python and reviews step-by-step thinking paths using multi-agent setups built with AutoGen. He spots and writes down made-up facts and reasoning errors in leading models, creating test scores that improved how reliable the models are."
+          },
+          {
+            "heading": "Data Science Intern · Unified Mentor Private Limited",
+            "text": "Mar 2025 - Jun 2025. He studied data and built simple prediction models using the IBM HR Analytics dataset. Through easy-to-read charts, he showed the main reasons why workers leave their jobs. He also wrote data search requests using SQL to pull and clean structured data, sharing helpful findings about TCS stock price changes over time."
+          }
+        ]
+      }
+    },
+    "section:philosophy:bn": {
+      "hash": "2ba4ef14",
+      "model": "gemini-3.8-flash",
+      "generatedAt": "2026-09-25T10:45:52.613Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "lang": "bn",
+        "blocks": [
+          {
+            "text": "কাজের ক্ষেত্রে ছয়টি বিশ্বাসে আমি বারবার ফিরে আসি — যা প্রোডাকশন LLM সিস্টেম থেকে অর্জিত, কেবল পড়ে শেখা নয়।"
+          },
+          {
+            "heading": "প্রথমে সাদামাটা সংস্করণটি শিপ করুন।",
+            "text": "একটি কার্যকর end-to-end পাইপলাইন একটি অর্ধেক তৈরি চতুর পাইপলাইনের চেয়ে অনেক শ্রেয়। প্রথমে তারের সংযোগ প্রমাণ করুন, তারপর সংকেত টিউন করুন।"
+          },
+          {
+            "heading": "অনুভূতির আগে Evals।",
+            "text": "যদি আপনি এটি পরিমাপ করতে না পারেন, তবে আপনি কেবল অনুমান করছেন। প্রতিটি LLM ফিচারের UI পাওয়ার আগে একটি স্কোড টেস্ট সেট থাকা দরকার।"
+          },
+          {
+            "heading": "ছোট মডেল, স্পষ্ট প্রম্পট।",
+            "text": "বেশিরভাগ প্রোডাকশন সমস্যার জন্য ফ্রন্টিয়ার মডেলের প্রয়োজন হয় না — প্রয়োজন একটি সুসংগঠিত retrieval স্তর এবং স্পষ্ট নির্দেশাবলী।"
+          },
+          {
+            "heading": "Observability একটি ফিচার।",
+            "text": "ট্রেস, টোকেন সংখ্যা, লেটেন্সি হিস্টোগ্রাম, খরচের ড্যাশবোর্ড। যে দল সিস্টেমটি দেখতে পায়, তারাই সিস্টেমটি মেরামত করতে পারে।"
+          },
+          {
+            "heading": "ডেটা > আর্কিটেকচার।",
+            "text": "একটি পরিচ্ছন্ন, লেবেলযুক্ত, ডিডুপ করা ডেটাসেট একটি জাঁকজমকপূর্ণ মডেলকে হার মানায়। সপ্তাহান্তটি CSV ফাইলের পেছনে ব্যয় করুন, ConvNet-এর পেছনে নয়।"
+          },
+          {
+            "heading": "এমন ডকুমেন্টেশন লিখুন যা থাকলে আপনার নিজের সুবিধা হতো।",
+            "text": "ইঞ্জিনিয়ারিংয়ের অর্ধেক কাজ হলো পরবর্তী ব্যক্তির পথ সহজ করা — যা সাধারণত ভবিষ্যতের আপনি। প্রথমে README, তারপর commit।"
+          }
+        ]
+      }
+    },
+    "section:philosophy:es": {
+      "hash": "f2561aac",
+      "model": "gemini-3.8-flash",
+      "generatedAt": "2026-09-25T10:40:34.321Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "lang": "es",
+        "blocks": [
+          {
+            "text": "Seis convicciones prácticas a las que siempre vuelvo, aprendidas de sistemas de LLM en producción, no de leer sobre ellos."
+          },
+          {
+            "heading": "Lanza primero la versión aburrida.",
+            "text": "Un pipeline de extremo a extremo que funcione supera a uno ingenioso a medio terminar. Comprueba la conexión y luego ajusta la señal."
+          },
+          {
+            "heading": "Evaluaciones antes que intuiciones.",
+            "text": "Si no puedes medirlo, estás adivinando. Cada funcionalidad con LLM recibe un conjunto de pruebas puntuadas antes de tener una UI."
+          },
+          {
+            "heading": "Modelos pequeños, prompts precisos.",
+            "text": "La mayoría de los problemas en producción no necesitan un modelo de frontera; necesitan una capa de recuperación bien indexada e instrucciones claras."
+          },
+          {
+            "heading": "La observabilidad es una característica.",
+            "text": "Trazas, recuento de tokens, histogramas de latencia, paneles de costes. El equipo que puede ver el sistema puede arreglar el sistema."
+          },
+          {
+            "heading": "Datos > arquitectura.",
+            "text": "Un conjunto de datos limpio, etiquetado y sin duplicados supera a un modelo sofisticado. Pasa el fin de semana con los CSVs, no con la ConvNet."
+          },
+          {
+            "heading": "Escribe la documentación que desearías que existiera.",
+            "text": "La mitad de la ingeniería consiste en desbloquear a la siguiente persona, que suele ser tu yo del futuro. Primero el README, luego el commit."
+          }
+        ]
+      }
+    },
+    "section:philosophy:hi": {
+      "hash": "2f5b5365",
+      "model": "gemini-3.8-flash",
+      "generatedAt": "2026-09-25T10:40:25.289Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "lang": "hi",
+        "blocks": [
+          {
+            "text": "छह कामकाजी विश्वास जिन पर मैं बार-बार लौटता हूँ — जो प्रोडक्शन LLM सिस्टम्स से सीखे हैं, न कि उनके बारे में पढ़कर।"
+          },
+          {
+            "heading": "पहले साधारण वर्शन शिप करें।",
+            "text": "शुरू से अंत तक काम करने वाली एक सामान्य पाइपलाइन, आधे-अधूरे चतुर सिस्टम से कहीं बेहतर होती है। पहले कनेक्शन को साबित करें, फिर सिग्नल को ट्यून करें।"
+          },
+          {
+            "heading": "अंदाज़े से पहले मूल्यांकन।",
+            "text": "अगर आप इसे माप नहीं सकते, तो आप सिर्फ़ अंदाज़ा लगा रहे हैं। हर LLM फ़ीचर को UI मिलने से पहले एक स्कोर्ड टेस्ट सेट मिलता है।"
+          },
+          {
+            "heading": "छोटे मॉडल, सटीक प्रॉम्प्ट्स।",
+            "text": "ज़्यादातर प्रोडक्शन समस्याओं के लिए किसी फ्रंटियर मॉडल की ज़रूरत नहीं होती — उन्हें एक अच्छी तरह से इंडेक्स की गई रिट्रीवल लेयर और स्पष्ट निर्देशों की आवश्यकता होती है।"
+          },
+          {
+            "heading": "ऑब्जर्वेबिलिटी एक फ़ीचर है।",
+            "text": "Traces, टोकन काउंट, लेटेंसी हिस्टोग्राम, कॉस्ट डैशबोर्ड। जो टीम सिस्टम को देख सकती है, वह सिस्टम को ठीक भी कर सकती है।"
+          },
+          {
+            "heading": "डेटा > आर्किटेक्चर।",
+            "text": "एक साफ़, लेबल्ड और डी-डुप्लिकेटेड डेटासेट किसी भी फैंसी मॉडल से बेहतर होता है। वीकेंड CSVs पर बिताएं, ConvNet पर नहीं।"
+          },
+          {
+            "heading": "वो दस्तावेज़ लिखें जो आप चाहते हैं कि मौजूद हों।",
+            "text": "इंजीनियरिंग का आधा काम अगले व्यक्ति का रास्ता साफ़ करना है — जो आमतौर पर भविष्य के आप ही होते हैं। पहले README लिखें, उसके बाद commit करें।"
+          }
+        ]
+      }
+    },
+    "section:philosophy:simple": {
+      "hash": "37e20dc8",
+      "model": "gemini-3.8-flash",
+      "generatedAt": "2026-09-25T10:45:49.016Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "lang": "en",
+        "blocks": [
+          {
+            "text": "These are six working beliefs he returns to. He gained them from running live LLM systems in the real world, not from reading about them."
+          },
+          {
+            "heading": "Ship the boring version first.",
+            "text": "A simple setup that works from start to finish beats a smart one that is only half done. Make sure the basic path works first, then make it better."
+          },
+          {
+            "heading": "Evals before vibes.",
+            "text": "If you cannot measure how well it works, you are only guessing. Every LLM feature must pass a scored test before anyone builds a visual screen or UI for it."
+          },
+          {
+            "heading": "Small models, sharp prompts.",
+            "text": "Most real-world problems do not need the largest, newest AI model. They just need a neat way to look up facts and clear, sharp instructions."
+          },
+          {
+            "heading": "Observability is a feature.",
+            "text": "Tracking steps, counting word pieces, checking wait times, and watching cost screens all matter. The team that can see what the system is doing can fix it."
+          },
+          {
+            "heading": "Data > architecture.",
+            "text": "Clean, clearly tagged data with no repeats is better than a fancy model design. Spend the weekend fixing data files like CSVs, not tweaking a ConvNet model."
+          },
+          {
+            "heading": "Write the docs you wish existed.",
+            "text": "Half of the job is helping the next person work without getting stuck, and that person is usually your future self. Write the guide in the README first, then save your code changes."
+          }
+        ]
+      }
+    },
+    "tour:curious-engineer": {
+      "hash": "011610a6",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:39:57.392Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "stops": [
+          "section:skills",
+          "section:projects",
+          "project:bruhworking-nexusflow",
+          "section:philosophy"
+        ]
+      }
+    },
+    "tour:hiring-ml": {
+      "hash": "bca1471d",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:39:55.978Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "stops": [
+          "section:experience",
+          "section:projects",
+          "project:urbancare-ai",
+          "project:bruhworking-nexusflow",
+          "section:skills",
+          "section:contact"
+        ]
+      }
+    },
+    "tour:quick-look": {
+      "hash": "81b0b91e",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:39:58.444Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "stops": [
+          "section:about",
+          "section:projects",
+          "section:skills",
+          "section:experience",
+          "section:contact"
+        ]
+      }
+    }
+  }
+}

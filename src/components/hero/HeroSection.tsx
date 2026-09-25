@@ -2,9 +2,6 @@
 
 import { lazy, useEffect, useLayoutEffect, useRef } from 'react';
 import Image from 'next/image';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { useGSAP } from '@gsap/react';
 import { ChevronDown, Hand } from 'lucide-react';
 import { BackgroundVideo } from '@/components/shared/BackgroundVideo';
 import { Deferred3D } from '@/components/shared/Deferred3D';
@@ -24,7 +21,29 @@ import { pointer, subscribePointer, subscribeScroll, usePointerTracking } from '
 import { SITE } from '@/lib/site';
 import { RoleTicker } from './RoleTicker';
 
-gsap.registerPlugin(ScrollTrigger, useGSAP);
+type Gsap = typeof import('gsap').default;
+type ScrollTriggerStatic = typeof import('gsap/ScrollTrigger').ScrollTrigger;
+
+type GsapModules = { gsap: Gsap; ScrollTrigger: ScrollTriggerStatic };
+
+// GSAP loads beside the page rather than in its first chunk: Lenis and the intro
+// curtain fetch the same chunk, and the hero is readable before it arrives.
+let gsapLoaded: GsapModules | null = null;
+let gsapLoad: Promise<GsapModules> | null = null;
+function loadGsap() {
+  gsapLoad ??= Promise.all([import('gsap'), import('gsap/ScrollTrigger')]).then(
+    ([{ default: gsap }, { ScrollTrigger }]) => {
+      gsap.registerPlugin(ScrollTrigger);
+      gsapLoaded = { gsap, ScrollTrigger };
+      return gsapLoaded;
+    },
+    (err: unknown) => {
+      gsapLoad = null;
+      throw err;
+    },
+  );
+  return gsapLoad;
+}
 
 const HeroCanvas = lazy(() => import('./HeroCanvas'));
 
@@ -135,21 +154,32 @@ export function HeroSection() {
     };
   }, [setHeroReady]);
 
-  // Intro timeline (first visit, after the curtain) and the scroll exit scrub.
-  useGSAP(
-    (_context, contextSafe) => {
-      const section = sectionRef.current;
-      if (!section || !done || !contextSafe) return;
-      if (reduce) {
-        // Motion was reduced before the reveal could run: nothing hides or dims the hero.
-        introPending.current = false;
-        heroScroll.bloom = 1;
-        return;
-      }
+  // Fetch GSAP at hydration, so the intro never waits on it once the curtain lifts.
+  useEffect(() => {
+    if (!getMotionPrefs().reduce) loadGsap().catch(() => {});
+  }, []);
+
+  // Intro timeline (first visit, after the curtain) and the scroll exit scrub. Every
+  // tween and trigger lives in one gsap.context, reverted whenever an input changes.
+  // A layout effect, so with GSAP already loaded the intro's first frame is set before paint.
+  useLayoutEffect(() => {
+    const section = sectionRef.current;
+    if (!section || !done) return;
+    if (reduce) {
+      // Motion was reduced before the reveal could run: nothing hides or dims the hero.
+      introPending.current = false;
+      heroScroll.bloom = 1;
+      return;
+    }
+    let cancelled = false;
+    let ctx: ReturnType<Gsap['context']> | null = null;
+    let removeSkip = () => {};
+
+    const run = ({ gsap, ScrollTrigger }: GsapModules) => {
       const q = gsap.utils.selector(section);
 
       // Inner wrappers only: the intro never animates these, so the two can't fight over y/opacity.
-      const buildExit = contextSafe(() => {
+      const buildExit = () => {
         const travel = (vh: number) => () => -window.innerHeight * vh * scale;
         const video = q('[data-hero-video]');
         gsap
@@ -175,9 +205,7 @@ export function HeroSection() {
             lite ? { scale: 1.08 } : { scale: 1.08, filter: 'blur(6px)' },
             0,
           );
-      });
-
-      let removeSkip = () => {};
+      };
 
       if (introPending.current) {
         introPending.current = false;
@@ -187,7 +215,8 @@ export function HeroSection() {
           defaults: { ease: 'expo.out' },
           onComplete: () => {
             removeSkip();
-            buildExit();
+            // Created after the context function returned, so added to the context explicitly.
+            ctx?.add(() => buildExit());
             ScrollTrigger.refresh();
           },
         });
@@ -260,15 +289,34 @@ export function HeroSection() {
       } else {
         buildExit();
       }
+    };
 
-      return () => {
-        removeSkip();
-        heroScroll.progress = 0;
-        heroScroll.bloom = 1;
-      };
-    },
-    { dependencies: [done, reduce, lite, scale], scope: sectionRef, revertOnUpdate: true },
-  );
+    const start = (mods: GsapModules) => {
+      ctx = mods.gsap.context(() => run(mods), section);
+    };
+    if (gsapLoaded) start(gsapLoaded);
+    else
+      loadGsap().then(
+        (mods) => {
+          if (!cancelled) start(mods);
+        },
+        () => {
+          // No GSAP (a failed chunk): the hero simply stays in its final, readable state.
+          if (cancelled) return;
+          introPending.current = false;
+          heroScroll.bloom = 1;
+        },
+      );
+
+    return () => {
+      cancelled = true;
+      removeSkip();
+      ctx?.revert();
+      ctx = null;
+      heroScroll.progress = 0;
+      heroScroll.bloom = 1;
+    };
+  }, [done, reduce, lite, scale]);
 
   // Pointer parallax: three depths from one rAF loop that sleeps when the pointer rests.
   useEffect(() => {

@@ -49,8 +49,20 @@ jobs:
       - name: Unit tests
         run: npm run test:unit
 
+      # Keyless: fails when src/data or the site copy changed without `npm run ai:corpus`.
+      - name: AI corpus freshness
+        run: npm run ai:corpus -- --check
+
+      - name: Retrieval recall floor (keyless)
+        run: npm run ai:recall
+
       - name: Build
         run: npm run build
+
+      # No Gemini key pattern in the client build, prerendered pages or public/, no
+      # SDK in client chunks, and next.config's env block holds only its four keys.
+      - name: AI secret scan
+        run: npm run ai:scan
 
       - name: Bundle budget
         run: npm run budget
@@ -64,6 +76,8 @@ jobs:
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
 
+      # playwright.config.ts starts `next start` with AI_FAKE_MODEL=1 and no key, so the
+      # AI specs drive the real routes without calling Gemini.
       - name: End-to-end tests (Playwright, Chromium)
         run: npm run test:e2e
 

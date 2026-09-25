@@ -1,0 +1,2971 @@
+{
+  "version": 1,
+  "entries": {
+    "alt:bruhworking-nexusflow:fallback": {
+      "hash": "4846ea4a292f663f",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:08:31.002Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "text": "Glowing purple spheres connected by bright blue lines against a dark starry background."
+      }
+    },
+    "alt:bruhworking-nexusflow:still": {
+      "hash": "bbe424090b3f0acd",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:08:27.481Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "text": "Project repository page for bruhworking showing description and user profile picture."
+      }
+    },
+    "alt:content-storyteller:fallback": {
+      "hash": "2bd8414640a0fd58",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:08:52.153Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "text": "Glowing audio waveforms and image frames on a dark background."
+      }
+    },
+    "alt:content-storyteller:still": {
+      "hash": "73988d61d023b117",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:08:49.016Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "text": "Content Storyteller repository header showing title, description, user profile picture, and stats."
+      }
+    },
+    "alt:drugs-side-effects-analysis:fallback": {
+      "hash": "3abe952661134c6b",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:08:59.361Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "text": "Glowing purple and blue network connecting document icons against a dark background."
+      }
+    },
+    "alt:drugs-side-effects-analysis:still": {
+      "hash": "59c5691a24524b33",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:08:55.752Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "text": "Blue background with medical cross outlines and text reading Drugs Side Effects And Medical Condition."
+      }
+    },
+    "alt:ibm-hr-attrition-prediction:fallback": {
+      "hash": "c6bc2cae41f19523",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:09:10.167Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "text": "Glowing blue and purple data visualizations, charts, and graphs on a dark background."
+      }
+    },
+    "alt:ibm-hr-attrition-prediction:still": {
+      "hash": "3807f4c6dbd56b92",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:09:06.087Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "text": "A title banner with illustrations of a person analyzing profiles, a line chart, and a robotic brain."
+      }
+    },
+    "alt:mcq-tech-challenge:fallback": {
+      "hash": "f6998d9ed05d993e",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:09:27.274Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "text": "Translucent glass UI window with glowing purple panels floating against a dark background."
+      }
+    },
+    "alt:mcq-tech-challenge:still": {
+      "hash": "fbbc1c67a1e7c6ff",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:09:23.563Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "text": "Repository overview page showing title, description, statistics, and a user profile picture."
+      }
+    },
+    "alt:netflix-content-analytics:fallback": {
+      "hash": "8d224f9fc6316084",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:09:20.423Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "text": "Futuristic digital city skyline with glowing neon purple and blue data lines in dark space."
+      }
+    },
+    "alt:netflix-content-analytics:still": {
+      "hash": "2f89819efd253b0e",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:09:16.539Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "text": "Repository overview page showing title, project description, and stats with a user avatar."
+      }
+    },
+    "alt:omni-lab:fallback": {
+      "hash": "99f7d2c98688ee04",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:08:45.232Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "text": "Four dark books with glowing cyan and purple pages connected by digital wireframe polygons."
+      }
+    },
+    "alt:omni-lab:still": {
+      "hash": "478a089b26c90c25",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:08:41.622Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "text": "Omni-Lab title card with books, a microscope, a flask, and a laptop."
+      }
+    },
+    "alt:tcs-stock-forecasting:fallback": {
+      "hash": "b4922c9015d986dc",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:02:30.861Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "text": "Abstract digital graphic of a glowing processor chip with purple and teal light streams and data lines on a dark background."
+      }
+    },
+    "alt:tcs-stock-forecasting:still": {
+      "hash": "b9c84165b513fcac",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:02:27.544Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "text": "An illustration of a person working on a laptop against a background of stock charts and the text TCS STOCK DATA."
+      }
+    },
+    "alt:urbancare-ai:fallback": {
+      "hash": "5aba2f1d5bc8bb00",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:02:25.915Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "text": "Glowing purple DNA double helix against a dark digital background with pulse lines."
+      }
+    },
+    "alt:urbancare-ai:still": {
+      "hash": "05f050a83332b26f",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:02:54.119Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "text": "A clinician in a lab coat interacts with large holographic displays showing patient vitals and a chest x-ray."
+      }
+    },
+    "alt:vyapar-gyan:fallback": {
+      "hash": "672cbf48d6e413e3",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:08:37.916Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "text": "Glowing neon blue and orange price tags and currency symbols float on black."
+      }
+    },
+    "alt:vyapar-gyan:still": {
+      "hash": "6c765697d8edc5ed",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:08:35.261Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "text": "Vyapar-Gyan repository page displaying project title, description, and contributor stats."
+      }
+    },
+    "compare:bruhworking-nexusflow~content-storyteller": {
+      "hash": "c41980e88984d2d1",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:06:28.093Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "rows": [
+          {
+            "dim": "goal",
+            "a": {
+              "field": "problem",
+              "quote": "Long-running agentic tasks crash browsers, lose state mid-flight, and offer no mid-run visibility — so users can't trust them with real work."
+            },
+            "b": {
+              "field": "problem",
+              "quote": "Marketing teams need polished multi-format output (copy, visuals, video, voiceover) from rough inputs — but most AI tools lock you into a single modality."
+            }
+          },
+          {
+            "dim": "approach",
+            "a": {
+              "field": "solution",
+              "quote": "A planner-coordinated swarm on Cloud Run that streams per-agent progress over SSE, with quality gates that re-run only failing branches instead of the whole pipeline."
+            },
+            "b": {
+              "field": "solution",
+              "quote": "Output-intent inference decides which pipeline stages run per job, so the same brief yields a LinkedIn GIF, a storyboard, and a Veo promo from ten coordinated GCP services."
+            }
+          },
+          {
+            "dim": "detail",
+            "a": {
+              "field": "lessons",
+              "quote": "Agent orchestration is an observability problem, not just a routing problem — stream progress early and often."
+            },
+            "b": {
+              "field": "lessons",
+              "quote": "Multimodal pipelines are cheaper when you infer intent upfront instead of running every stage blindly."
+            }
+          }
+        ]
+      }
+    },
+    "compare:bruhworking-nexusflow~drugs-side-effects-analysis": {
+      "hash": "9ca87b80c3c50a9f",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:06:35.030Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "rows": [
+          {
+            "dim": "goal",
+            "a": {
+              "field": "problem",
+              "quote": "Long-running agentic tasks crash browsers, lose state mid-flight, and offer no mid-run visibility — so users can't trust them with real work."
+            },
+            "b": {
+              "field": "shortDescription",
+              "quote": "Complete ML pipeline analyzing drug safety, efficacy, and patient experiences from Drugs.com."
+            }
+          },
+          {
+            "dim": "approach",
+            "a": {
+              "field": "solution",
+              "quote": "A planner-coordinated swarm on Cloud Run that streams per-agent progress over SSE, with quality gates that re-run only failing branches instead of the whole pipeline."
+            },
+            "b": {
+              "field": "fullDescription",
+              "quote": "11MB+ dataset processed through 7-step notebook workflow. Classification (Gradient Boosting), regression (rating prediction), NLP sentiment analysis (VADER, TextBlob), Apriori association mining."
+            }
+          },
+          {
+            "dim": "detail",
+            "a": {
+              "field": "lessons",
+              "quote": "Agent orchestration is an observability problem, not just a routing problem — stream progress early and often."
+            },
+            "b": {
+              "field": "shortDescription",
+              "quote": "Trained 6 ML models (classification, regression, clustering), performed association rule mining on drug-condition-side effect patterns, and built 3 interactive Streamlit dashboards."
+            }
+          }
+        ]
+      }
+    },
+    "compare:bruhworking-nexusflow~ibm-hr-attrition-prediction": {
+      "hash": "502311895c365acc",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:06:38.922Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "rows": [
+          {
+            "dim": "goal",
+            "a": {
+              "field": "problem",
+              "quote": "Long-running agentic tasks crash browsers, lose state mid-flight, and offer no mid-run visibility — so users can't trust them with real work."
+            },
+            "b": null
+          },
+          {
+            "dim": "approach",
+            "a": {
+              "field": "solution",
+              "quote": "A planner-coordinated swarm on Cloud Run that streams per-agent progress over SSE, with quality gates that re-run only failing branches instead of the whole pipeline."
+            },
+            "b": null
+          },
+          {
+            "dim": "detail",
+            "a": {
+              "field": "lessons",
+              "quote": "Agent orchestration is an observability problem, not just a routing problem — stream progress early and often."
+            },
+            "b": {
+              "field": "tagline",
+              "quote": "Employee Attrition Analysis with Flask Dashboard"
+            }
+          }
+        ]
+      }
+    },
+    "compare:bruhworking-nexusflow~mcq-tech-challenge": {
+      "hash": "340d7eb2aaeb7194",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:06:45.772Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "rows": [
+          {
+            "dim": "goal",
+            "a": {
+              "field": "problem",
+              "quote": "Long-running agentic tasks crash browsers, lose state mid-flight, and offer no mid-run visibility — so users can't trust them with real work."
+            },
+            "b": {
+              "field": "shortDescription",
+              "quote": "Modern MCQ quiz app built with vanilla JavaScript. Upload MCQ PDFs, get timed questions, and receive Google Gemini-powered performance analysis."
+            }
+          },
+          {
+            "dim": "approach",
+            "a": {
+              "field": "solution",
+              "quote": "A planner-coordinated swarm on Cloud Run that streams per-agent progress over SSE, with quality gates that re-run only failing branches instead of the whole pipeline."
+            },
+            "b": null
+          },
+          {
+            "dim": "detail",
+            "a": {
+              "field": "lessons",
+              "quote": "Agent orchestration is an observability problem, not just a routing problem — stream progress early and often."
+            },
+            "b": {
+              "field": "tagline",
+              "quote": "AI-Powered Quiz App with GitHub Cloud Sync"
+            }
+          }
+        ]
+      }
+    },
+    "compare:bruhworking-nexusflow~netflix-content-analytics": {
+      "hash": "0a1f00a987eb6813",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:06:42.164Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "rows": [
+          {
+            "dim": "goal",
+            "a": {
+              "field": "problem",
+              "quote": "Long-running agentic tasks crash browsers, lose state mid-flight, and offer no mid-run visibility — so users can't trust them with real work."
+            },
+            "b": null
+          },
+          {
+            "dim": "approach",
+            "a": {
+              "field": "solution",
+              "quote": "A planner-coordinated swarm on Cloud Run that streams per-agent progress over SSE, with quality gates that re-run only failing branches instead of the whole pipeline."
+            },
+            "b": {
+              "field": "fullDescription",
+              "quote": "Full reproducibility from data ingest through deployment. Statistical tests quantify content strategy shifts over time; association mining reveals genre-country co-occurrence patterns."
+            }
+          },
+          {
+            "dim": "detail",
+            "a": {
+              "field": "lessons",
+              "quote": "Agent orchestration is an observability problem, not just a routing problem — stream progress early and often."
+            },
+            "b": {
+              "field": "tagline",
+              "quote": "End-to-End Pipeline for 2008–2021 Netflix Catalog"
+            }
+          }
+        ]
+      }
+    },
+    "compare:bruhworking-nexusflow~omni-lab": {
+      "hash": "81a929787baf88a9",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:06:24.592Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "rows": [
+          {
+            "dim": "goal",
+            "a": {
+              "field": "problem",
+              "quote": "Long-running agentic tasks crash browsers, lose state mid-flight, and offer no mid-run visibility — so users can't trust them with real work."
+            },
+            "b": {
+              "field": "problem",
+              "quote": "Static educational content (PDFs, slides, lecture videos) doesn't adapt to what a specific learner is confused about right now."
+            }
+          },
+          {
+            "dim": "approach",
+            "a": {
+              "field": "solution",
+              "quote": "A planner-coordinated swarm on Cloud Run that streams per-agent progress over SSE, with quality gates that re-run only failing branches instead of the whole pipeline."
+            },
+            "b": {
+              "field": "solution",
+              "quote": "Three specialized agents — Teacher (live voice with barge-in), Scientist (writes code to verify claims), Visualizer (Veo-generated videos) — turn any PDF into an interactive, interruptible lesson."
+            }
+          },
+          {
+            "dim": "detail",
+            "a": {
+              "field": "lessons",
+              "quote": "Agent orchestration is an observability problem, not just a routing problem — stream progress early and often."
+            },
+            "b": {
+              "field": "lessons",
+              "quote": "The cleanest way to stop LLMs hallucinating in education is to let a Scientist agent write code that proves or disproves its own claims."
+            }
+          }
+        ]
+      }
+    },
+    "compare:bruhworking-nexusflow~tcs-stock-forecasting": {
+      "hash": "e9f5a93c802e80c4",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:06:31.611Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "rows": [
+          {
+            "dim": "goal",
+            "a": {
+              "field": "problem",
+              "quote": "Long-running agentic tasks crash browsers, lose state mid-flight, and offer no mid-run visibility — so users can't trust them with real work."
+            },
+            "b": null
+          },
+          {
+            "dim": "approach",
+            "a": {
+              "field": "solution",
+              "quote": "A planner-coordinated swarm on Cloud Run that streams per-agent progress over SSE, with quality gates that re-run only failing branches instead of the whole pipeline."
+            },
+            "b": null
+          },
+          {
+            "dim": "detail",
+            "a": {
+              "field": "lessons",
+              "quote": "Agent orchestration is an observability problem, not just a routing problem — stream progress early and often."
+            },
+            "b": {
+              "field": "tagline",
+              "quote": "20-Year Stock Analysis with ML, Deep Learning & Dashboard"
+            }
+          }
+        ]
+      }
+    },
+    "compare:bruhworking-nexusflow~urbancare-ai": {
+      "hash": "185492311f1ef943",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:03:42.275Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "rows": [
+          {
+            "dim": "goal",
+            "a": {
+              "field": "problem",
+              "quote": "Long-running agentic tasks crash browsers, lose state mid-flight, and offer no mid-run visibility — so users can't trust them with real work."
+            },
+            "b": {
+              "field": "problem",
+              "quote": "Most clinical AI is a black box — physicians can't audit how a diagnosis was reached, so they can't trust it and compliance teams can't sign off on it."
+            }
+          },
+          {
+            "dim": "approach",
+            "a": {
+              "field": "solution",
+              "quote": "A planner-coordinated swarm on Cloud Run that streams per-agent progress over SSE, with quality gates that re-run only failing branches instead of the whole pipeline."
+            },
+            "b": {
+              "field": "solution",
+              "quote": "A Semantics-to-Vector interface that bridges human-readable clinical semantics and internal model vectors, making every layer of the 30-agent pipeline inspectable — from lab-report extraction to differential diagnosis."
+            }
+          },
+          {
+            "dim": "detail",
+            "a": {
+              "field": "lessons",
+              "quote": "Agent orchestration is an observability problem, not just a routing problem — stream progress early and often."
+            },
+            "b": {
+              "field": "lessons",
+              "quote": "Interpretability isn't a feature you bolt on at the end — for clinical tools, it has to be the interface itself."
+            }
+          }
+        ]
+      }
+    },
+    "compare:bruhworking-nexusflow~vyapar-gyan": {
+      "hash": "4703eb591e310ab4",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:06:21.172Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "rows": [
+          {
+            "dim": "goal",
+            "a": {
+              "field": "problem",
+              "quote": "Long-running agentic tasks crash browsers, lose state mid-flight, and offer no mid-run visibility — so users can't trust them with real work."
+            },
+            "b": {
+              "field": "problem",
+              "quote": "India's next billion commerce users don't use web dashboards — they speak eight languages, live inside WhatsApp, and send voice notes, not typed SKUs."
+            }
+          },
+          {
+            "dim": "approach",
+            "a": {
+              "field": "solution",
+              "quote": "A planner-coordinated swarm on Cloud Run that streams per-agent progress over SSE, with quality gates that re-run only failing branches instead of the whole pipeline."
+            },
+            "b": {
+              "field": "solution",
+              "quote": "Voice-first WhatsApp commerce: Gemini transcribes and classifies voice notes, routes intents to 65+ Lambdas across 12 domains, and AWS Polly responds in the customer's dialect."
+            }
+          },
+          {
+            "dim": "detail",
+            "a": {
+              "field": "lessons",
+              "quote": "Agent orchestration is an observability problem, not just a routing problem — stream progress early and often."
+            },
+            "b": {
+              "field": "lessons",
+              "quote": "Voice-first isn't a novelty — it collapses a typing funnel that was quietly blocking non-English users entirely."
+            }
+          }
+        ]
+      }
+    },
+    "compare:content-storyteller~drugs-side-effects-analysis": {
+      "hash": "c923f30889f4032d",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:07:38.161Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "rows": [
+          {
+            "dim": "goal",
+            "a": {
+              "field": "problem",
+              "quote": "Marketing teams need polished multi-format output (copy, visuals, video, voiceover) from rough inputs — but most AI tools lock you into a single modality."
+            },
+            "b": {
+              "field": "shortDescription",
+              "quote": "Complete ML pipeline analyzing drug safety, efficacy, and patient experiences from Drugs.com."
+            }
+          },
+          {
+            "dim": "approach",
+            "a": {
+              "field": "solution",
+              "quote": "Output-intent inference decides which pipeline stages run per job, so the same brief yields a LinkedIn GIF, a storyboard, and a Veo promo from ten coordinated GCP services."
+            },
+            "b": {
+              "field": "fullDescription",
+              "quote": "11MB+ dataset processed through 7-step notebook workflow. Classification (Gradient Boosting), regression (rating prediction), NLP sentiment analysis (VADER, TextBlob), Apriori association mining."
+            }
+          },
+          {
+            "dim": "detail",
+            "a": {
+              "field": "lessons",
+              "quote": "Multimodal pipelines are cheaper when you infer intent upfront instead of running every stage blindly."
+            },
+            "b": {
+              "field": "shortDescription",
+              "quote": "Trained 6 ML models (classification, regression, clustering), performed association rule mining on drug-condition-side effect patterns, and built 3 interactive Streamlit dashboards."
+            }
+          }
+        ]
+      }
+    },
+    "compare:content-storyteller~ibm-hr-attrition-prediction": {
+      "hash": "127c5332ccf4d2c1",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:07:41.972Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "rows": [
+          {
+            "dim": "goal",
+            "a": {
+              "field": "problem",
+              "quote": "Marketing teams need polished multi-format output (copy, visuals, video, voiceover) from rough inputs — but most AI tools lock you into a single modality."
+            },
+            "b": {
+              "field": "shortDescription",
+              "quote": "Predicts employee attrition using IBM's HR dataset (1470 × 35)."
+            }
+          },
+          {
+            "dim": "approach",
+            "a": {
+              "field": "solution",
+              "quote": "Output-intent inference decides which pipeline stages run per job, so the same brief yields a LinkedIn GIF, a storyboard, and a Veo promo from ten coordinated GCP services."
+            },
+            "b": {
+              "field": "fullDescription",
+              "quote": "Statistical analysis (ANOVA, correlation), ML comparison across Logistic Regression, SVM, Random Forest, XGBoost, LightGBM, CatBoost, AdaBoost."
+            }
+          },
+          {
+            "dim": "detail",
+            "a": {
+              "field": "lessons",
+              "quote": "Multimodal pipelines are cheaper when you infer intent upfront instead of running every stage blindly."
+            },
+            "b": {
+              "field": "shortDescription",
+              "quote": "Trained seven models including XGBoost (86% accuracy, 0.83 ROC-AUC), deployed via Flask web app that converts uploaded CSVs into dynamic Excel dashboards with automated HR recommendations."
+            }
+          }
+        ]
+      }
+    },
+    "compare:content-storyteller~mcq-tech-challenge": {
+      "hash": "d054886152ad2908",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:07:48.927Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "rows": [
+          {
+            "dim": "goal",
+            "a": {
+              "field": "problem",
+              "quote": "Marketing teams need polished multi-format output (copy, visuals, video, voiceover) from rough inputs — but most AI tools lock you into a single modality."
+            },
+            "b": {
+              "field": "shortDescription",
+              "quote": "Upload MCQ PDFs, get timed questions, and receive Google Gemini-powered performance analysis. Syncs scores across devices via a private GitHub Gist. Perfect for government job or certification prep."
+            }
+          },
+          {
+            "dim": "approach",
+            "a": {
+              "field": "solution",
+              "quote": "Output-intent inference decides which pipeline stages run per job, so the same brief yields a LinkedIn GIF, a storyboard, and a Veo promo from ten coordinated GCP services."
+            },
+            "b": {
+              "field": "fullDescription",
+              "quote": "GitHub token stored locally; scores persisted in private Gist only the user can access. Gemini API analyzes weak topics and suggests study strategies."
+            }
+          },
+          {
+            "dim": "detail",
+            "a": {
+              "field": "lessons",
+              "quote": "Multimodal pipelines are cheaper when you infer intent upfront instead of running every stage blindly."
+            },
+            "b": null
+          }
+        ]
+      }
+    },
+    "compare:content-storyteller~netflix-content-analytics": {
+      "hash": "13ed23d4447814a8",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:07:45.215Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "rows": [
+          {
+            "dim": "goal",
+            "a": {
+              "field": "problem",
+              "quote": "Marketing teams need polished multi-format output (copy, visuals, video, voiceover) from rough inputs — but most AI tools lock you into a single modality."
+            },
+            "b": null
+          },
+          {
+            "dim": "approach",
+            "a": {
+              "field": "solution",
+              "quote": "Output-intent inference decides which pipeline stages run per job, so the same brief yields a LinkedIn GIF, a storyboard, and a Veo promo from ten coordinated GCP services."
+            },
+            "b": {
+              "field": "fullDescription",
+              "quote": "Full reproducibility from data ingest through deployment. Statistical tests quantify content strategy shifts over time; association mining reveals genre-country co-occurrence patterns."
+            }
+          },
+          {
+            "dim": "detail",
+            "a": {
+              "field": "lessons",
+              "quote": "Multimodal pipelines are cheaper when you infer intent upfront instead of running every stage blindly."
+            },
+            "b": {
+              "field": "tagline",
+              "quote": "End-to-End Pipeline for 2008–2021 Netflix Catalog"
+            }
+          }
+        ]
+      }
+    },
+    "compare:content-storyteller~omni-lab": {
+      "hash": "ae61bccf93568c6f",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:07:13.608Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "rows": [
+          {
+            "dim": "goal",
+            "a": {
+              "field": "problem",
+              "quote": "Marketing teams need polished multi-format output (copy, visuals, video, voiceover) from rough inputs — but most AI tools lock you into a single modality."
+            },
+            "b": {
+              "field": "problem",
+              "quote": "Static educational content (PDFs, slides, lecture videos) doesn't adapt to what a specific learner is confused about right now."
+            }
+          },
+          {
+            "dim": "approach",
+            "a": {
+              "field": "solution",
+              "quote": "Output-intent inference decides which pipeline stages run per job, so the same brief yields a LinkedIn GIF, a storyboard, and a Veo promo from ten coordinated GCP services."
+            },
+            "b": {
+              "field": "solution",
+              "quote": "Three specialized agents — Teacher (live voice with barge-in), Scientist (writes code to verify claims), Visualizer (Veo-generated videos) — turn any PDF into an interactive, interruptible lesson."
+            }
+          },
+          {
+            "dim": "detail",
+            "a": {
+              "field": "lessons",
+              "quote": "Multimodal pipelines are cheaper when you infer intent upfront instead of running every stage blindly."
+            },
+            "b": {
+              "field": "lessons",
+              "quote": "The cleanest way to stop LLMs hallucinating in education is to let a Scientist agent write code that proves or disproves its own claims."
+            }
+          }
+        ]
+      }
+    },
+    "compare:content-storyteller~tcs-stock-forecasting": {
+      "hash": "214a1dbdcdc2e09f",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:07:34.939Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "rows": [
+          {
+            "dim": "goal",
+            "a": {
+              "field": "problem",
+              "quote": "Marketing teams need polished multi-format output (copy, visuals, video, voiceover) from rough inputs — but most AI tools lock you into a single modality."
+            },
+            "b": null
+          },
+          {
+            "dim": "approach",
+            "a": {
+              "field": "solution",
+              "quote": "Output-intent inference decides which pipeline stages run per job, so the same brief yields a LinkedIn GIF, a storyboard, and a Veo promo from ten coordinated GCP services."
+            },
+            "b": null
+          },
+          {
+            "dim": "detail",
+            "a": {
+              "field": "lessons",
+              "quote": "Multimodal pipelines are cheaper when you infer intent upfront instead of running every stage blindly."
+            },
+            "b": {
+              "field": "tagline",
+              "quote": "20-Year Stock Analysis with ML, Deep Learning & Dashboard"
+            }
+          }
+        ]
+      }
+    },
+    "compare:content-storyteller~urbancare-ai": {
+      "hash": "27fad379de833343",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:03:50.991Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "rows": [
+          {
+            "dim": "goal",
+            "a": {
+              "field": "problem",
+              "quote": "Marketing teams need polished multi-format output (copy, visuals, video, voiceover) from rough inputs — but most AI tools lock you into a single modality."
+            },
+            "b": {
+              "field": "problem",
+              "quote": "Most clinical AI is a black box — physicians can't audit how a diagnosis was reached, so they can't trust it and compliance teams can't sign off on it."
+            }
+          },
+          {
+            "dim": "approach",
+            "a": {
+              "field": "solution",
+              "quote": "Output-intent inference decides which pipeline stages run per job, so the same brief yields a LinkedIn GIF, a storyboard, and a Veo promo from ten coordinated GCP services."
+            },
+            "b": {
+              "field": "solution",
+              "quote": "A Semantics-to-Vector interface that bridges human-readable clinical semantics and internal model vectors, making every layer of the 30-agent pipeline inspectable — from lab-report extraction to differential diagnosis."
+            }
+          },
+          {
+            "dim": "detail",
+            "a": {
+              "field": "lessons",
+              "quote": "Multimodal pipelines are cheaper when you infer intent upfront instead of running every stage blindly."
+            },
+            "b": {
+              "field": "lessons",
+              "quote": "Interpretability isn't a feature you bolt on at the end — for clinical tools, it has to be the interface itself."
+            }
+          }
+        ]
+      }
+    },
+    "compare:content-storyteller~vyapar-gyan": {
+      "hash": "dcddaaed29b40592",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:06:52.685Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "rows": [
+          {
+            "dim": "goal",
+            "a": {
+              "field": "problem",
+              "quote": "Marketing teams need polished multi-format output (copy, visuals, video, voiceover) from rough inputs — but most AI tools lock you into a single modality."
+            },
+            "b": {
+              "field": "problem",
+              "quote": "India's next billion commerce users don't use web dashboards — they speak eight languages, live inside WhatsApp, and send voice notes, not typed SKUs."
+            }
+          },
+          {
+            "dim": "approach",
+            "a": {
+              "field": "solution",
+              "quote": "Output-intent inference decides which pipeline stages run per job, so the same brief yields a LinkedIn GIF, a storyboard, and a Veo promo from ten coordinated GCP services."
+            },
+            "b": {
+              "field": "solution",
+              "quote": "Voice-first WhatsApp commerce: Gemini transcribes and classifies voice notes, routes intents to 65+ Lambdas across 12 domains, and AWS Polly responds in the customer's dialect."
+            }
+          },
+          {
+            "dim": "detail",
+            "a": {
+              "field": "lessons",
+              "quote": "Multimodal pipelines are cheaper when you infer intent upfront instead of running every stage blindly."
+            },
+            "b": {
+              "field": "lessons",
+              "quote": "Voice-first isn't a novelty — it collapses a typing funnel that was quietly blocking non-English users entirely."
+            }
+          }
+        ]
+      }
+    },
+    "compare:drugs-side-effects-analysis~ibm-hr-attrition-prediction": {
+      "hash": "2961a595bf179555",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:08:06.402Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "rows": [
+          {
+            "dim": "goal",
+            "a": {
+              "field": "shortDescription",
+              "quote": "Complete ML pipeline analyzing drug safety, efficacy, and patient experiences from Drugs.com."
+            },
+            "b": {
+              "field": "shortDescription",
+              "quote": "Predicts employee attrition using IBM's HR dataset (1470 × 35)."
+            }
+          },
+          {
+            "dim": "approach",
+            "a": {
+              "field": "fullDescription",
+              "quote": "11MB+ dataset processed through 7-step notebook workflow. Classification (Gradient Boosting), regression (rating prediction), NLP sentiment analysis (VADER, TextBlob), Apriori association mining."
+            },
+            "b": null
+          },
+          {
+            "dim": "detail",
+            "a": {
+              "field": "shortDescription",
+              "quote": "Trained 6 ML models (classification, regression, clustering), performed association rule mining on drug-condition-side effect patterns, and built 3 interactive Streamlit dashboards."
+            },
+            "b": {
+              "field": "shortDescription",
+              "quote": "Trained seven models including XGBoost (86% accuracy, 0.83 ROC-AUC), deployed via Flask web app that converts uploaded CSVs into dynamic Excel dashboards with automated HR recommendations."
+            }
+          }
+        ]
+      }
+    },
+    "compare:drugs-side-effects-analysis~mcq-tech-challenge": {
+      "hash": "96e39a7c2505eafe",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:08:13.708Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "rows": [
+          {
+            "dim": "goal",
+            "a": {
+              "field": "shortDescription",
+              "quote": "Complete ML pipeline analyzing drug safety, efficacy, and patient experiences from Drugs.com."
+            },
+            "b": {
+              "field": "shortDescription",
+              "quote": "Modern MCQ quiz app built with vanilla JavaScript. Upload MCQ PDFs, get timed questions, and receive Google Gemini-powered performance analysis."
+            }
+          },
+          {
+            "dim": "approach",
+            "a": {
+              "field": "fullDescription",
+              "quote": "11MB+ dataset processed through 7-step notebook workflow. Classification (Gradient Boosting), regression (rating prediction), NLP sentiment analysis (VADER, TextBlob), Apriori association mining."
+            },
+            "b": {
+              "field": "fullDescription",
+              "quote": "Cross-platform (desktop/tablet/mobile), dark-mode UI, per-question and total time tracking. GitHub token stored locally; scores persisted in private Gist only the user can access."
+            }
+          },
+          {
+            "dim": "detail",
+            "a": {
+              "field": "shortDescription",
+              "quote": "Trained 6 ML models (classification, regression, clustering), performed association rule mining on drug-condition-side effect patterns, and built 3 interactive Streamlit dashboards."
+            },
+            "b": {
+              "field": "fullDescription",
+              "quote": "Gemini API analyzes weak topics and suggests study strategies."
+            }
+          }
+        ]
+      }
+    },
+    "compare:drugs-side-effects-analysis~netflix-content-analytics": {
+      "hash": "b520ffc6c02c080f",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:08:09.818Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "rows": [
+          {
+            "dim": "goal",
+            "a": {
+              "field": "shortDescription",
+              "quote": "Complete ML pipeline analyzing drug safety, efficacy, and patient experiences from Drugs.com."
+            },
+            "b": null
+          },
+          {
+            "dim": "approach",
+            "a": {
+              "field": "fullDescription",
+              "quote": "11MB+ dataset processed through 7-step notebook workflow. Classification (Gradient Boosting), regression (rating prediction), NLP sentiment analysis (VADER, TextBlob), Apriori association mining."
+            },
+            "b": {
+              "field": "fullDescription",
+              "quote": "Full reproducibility from data ingest through deployment. Statistical tests quantify content strategy shifts over time; association mining reveals genre-country co-occurrence patterns."
+            }
+          },
+          {
+            "dim": "detail",
+            "a": {
+              "field": "shortDescription",
+              "quote": "Trained 6 ML models (classification, regression, clustering), performed association rule mining on drug-condition-side effect patterns, and built 3 interactive Streamlit dashboards."
+            },
+            "b": {
+              "field": "tagline",
+              "quote": "End-to-End Pipeline for 2008–2021 Netflix Catalog"
+            }
+          }
+        ]
+      }
+    },
+    "compare:drugs-side-effects-analysis~omni-lab": {
+      "hash": "0b53ea7c40c66e34",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:07:21.107Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "rows": [
+          {
+            "dim": "goal",
+            "a": {
+              "field": "shortDescription",
+              "quote": "Complete ML pipeline analyzing drug safety, efficacy, and patient experiences from Drugs.com."
+            },
+            "b": {
+              "field": "problem",
+              "quote": "Static educational content (PDFs, slides, lecture videos) doesn't adapt to what a specific learner is confused about right now."
+            }
+          },
+          {
+            "dim": "approach",
+            "a": {
+              "field": "fullDescription",
+              "quote": "11MB+ dataset processed through 7-step notebook workflow. Classification (Gradient Boosting), regression (rating prediction), NLP sentiment analysis (VADER, TextBlob), Apriori association mining."
+            },
+            "b": {
+              "field": "solution",
+              "quote": "Three specialized agents — Teacher (live voice with barge-in), Scientist (writes code to verify claims), Visualizer (Veo-generated videos) — turn any PDF into an interactive, interruptible lesson."
+            }
+          },
+          {
+            "dim": "detail",
+            "a": {
+              "field": "shortDescription",
+              "quote": "Trained 6 ML models (classification, regression, clustering), performed association rule mining on drug-condition-side effect patterns, and built 3 interactive Streamlit dashboards."
+            },
+            "b": {
+              "field": "lessons",
+              "quote": "The cleanest way to stop LLMs hallucinating in education is to let a Scientist agent write code that proves or disproves its own claims."
+            }
+          }
+        ]
+      }
+    },
+    "compare:drugs-side-effects-analysis~tcs-stock-forecasting": {
+      "hash": "1964135940aca872",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:07:52.532Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "rows": [
+          {
+            "dim": "goal",
+            "a": {
+              "field": "shortDescription",
+              "quote": "Complete ML pipeline analyzing drug safety, efficacy, and patient experiences from Drugs.com."
+            },
+            "b": {
+              "field": "shortDescription",
+              "quote": "Comprehensive data science project analyzing and forecasting TCS stock."
+            }
+          },
+          {
+            "dim": "approach",
+            "a": {
+              "field": "fullDescription",
+              "quote": "11MB+ dataset processed through 7-step notebook workflow. Classification (Gradient Boosting), regression (rating prediction), NLP sentiment analysis (VADER, TextBlob), Apriori association mining."
+            },
+            "b": {
+              "field": "shortDescription",
+              "quote": "Feature engineering with MACD/RSI/rolling stats, five models compared (Linear, Random Forest, XGBoost, LSTM, Prophet), and an interactive Streamlit dashboard with buy/sell signals via EMA crossover."
+            }
+          },
+          {
+            "dim": "detail",
+            "a": {
+              "field": "shortDescription",
+              "quote": "Trained 6 ML models (classification, regression, clustering), performed association rule mining on drug-condition-side effect patterns, and built 3 interactive Streamlit dashboards."
+            },
+            "b": {
+              "field": "fullDescription",
+              "quote": "Linear Regression achieves R² ≈ 0.999 on trend fitting, LSTM delivers 246 RMSE with 0.827 R² on sequence forecasting."
+            }
+          }
+        ]
+      }
+    },
+    "compare:drugs-side-effects-analysis~urbancare-ai": {
+      "hash": "1a63277ae6a6ddd4",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:03:56.760Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "rows": [
+          {
+            "dim": "goal",
+            "a": {
+              "field": "shortDescription",
+              "quote": "Complete ML pipeline analyzing drug safety, efficacy, and patient experiences from Drugs.com."
+            },
+            "b": {
+              "field": "problem",
+              "quote": "Most clinical AI is a black box — physicians can't audit how a diagnosis was reached, so they can't trust it and compliance teams can't sign off on it."
+            }
+          },
+          {
+            "dim": "approach",
+            "a": {
+              "field": "fullDescription",
+              "quote": "11MB+ dataset processed through 7-step notebook workflow. Classification (Gradient Boosting), regression (rating prediction), NLP sentiment analysis (VADER, TextBlob), Apriori association mining."
+            },
+            "b": {
+              "field": "fullDescription",
+              "quote": "Leverages Google HAI-DEF open-weight models (MedGemma 4B for vision/document tasks, TxGemma for therapeutic reasoning)."
+            }
+          },
+          {
+            "dim": "detail",
+            "a": {
+              "field": "shortDescription",
+              "quote": "Trained 6 ML models (classification, regression, clustering), performed association rule mining on drug-condition-side effect patterns, and built 3 interactive Streamlit dashboards."
+            },
+            "b": {
+              "field": "lessons",
+              "quote": "Interpretability isn't a feature you bolt on at the end — for clinical tools, it has to be the interface itself."
+            }
+          }
+        ]
+      }
+    },
+    "compare:drugs-side-effects-analysis~vyapar-gyan": {
+      "hash": "b038355d0b6ce384",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:06:59.896Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "rows": [
+          {
+            "dim": "goal",
+            "a": {
+              "field": "shortDescription",
+              "quote": "Complete ML pipeline analyzing drug safety, efficacy, and patient experiences from Drugs.com."
+            },
+            "b": {
+              "field": "problem",
+              "quote": "India's next billion commerce users don't use web dashboards — they speak eight languages, live inside WhatsApp, and send voice notes, not typed SKUs."
+            }
+          },
+          {
+            "dim": "approach",
+            "a": {
+              "field": "fullDescription",
+              "quote": "11MB+ dataset processed through 7-step notebook workflow. Classification (Gradient Boosting), regression (rating prediction), NLP sentiment analysis (VADER, TextBlob), Apriori association mining."
+            },
+            "b": {
+              "field": "solution",
+              "quote": "Voice-first WhatsApp commerce: Gemini transcribes and classifies voice notes, routes intents to 65+ Lambdas across 12 domains, and AWS Polly responds in the customer's dialect."
+            }
+          },
+          {
+            "dim": "detail",
+            "a": {
+              "field": "shortDescription",
+              "quote": "Trained 6 ML models (classification, regression, clustering), performed association rule mining on drug-condition-side effect patterns, and built 3 interactive Streamlit dashboards."
+            },
+            "b": {
+              "field": "lessons",
+              "quote": "Voice-first isn't a novelty — it collapses a typing funnel that was quietly blocking non-English users entirely."
+            }
+          }
+        ]
+      }
+    },
+    "compare:ibm-hr-attrition-prediction~mcq-tech-challenge": {
+      "hash": "2e3a2173ebb04ccb",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:08:20.540Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "rows": [
+          {
+            "dim": "goal",
+            "a": null,
+            "b": null
+          },
+          {
+            "dim": "approach",
+            "a": null,
+            "b": null
+          },
+          {
+            "dim": "detail",
+            "a": {
+              "field": "tagline",
+              "quote": "Employee Attrition Analysis with Flask Dashboard"
+            },
+            "b": {
+              "field": "tagline",
+              "quote": "AI-Powered Quiz App with GitHub Cloud Sync"
+            }
+          }
+        ]
+      }
+    },
+    "compare:ibm-hr-attrition-prediction~netflix-content-analytics": {
+      "hash": "158b131acfb42477",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:08:16.738Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "rows": [
+          {
+            "dim": "goal",
+            "a": {
+              "field": "shortDescription",
+              "quote": "Predicts employee attrition using IBM's HR dataset (1470 × 35)."
+            },
+            "b": {
+              "field": "shortDescription",
+              "quote": "Modular pipeline for Netflix's 14-year content catalog: PostgreSQL ingestion, Python cleaning and feature engineering"
+            }
+          },
+          {
+            "dim": "approach",
+            "a": {
+              "field": "fullDescription",
+              "quote": "Statistical analysis (ANOVA, correlation), ML comparison across Logistic Regression, SVM, Random Forest, XGBoost, LightGBM, CatBoost, AdaBoost."
+            },
+            "b": {
+              "field": "fullDescription",
+              "quote": "Statistical tests quantify content strategy shifts over time; association mining reveals genre-country co-occurrence patterns."
+            }
+          },
+          {
+            "dim": "detail",
+            "a": {
+              "field": "shortDescription",
+              "quote": "Trained seven models including XGBoost (86% accuracy, 0.83 ROC-AUC), deployed via Flask web app that converts uploaded CSVs into dynamic Excel dashboards with automated HR recommendations."
+            },
+            "b": {
+              "field": "shortDescription",
+              "quote": "advanced EDA (time-series, heatmaps, wordclouds, statistical tests), association-rule mining, ML models, and an interactive Streamlit dashboard."
+            }
+          }
+        ]
+      }
+    },
+    "compare:ibm-hr-attrition-prediction~omni-lab": {
+      "hash": "ce8af28764dd8010",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:07:24.332Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "rows": [
+          {
+            "dim": "goal",
+            "a": {
+              "field": "shortDescription",
+              "quote": "Predicts employee attrition using IBM's HR dataset (1470 × 35)."
+            },
+            "b": {
+              "field": "problem",
+              "quote": "Static educational content (PDFs, slides, lecture videos) doesn't adapt to what a specific learner is confused about right now."
+            }
+          },
+          {
+            "dim": "approach",
+            "a": {
+              "field": "fullDescription",
+              "quote": "Statistical analysis (ANOVA, correlation), ML comparison across Logistic Regression, SVM, Random Forest, XGBoost, LightGBM, CatBoost, AdaBoost."
+            },
+            "b": {
+              "field": "solution",
+              "quote": "Three specialized agents — Teacher (live voice with barge-in), Scientist (writes code to verify claims), Visualizer (Veo-generated videos) — turn any PDF into an interactive, interruptible lesson."
+            }
+          },
+          {
+            "dim": "detail",
+            "a": {
+              "field": "tagline",
+              "quote": "Employee Attrition Analysis with Flask Dashboard"
+            },
+            "b": {
+              "field": "lessons",
+              "quote": "The cleanest way to stop LLMs hallucinating in education is to let a Scientist agent write code that proves or disproves its own claims."
+            }
+          }
+        ]
+      }
+    },
+    "compare:ibm-hr-attrition-prediction~tcs-stock-forecasting": {
+      "hash": "1d03330dee49e846",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:07:55.955Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "rows": [
+          {
+            "dim": "goal",
+            "a": null,
+            "b": null
+          },
+          {
+            "dim": "approach",
+            "a": null,
+            "b": null
+          },
+          {
+            "dim": "detail",
+            "a": {
+              "field": "tagline",
+              "quote": "Employee Attrition Analysis with Flask Dashboard"
+            },
+            "b": {
+              "field": "tagline",
+              "quote": "20-Year Stock Analysis with ML, Deep Learning & Dashboard"
+            }
+          }
+        ]
+      }
+    },
+    "compare:ibm-hr-attrition-prediction~urbancare-ai": {
+      "hash": "79c54db7bb8c2fc8",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:04:00.164Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "rows": [
+          {
+            "dim": "goal",
+            "a": {
+              "field": "shortDescription",
+              "quote": "Predicts employee attrition using IBM's HR dataset (1470 × 35)."
+            },
+            "b": {
+              "field": "problem",
+              "quote": "Most clinical AI is a black box — physicians can't audit how a diagnosis was reached, so they can't trust it and compliance teams can't sign off on it."
+            }
+          },
+          {
+            "dim": "approach",
+            "a": {
+              "field": "fullDescription",
+              "quote": "Statistical analysis (ANOVA, correlation), ML comparison across Logistic Regression, SVM, Random Forest, XGBoost, LightGBM, CatBoost, AdaBoost."
+            },
+            "b": {
+              "field": "shortDescription",
+              "quote": "A 30-agent, 8-layer clinical pipeline built on MedGemma + TxGemma + Gemini."
+            }
+          },
+          {
+            "dim": "detail",
+            "a": {
+              "field": "shortDescription",
+              "quote": "Trained seven models including XGBoost (86% accuracy, 0.83 ROC-AUC), deployed via Flask web app that converts uploaded CSVs into dynamic Excel dashboards with automated HR recommendations."
+            },
+            "b": {
+              "field": "lessons",
+              "quote": "Interpretability isn't a feature you bolt on at the end — for clinical tools, it has to be the interface itself."
+            }
+          }
+        ]
+      }
+    },
+    "compare:ibm-hr-attrition-prediction~vyapar-gyan": {
+      "hash": "6368bd4cccc172c3",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:07:03.127Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "rows": [
+          {
+            "dim": "goal",
+            "a": null,
+            "b": {
+              "field": "problem",
+              "quote": "India's next billion commerce users don't use web dashboards — they speak eight languages, live inside WhatsApp, and send voice notes, not typed SKUs."
+            }
+          },
+          {
+            "dim": "approach",
+            "a": null,
+            "b": null
+          },
+          {
+            "dim": "detail",
+            "a": {
+              "field": "tagline",
+              "quote": "Employee Attrition Analysis with Flask Dashboard"
+            },
+            "b": {
+              "field": "lessons",
+              "quote": "Voice-first isn't a novelty — it collapses a typing funnel that was quietly blocking non-English users entirely."
+            }
+          }
+        ]
+      }
+    },
+    "compare:mcq-tech-challenge~netflix-content-analytics": {
+      "hash": "c8cf7cba2a49e352",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:08:24.186Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "rows": [
+          {
+            "dim": "goal",
+            "a": {
+              "field": "shortDescription",
+              "quote": "Modern MCQ quiz app built with vanilla JavaScript. Upload MCQ PDFs, get timed questions, and receive Google Gemini-powered performance analysis."
+            },
+            "b": null
+          },
+          {
+            "dim": "approach",
+            "a": null,
+            "b": {
+              "field": "fullDescription",
+              "quote": "Full reproducibility from data ingest through deployment. Statistical tests quantify content strategy shifts over time; association mining reveals genre-country co-occurrence patterns."
+            }
+          },
+          {
+            "dim": "detail",
+            "a": {
+              "field": "tagline",
+              "quote": "AI-Powered Quiz App with GitHub Cloud Sync"
+            },
+            "b": {
+              "field": "tagline",
+              "quote": "End-to-End Pipeline for 2008–2021 Netflix Catalog"
+            }
+          }
+        ]
+      }
+    },
+    "compare:mcq-tech-challenge~omni-lab": {
+      "hash": "757e4ed2efe4e4f3",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:07:31.247Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "rows": [
+          {
+            "dim": "goal",
+            "a": {
+              "field": "shortDescription",
+              "quote": "Modern MCQ quiz app built with vanilla JavaScript. Upload MCQ PDFs, get timed questions, and receive Google Gemini-powered performance analysis."
+            },
+            "b": {
+              "field": "problem",
+              "quote": "Static educational content (PDFs, slides, lecture videos) doesn't adapt to what a specific learner is confused about right now."
+            }
+          },
+          {
+            "dim": "approach",
+            "a": {
+              "field": "fullDescription",
+              "quote": "Gemini API analyzes weak topics and suggests study strategies."
+            },
+            "b": {
+              "field": "solution",
+              "quote": "Three specialized agents — Teacher (live voice with barge-in), Scientist (writes code to verify claims), Visualizer (Veo-generated videos) — turn any PDF into an interactive, interruptible lesson."
+            }
+          },
+          {
+            "dim": "detail",
+            "a": {
+              "field": "shortDescription",
+              "quote": "Syncs scores across devices via a private GitHub Gist."
+            },
+            "b": {
+              "field": "lessons",
+              "quote": "The cleanest way to stop LLMs hallucinating in education is to let a Scientist agent write code that proves or disproves its own claims."
+            }
+          }
+        ]
+      }
+    },
+    "compare:mcq-tech-challenge~tcs-stock-forecasting": {
+      "hash": "8069bb18299f7e34",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:08:02.797Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "rows": [
+          {
+            "dim": "goal",
+            "a": {
+              "field": "shortDescription",
+              "quote": "Modern MCQ quiz app built with vanilla JavaScript. Upload MCQ PDFs, get timed questions, and receive Google Gemini-powered performance analysis."
+            },
+            "b": {
+              "field": "shortDescription",
+              "quote": "Comprehensive data science project analyzing and forecasting TCS stock. Feature engineering with MACD/RSI/rolling stats"
+            }
+          },
+          {
+            "dim": "approach",
+            "a": {
+              "field": "fullDescription",
+              "quote": "GitHub token stored locally; scores persisted in private Gist only the user can access. Gemini API analyzes weak topics and suggests study strategies."
+            },
+            "b": {
+              "field": "shortDescription",
+              "quote": "five models compared (Linear, Random Forest, XGBoost, LSTM, Prophet), and an interactive Streamlit dashboard with buy/sell signals via EMA crossover."
+            }
+          },
+          {
+            "dim": "detail",
+            "a": {
+              "field": "tagline",
+              "quote": "AI-Powered Quiz App with GitHub Cloud Sync"
+            },
+            "b": {
+              "field": "fullDescription",
+              "quote": "Linear Regression achieves R² ≈ 0.999 on trend fitting, LSTM delivers 246 RMSE with 0.827 R² on sequence forecasting."
+            }
+          }
+        ]
+      }
+    },
+    "compare:mcq-tech-challenge~urbancare-ai": {
+      "hash": "322c735012d0ec6e",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:04:06.138Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "rows": [
+          {
+            "dim": "goal",
+            "a": {
+              "field": "shortDescription",
+              "quote": "Perfect for government job or certification prep."
+            },
+            "b": {
+              "field": "problem",
+              "quote": "Most clinical AI is a black box — physicians can't audit how a diagnosis was reached, so they can't trust it and compliance teams can't sign off on it."
+            }
+          },
+          {
+            "dim": "approach",
+            "a": {
+              "field": "fullDescription",
+              "quote": "GitHub token stored locally; scores persisted in private Gist only the user can access. Gemini API analyzes weak topics and suggests study strategies."
+            },
+            "b": {
+              "field": "solution",
+              "quote": "A Semantics-to-Vector interface that bridges human-readable clinical semantics and internal model vectors, making every layer of the 30-agent pipeline inspectable — from lab-report extraction to differential diagnosis."
+            }
+          },
+          {
+            "dim": "detail",
+            "a": {
+              "field": "shortDescription",
+              "quote": "Modern MCQ quiz app built with vanilla JavaScript. Upload MCQ PDFs, get timed questions, and receive Google Gemini-powered performance analysis."
+            },
+            "b": {
+              "field": "lessons",
+              "quote": "Interpretability isn't a feature you bolt on at the end — for clinical tools, it has to be the interface itself."
+            }
+          }
+        ]
+      }
+    },
+    "compare:mcq-tech-challenge~vyapar-gyan": {
+      "hash": "47359bc1e2ebb698",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:07:10.013Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "rows": [
+          {
+            "dim": "goal",
+            "a": {
+              "field": "shortDescription",
+              "quote": "Modern MCQ quiz app built with vanilla JavaScript. Upload MCQ PDFs, get timed questions, and receive Google Gemini-powered performance analysis."
+            },
+            "b": {
+              "field": "problem",
+              "quote": "India's next billion commerce users don't use web dashboards — they speak eight languages, live inside WhatsApp, and send voice notes, not typed SKUs."
+            }
+          },
+          {
+            "dim": "approach",
+            "a": {
+              "field": "fullDescription",
+              "quote": "GitHub token stored locally; scores persisted in private Gist only the user can access. Gemini API analyzes weak topics and suggests study strategies."
+            },
+            "b": {
+              "field": "solution",
+              "quote": "Voice-first WhatsApp commerce: Gemini transcribes and classifies voice notes, routes intents to 65+ Lambdas across 12 domains, and AWS Polly responds in the customer's dialect."
+            }
+          },
+          {
+            "dim": "detail",
+            "a": {
+              "field": "tagline",
+              "quote": "AI-Powered Quiz App with GitHub Cloud Sync"
+            },
+            "b": {
+              "field": "lessons",
+              "quote": "Voice-first isn't a novelty — it collapses a typing funnel that was quietly blocking non-English users entirely."
+            }
+          }
+        ]
+      }
+    },
+    "compare:netflix-content-analytics~omni-lab": {
+      "hash": "13ff0520d11dcd2f",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:07:28.218Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "rows": [
+          {
+            "dim": "goal",
+            "a": null,
+            "b": {
+              "field": "problem",
+              "quote": "Static educational content (PDFs, slides, lecture videos) doesn't adapt to what a specific learner is confused about right now."
+            }
+          },
+          {
+            "dim": "approach",
+            "a": {
+              "field": "fullDescription",
+              "quote": "Statistical tests quantify content strategy shifts over time; association mining reveals genre-country co-occurrence patterns."
+            },
+            "b": {
+              "field": "solution",
+              "quote": "Three specialized agents — Teacher (live voice with barge-in), Scientist (writes code to verify claims), Visualizer (Veo-generated videos) — turn any PDF into an interactive, interruptible lesson."
+            }
+          },
+          {
+            "dim": "detail",
+            "a": {
+              "field": "tagline",
+              "quote": "End-to-End Pipeline for 2008–2021 Netflix Catalog"
+            },
+            "b": {
+              "field": "lessons",
+              "quote": "The cleanest way to stop LLMs hallucinating in education is to let a Scientist agent write code that proves or disproves its own claims."
+            }
+          }
+        ]
+      }
+    },
+    "compare:netflix-content-analytics~tcs-stock-forecasting": {
+      "hash": "d334603af15c72f8",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:07:59.376Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "rows": [
+          {
+            "dim": "goal",
+            "a": null,
+            "b": null
+          },
+          {
+            "dim": "approach",
+            "a": {
+              "field": "tagline",
+              "quote": "End-to-End Pipeline for 2008–2021 Netflix Catalog"
+            },
+            "b": null
+          },
+          {
+            "dim": "detail",
+            "a": {
+              "field": "fullDescription",
+              "quote": "Statistical tests quantify content strategy shifts over time; association mining reveals genre-country co-occurrence patterns."
+            },
+            "b": {
+              "field": "tagline",
+              "quote": "20-Year Stock Analysis with ML, Deep Learning & Dashboard"
+            }
+          }
+        ]
+      }
+    },
+    "compare:netflix-content-analytics~urbancare-ai": {
+      "hash": "8c897547b93bde1b",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:04:03.291Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "rows": [
+          {
+            "dim": "goal",
+            "a": null,
+            "b": {
+              "field": "problem",
+              "quote": "Most clinical AI is a black box — physicians can't audit how a diagnosis was reached, so they can't trust it and compliance teams can't sign off on it."
+            }
+          },
+          {
+            "dim": "approach",
+            "a": {
+              "field": "fullDescription",
+              "quote": "Full reproducibility from data ingest through deployment. Statistical tests quantify content strategy shifts over time; association mining reveals genre-country co-occurrence patterns."
+            },
+            "b": null
+          },
+          {
+            "dim": "detail",
+            "a": {
+              "field": "tagline",
+              "quote": "End-to-End Pipeline for 2008–2021 Netflix Catalog"
+            },
+            "b": {
+              "field": "lessons",
+              "quote": "Interpretability isn't a feature you bolt on at the end — for clinical tools, it has to be the interface itself."
+            }
+          }
+        ]
+      }
+    },
+    "compare:netflix-content-analytics~vyapar-gyan": {
+      "hash": "055930d4468f0a8e",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:07:06.793Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "rows": [
+          {
+            "dim": "goal",
+            "a": null,
+            "b": {
+              "field": "problem",
+              "quote": "India's next billion commerce users don't use web dashboards — they speak eight languages, live inside WhatsApp, and send voice notes, not typed SKUs."
+            }
+          },
+          {
+            "dim": "approach",
+            "a": {
+              "field": "fullDescription",
+              "quote": "Full reproducibility from data ingest through deployment. Statistical tests quantify content strategy shifts over time; association mining reveals genre-country co-occurrence patterns."
+            },
+            "b": {
+              "field": "solution",
+              "quote": "Voice-first WhatsApp commerce: Gemini transcribes and classifies voice notes, routes intents to 65+ Lambdas across 12 domains, and AWS Polly responds in the customer's dialect."
+            }
+          },
+          {
+            "dim": "detail",
+            "a": {
+              "field": "tagline",
+              "quote": "End-to-End Pipeline for 2008–2021 Netflix Catalog"
+            },
+            "b": {
+              "field": "lessons",
+              "quote": "Voice-first isn't a novelty — it collapses a typing funnel that was quietly blocking non-English users entirely."
+            }
+          }
+        ]
+      }
+    },
+    "compare:omni-lab~tcs-stock-forecasting": {
+      "hash": "e9a1d3331fc33f9a",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:07:17.223Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "rows": [
+          {
+            "dim": "goal",
+            "a": {
+              "field": "problem",
+              "quote": "Static educational content (PDFs, slides, lecture videos) doesn't adapt to what a specific learner is confused about right now."
+            },
+            "b": {
+              "field": "shortDescription",
+              "quote": "Comprehensive data science project analyzing and forecasting TCS stock."
+            }
+          },
+          {
+            "dim": "approach",
+            "a": {
+              "field": "solution",
+              "quote": "Three specialized agents — Teacher (live voice with barge-in), Scientist (writes code to verify claims), Visualizer (Veo-generated videos) — turn any PDF into an interactive, interruptible lesson."
+            },
+            "b": {
+              "field": "shortDescription",
+              "quote": "Feature engineering with MACD/RSI/rolling stats, five models compared (Linear, Random Forest, XGBoost, LSTM, Prophet), and an interactive Streamlit dashboard with buy/sell signals via EMA crossover."
+            }
+          },
+          {
+            "dim": "detail",
+            "a": {
+              "field": "lessons",
+              "quote": "The cleanest way to stop LLMs hallucinating in education is to let a Scientist agent write code that proves or disproves its own claims."
+            },
+            "b": {
+              "field": "fullDescription",
+              "quote": "Linear Regression achieves R² ≈ 0.999 on trend fitting, LSTM delivers 246 RMSE with 0.827 R² on sequence forecasting."
+            }
+          }
+        ]
+      }
+    },
+    "compare:omni-lab~urbancare-ai": {
+      "hash": "d1314851348d5724",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:03:48.242Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "rows": [
+          {
+            "dim": "goal",
+            "a": {
+              "field": "problem",
+              "quote": "Static educational content (PDFs, slides, lecture videos) doesn't adapt to what a specific learner is confused about right now."
+            },
+            "b": {
+              "field": "problem",
+              "quote": "Most clinical AI is a black box — physicians can't audit how a diagnosis was reached, so they can't trust it and compliance teams can't sign off on it."
+            }
+          },
+          {
+            "dim": "approach",
+            "a": {
+              "field": "solution",
+              "quote": "Three specialized agents — Teacher (live voice with barge-in), Scientist (writes code to verify claims), Visualizer (Veo-generated videos) — turn any PDF into an interactive, interruptible lesson."
+            },
+            "b": {
+              "field": "solution",
+              "quote": "A Semantics-to-Vector interface that bridges human-readable clinical semantics and internal model vectors, making every layer of the 30-agent pipeline inspectable — from lab-report extraction to differential diagnosis."
+            }
+          },
+          {
+            "dim": "detail",
+            "a": {
+              "field": "lessons",
+              "quote": "The cleanest way to stop LLMs hallucinating in education is to let a Scientist agent write code that proves or disproves its own claims."
+            },
+            "b": {
+              "field": "lessons",
+              "quote": "Interpretability isn't a feature you bolt on at the end — for clinical tools, it has to be the interface itself."
+            }
+          }
+        ]
+      }
+    },
+    "compare:omni-lab~vyapar-gyan": {
+      "hash": "4d2b7e9753c7d254",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:06:49.081Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "rows": [
+          {
+            "dim": "goal",
+            "a": {
+              "field": "problem",
+              "quote": "Static educational content (PDFs, slides, lecture videos) doesn't adapt to what a specific learner is confused about right now."
+            },
+            "b": {
+              "field": "problem",
+              "quote": "India's next billion commerce users don't use web dashboards — they speak eight languages, live inside WhatsApp, and send voice notes, not typed SKUs."
+            }
+          },
+          {
+            "dim": "approach",
+            "a": {
+              "field": "solution",
+              "quote": "Three specialized agents — Teacher (live voice with barge-in), Scientist (writes code to verify claims), Visualizer (Veo-generated videos) — turn any PDF into an interactive, interruptible lesson."
+            },
+            "b": {
+              "field": "solution",
+              "quote": "Voice-first WhatsApp commerce: Gemini transcribes and classifies voice notes, routes intents to 65+ Lambdas across 12 domains, and AWS Polly responds in the customer's dialect."
+            }
+          },
+          {
+            "dim": "detail",
+            "a": {
+              "field": "lessons",
+              "quote": "The cleanest way to stop LLMs hallucinating in education is to let a Scientist agent write code that proves or disproves its own claims."
+            },
+            "b": {
+              "field": "lessons",
+              "quote": "Voice-first isn't a novelty — it collapses a typing funnel that was quietly blocking non-English users entirely."
+            }
+          }
+        ]
+      }
+    },
+    "compare:tcs-stock-forecasting~urbancare-ai": {
+      "hash": "20824f6f9658fd0b",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:03:53.916Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "rows": [
+          {
+            "dim": "goal",
+            "a": {
+              "field": "shortDescription",
+              "quote": "Comprehensive data science project analyzing and forecasting TCS stock."
+            },
+            "b": {
+              "field": "problem",
+              "quote": "Most clinical AI is a black box — physicians can't audit how a diagnosis was reached, so they can't trust it and compliance teams can't sign off on it."
+            }
+          },
+          {
+            "dim": "approach",
+            "a": {
+              "field": "shortDescription",
+              "quote": "Feature engineering with MACD/RSI/rolling stats, five models compared (Linear, Random Forest, XGBoost, LSTM, Prophet), and an interactive Streamlit dashboard with buy/sell signals via EMA crossover."
+            },
+            "b": {
+              "field": "shortDescription",
+              "quote": "A 30-agent, 8-layer clinical pipeline built on MedGemma + TxGemma + Gemini."
+            }
+          },
+          {
+            "dim": "detail",
+            "a": {
+              "field": "fullDescription",
+              "quote": "Linear Regression achieves R² ≈ 0.999 on trend fitting, LSTM delivers 246 RMSE with 0.827 R² on sequence forecasting."
+            },
+            "b": {
+              "field": "lessons",
+              "quote": "Interpretability isn't a feature you bolt on at the end — for clinical tools, it has to be the interface itself."
+            }
+          }
+        ]
+      }
+    },
+    "compare:tcs-stock-forecasting~vyapar-gyan": {
+      "hash": "f36b5844c668c227",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:06:56.190Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "rows": [
+          {
+            "dim": "goal",
+            "a": {
+              "field": "shortDescription",
+              "quote": "Comprehensive data science project analyzing and forecasting TCS stock."
+            },
+            "b": {
+              "field": "problem",
+              "quote": "India's next billion commerce users don't use web dashboards — they speak eight languages, live inside WhatsApp, and send voice notes, not typed SKUs."
+            }
+          },
+          {
+            "dim": "approach",
+            "a": {
+              "field": "shortDescription",
+              "quote": "Feature engineering with MACD/RSI/rolling stats, five models compared (Linear, Random Forest, XGBoost, LSTM, Prophet), and an interactive Streamlit dashboard with buy/sell signals via EMA crossover."
+            },
+            "b": {
+              "field": "solution",
+              "quote": "Voice-first WhatsApp commerce: Gemini transcribes and classifies voice notes, routes intents to 65+ Lambdas across 12 domains, and AWS Polly responds in the customer's dialect."
+            }
+          },
+          {
+            "dim": "detail",
+            "a": null,
+            "b": {
+              "field": "lessons",
+              "quote": "Voice-first isn't a novelty — it collapses a typing funnel that was quietly blocking non-English users entirely."
+            }
+          }
+        ]
+      }
+    },
+    "compare:urbancare-ai~vyapar-gyan": {
+      "hash": "399f773b374934f9",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:03:44.935Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "rows": [
+          {
+            "dim": "goal",
+            "a": {
+              "field": "problem",
+              "quote": "Most clinical AI is a black box — physicians can't audit how a diagnosis was reached, so they can't trust it and compliance teams can't sign off on it."
+            },
+            "b": {
+              "field": "problem",
+              "quote": "India's next billion commerce users don't use web dashboards — they speak eight languages, live inside WhatsApp, and send voice notes, not typed SKUs."
+            }
+          },
+          {
+            "dim": "approach",
+            "a": {
+              "field": "solution",
+              "quote": "A Semantics-to-Vector interface that bridges human-readable clinical semantics and internal model vectors, making every layer of the 30-agent pipeline inspectable — from lab-report extraction to differential diagnosis."
+            },
+            "b": {
+              "field": "solution",
+              "quote": "Voice-first WhatsApp commerce: Gemini transcribes and classifies voice notes, routes intents to 65+ Lambdas across 12 domains, and AWS Polly responds in the customer's dialect."
+            }
+          },
+          {
+            "dim": "detail",
+            "a": {
+              "field": "lessons",
+              "quote": "Interpretability isn't a feature you bolt on at the end — for clinical tools, it has to be the interface itself."
+            },
+            "b": {
+              "field": "lessons",
+              "quote": "Voice-first isn't a novelty — it collapses a typing funnel that was quietly blocking non-English users entirely."
+            }
+          }
+        ]
+      }
+    },
+    "demo:drugs-side-effects-analysis": {
+      "hash": "24b3875c11fc8b09",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:09:02.756Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "text": "An end-to-end healthcare data science platform demo for Drugs Side Effects Analysis."
+      }
+    },
+    "demo:ibm-hr-attrition-prediction": {
+      "hash": "ff41706c411ead85",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:09:13.298Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "text": "An interactive employee attrition analysis dashboard displaying predictive analytics and data charts."
+      }
+    },
+    "demo:tcs-stock-forecasting": {
+      "hash": "43af4a8170937815",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:02:34.361Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "text": "An introduction to TCS Stock Forecasting, presenting a 20-year stock analysis with machine learning, deep learning, and a dashboard."
+      }
+    },
+    "interests": {
+      "hash": "665c9d6b80d322b7",
+      "model": "gemini-embedding-2",
+      "generatedAt": "2026-09-25T12:11:36.223Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "agents": [
+          {
+            "slug": "omni-lab",
+            "score": 0.9287
+          },
+          {
+            "slug": "content-storyteller",
+            "score": 0.9167
+          },
+          {
+            "slug": "urbancare-ai",
+            "score": 0.9164
+          },
+          {
+            "slug": "bruhworking-nexusflow",
+            "score": 0.9093
+          },
+          {
+            "slug": "vyapar-gyan",
+            "score": 0.841
+          },
+          {
+            "slug": "mcq-tech-challenge",
+            "score": 0.8208
+          },
+          {
+            "slug": "drugs-side-effects-analysis",
+            "score": 0.8112
+          },
+          {
+            "slug": "netflix-content-analytics",
+            "score": 0.802
+          },
+          {
+            "slug": "ibm-hr-attrition-prediction",
+            "score": 0.8001
+          },
+          {
+            "slug": "tcs-stock-forecasting",
+            "score": 0.7968
+          }
+        ],
+        "rag": [
+          {
+            "slug": "urbancare-ai",
+            "score": 1
+          },
+          {
+            "slug": "omni-lab",
+            "score": 0.8184
+          },
+          {
+            "slug": "content-storyteller",
+            "score": 0.7798
+          },
+          {
+            "slug": "vyapar-gyan",
+            "score": 0.7734
+          },
+          {
+            "slug": "bruhworking-nexusflow",
+            "score": 0.7661
+          },
+          {
+            "slug": "drugs-side-effects-analysis",
+            "score": 0.7548
+          },
+          {
+            "slug": "ibm-hr-attrition-prediction",
+            "score": 0.7386
+          },
+          {
+            "slug": "mcq-tech-challenge",
+            "score": 0.7303
+          },
+          {
+            "slug": "tcs-stock-forecasting",
+            "score": 0.7279
+          },
+          {
+            "slug": "netflix-content-analytics",
+            "score": 0.7051
+          }
+        ],
+        "forecasting": [
+          {
+            "slug": "tcs-stock-forecasting",
+            "score": 1
+          },
+          {
+            "slug": "ibm-hr-attrition-prediction",
+            "score": 0.7844
+          },
+          {
+            "slug": "netflix-content-analytics",
+            "score": 0.7797
+          },
+          {
+            "slug": "drugs-side-effects-analysis",
+            "score": 0.7671
+          },
+          {
+            "slug": "content-storyteller",
+            "score": 0.7529
+          },
+          {
+            "slug": "mcq-tech-challenge",
+            "score": 0.7492
+          },
+          {
+            "slug": "urbancare-ai",
+            "score": 0.7279
+          },
+          {
+            "slug": "bruhworking-nexusflow",
+            "score": 0.7259
+          },
+          {
+            "slug": "omni-lab",
+            "score": 0.7183
+          },
+          {
+            "slug": "vyapar-gyan",
+            "score": 0.7162
+          }
+        ]
+      }
+    },
+    "level:bruhworking-nexusflow:eli5": {
+      "hash": "4278aef87a1852f4",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:04:28.326Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "text": "Oikantik created a tool that breaks big tasks like reading a 50-page PDF into smaller parts handled by a team of specialized helpers. It shows live progress as the work happens and checks the quality to make sure the final result is good. This system keeps everything running smoothly even when tasks take a long time to finish."
+      }
+    },
+    "level:bruhworking-nexusflow:engineer": {
+      "hash": "43ab3e6d3b65c7d6",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:04:35.226Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "text": "Oikantik built Bruhworking NexusFlow, a serverless agent swarm for stateful orchestration that breaks complex tasks into subtasks via a planner and delegates them to specialized agents. Deployed on Cloud Run with auto-scaling, the engine streams real-time progress via SSE and iteratively improves output if the quality score is under 80 while tracking per-agent token costs. The tech stack consists of Python, FastAPI, Google ADK, Gemini 2.0 Flash, Cloud Run, Docker, and SSE."
+      }
+    },
+    "level:bruhworking-nexusflow:recruiter": {
+      "hash": "96de470fa8ab5536",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:04:31.916Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "text": "Bruhworking NexusFlow is an async multi-agent orchestration engine built to address long-running agentic tasks that crash browsers, lose state mid-flight, and offer no mid-run visibility. It uses a planner-coordinated swarm that breaks complex tasks into subtasks, streams progress via SSE, and tracks per-agent token costs. Oikantik built this project using Python, FastAPI, Google ADK, Gemini 2.0 Flash, Cloud Run, Docker, and SSE."
+      }
+    },
+    "level:content-storyteller:eli5": {
+      "hash": "c619db38380f03ab",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:04:59.692Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "text": "Oikantik built a platform that turns rough notes, pictures, and voice recordings into finished marketing materials like written posts, images, storyboards, and short videos. The system automatically figures out what kind of final product is needed for each job instead of running every step every time. It also helps marketing teams discover current trends across different social media sites."
+      }
+    },
+    "level:content-storyteller:engineer": {
+      "hash": "b5cdce6532c4e3ae",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:05:10.508Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "text": "Content Storyteller is a multimodal AI platform for marketing assets built on GCP with Vertex AI Gemini. Output-intent inference determines which pipeline stages run per job, coordinating ten GCP services including Cloud Run, Pub/Sub, and Firestore. The technical stack includes React, Vertex AI, Gemini 2.5 Flash/Pro, Cloud Run, Pub/Sub, Firestore, and Terraform."
+      }
+    },
+    "level:content-storyteller:recruiter": {
+      "hash": "d79989d53417a30d",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:05:03.482Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "text": "Content Storyteller is a multimodal AI platform that transforms rough inputs like text, images, and voice notes into polished marketing assets including copy, visuals, storyboards, voiceover scripts, and short promo videos. It addresses the problem that marketing teams need polished multi-format output from rough inputs, but most AI tools lock you into a single modality. The project uses React, Vertex AI, Gemini 2.5 Flash/Pro, Cloud Run, Pub/Sub, Firestore, and Terraform."
+      }
+    },
+    "level:drugs-side-effects-analysis:eli5": {
+      "hash": "4943090749564e97",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:05:23.997Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "text": "Oikantik created a health data project that looks at patient experiences and drug safety. The work includes training multiple machine learning models and building interactive dashboards."
+      }
+    },
+    "level:drugs-side-effects-analysis:engineer": {
+      "hash": "bf1ac27ffa93e14a",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:05:31.382Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "text": "Oikantik built an end-to-end healthcare data science platform that processes an 11MB+ dataset through a 7-step notebook workflow to analyze drug safety, efficacy, and patient experiences. The architecture includes 6 trained ML models, sentiment analysis, association rule mining, and 3 interactive Streamlit dashboards using Python, Streamlit, Scikit-learn, NLTK, TextBlob, Apyori, and Plotly."
+      }
+    },
+    "level:drugs-side-effects-analysis:recruiter": {
+      "hash": "d2f63f1e90895188",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:05:28.164Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "text": "Oikantik built a healthcare data science platform that analyses drug safety and patient experiences from Drugs.com. It uses Python, Streamlit, Scikit-learn, NLTK, TextBlob, Apyori, and Plotly to process data, train ML models, and power interactive dashboards."
+      }
+    },
+    "level:ibm-hr-attrition-prediction:eli5": {
+      "hash": "680a8e5f0ebf9c45",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:05:34.986Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "text": "Oikantik created a tool that predicts employee departures and creates detailed spreadsheets with automated suggestions based on uploaded data."
+      }
+    },
+    "level:ibm-hr-attrition-prediction:engineer": {
+      "hash": "092fe4fada72c82e",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:05:41.812Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "text": "Oikantik built a machine learning application using Python, Scikit-learn, XGBoost, LightGBM, CatBoost, Flask, and hvPlot to predict employee attrition from IBM's dataset. The Flask web app processes uploaded CSV files and generates dynamic Excel dashboards with automated HR recommendations based on models trained across seven algorithms."
+      }
+    },
+    "level:ibm-hr-attrition-prediction:recruiter": {
+      "hash": "cb910a837feb75c1",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:05:38.394Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "text": "Oikantik created a Flask web app that predicts employee attrition using IBM dataset and seven machine learning models, generating dynamic Excel dashboards and automated recommendations. The project uses Python, Scikit-learn, XGBoost, LightGBM, CatBoost, Flask, and hvPlot."
+      }
+    },
+    "level:mcq-tech-challenge:eli5": {
+      "hash": "29d6a4dbdaef5cab",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:05:55.815Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "text": "Oikantik built a quiz app that lets people upload documents to take timed questions and receive performance analysis. The app also syncs scores across devices."
+      }
+    },
+    "level:mcq-tech-challenge:engineer": {
+      "hash": "fca7cdcac0aff029",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:06:02.769Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "text": "Oikantik built the MCQ Tech Challenge web app using vanilla JavaScript, HTML5, CSS3, Google Gemini API, GitHub Gist API, and PDF.js. The architecture features a dark-mode UI with per-question and total time tracking, scoring persistence across devices via a private GitHub Gist, and Google Gemini-powered performance analysis."
+      }
+    },
+    "level:mcq-tech-challenge:recruiter": {
+      "hash": "a8532670482e6546",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:05:59.050Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "text": "Oikantik built MCQ Tech Challenge, a quiz app that addresses the need for exam preparation by allowing users to upload MCQ PDFs for timed questions. It uses Vanilla JS, HTML5, CSS3, Google Gemini API, GitHub Gist API, and PDF.js."
+      }
+    },
+    "level:netflix-content-analytics:eli5": {
+      "hash": "57a3283a89c39766",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:05:45.315Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "text": "Oikantik created a tool that cleans and studies a large catalog of Netflix shows and movies. It helps people explore trends and connections in the data through an interactive visual dashboard."
+      }
+    },
+    "level:netflix-content-analytics:engineer": {
+      "hash": "3eabbd62cb193931",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:05:52.597Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "text": "Oikantik built a modular pipeline for the Netflix content catalog featuring PostgreSQL ingestion, Python cleaning and feature engineering, exploratory data analysis, and association-rule mining. The architecture incorporates machine learning models alongside an interactive Streamlit dashboard, utilizing Python, PostgreSQL, Pandas, Streamlit, Matplotlib, and Seaborn."
+      }
+    },
+    "level:netflix-content-analytics:recruiter": {
+      "hash": "09649234aa3287f6",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:05:48.812Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "text": "Oikantik built Netflix Content Analytics, a modular pipeline addressing the analysis of a 14-year Netflix catalog through data ingestion, cleaning, and modeling. The project uses Python, PostgreSQL, Pandas, Streamlit, Matplotlib, and Seaborn."
+      }
+    },
+    "level:omni-lab:eli5": {
+      "hash": "8f045c62d3eb5f35",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:04:48.990Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "text": "Oikantik created Omni-Lab, an educational workspace that turns any uploaded PDF into interactive and visual lessons. Three specialized helpers work together to teach using live voice, verify information through code, and generate custom videos on demand."
+      }
+    },
+    "level:omni-lab:engineer": {
+      "hash": "61b2e5add4efd84a",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:04:56.187Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "text": "Omni-Lab is an empirical AI tutor that transforms static educational content into interactive, verifiable, and visual lessons using three specialized agents. The architecture features a Teacher agent running on Gemini 2.5 Flash Native Audio with local voice activity detection for barge-in interruptions, a Scientist agent using Gemini 3 Pro to write code for proof rather than hallucinating, and a Visualizer agent generating videos via Veo. The tech stack includes React 19, TypeScript, Vite 6, Gemini 2.5 Flash Audio, Gemini 3 Pro, Veo 3.1, and Recharts."
+      }
+    },
+    "level:omni-lab:recruiter": {
+      "hash": "ad082b406d36afaa",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:04:52.485Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "text": "Omni-Lab is an autonomous educational workspace powered by three AI agents that transforms static educational content into interactive, verifiable, and visual lessons. It addresses the problem that static materials like PDFs, slides, and lecture videos do not adapt to what a specific learner is confused about right now. The project uses React 19, TypeScript, Vite 6, Gemini 2.5 Flash Audio, Gemini 3 Pro, Veo 3.1, and Recharts."
+      }
+    },
+    "level:tcs-stock-forecasting:eli5": {
+      "hash": "aa7c9e486e909b3b",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:05:13.735Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "text": "Oikantik created a data science project that analyzes and forecasts TCS stock using multiple models and an interactive dashboard with buy and sell signals."
+      }
+    },
+    "level:tcs-stock-forecasting:engineer": {
+      "hash": "26193a9bc4266a0f",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:05:20.576Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "text": "Oikantik Basu built a data science project analyzing and forecasting TCS stock with feature engineering, five machine learning and deep learning models, and an interactive Streamlit dashboard featuring buy and sell signals. The tech stack includes Python, Streamlit, Plotly, Scikit-learn, XGBoost, Keras/TensorFlow, and Prophet."
+      }
+    },
+    "level:tcs-stock-forecasting:recruiter": {
+      "hash": "9bea4ab1cbb03ec6",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:05:17.165Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "text": "Oikantik created a data science project to analyze and forecast TCS stock by comparing five machine learning and deep learning models and providing an interactive dashboard with buy and sell signals. The project uses Python, Streamlit, Plotly, Scikit-learn, XGBoost, Keras/TensorFlow, and Prophet."
+      }
+    },
+    "level:urbancare-ai:eli5": {
+      "hash": "000c7a5a31714339",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:59:31.203Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "text": "Oikantik created a medical dashboard that acts as a doctor consultant to help physicians see how medical software reaches its diagnoses. The system lets doctors inspect every step of the process, from reading lab reports and spotting broken bones to suggesting possible conditions. This transparency helps physicians understand and trust the diagnostic process."
+      }
+    },
+    "level:urbancare-ai:engineer": {
+      "hash": "0092f01890279ac8",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:59:37.192Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "text": "UrbanCare AI is an AI-native clinical ecosystem built with a 30-agent, 8-layer clinical pipeline leveraging MedGemma, TxGemma, and Gemini. The architecture includes a Semantics-to-Vector interface that bridges human-readable clinical semantics and internal model vectors to make AI reasoning auditable at every layer, from lab-report extraction to differential diagnosis. The listed stack includes React 19, Node.js, PostgreSQL, MedGemma, TxGemma, Gemini, LangChain, and GCP."
+      }
+    },
+    "level:urbancare-ai:recruiter": {
+      "hash": "8e7626b42c2c9286",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:59:34.147Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "text": "UrbanCare AI is a clinical ecosystem built on MedGemma, TxGemma, and Gemini that provides a Semantics-to-Vector interface so physicians can inspect how medical AI models reach their diagnoses. It addresses the problem that most clinical AI is a black box where physicians cannot audit how a diagnosis was reached, preventing trust and compliance sign-offs. The technologies used include React 19, Node.js, PostgreSQL, MedGemma, TxGemma, Gemini, LangChain, and GCP."
+      }
+    },
+    "level:vyapar-gyan:eli5": {
+      "hash": "2fb940000c882859",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:04:38.743Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "text": "Oikantik Basu built Vyapar-Gyan, a shopping platform for Indian retailers where customers can buy things using voice messages and web chats in 8 Indian languages. The system turns voice notes into product requests and handles them automatically so shoppers do not need to use typed forms. It also helps sellers track their business records and spot unsold items."
+      }
+    },
+    "level:vyapar-gyan:engineer": {
+      "hash": "06eacec60b5af568",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:04:45.950Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "text": "Vyapar-Gyan is an omnichannel commerce platform for Indian retailers that enables voice-first shopping via WhatsApp or web chat across 8 Indian languages. The architecture relies on a full-stack serverless AWS setup utilizing 65+ Lambda handlers across 12 domains, powered by Gemini 2.0 for voice transcription and intent extraction, AWS Polly for neural text-to-speech responses, and Bedrock for dead-stock detection. The technology stack includes AWS Lambda, DynamoDB, Twilio, Razorpay, Bedrock, Gemini 2.0, Next.js 14, and CDK."
+      }
+    },
+    "level:vyapar-gyan:recruiter": {
+      "hash": "1d68b6b20076fdb5",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:04:42.544Z",
+      "reviewed": false,
+      "claimBearing": true,
+      "value": {
+        "text": "Vyapar-Gyan is an omnichannel commerce marketplace for Indian retailers that addresses the problem where Indias next billion commerce users live inside WhatsApp, speak eight languages, and send voice notes instead of using web dashboards. Oikantik built this voice-first shopping and WhatsApp commerce platform using AWS Lambda, DynamoDB, Twilio, Razorpay, Bedrock, Gemini 2.0, Next.js 14, and CDK."
+      }
+    },
+    "neighbours:bruhworking-nexusflow": {
+      "hash": "665c9d6b80d322b7",
+      "model": "gemini-embedding-2",
+      "generatedAt": "2026-09-25T12:11:36.223Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "items": [
+          {
+            "slug": "omni-lab",
+            "cosine": 0.7886
+          },
+          {
+            "slug": "content-storyteller",
+            "cosine": 0.7833
+          },
+          {
+            "slug": "urbancare-ai",
+            "cosine": 0.7661
+          }
+        ]
+      }
+    },
+    "neighbours:content-storyteller": {
+      "hash": "665c9d6b80d322b7",
+      "model": "gemini-embedding-2",
+      "generatedAt": "2026-09-25T12:11:36.223Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "items": [
+          {
+            "slug": "omni-lab",
+            "cosine": 0.8023
+          },
+          {
+            "slug": "vyapar-gyan",
+            "cosine": 0.7849
+          },
+          {
+            "slug": "bruhworking-nexusflow",
+            "cosine": 0.7833
+          }
+        ]
+      }
+    },
+    "neighbours:drugs-side-effects-analysis": {
+      "hash": "665c9d6b80d322b7",
+      "model": "gemini-embedding-2",
+      "generatedAt": "2026-09-25T12:11:36.223Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "items": [
+          {
+            "slug": "netflix-content-analytics",
+            "cosine": 0.8156
+          },
+          {
+            "slug": "ibm-hr-attrition-prediction",
+            "cosine": 0.7736
+          },
+          {
+            "slug": "tcs-stock-forecasting",
+            "cosine": 0.7671
+          }
+        ]
+      }
+    },
+    "neighbours:ibm-hr-attrition-prediction": {
+      "hash": "665c9d6b80d322b7",
+      "model": "gemini-embedding-2",
+      "generatedAt": "2026-09-25T12:11:36.223Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "items": [
+          {
+            "slug": "tcs-stock-forecasting",
+            "cosine": 0.7844
+          },
+          {
+            "slug": "drugs-side-effects-analysis",
+            "cosine": 0.7736
+          },
+          {
+            "slug": "netflix-content-analytics",
+            "cosine": 0.7527
+          }
+        ]
+      }
+    },
+    "neighbours:mcq-tech-challenge": {
+      "hash": "665c9d6b80d322b7",
+      "model": "gemini-embedding-2",
+      "generatedAt": "2026-09-25T12:11:36.223Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "items": [
+          {
+            "slug": "omni-lab",
+            "cosine": 0.7676
+          },
+          {
+            "slug": "vyapar-gyan",
+            "cosine": 0.764
+          },
+          {
+            "slug": "content-storyteller",
+            "cosine": 0.7589
+          }
+        ]
+      }
+    },
+    "neighbours:netflix-content-analytics": {
+      "hash": "665c9d6b80d322b7",
+      "model": "gemini-embedding-2",
+      "generatedAt": "2026-09-25T12:11:36.223Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "items": [
+          {
+            "slug": "drugs-side-effects-analysis",
+            "cosine": 0.8156
+          },
+          {
+            "slug": "tcs-stock-forecasting",
+            "cosine": 0.7797
+          },
+          {
+            "slug": "content-storyteller",
+            "cosine": 0.7777
+          }
+        ]
+      }
+    },
+    "neighbours:omni-lab": {
+      "hash": "665c9d6b80d322b7",
+      "model": "gemini-embedding-2",
+      "generatedAt": "2026-09-25T12:11:36.223Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "items": [
+          {
+            "slug": "urbancare-ai",
+            "cosine": 0.8184
+          },
+          {
+            "slug": "content-storyteller",
+            "cosine": 0.8023
+          },
+          {
+            "slug": "bruhworking-nexusflow",
+            "cosine": 0.7886
+          }
+        ]
+      }
+    },
+    "neighbours:tcs-stock-forecasting": {
+      "hash": "665c9d6b80d322b7",
+      "model": "gemini-embedding-2",
+      "generatedAt": "2026-09-25T12:11:36.223Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "items": [
+          {
+            "slug": "ibm-hr-attrition-prediction",
+            "cosine": 0.7844
+          },
+          {
+            "slug": "netflix-content-analytics",
+            "cosine": 0.7797
+          },
+          {
+            "slug": "drugs-side-effects-analysis",
+            "cosine": 0.7671
+          }
+        ]
+      }
+    },
+    "neighbours:urbancare-ai": {
+      "hash": "665c9d6b80d322b7",
+      "model": "gemini-embedding-2",
+      "generatedAt": "2026-09-25T12:11:36.223Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "items": [
+          {
+            "slug": "omni-lab",
+            "cosine": 0.8184
+          },
+          {
+            "slug": "content-storyteller",
+            "cosine": 0.7798
+          },
+          {
+            "slug": "vyapar-gyan",
+            "cosine": 0.7734
+          }
+        ]
+      }
+    },
+    "neighbours:vyapar-gyan": {
+      "hash": "665c9d6b80d322b7",
+      "model": "gemini-embedding-2",
+      "generatedAt": "2026-09-25T12:11:36.223Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "items": [
+          {
+            "slug": "content-storyteller",
+            "cosine": 0.7849
+          },
+          {
+            "slug": "omni-lab",
+            "cosine": 0.7798
+          },
+          {
+            "slug": "urbancare-ai",
+            "cosine": 0.7734
+          }
+        ]
+      }
+    },
+    "questions:bruhworking-nexusflow": {
+      "hash": "8799a30454061fb3",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:06:06.919Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "questions": [
+          {
+            "text": "Why did you treat agent orchestration as an observability problem rather than just a routing problem?",
+            "evidence": [
+              {
+                "id": "project:bruhworking-nexusflow#lessons",
+                "quote": "Agent orchestration is an observability problem, not just a routing problem — stream progress early and often."
+              }
+            ]
+          },
+          {
+            "text": "How did you design quality gates to re-run only failing branches instead of the whole pipeline?",
+            "evidence": [
+              {
+                "id": "project:bruhworking-nexusflow#solution",
+                "quote": "A planner-coordinated swarm on Cloud Run that streams per-agent progress over SSE, with quality gates that re-run only failing branches instead of the whole pipeline."
+              }
+            ]
+          },
+          {
+            "text": "Why did long-running agentic tasks crash browsers and lose state mid-flight?",
+            "evidence": [
+              {
+                "id": "project:bruhworking-nexusflow#problem",
+                "quote": "Long-running agentic tasks crash browsers, lose state mid-flight, and offer no mid-run visibility — so users can't trust them with real work."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "questions:content-storyteller": {
+      "hash": "4d36dd0095089f18",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:06:17.476Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "questions": [
+          {
+            "text": "Why did you decide to infer intent upfront in your multimodal pipelines instead of running every stage blindly?",
+            "evidence": [
+              {
+                "id": "project:content-storyteller#lessons",
+                "quote": "Multimodal pipelines are cheaper when you infer intent upfront instead of running every stage blindly."
+              }
+            ]
+          },
+          {
+            "text": "How did you design output-intent inference to decide which pipeline stages run per job?",
+            "evidence": [
+              {
+                "id": "project:content-storyteller#solution",
+                "quote": "Output-intent inference decides which pipeline stages run per job, so the same brief yields a LinkedIn GIF, a storyboard, and a Veo promo from ten coordinated GCP services."
+              }
+            ]
+          },
+          {
+            "text": "Why did you build this tool given that most AI tools lock you into a single modality?",
+            "evidence": [
+              {
+                "id": "project:content-storyteller#problem",
+                "quote": "Marketing teams need polished multi-format output (copy, visuals, video, voiceover) from rough inputs — but most AI tools lock you into a single modality."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "questions:omni-lab": {
+      "hash": "966ef711a6f7f28b",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:06:14.065Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "questions": [
+          {
+            "text": "Why did you let a Scientist agent write code that proves or disproves its own claims?",
+            "evidence": [
+              {
+                "id": "project:omni-lab#lessons",
+                "quote": "The cleanest way to stop LLMs hallucinating in education is to let a Scientist agent write code that proves or disproves its own claims."
+              }
+            ]
+          },
+          {
+            "text": "How did you design the Teacher agent to handle live voice with barge-in?",
+            "evidence": [
+              {
+                "id": "project:omni-lab#solution",
+                "quote": "Three specialized agents — Teacher (live voice with barge-in), Scientist (writes code to verify claims), Visualizer (Veo-generated videos) — turn any PDF into an interactive, interruptible lesson."
+              }
+            ]
+          },
+          {
+            "text": "Why did you choose to address static educational content that doesn't adapt to specific learners?",
+            "evidence": [
+              {
+                "id": "project:omni-lab#problem",
+                "quote": "Static educational content (PDFs, slides, lecture videos) doesn't adapt to what a specific learner is confused about right now."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "questions:urbancare-ai": {
+      "hash": "aefcd31a8696895b",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T10:59:40.768Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "questions": [
+          {
+            "text": "Why did you treat interpretability as the interface itself rather than a feature bolted on at the end?",
+            "evidence": [
+              {
+                "id": "project:urbancare-ai#lessons",
+                "quote": "Interpretability isn't a feature you bolt on at the end — for clinical tools, it has to be the interface itself."
+              }
+            ]
+          },
+          {
+            "text": "How did you bridge human-readable clinical semantics and internal model vectors to inspect the pipeline?",
+            "evidence": [
+              {
+                "id": "project:urbancare-ai#solution",
+                "quote": "A Semantics-to-Vector interface that bridges human-readable clinical semantics and internal model vectors, making every layer of the 30-agent pipeline inspectable — from lab-report extraction to differential diagnosis."
+              }
+            ]
+          },
+          {
+            "text": "How did you address the lack of auditability that prevents compliance teams from signing off on diagnoses?",
+            "evidence": [
+              {
+                "id": "project:urbancare-ai#problem",
+                "quote": "Most clinical AI is a black box — physicians can't audit how a diagnosis was reached, so they can't trust it and compliance teams can't sign off on it."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "questions:vyapar-gyan": {
+      "hash": "aed709b26db52b91",
+      "model": "gemini-3.5-flash-lite",
+      "generatedAt": "2026-09-25T11:06:10.820Z",
+      "reviewed": false,
+      "claimBearing": false,
+      "value": {
+        "questions": [
+          {
+            "text": "Why did you focus on voice notes instead of typed SKUs for India's next billion commerce users?",
+            "evidence": [
+              {
+                "id": "project:vyapar-gyan#problem",
+                "quote": "India's next billion commerce users don't use web dashboards — they speak eight languages, live inside WhatsApp, and send voice notes, not typed SKUs."
+              }
+            ]
+          },
+          {
+            "text": "How did you design the voice-first approach to address non-English users?",
+            "evidence": [
+              {
+                "id": "project:vyapar-gyan#lessons",
+                "quote": "Voice-first isn't a novelty — it collapses a typing funnel that was quietly blocking non-English users entirely."
+              }
+            ]
+          },
+          {
+            "text": "How did you implement AWS Polly in the workflow?",
+            "evidence": [
+              {
+                "id": "project:vyapar-gyan#solution",
+                "quote": "AWS Polly responds in the customer's dialect."
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,30 @@
+/* Package: ai-contact — the contact form's writing help: the draft panel, the message check and dictation.
+   Colours are the site's tokens; reduced motion keys off html[data-motion="reduced"] only. */
+
+@layer components {
+  /* While a draft streams in, the read-only message field says so with its border
+     rather than a caret or shimmer, so there is nothing to animate. */
+  [data-contact-form] textarea[name='message'][aria-busy='true'] {
+    border-color: var(--app-violet-bright);
+    cursor: progress;
+  }
+
+  /* The panel's notes field grows with the text but never past a few lines. */
+  .ai-draft-panel textarea {
+    max-height: 12rem;
+  }
+
+  /* On phones the floating dock covers the bottom of the screen: a field or button
+     that takes focus scrolls far enough to land above it. */
+  @media (max-width: 639.98px) {
+    [data-contact-form] :is(input, textarea, select, button, a) {
+      scroll-margin-bottom: calc(var(--dock-height) + var(--dock-clearance) + 1rem);
+    }
+  }
+
+  @media (forced-colors: active) {
+    [data-contact-form] textarea[name='message'][aria-busy='true'] {
+      border-color: Highlight;
+    }
+  }
+}

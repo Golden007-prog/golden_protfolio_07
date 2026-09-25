@@ -14,7 +14,7 @@ export type DownloadCvButtonProps = {
   label?: string;
   /** Shows 'PDF · 75 KB' inside the button. */
   showMeta?: boolean;
-  /** Adds a 'View' link that opens the PDF in a new tab. */
+  /** Adds a 'View CV' link that opens the PDF in a new tab. */
   showView?: boolean;
   magnetic?: boolean;
   className?: string;
@@ -77,15 +77,17 @@ export function DownloadCvButton({
   return (
     <span className={cn('inline-flex flex-wrap items-center gap-2', className)}>
       {download}
+      {/* Button appends '(opens in new tab)', so the name reads 'View CV (PDF) (opens in new tab)'. */}
       <Button
         href={SITE.cvPath}
         external
         variant="ghost"
         size={size}
         cursor="view"
+        data-cv-view=""
         onClick={() => track('cv_view')}
       >
-        View<span className="sr-only"> CV</span>
+        View CV<span className="sr-only"> (PDF)</span>
       </Button>
     </span>
   );

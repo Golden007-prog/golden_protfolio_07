@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "engines": {
-    "node": ">=20.9"
+    "node": ">=22.18 <26"
   },
   "scripts": {
     "dev": "next dev",
@@ -24,15 +24,23 @@
     "lottie:fetch": "node scripts/fetch-lottie.mjs",
     "lottie:recolor": "node scripts/recolor-lottie.mjs",
     "glb:envelope": "node scripts/optimize-envelope.mjs",
-    "contrast": "node scripts/check-contrast.mjs"
+    "contrast": "node scripts/check-contrast.mjs",
+    "ai:corpus": "node scripts/ai/build-corpus.mjs",
+    "ai:embed": "node --env-file-if-exists=.env scripts/ai/embed-corpus.mjs",
+    "ai:generate": "node --env-file-if-exists=.env scripts/ai/run-generators.mjs",
+    "ai:review": "node scripts/ai/review.mjs",
+    "ai:recall": "node --env-file-if-exists=.env scripts/ai/recall-check.mjs",
+    "ai:scan": "node scripts/ai/secret-scan.mjs"
   },
   "dependencies": {
+    "@google/genai": "2.24.0",
     "@gsap/react": "^2.1.2",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.6.0",
     "@react-three/postprocessing": "^3.0.4",
     "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0",
+    "botid": "1.5.11",
     "clsx": "^2.1.1",
     "framer-motion": "^12.23.24",
     "gsap": "^3.15.0",
@@ -42,9 +50,11 @@
     "next": "^16.3.5",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "server-only": "^0.0.1",
     "tailwind-merge": "^3.4.0",
     "three": "^0.183.2",
-    "troika-three-text": "^0.52.4"
+    "troika-three-text": "^0.52.4",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",

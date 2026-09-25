@@ -1,0 +1,230 @@
+/* Package: ai — the shared AI kit: action spotlight, streaming caret, citation chips, thinking dots, voice and read-aloud.
+   Reduced motion keys off html[data-motion="reduced"] only (the OS setting or the in-page override). */
+
+@layer components {
+  /* Colours come in through custom properties: Tailwind gives a direct color-mix()
+     a solid fallback inside a nested @supports, which is invalid in a keyframe. */
+  @keyframes ai-spotlight {
+    0% {
+      box-shadow:
+        0 0 0 0 transparent,
+        0 0 0 0 transparent;
+    }
+    22% {
+      box-shadow:
+        0 0 0 3px var(--ai-ring),
+        0 0 0 8px var(--ai-halo);
+    }
+    100% {
+      box-shadow:
+        0 0 0 3px transparent,
+        0 0 0 20px transparent;
+    }
+  }
+
+  @keyframes ai-caret {
+    0%,
+    100% {
+      opacity: 0.25;
+    }
+    50% {
+      opacity: 0.9;
+    }
+  }
+
+  @keyframes ai-dot {
+    0%,
+    70%,
+    100% {
+      opacity: 0.3;
+      transform: translateY(0);
+    }
+    35% {
+      opacity: 1;
+      transform: translateY(-3px);
+    }
+  }
+
+  @keyframes ai-wave {
+    from {
+      transform: scaleY(0.35);
+    }
+    to {
+      transform: scaleY(1);
+    }
+  }
+
+  /* ---------- Action spotlight (useAiActionRunner) ----------
+     Starts after the scroll has mostly landed. backwards, not both: once it ends,
+     the element's own shadow (a glass card's) is back. */
+  [data-ai-spotlight] {
+    --ai-ring: color-mix(in oklab, var(--app-violet-bright) 85%, transparent);
+    --ai-halo: color-mix(in oklab, var(--app-violet-bright) 22%, transparent);
+    animation: ai-spotlight 1.4s var(--ease-out-expo) 0.35s backwards;
+  }
+  /* The pause toggle would freeze the ring on its invisible first frame. */
+  html[data-motion='reduced'] [data-ai-spotlight],
+  html[data-motion-paused] [data-ai-spotlight] {
+    animation: none;
+    box-shadow: 0 0 0 3px var(--app-focus-ring);
+  }
+  @media (forced-colors: active) {
+    [data-ai-spotlight] {
+      outline: 3px solid Highlight;
+      outline-offset: 4px;
+    }
+  }
+
+  /* ---------- StreamingText ---------- */
+  .ai-stream-text {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  .ai-caret {
+    display: inline-block;
+    width: 0.45em;
+    height: 1em;
+    margin-inline-start: 2px;
+    vertical-align: -0.15em;
+    border-radius: 2px;
+    background: var(--app-violet-bright);
+    animation: ai-caret 1.1s var(--ease-in-out) infinite;
+  }
+  html[data-motion='reduced'] .ai-caret {
+    animation: none;
+    opacity: 0.6;
+  }
+
+  /* Inline citation: a 44px hit box whose negative margins keep the line box and
+     word spacing unchanged; the visible pill is .ai-cite-pill. */
+  .ai-cite {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    margin: -12px;
+    padding: 0;
+    border: 0;
+    background: none;
+    vertical-align: middle;
+    color: var(--color-cyan-text);
+    font: 600 11px/1 var(--font-mono);
+    white-space: nowrap;
+  }
+  button.ai-cite {
+    cursor: pointer;
+  }
+  .ai-cite-pill {
+    display: inline-grid;
+    place-items: center;
+    min-width: 1.6em;
+    height: 1.6em;
+    padding-inline: 0.35em;
+    border: 1px solid var(--color-glass-border-strong);
+    border-radius: 9999px;
+    background: var(--color-surface-tint);
+    transition:
+      border-color var(--dur-quick) var(--ease-out-expo),
+      background-color var(--dur-quick) var(--ease-out-expo);
+  }
+  button.ai-cite:hover .ai-cite-pill {
+    border-color: var(--app-violet-bright);
+  }
+  button.ai-cite:focus-visible {
+    outline-offset: -11px;
+    border-radius: 9999px;
+  }
+
+  /* A text link inside small print with a 44px hit area. */
+  .ai-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    margin-block: -12px;
+    color: var(--color-text-secondary);
+    text-decoration: underline;
+    text-decoration-color: var(--color-glass-border-strong);
+    text-underline-offset: 3px;
+    transition: text-decoration-color var(--dur-quick) var(--ease-out-expo);
+  }
+  .ai-link:hover {
+    text-decoration-color: currentColor;
+  }
+
+  /* ---------- AiThinking fallback dots (static under reduced motion) ---------- */
+  .ai-dots {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .ai-dots > span {
+    width: 6px;
+    height: 6px;
+    border-radius: 9999px;
+    background: currentColor;
+    opacity: 0.3;
+    animation: ai-dot 1.2s var(--ease-in-out) infinite;
+  }
+  .ai-dots > span:nth-child(2) {
+    animation-delay: 0.15s;
+  }
+  .ai-dots > span:nth-child(3) {
+    animation-delay: 0.3s;
+  }
+  html[data-motion='reduced'] .ai-dots > span {
+    animation: none;
+    opacity: 0.6;
+    transform: none;
+  }
+
+  /* ---------- VoiceInput fallback wave ---------- */
+  .ai-wave {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    height: 16px;
+  }
+  .ai-wave > span {
+    width: 3px;
+    height: 100%;
+    border-radius: 2px;
+    background: currentColor;
+    transform-origin: center;
+    animation: ai-wave 0.8s var(--ease-in-out) infinite alternate;
+  }
+  .ai-wave > span:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+  .ai-wave > span:nth-child(3) {
+    animation-delay: 0.4s;
+  }
+  .ai-wave > span:nth-child(4) {
+    animation-delay: 0.1s;
+  }
+  html[data-motion='reduced'] .ai-wave > span {
+    animation: none;
+    transform: scaleY(0.6);
+  }
+
+  /* ---------- ReadAloud: the sentence being spoken ---------- */
+  .ai-read-mark {
+    --ai-mark: color-mix(in oklab, var(--app-violet-bright) 16%, transparent);
+    border-radius: 4px;
+    background: var(--ai-mark);
+    color: inherit;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+    transition: background-color var(--dur-base) var(--ease-out-expo);
+  }
+  @media (forced-colors: active) {
+    .ai-read-mark {
+      background: Mark;
+      color: MarkText;
+    }
+  }
+}

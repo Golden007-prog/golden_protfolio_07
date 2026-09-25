@@ -1,207 +1,201 @@
 'use client';
 
 import {
+  useCallback,
   useEffect,
   useId,
   useRef,
   useState,
+  useSyncExternalStore,
   type FormEvent,
   type KeyboardEvent as ReactKeyboardEvent,
-  type ReactNode,
   type RefObject,
 } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ArrowUpRight, MessageSquare, PenLine, Send, Sparkles, X } from 'lucide-react';
+import { MessageSquare, MessageSquarePlus, Send, Sparkles, Square, X } from 'lucide-react';
 import profile from '@/data/profile.json';
 import projects from '@/data/projects.json';
+import conciergeStore from '@/data/ai-generated/concierge.json';
+import { useAiHealth } from '@/components/ai/AiNotice';
+import { SuggestedPrompts } from '@/components/ai/SuggestedPrompts';
+import { useAiActionRunner } from '@/components/ai/useAiActionRunner';
+import { useAiStream } from '@/components/ai/useAiStream';
+import { AiBubble, BY_SLUG, RuleBubble, type BubbleHandlers } from '@/components/ai/concierge/AiMessage';
+import { CANARY_SHAPE, scrubCanary, useConversation, type AiMsg, type Msg, type RuleNote } from '@/components/ai/concierge/useConversation';
 import { LottieIcon } from '@/components/shared/LottieIcon';
 import { Button } from '@/components/ui/Button';
 import { Dialog } from '@/components/ui/Dialog';
 import { DownloadCvButton } from '@/components/ui/DownloadCvButton';
+import { useToast } from '@/components/ui/Toast';
+import { hasCaseStudy, PROJECTS } from '@/data/projects';
+import { useActiveSection } from '@/hooks/useActiveSection';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { useMotionPrefs } from '@/hooks/useMotionPrefs';
-import { emit } from '@/lib/events';
+import { takePending } from '@/lib/ai/bus';
+import { aiSession, BLOCK_STREAK, SERVER_SESSION_SNAPSHOT, SOFT_CAP } from '@/lib/ai/circuit';
+import { SHOW_UNREVIEWED } from '@/lib/ai/config';
+import { keepFollowups, startersFor, type FollowupNames, type StarterEntries } from '@/lib/ai/followups';
+import type { AiFallbackReason, AiSource, AiToolCall, AskOpenRequest, AskRequest, AskScope } from '@/lib/ai/protocol';
+import { langFor, safeLangTag } from '@/lib/ai/script';
+import { isTerminal } from '@/lib/ai/stream';
+import { stepLabel, toolAction, toolDataFrom, UNDO_PARAMS, validateToolCall, wantsNavigation } from '@/lib/ai/tools';
+import { track } from '@/lib/analytics';
+import { emit, useAppEvent } from '@/lib/events';
 import { duration, ease } from '@/lib/motion';
-import { slugify } from '@/lib/slug';
-import { answer as ask, isMultiSentence, STARTERS, type AskAnswer, type AskData } from '@/utils/askme';
-
-type Msg = { id: number; from: 'bot' | 'user'; text: string; answer?: AskAnswer };
-type Project = (typeof projects)[number];
+import { SECTIONS, type SectionId } from '@/lib/site';
+import { readUrl, setUrlParams, useUrlParam } from '@/lib/urlState';
+import { answer as ask, isMultiSentence, isRefusal, shouldEscalate, STARTERS, type AskAnswer, type AskData } from '@/utils/askme';
 
 const DATA: AskData = { profile, projects };
-const BY_SLUG = new Map<string, Project>(projects.map((p) => [slugify(p.name), p]));
+const QUESTION_MAX = 500;
+const Q_PHONE = '(max-width: 639.98px)';
+/** Below this visual-viewport height (a phone with its keyboard up) the sheet goes compact. */
+const SHORT_VIEWPORT_PX = 420;
+const STARTER_STORE = (conciergeStore as { entries?: StarterEntries }).entries ?? {};
+const CASE_STUDY_SLUGS: ReadonlySet<string> = new Set(PROJECTS.filter(hasCaseStudy).map((p) => p.slug));
+const SKILL_NAMES: readonly string[] = [...new Set(Object.values(profile.skills).flat())];
+const TOOL_DATA = toolDataFrom({
+  sections: SECTIONS,
+  projects: PROJECTS,
+  skills: profile.skills,
+});
+const FOLLOWUP_NAMES: FollowupNames = {
+  projects: PROJECTS.map((p) => p.name),
+  skills: SKILL_NAMES,
+  companies: profile.experience.map((e) => e.company),
+  sections: SECTIONS.map((s) => s.label),
+};
+// Fallbacks that mean the AI is off or out for now: the quick answers carry on.
+const RESTING: ReadonlySet<AiFallbackReason> = new Set<AiFallbackReason>(['quota', 'no-key', 'disabled', 'timeout']);
+const UNDOABLE: ReadonlySet<string> = new Set(['openProject', 'openSkill', 'setProjectFilters']);
 
-const GREETING: Msg = {
-  id: 0,
-  from: 'bot',
-  text: "Hi, I'm Oikantik's portfolio assistant. Ask about projects, skills, or how to work together.",
+/** A scope from an ask:open request, only when it names something on the site. */
+function validScope(s: unknown): AskScope | null {
+  if (!s || typeof s !== 'object') return null;
+  const x = s as Record<string, unknown>;
+  if (typeof x.project === 'string' && BY_SLUG.has(x.project)) return { project: x.project };
+  if (typeof x.skill === 'string' && SKILL_NAMES.includes(x.skill)) return { skill: x.skill };
+  if (typeof x.experience === 'number' && Number.isInteger(x.experience) && x.experience >= 0 && x.experience < profile.experience.length) {
+    return { experience: x.experience };
+  }
+  if (typeof x.section === 'string' && SECTIONS.some((sec) => sec.id === x.section)) return { section: x.section as SectionId };
+  return null;
+}
+
+function scopeLabel(scope: AskScope): string {
+  if ('project' in scope) return BY_SLUG.get(scope.project)?.name ?? scope.project;
+  if ('skill' in scope) return scope.skill;
+  if ('experience' in scope) return profile.experience[scope.experience]?.company ?? 'this role';
+  return SECTIONS.find((s) => s.id === scope.section)?.label ?? scope.section;
+}
+
+function preferredLangs(): readonly string[] {
+  return typeof navigator === 'undefined' ? [] : (navigator.languages ?? [navigator.language]);
+}
+
+type LiveAsk = {
+  id: number;
+  question: string;
+  rule: AskAnswer;
+  request: AskRequest;
+  lang: string | null;
 };
 
-const Q_PHONE = '(max-width: 639.98px)';
-// Chips and links inside answers: 36px under a mouse, 44px on touch (tap-safe-sm).
-const CHIP =
-  'tap-safe-sm inline-flex items-center gap-1 rounded-full border border-glass-border bg-glass-fill px-3 text-xs font-medium text-text-secondary ring-focus transition-colors hover:border-glass-border-strong hover:text-text-primary';
-
-function renderInline(text: string): ReactNode {
-  return text.split('\n').map((line, i) => (
-    <span key={i} className="block">
-      {line.split(/\*\*(.+?)\*\*/g).map((part, j) =>
-        j % 2 === 1 ? (
-          <strong key={j} className="font-semibold text-text-primary">
-            {part}
-          </strong>
-        ) : (
-          <span key={j}>{part}</span>
-        ),
-      )}
-    </span>
-  ));
-}
-
-function MiniProject({ slug, onShow }: { slug: string; onShow: (slug: string) => void }) {
-  const p = BY_SLUG.get(slug);
-  const [imgOk, setImgOk] = useState(true);
-  if (!p) return null;
-  return (
-    <div data-ask-project={slug} className="flex gap-3 rounded-xl border border-glass-border bg-glass-fill p-2">
-      {imgOk && p.thumbnail ? (
-        // Thumbnails are a mix of local and GitHub-hosted files, shown at 64px; next/image adds nothing here.
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={p.thumbnail}
-          alt=""
-          width={64}
-          height={48}
-          loading="lazy"
-          decoding="async"
-          referrerPolicy="no-referrer"
-          onError={() => setImgOk(false)}
-          className="h-12 w-16 shrink-0 rounded-lg object-cover"
-        />
-      ) : (
-        <span aria-hidden="true" className="h-12 w-16 shrink-0 rounded-lg bg-heat-0" />
-      )}
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-semibold leading-5 text-text-primary">{p.name}</p>
-        <p className="line-clamp-2 text-xs leading-4 text-text-muted">{p.tagline}</p>
-        <div className="mt-1.5 flex flex-wrap gap-1.5">
-          <button type="button" onClick={() => onShow(slug)} className={CHIP} data-cursor="open">
-            Show in Projects
-          </button>
-          {p.liveUrl ? (
-            <a href={p.liveUrl} target="_blank" rel="noopener noreferrer" className={CHIP}>
-              Live
-              <ArrowUpRight aria-hidden="true" className="size-3" />
-              <span className="sr-only"> demo of {p.name} (opens in new tab)</span>
-            </a>
-          ) : null}
-          <a href={p.githubUrl} target="_blank" rel="noopener noreferrer" className={CHIP}>
-            Code
-            <ArrowUpRight aria-hidden="true" className="size-3" />
-            <span className="sr-only"> of {p.name} on GitHub (opens in new tab)</span>
-          </a>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function Bubble({
-  msg,
-  onShowProject,
-  onWrite,
-}: {
-  msg: Msg;
-  onShowProject: (slug: string) => void;
-  onWrite: (draft: string) => void;
-}) {
-  const a = msg.answer;
-  const draft = a?.handoff;
-  if (msg.from === 'user') {
-    return (
-      <div className="flex justify-end">
-        <p className="max-w-[85%] whitespace-pre-wrap rounded-2xl rounded-br-md bg-violet px-3.5 py-2.5 text-sm leading-relaxed text-white">
-          <span className="sr-only">You: </span>
-          {msg.text}
-        </p>
-      </div>
-    );
-  }
-  return (
-    <div className="flex justify-start" data-ask-answer={a?.intent ?? 'greeting'}>
-      <div className="max-w-[92%] rounded-2xl rounded-bl-md border border-glass-border bg-surface-tint px-3.5 py-2.5 text-sm leading-relaxed text-text-secondary">
-        <div>{renderInline(msg.text)}</div>
-        {a && a.projects.length > 0 ? (
-          <div className="mt-2.5 grid gap-2">
-            {a.projects.map((slug) => (
-              <MiniProject key={slug} slug={slug} onShow={onShowProject} />
-            ))}
-          </div>
-        ) : null}
-        {a && (a.actions.length > 0 || draft) ? (
-          <div className="mt-2.5 flex flex-wrap gap-1.5">
-            {a.actions.map((act) =>
-              act.kind === 'cv' ? (
-                <DownloadCvButton key="cv" variant="secondary" size="sm" />
-              ) : (
-                <Button key={act.href} href={act.href} external={act.external} variant="secondary" size="sm" cursor="open">
-                  {act.label}
-                </Button>
-              ),
-            )}
-            {draft ? (
-              <Button
-                variant="primary"
-                size="sm"
-                shine={false}
-                leadingIcon={<PenLine aria-hidden="true" className="size-3.5" />}
-                onClick={() => onWrite(draft)}
-                data-ask-handoff=""
-              >
-                Write to Oikantik
-              </Button>
-            ) : null}
-          </div>
-        ) : null}
-      </div>
-    </div>
-  );
-}
+type Snapshot = Pick<ReturnType<typeof useAiStream>, 'status' | 'text' | 'meta' | 'done' | 'tools' | 'fallback' | 'ttftMs' | 'totalMs'>;
 
 type BodyProps = {
   ids: { title: string; subtitle: string; input: string };
   messages: Msg[];
+  live: AiMsg | null;
+  liveThinking: boolean;
+  liveTool: boolean;
+  freshId: number | null;
   typing: boolean;
   asked: boolean;
+  busy: boolean;
   input: string;
   setInput: (v: string) => void;
+  starters: readonly string[];
+  followUps: readonly string[];
+  scope: AskScope | null;
+  onClearScope: () => void;
+  status: { tone: 'ready' | 'resting' | 'idle'; label: string };
+  capNote: string | null;
+  canHandOff: boolean;
+  onHandOff: () => void;
   onSend: (q: string) => void;
+  onStop: () => void;
+  onNewChat: () => void;
   onClose: () => void;
-  onShowProject: (slug: string) => void;
-  onWrite: (draft: string) => void;
+  regenLeft: number;
+  handlers: BubbleHandlers;
+  announcement: string;
   logRef: RefObject<HTMLDivElement | null>;
   inputRef: RefObject<HTMLInputElement | null>;
 };
 
-function ChatBody({ ids, messages, typing, asked, input, setInput, onSend, onClose, onShowProject, onWrite, logRef, inputRef }: BodyProps) {
+function ChatBody({
+  onSend,
+  input,
+  messages,
+  status,
+  ids,
+  onNewChat,
+  asked,
+  scope,
+  onClose,
+  logRef,
+  busy,
+  freshId,
+  regenLeft,
+  handlers,
+  live,
+  liveThinking,
+  liveTool,
+  typing,
+  canHandOff,
+  onHandOff,
+  starters,
+  followUps,
+  capNote,
+  onClearScope,
+  inputRef,
+  setInput,
+  onStop,
+  announcement,
+}: BodyProps) {
   const submit = (e: FormEvent) => {
     e.preventDefault();
     onSend(input);
   };
+  const lastAi = [...messages].reverse().find((m): m is AiMsg => m.from === 'bot' && m.kind === 'ai');
+  const latestId = messages[messages.length - 1]?.id;
+  const dotClass = status.tone === 'ready' ? 'text-success' : status.tone === 'resting' ? 'text-amber-text' : 'text-text-muted';
+
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <div className="flex items-center gap-3 border-b border-hairline px-4 py-2">
+      <div className="flex items-center gap-2 border-b border-hairline py-2 pl-4 pr-2">
         <span className="grid size-9 shrink-0 place-items-center rounded-full bg-[linear-gradient(135deg,var(--app-violet),var(--app-cyan))] text-white">
           <Sparkles aria-hidden="true" className="size-4" />
         </span>
         <div className="min-w-0 flex-1">
-          <h2 id={ids.title} className="font-display text-base font-semibold leading-6 tracking-normal text-text-primary">
+          <h2
+            id={ids.title}
+            className="flex items-center gap-2 font-display text-base font-semibold leading-6 tracking-normal text-text-primary"
+          >
             Ask Oikantik
+            <span data-ask-status={status.tone} title={status.label} className={`inline-flex ${dotClass}`}>
+              <span aria-hidden="true" className="ask-status-dot size-2 rounded-full bg-current" />
+              <span className="sr-only">{status.label}</span>
+            </span>
           </h2>
           <p id={ids.subtitle} className="text-xs leading-4 text-text-muted" data-ask-subtitle="">
-            Quick answers from this site&apos;s data (not an LLM)
+            Answers from this site&apos;s data · AI-assisted for open questions
           </p>
         </div>
+        <Button variant="icon" size="md" aria-label="New chat" onClick={onNewChat} disabled={!asked && !scope} data-ask-new="">
+          <MessageSquarePlus aria-hidden="true" className="size-4" />
+        </Button>
         <Button variant="icon" size="md" aria-label="Close assistant" onClick={onClose}>
           <X aria-hidden="true" className="size-4" />
         </Button>
@@ -209,19 +203,49 @@ function ChatBody({ ids, messages, typing, asked, input, setInput, onSend, onClo
 
       <div
         ref={logRef}
-        role="log"
-        aria-live="polite"
-        aria-relevant="additions"
-        aria-label="Conversation"
         data-lenis-prevent=""
         data-ask-log=""
-        className="ask-log min-h-0 flex-1 space-y-3 overflow-y-auto px-4 py-4"
+        aria-busy={busy || undefined}
+        className="ask-log min-h-0 flex-1 overflow-y-auto px-4 py-4"
       >
-        {messages.map((m) => (
-          <Bubble key={m.id} msg={m} onShowProject={onShowProject} onWrite={onWrite} />
-        ))}
+        {/* Finished bubbles only: a streaming answer joins the log once it completes, so it is announced once. */}
+        <div
+          role="log"
+          aria-live="polite"
+          aria-relevant="additions"
+          aria-label="Conversation"
+          aria-busy={busy || undefined}
+          className="space-y-3"
+        >
+          {messages.map((m) =>
+            m.from === 'user' ? (
+              <div key={m.id} className="flex justify-end">
+                <p className="max-w-[85%] whitespace-pre-wrap rounded-2xl rounded-br-md bg-violet px-3.5 py-2.5 text-sm leading-relaxed text-white [overflow-wrap:anywhere]">
+                  <span className="sr-only">You: </span>
+                  {m.text}
+                </p>
+              </div>
+            ) : m.kind === 'ai' ? (
+              <AiBubble
+                key={m.id}
+                msg={m}
+                latest={m.id === latestId && m.id === lastAi?.id}
+                fresh={m.id === freshId}
+                regenLeft={busy ? 0 : regenLeft}
+                handlers={handlers}
+              />
+            ) : (
+              <RuleBubble key={m.id} msg={m} handlers={handlers} />
+            ),
+          )}
+        </div>
+        {live ? (
+          <div className="mt-3" data-ask-live="">
+            <AiBubble msg={live} streaming thinking={liveThinking} toolPending={liveTool} regenLeft={0} handlers={handlers} />
+          </div>
+        ) : null}
         {typing ? (
-          <div aria-hidden="true" className="flex justify-start" data-ask-typing="">
+          <div aria-hidden="true" className="mt-3 flex justify-start" data-ask-typing="">
             <span className="rounded-2xl rounded-bl-md border border-glass-border bg-surface-tint px-2 py-1">
               <LottieIcon
                 name="typing"
@@ -234,11 +258,32 @@ function ChatBody({ ids, messages, typing, asked, input, setInput, onSend, onClo
             </span>
           </div>
         ) : null}
+        {canHandOff ? (
+          <div className="mt-3 flex justify-center">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={onHandOff}
+              leadingIcon={
+                <LottieIcon
+                  name="send"
+                  play="once"
+                  lazy={false}
+                  className="block size-4"
+                  fallback={<Send aria-hidden="true" className="size-3.5" />}
+                />
+              }
+              data-ask-handoff-all=""
+            >
+              Write to Oikantik with these questions
+            </Button>
+          </div>
+        ) : null}
       </div>
 
       {!asked ? (
         <div className="flex flex-wrap gap-2 px-4 pb-3" data-ask-starters="">
-          {STARTERS.map((s) => (
+          {starters.map((s) => (
             <button
               key={s}
               type="button"
@@ -249,6 +294,31 @@ function ChatBody({ ids, messages, typing, asked, input, setInput, onSend, onClo
             </button>
           ))}
           <DownloadCvButton variant="secondary" size="md" className="text-sm" />
+        </div>
+      ) : followUps.length && !busy ? (
+        <SuggestedPrompts prompts={followUps} onPick={onSend} label="Suggested follow-up questions" className="px-4 pb-3" />
+      ) : null}
+
+      {scope || capNote ? (
+        <div className="flex flex-wrap items-center gap-2 px-4 pb-2 text-xs text-text-muted">
+          {scope ? (
+            <span
+              data-ask-scope=""
+              className="inline-flex max-w-full items-center gap-1 rounded-full border border-glass-border bg-glass-fill pl-3 text-text-secondary"
+            >
+              <span className="truncate">About: {scopeLabel(scope)}</span>
+              <Button
+                variant="icon"
+                size="sm"
+                aria-label={`Remove scope: ${scopeLabel(scope)}`}
+                onClick={onClearScope}
+                data-ask-scope-clear=""
+              >
+                <X aria-hidden="true" className="size-3.5" />
+              </Button>
+            </span>
+          ) : null}
+          {capNote ? <span data-ask-cap="">{capNote}</span> : null}
         </div>
       ) : null}
 
@@ -264,60 +334,122 @@ function ChatBody({ ids, messages, typing, asked, input, setInput, onSend, onClo
           placeholder="Ask a question…"
           autoComplete="off"
           enterKeyHint="send"
-          maxLength={200}
+          maxLength={QUESTION_MAX}
           className="tap-safe min-w-0 flex-1 rounded-full border border-glass-border-strong bg-glass-fill px-4 text-base text-text-primary ring-focus placeholder:text-text-muted"
         />
-        <Button type="submit" variant="primary" size="md" shine={false} aria-label="Send" disabled={!input.trim()} className="w-11 px-0">
-          <Send aria-hidden="true" className="size-4" />
-        </Button>
+        {busy ? (
+          <Button type="button" variant="secondary" size="md" aria-label="Stop" onClick={onStop} className="w-11 px-0" data-ask-stop="">
+            <Square aria-hidden="true" className="size-3.5 fill-current" />
+          </Button>
+        ) : (
+          <Button type="submit" variant="primary" size="md" shine={false} aria-label="Send" disabled={!input.trim()} className="w-11 px-0">
+            <Send aria-hidden="true" className="size-4" />
+          </Button>
+        )}
       </form>
+      <p className="sr-only" role="status" aria-live="polite" aria-atomic="true" data-ask-announce="">
+        {announcement}
+      </p>
     </div>
   );
 }
 
 /**
- * The site's quick-answer assistant: a launcher in the floating dock that opens a
- * non-modal panel above it, or a modal bottom sheet below 640px. Answers come from
- * src/utils/askme.ts (rule-based, from this site's own data); project answers
- * carry mini cards, and hire or project answers can hand a draft to the contact form.
+ * The site's concierge: a launcher in the floating dock that opens a non-modal
+ * panel above it, or a modal bottom sheet below 640px.
+ *
+ * Rule first: every question gets askme.answer() at once. Its deterministic
+ * answers (a project, hiring, the CV, links, roles, education, a skill) render
+ * with no AI call; open-ended, 'about' and unmatched questions, navigation
+ * requests and scoped questions go to /api/ai/ask, and any failure shows the
+ * rule answer already computed. Every bubble says which one answered.
+ *
+ * AI answers stream outside the log (so a screen reader hears each answer once,
+ * when it joins the log), arrive as verified sentences with source chips, and
+ * carry the disclosure, Markdown copy, feedback, Regenerate, the quick answer and
+ * a Details panel. A tool call runs through the action runner with an Undo. The
+ * thread lives in the session area; requests carry only the visitor's questions
+ * and the last answer's citation ids.
  */
-export function AskMeBot({ onOpenChange }: { onOpenChange?: (open: boolean) => void }) {
+export function AskMeBot({
+  onOpenChange,
+  onBusyChange,
+}: {
+  onOpenChange?: (open: boolean) => void;
+  onBusyChange?: (busy: boolean) => void;
+}) {
   const { reduce, finePointer } = useMotionPrefs();
   const isPhone = useMediaQuery(Q_PHONE);
   const [open, setOpenState] = useState(false);
-  const [messages, setMessages] = useState<Msg[]>([GREETING]);
   const [typing, setTyping] = useState(false);
   const [input, setInput] = useState('');
   const [breathe, setBreathe] = useState(true);
+  const [live, setLive] = useState<LiveAsk | null>(null);
+  const [freshId, setFreshId] = useState<number | null>(null);
+  const [announcement, setAnnouncement] = useState('');
+  const [healthWanted, setHealthWanted] = useState(false);
+
+  const conv = useConversation();
+  const stream = useAiStream('/api/ai/ask');
+  const runAction = useAiActionRunner();
+  const { toast } = useToast();
+  const health = useAiHealth(healthWanted);
+  const session = useSyncExternalStore(aiSession.subscribe, aiSession.snapshot, () => SERVER_SESSION_SNAPSHOT);
+  const activeSection = useActiveSection();
+  const openProject = useUrlParam('project');
 
   const launcherRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const logRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const timers = useRef(new Set<number>());
-  const nextId = useRef(1);
   const onOpenChangeRef = useRef(onOpenChange);
+  const onBusyChangeRef = useRef(onBusyChange);
+  const streamRef = useRef<Snapshot>(stream);
+  const messagesRef = useRef(conv.messages);
   useEffect(() => {
     onOpenChangeRef.current = onOpenChange;
+    onBusyChangeRef.current = onBusyChange;
+    streamRef.current = stream;
+    messagesRef.current = conv.messages;
   });
 
   const baseId = useId();
-  const ids = { title: `${baseId}-title`, subtitle: `${baseId}-subtitle`, input: `${baseId}-input` };
+  const ids = {
+    title: `${baseId}-title`,
+    subtitle: `${baseId}-subtitle`,
+    input: `${baseId}-input`,
+  };
   const panelId = `${baseId}-panel`;
-  const asked = messages.some((m) => m.from === 'user');
+  const asked = conv.messages.some((m) => m.from === 'user');
+  const busy = live !== null;
 
-  const later = (fn: () => void, ms: number) => {
+  const later = useCallback((fn: () => void, ms: number) => {
     const id = window.setTimeout(() => {
       timers.current.delete(id);
       fn();
     }, ms);
     timers.current.add(id);
-  };
+  }, []);
 
   useEffect(() => {
     const pending = timers.current;
     return () => pending.forEach((id) => window.clearTimeout(id));
   }, []);
+
+  useEffect(() => {
+    onBusyChangeRef.current?.(busy);
+  }, [busy]);
+
+  /** One polite status line: 'Stopped', 'Quick answer shown instead'. Never the answer itself. */
+  const say = useCallback(
+    (text: string) => {
+      setAnnouncement('');
+      later(() => setAnnouncement(text), 60);
+      later(() => setAnnouncement((cur) => (cur === text ? '' : cur)), 7000);
+    },
+    [later],
+  );
 
   const setOpen = (v: boolean) => {
     setOpenState(v);
@@ -330,25 +462,240 @@ export function AskMeBot({ onOpenChange }: { onOpenChange?: (open: boolean) => v
     if (refocus) requestAnimationFrame(() => launcherRef.current?.focus({ preventScroll: true }));
   };
 
-  const push = (m: Omit<Msg, 'id'>) => setMessages((list) => [...list, { ...m, id: nextId.current++ }]);
+  /** Phones close the sheet first, so the page underneath can scroll and take focus. */
+  const onPage = (fn: () => void) => {
+    if (isPhone && open) {
+      close(false);
+      later(fn, 120);
+    } else fn();
+  };
 
-  const send = (text: string) => {
-    const q = text.trim();
-    if (!q || typing) return;
-    const a = ask(q, DATA);
-    push({ from: 'user', text: q });
-    setInput('');
-    const reply = { from: 'bot' as const, text: a.text, answer: a };
-    // A short beat of "typing" before longer answers only; none under reduced motion.
-    if (!reduce && isMultiSentence(a.text)) {
-      setTyping(true);
-      later(() => {
-        setTyping(false);
-        push(reply);
-      }, 300 + Math.min(150, a.text.length));
-    } else {
-      push(reply);
+  const pushRule = (
+    rule: AskAnswer,
+    extra: {
+      question?: string;
+      note?: RuleNote;
+      reason?: AiFallbackReason;
+      english?: boolean;
+    } = {},
+  ) =>
+    conv.add({
+      from: 'bot',
+      kind: 'rules',
+      text: rule.text,
+      answer: rule,
+      ...extra,
+    });
+
+  /* ---- a tool call: run it, keep a step chip, offer Undo ---- */
+
+  const undoStep = (id: number) => {
+    const m = messagesRef.current.find((x): x is AiMsg => x.id === id && x.from === 'bot' && x.kind === 'ai');
+    const undo = m?.step?.undo;
+    if (!m || !undo || m.step?.undone) return;
+    setUrlParams(undo);
+    conv.update(id, (x) => (x.from === 'bot' && x.kind === 'ai' && x.step ? { ...x, step: { ...x.step, undone: true } } : x));
+    say('Undone');
+  };
+
+  const runTool = (call: AiToolCall, id: number) => {
+    const action = toolAction(call);
+    if (!action) return;
+    const params = readUrl().params;
+    const undo = UNDOABLE.has(call.name) ? Object.fromEntries(UNDO_PARAMS.map((k) => [k, params.get(k)])) : null;
+    const label = stepLabel(call, TOOL_DATA);
+    conv.update(id, (m) => (m.from === 'bot' && m.kind === 'ai' ? { ...m, step: { label, undo } } : m));
+    track('ai_tool', { feature: 'ask', intent: call.name });
+    onPage(() => {
+      runAction(action);
+      // The project dialog is modal: the toast region is the one place Undo stays reachable.
+      if (undo)
+        toast({
+          title: label.replace(/…$/, ''),
+          tone: 'info',
+          duration: 8000,
+          action: { label: 'Undo', onClick: () => undoStep(id) },
+        });
+    });
+  };
+
+  /* ---- a settled stream becomes a message ---- */
+
+  const finalize = (l: LiveAsk, s: Snapshot) => {
+    setLive(null);
+    setHealthWanted(true);
+    const english = Boolean(l.lang);
+    if (s.status === 'fallback') {
+      const reason = s.fallback?.reason ?? 'upstream';
+      if (reason === 'low-relevance' && l.rule.intent !== 'fallback') {
+        // The rules did answer; the site just has nothing more for the model to add.
+        pushRule(l.rule, { english });
+        return;
+      }
+      const note: RuleNote = RESTING.has(reason) ? 'resting' : reason === 'low-relevance' ? 'nothing' : 'unavailable';
+      pushRule(l.rule, { question: l.question, note, reason, english });
+      say(note === 'nothing' ? 'Nothing on this site covers that.' : 'Quick answer shown instead');
+      return;
     }
+    const raw = s.text;
+    const meta = s.meta;
+    const done = s.done;
+    const sources: AiSource[] = (meta?.sources ?? []).map((src) => ({
+      ...src,
+      label: scrubCanary(src.label),
+    }));
+    const known = new Set(sources.map((x) => x.id));
+    // A canary-shaped string means the answer leaked instructions: nothing of it is shown.
+    const leaked = CANARY_SHAPE.test(raw);
+    const inText = [...raw.matchAll(/\[c:([a-z]+:[\w#.-]+)\]/g)].map((m) => m[1]);
+    const cited = leaked ? [] : [...new Set(done ? done.cited : inText)].filter((id) => known.has(id));
+    const call = s.status === 'done' && !leaked ? (s.tools.map((t) => validateToolCall(t, TOOL_DATA)).find(Boolean) ?? null) : null;
+
+    if (s.status === 'stopped' && !raw.trim()) {
+      pushRule(l.rule, { question: l.question, note: 'stopped', english });
+      say('Stopped');
+      return;
+    }
+    if (s.status === 'done' && !leaked && !call && !done?.degraded && cited.length === 0 && !isRefusal(raw)) {
+      pushRule(l.rule, { question: l.question, note: 'uncited', english });
+      say('Quick answer shown instead');
+      return;
+    }
+    const lang = safeLangTag(done?.lang);
+    const id = conv.add({
+      from: 'bot',
+      kind: 'ai',
+      question: l.question,
+      request: l.request,
+      rule: l.rule,
+      text: leaked ? '' : raw,
+      status: s.status === 'stopped' ? 'stopped' : 'done',
+      sources,
+      cited,
+      dropped: done?.dropped ?? 0,
+      degraded: leaked || Boolean(done?.degraded),
+      model: scrubCanary(meta?.model ?? ''),
+      mode: meta?.mode ?? 'lexical',
+      cached: Boolean((meta as { cached?: unknown } | null)?.cached === true),
+      retrieval: meta?.retrieval ?? [],
+      usage: done?.usage,
+      ttftMs: s.ttftMs,
+      totalMs: s.totalMs,
+      followUps: leaked ? [] : keepFollowups(done?.followUps ?? [], FOLLOWUP_NAMES),
+      lang,
+      en: lang && typeof done?.alt?.en === 'string' ? done.alt.en : null,
+      requestedLang: l.lang,
+      step: null,
+    });
+    setFreshId(id);
+    if (call) runTool(call, id);
+    if (s.status === 'stopped') say('Stopped');
+  };
+
+  const finalizeRef = useRef(finalize);
+  useEffect(() => {
+    finalizeRef.current = finalize;
+  });
+
+  useEffect(() => {
+    if (!live || !isTerminal(stream.status)) return;
+    let cancelled = false;
+    // After this commit: the settled stream is read from the ref, then committed once.
+    queueMicrotask(() => {
+      if (!cancelled) finalizeRef.current(live, streamRef.current);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [live, stream.status]);
+
+  /* ---- sending ---- */
+
+  const startAi = (question: string, rule: AskAnswer, request: AskRequest, lang: string | null) => {
+    setLive({ id: -Date.now(), question, rule, request, lang });
+    track('ai_ask', { feature: 'ask', intent: rule.intent });
+    stream.start(request);
+  };
+
+  /** `scopeNow` is a scope set in this same tick (ask:open), before the re-render that would carry it here. */
+  const send = (text: string, scopeNow?: AskScope) => {
+    const q = text.trim().slice(0, QUESTION_MAX);
+    if (!q || typing || live) return;
+    const rule = ask(q, DATA);
+    const prior = conv.questions;
+    const scope = scopeNow ?? conv.scope;
+    const lang = langFor(q, preferredLangs());
+    const english = Boolean(lang && lang !== 'en');
+    conv.add({ from: 'user', text: q });
+    setInput('');
+
+    if (!shouldEscalate(q, rule, { scoped: Boolean(scope), foreign: english })) {
+      // A short beat of "typing" before longer answers only; none under reduced motion.
+      if (!reduce && isMultiSentence(rule.text)) {
+        setTyping(true);
+        later(
+          () => {
+            setTyping(false);
+            pushRule(rule, { english });
+          },
+          300 + Math.min(150, rule.text.length),
+        );
+      } else pushRule(rule, { english });
+      return;
+    }
+
+    // The circuit is open, the visit's AI answers are spent, or the server has AI off: no request.
+    const blocked = aiSession.blockReason();
+    if (blocked || (health && (!health.enabled || !health.configured))) {
+      pushRule(rule, {
+        question: q,
+        note: 'resting',
+        reason: blocked ?? 'disabled',
+        english,
+      });
+      say('Quick answer shown instead');
+      return;
+    }
+    if (aiSession.overSoftCap()) {
+      pushRule(rule, { question: q, note: 'cap', english });
+      say('Quick answer shown instead');
+      return;
+    }
+
+    const request: AskRequest = {
+      question: q,
+      ...conv.context(prior),
+      ...(scope ? { scope } : {}),
+      ...(shouldOfferTools(q, rule) ? { tools: true } : {}),
+      ...(lang && lang !== 'en' ? { lang } : {}),
+    };
+    startAi(q, rule, request, english ? lang : null);
+  };
+
+  const sendRef = useRef(send);
+  useEffect(() => {
+    sendRef.current = send;
+  });
+
+  const stop = () => {
+    if (live) stream.stop();
+  };
+
+  const regenerate = (msg: AiMsg) => {
+    if (live || typing || !conv.takeRegen()) return;
+    conv.remove(msg.id);
+    const prevCited = msg.cited.length ? msg.cited.slice(0, 12) : msg.request.prevCited;
+    startAi(msg.question, msg.rule, { ...msg.request, ...(prevCited?.length ? { prevCited } : {}) }, msg.requestedLang);
+  };
+
+  const newChat = () => {
+    if (live) stream.reset();
+    setLive(null);
+    setTyping(false);
+    setFreshId(null);
+    conv.clear();
+    say('New chat started');
+    requestAnimationFrame(() => inputRef.current?.focus({ preventScroll: true }));
   };
 
   const showProject = (slug: string) => {
@@ -359,14 +706,64 @@ export function AskMeBot({ onOpenChange }: { onOpenChange?: (open: boolean) => v
   // After the sheet's focus trap has let go, so the contact form can take focus.
   const write = (draft: string) => {
     close(false);
+    track('ai_handoff', { feature: 'ask' });
     later(() => emit('contact:prefill', { message: draft }), 60);
   };
+
+  const handOffQuestions = () => {
+    close(false);
+    track('ai_handoff', { feature: 'ask', count: conv.questions.length });
+    const message = conv.questions.map((q) => `- ${q}`).join('\n');
+    later(() => emit('contact:prefill', { message }), 60);
+  };
+
+  const openSource = (s: AiSource) => {
+    track('ai_cite_click', { feature: 'ask', intent: s.target.kind });
+    onPage(() => runAction(s.target));
+  };
+
+  const handlers: BubbleHandlers = {
+    onShowProject: showProject,
+    onWrite: write,
+    onCite: openSource,
+    onUndo: undoStep,
+    onRegenerate: regenerate,
+    caseStudySlugs: CASE_STUDY_SLUGS,
+  };
+
+  /* ---- ask:open from the rest of the site, including before the dock mounted ---- */
+
+  const openFrom = (req: AskOpenRequest) => {
+    const scope = validScope(req.scope);
+    if (scope) conv.setScope(scope);
+    setOpen(true);
+    const q = typeof req.question === 'string' ? req.question.trim().slice(0, QUESTION_MAX) : '';
+    if (!q) return;
+    // The scope goes along explicitly: the send can run before the re-render that sets it.
+    if (req.send) later(() => sendRef.current(q, scope ?? undefined), 0);
+    else setInput(q);
+  };
+  const openFromRef = useRef(openFrom);
+  useEffect(() => {
+    openFromRef.current = openFrom;
+  });
+
+  useAppEvent('ask:open', (detail) => openFromRef.current(takePending('ask') ?? detail));
+  useEffect(() => {
+    const t = window.setTimeout(() => {
+      const req = takePending('ask');
+      if (req) openFromRef.current(req);
+    }, 0);
+    return () => window.clearTimeout(t);
+  }, []);
+
+  /* ---- panel behaviour ---- */
 
   // Newest message in view.
   useEffect(() => {
     const log = logRef.current;
     if (log) log.scrollTop = log.scrollHeight;
-  }, [messages.length, typing, open]);
+  }, [conv.messages.length, typing, open, live, stream.text.length]);
 
   // Desktop: focus the field on open (fine pointers only, so no keyboard pops up).
   useEffect(() => {
@@ -381,7 +778,8 @@ export function AskMeBot({ onOpenChange }: { onOpenChange?: (open: boolean) => v
       if (panelRef.current?.contains(t) || launcherRef.current?.contains(t)) return;
       // Presses inside another overlay (a project dialog, a toast) leave the panel alone.
       if ((t as Element).closest?.('[data-dialog-root], [data-toast-region]')) return;
-      setOpen(false);
+      setOpenState(false);
+      onOpenChangeRef.current?.(false);
     };
     document.addEventListener('pointerdown', onDown, { passive: true });
     return () => document.removeEventListener('pointerdown', onDown);
@@ -396,6 +794,8 @@ export function AskMeBot({ onOpenChange }: { onOpenChange?: (open: boolean) => v
       const kb = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
       root.style.setProperty('--ask-kb', `${Math.round(kb)}px`);
       root.style.setProperty('--ask-vvh', `${Math.round(vv.height)}px`);
+      // A raised keyboard leaves ~300px: ai-concierge.css compacts the sheet so the field stays in view.
+      root.toggleAttribute('data-ask-short', vv.height < SHORT_VIEWPORT_PX);
     };
     update();
     vv.addEventListener('resize', update, { passive: true });
@@ -405,28 +805,108 @@ export function AskMeBot({ onOpenChange }: { onOpenChange?: (open: boolean) => v
       vv.removeEventListener('scroll', update);
       root.style.removeProperty('--ask-kb');
       root.style.removeProperty('--ask-vvh');
+      root.removeAttribute('data-ask-short');
     };
   }, [open, isPhone]);
 
+  // Esc: the first press stops a running answer, the next one closes the panel.
   const onPanelKeyDown = (e: ReactKeyboardEvent) => {
     if (e.key !== 'Escape' || e.nativeEvent.isComposing) return;
     e.preventDefault();
     e.stopPropagation();
-    close(true);
+    if (live) stop();
+    else close(true);
   };
+
+  // The sheet's Dialog closes on Escape unless the event was handled here first.
+  const onSheetKeyDown = (e: ReactKeyboardEvent) => {
+    if (e.key !== 'Escape' || e.nativeEvent.isComposing || !live) return;
+    e.preventDefault();
+    stop();
+  };
+
+  /* ---- derived view ---- */
+
+  const liveMsg: AiMsg | null = live
+    ? {
+        id: live.id,
+        from: 'bot',
+        kind: 'ai',
+        question: live.question,
+        request: live.request,
+        rule: live.rule,
+        text: scrubCanary(stream.text),
+        status: 'done',
+        sources: (stream.meta?.sources ?? []).map((src) => ({ ...src, label: scrubCanary(src.label) })),
+        cited: [],
+        dropped: 0,
+        degraded: false,
+        model: '',
+        mode: stream.meta?.mode ?? 'lexical',
+        cached: false,
+        retrieval: [],
+        ttftMs: null,
+        totalMs: null,
+        followUps: [],
+        lang: null,
+        en: null,
+        requestedLang: live.lang,
+        step: null,
+      }
+    : null;
+
+  const last = conv.messages[conv.messages.length - 1];
+  const followUps = last && last.from === 'bot' && last.kind === 'ai' ? last.followUps : [];
+  const starters = startersFor({
+    entries: STARTER_STORE,
+    showUnreviewed: SHOW_UNREVIEWED,
+    project: openProject,
+    section: activeSection,
+    fallback: STARTERS,
+  });
+
+  const resting = session.streak >= BLOCK_STREAK || Boolean(health && (!health.enabled || !health.configured));
+  const status: BodyProps['status'] = resting
+    ? { tone: 'resting', label: 'AI is resting; quick answers still work' }
+    : session.count > 0 || (health?.enabled && health.configured)
+      ? { tone: 'ready', label: 'AI available for open questions' }
+      : { tone: 'idle', label: 'Quick answers ready; AI for open questions' };
+  const left = Math.max(0, SOFT_CAP - session.count);
+  const capNote =
+    session.count >= SOFT_CAP - 2
+      ? left > 0
+        ? `${left} AI ${left === 1 ? 'answer' : 'answers'} left in this visit`
+        : 'AI answers are used up for this visit; quick answers still work'
+      : null;
 
   const body = (
     <ChatBody
       ids={ids}
-      messages={messages}
+      messages={conv.messages}
+      live={liveMsg}
+      liveThinking={Boolean(live) && !stream.text}
+      liveTool={Boolean(live) && stream.tools.length > 0}
+      freshId={freshId}
       typing={typing}
       asked={asked}
+      busy={busy}
       input={input}
       setInput={setInput}
+      starters={starters}
+      followUps={followUps}
+      scope={conv.scope}
+      onClearScope={() => conv.setScope(null)}
+      status={status}
+      capNote={capNote}
+      canHandOff={conv.questions.length >= 2 && !busy && !typing}
+      onHandOff={handOffQuestions}
       onSend={send}
+      onStop={stop}
+      onNewChat={newChat}
       onClose={() => close(true)}
-      onShowProject={showProject}
-      onWrite={write}
+      regenLeft={conv.regenLeft}
+      handlers={handlers}
+      announcement={announcement}
       logRef={logRef}
       inputRef={inputRef}
     />
@@ -441,14 +921,17 @@ export function AskMeBot({ onOpenChange }: { onOpenChange?: (open: boolean) => v
         aria-haspopup="dialog"
         aria-expanded={open}
         aria-controls={open && !isPhone ? panelId : undefined}
+        aria-busy={busy || undefined}
         data-ask-launcher=""
+        data-busy={busy ? '' : undefined}
         data-breathe={breathe && !reduce ? '' : undefined}
         onAnimationEnd={() => setBreathe(false)}
         onClick={() => (open ? close(true) : setOpen(true))}
         onKeyDown={open && !isPhone ? onPanelKeyDown : undefined}
-        className="ask-launcher grid size-14 shrink-0 place-items-center rounded-full bg-[linear-gradient(135deg,var(--app-violet),color-mix(in_oklab,var(--app-violet)_60%,var(--app-violet-bright)))] text-white ring-focus transition-[filter] duration-200 ease-out hover:brightness-110"
+        className="ask-launcher relative grid size-14 shrink-0 place-items-center rounded-full bg-[linear-gradient(135deg,var(--app-violet),color-mix(in_oklab,var(--app-violet)_60%,var(--app-violet-bright)))] text-white ring-focus transition-[filter] duration-200 ease-out hover:brightness-110"
       >
         {open ? <X aria-hidden="true" className="size-5" /> : <MessageSquare aria-hidden="true" className="size-5" />}
+        {busy && !open ? <span aria-hidden="true" className="ask-launcher-busy" /> : null}
       </button>
 
       <AnimatePresence>
@@ -464,8 +947,18 @@ export function AskMeBot({ onOpenChange }: { onOpenChange?: (open: boolean) => v
             data-ask-panel=""
             onKeyDown={onPanelKeyDown}
             initial={{ opacity: 0, y: 12, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1, transition: { duration: duration.base, ease: ease.out } }}
-            exit={{ opacity: 0, y: 8, scale: 0.98, transition: { duration: 0.2, ease: ease.in } }}
+            animate={{
+              opacity: 1,
+              y: 0,
+              scale: 1,
+              transition: { duration: duration.base, ease: ease.out },
+            }}
+            exit={{
+              opacity: 0,
+              y: 8,
+              scale: 0.98,
+              transition: { duration: 0.2, ease: ease.in },
+            }}
             style={{ transformOrigin: '100% 100%' }}
             className="ask-panel glass-strong glass-keep flex flex-col overflow-clip"
           >
@@ -482,10 +975,15 @@ export function AskMeBot({ onOpenChange }: { onOpenChange?: (open: boolean) => v
         describedBy={ids.subtitle}
         panelClassName="ask-sheet"
       >
-        <div data-ask-sheet="" className="h-full">
+        <div data-ask-sheet="" className="h-full" onKeyDown={onSheetKeyDown}>
           {body}
         </div>
       </Dialog>
     </>
   );
+}
+
+/** Declarations cost about 500 input tokens, so they go only with a navigation request the rules can't carry out. */
+function shouldOfferTools(question: string, rule: AskAnswer): boolean {
+  return rule.intent !== 'cv' && wantsNavigation(question);
 }
