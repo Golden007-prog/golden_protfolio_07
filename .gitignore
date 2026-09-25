@@ -36,3 +36,17 @@ yarn-error.log*
 # editor
 .idea/
 .vscode/
+
+# local tooling and source material kept out of the repo
+.venv/
+meshy/
+linkedin-mcp/
+img/
+cv/
+*.bundle
+.claude-flow/
+scripts/*.log
+
+# playwright
+test-results/
+playwright-report/

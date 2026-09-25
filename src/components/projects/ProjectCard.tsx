@@ -1,193 +1,198 @@
-import { useRef, useState } from 'react';
-import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
-import { ArrowUpRight, Github, ExternalLink } from 'lucide-react';
-import { GlassCard } from '../shared/GlassCard';
-import { useDeviceCapability } from '../../hooks/useDeviceCapability';
+'use client';
 
-export type Project = {
-  name: string;
-  slug: string;
-  shortDescription: string;
-  fullDescription: string;
-  tagline: string;
-  category: string;
-  featured: boolean;
-  language: string;
-  techStack: string[];
-  topics: string[];
-  githubUrl: string;
-  liveUrl: string | null;
-  thumbnail: string;
-  stars: number;
-  demoVideo?: string;
-  problem?: string;
-  solution?: string;
-  challenges?: { challenge: string; solution: string }[];
-  lessons?: string;
-  metrics?: { value: string; label: string }[];
+import { memo, useRef, useState } from 'react';
+import { flushSync } from 'react-dom';
+import { motion } from 'framer-motion';
+import { ExternalLink, Github, Sparkles } from 'lucide-react';
+import { GlassCard } from '@/components/shared/GlassCard';
+import { LottieIcon } from '@/components/shared/LottieIcon';
+import { Button } from '@/components/ui/Button';
+import type { BentoSize, Project } from '@/data/projects';
+import { useRenderCount } from '@/lib/devRenderCount';
+import { cn } from '@/utils/cn';
+import { mediaLayoutId, ProjectImage, titleLayoutId } from './ProjectImage';
+
+
+type Props = {
+  project: Project;
+  size?: BentoSize;
+  onOpen: (slug: string) => void;
+  /** This card's project is showing in the dialog. */
+  isOpen?: boolean;
+  /** From the section's one capability read. */
+  allowVideo: boolean;
+  isTouch: boolean;
+  /** Shared-element ids for the morph; off under reduced motion. */
+  morph: boolean;
 };
 
-type Props = { project: Project; onOpen: (p: Project) => void };
+const SIZES: Record<BentoSize, string> = {
+  lead: '(min-width: 1024px) 60vw, 100vw',
+  wide: '(min-width: 768px) 50vw, 100vw',
+  normal: '(min-width: 1024px) 30vw, (min-width: 768px) 50vw, 100vw',
+};
 
-export function ProjectCard({ project, onOpen }: Props) {
-  const base = '/';
-  const thumb = project.thumbnail.startsWith('/') ? base + project.thumbnail.slice(1) : project.thumbnail;
-  const [hovered, setHovered] = useState(false);
-  const { isTouch } = useDeviceCapability();
-  // Touch devices never fire hover, so the artwork would stay hidden forever.
-  const revealed = hovered || isTouch;
-  const videoRef = useRef<HTMLVideoElement>(null);
+const TECH_SHOWN: Record<BentoSize, number> = { lead: 6, wide: 5, normal: 4 };
+
+export const openButtonId = (slug: string) => `project-open-${slug}`;
+
+/**
+ * One project in the grid. The title is a button stretched over the whole card
+ * (after:absolute), so the card has one tab stop that opens the dialog, while the
+ * Live demo and Code links sit above it (z-10) as separate, real links.
+ */
+export const ProjectCard = memo(function ProjectCard({
+  project,
+  size = 'normal',
+  onOpen,
+  isOpen = false,
+  allowVideo,
+  isTouch,
+  morph,
+}: Props) {
+  useRenderCount('ProjectCard');
   const cardRef = useRef<HTMLDivElement>(null);
+  const [hovered, setHovered] = useState(false);
+  const [focused, setFocused] = useState(false);
+  const [pressed, setPressed] = useState(false);
+  const lead = size === 'lead';
+  const shownTech = project.techStack.slice(0, TECH_SHOWN[size]);
+  const extraTech = project.techStack.length - shownTech.length;
 
-  const mx = useMotionValue(0);
-  const my = useMotionValue(0);
-  const sprX = useSpring(mx, { stiffness: 180, damping: 18 });
-  const sprY = useSpring(my, { stiffness: 180, damping: 18 });
-  const rotateY = useTransform(sprX, [-0.5, 0.5], [-8, 8]);
-  const rotateX = useTransform(sprY, [-0.5, 0.5], [6, -6]);
-
-  const onMove = (e: React.MouseEvent) => {
-    const el = cardRef.current;
-    if (!el) return;
-    const r = el.getBoundingClientRect();
-    mx.set((e.clientX - r.left) / r.width - 0.5);
-    my.set((e.clientY - r.top) / r.height - 0.5);
-  };
-
-  const onEnter = () => {
-    setHovered(true);
-    if (project.demoVideo && videoRef.current) {
-      videoRef.current.currentTime = 0;
-      void videoRef.current.play().catch(() => {});
-    }
-  };
-  const onLeave = () => {
-    setHovered(false);
-    mx.set(0);
-    my.set(0);
-    if (videoRef.current) {
-      videoRef.current.pause();
-    }
+  const open = () => {
+    // Commit the untilted card first, so the morph starts from its true rectangle.
+    flushSync(() => setPressed(true));
+    onOpen(project.slug);
   };
 
   return (
-    <motion.div
+    <GlassCard
+      as="article"
       ref={cardRef}
-      onClick={() => onOpen(project)}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          onOpen(project);
-        }
+      strong
+      spotlight
+      tilt={pressed || isOpen ? false : 4}
+      blur="none"
+      data-project-card={project.slug}
+      aria-labelledby={openButtonId(project.slug)}
+      className={cn('project-card group flex h-full flex-col', project.featured && 'featured-card')}
+      onPointerEnter={() => setHovered(true)}
+      onPointerLeave={() => {
+        setHovered(false);
+        setPressed(false);
       }}
-      onMouseEnter={onEnter}
-      onMouseMove={onMove}
-      onMouseLeave={onLeave}
-      onFocus={onEnter}
-      onBlur={onLeave}
-      whileHover={{ y: -8 }}
-      style={{
-        transformPerspective: 1200,
-        rotateX,
-        rotateY,
-        transformStyle: 'preserve-3d',
+      onFocus={() => setFocused(true)}
+      onBlur={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setFocused(false);
       }}
-      role="button"
-      tabIndex={0}
-      aria-label={`Open ${project.name} details`}
-      className={`text-left w-full group cursor-pointer relative ${project.featured ? 'featured-card' : ''}`}
     >
-      <GlassCard strong className="overflow-hidden h-full flex flex-col transition-all duration-500 group-hover:border-violet-bright/30 group-hover:shadow-[0_16px_60px_rgba(124,58,237,0.25)]">
-        <div className="relative aspect-[16/10] overflow-hidden">
-          <img
-            src={thumb}
-            alt={project.name}
-            loading="lazy"
-            className={`w-full h-full object-cover transition-all duration-700 ${
-              revealed ? 'opacity-100 scale-105' : 'opacity-0 scale-100'
-            }`}
-          />
-          {project.demoVideo && (
-            <video
-              ref={videoRef}
-              muted
-              loop
-              playsInline
-              preload="none"
-              poster={thumb}
-              className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${hovered ? 'opacity-100' : 'opacity-0'}`}
-            >
-              <source src={project.demoVideo.startsWith('/') ? base + project.demoVideo.slice(1) : project.demoVideo} type="video/mp4" />
-            </video>
-          )}
-          <div
-            className={`absolute inset-0 transition-opacity duration-500 pointer-events-none ${revealed ? 'opacity-0' : 'opacity-100'}`}
-            style={{
-              background:
-                'radial-gradient(circle at 30% 20%, rgba(168,85,247,0.35), transparent 55%), radial-gradient(circle at 70% 80%, rgba(34,211,238,0.25), transparent 55%)',
-            }}
-          />
-          <div className={`absolute inset-0 bg-gradient-to-t from-bg-elevated via-bg-elevated/40 to-transparent transition-opacity duration-500 ${revealed ? 'opacity-40' : 'opacity-100'}`} />
-          <div className="absolute top-3 left-3 flex items-center gap-2">
-            <span className="font-mono text-[10px] uppercase tracking-widest px-2 py-1 rounded-full glass text-cyan-bright">
-              {project.category}
-            </span>
-            {project.featured && (
-              <span className="font-mono text-[10px] uppercase tracking-widest px-2 py-1 rounded-full bg-violet-bright/20 text-violet-bright border border-violet-bright/40">
-                Featured
-              </span>
-            )}
-          </div>
-          <ArrowUpRight className="absolute top-3 right-3 text-text-muted group-hover:text-violet-bright transition-colors" size={18} />
-        </div>
+      <ProjectImage
+        project={project}
+        sizes={SIZES[size]}
+        loop={isTouch ? 'inView' : 'hover'}
+        active={hovered || focused}
+        allowVideo={allowVideo}
+        reveal
+        parallax={lead}
+        layoutId={morph ? mediaLayoutId(project.slug) : undefined}
+        className={cn('aspect-[16/10] w-full shrink-0', lead && 'lg:aspect-auto lg:min-h-72 lg:flex-1')}
+      />
 
-        <div className="p-5 flex flex-col flex-1">
-          <h3 className="font-display text-xl font-semibold text-text-primary group-hover:text-violet-bright transition-colors">
-            {project.name}
-          </h3>
-          <p className="mt-1 font-mono text-[11px] uppercase tracking-wider text-cyan-bright/80">
-            {project.tagline}
+      <div className="pointer-events-none absolute left-3 top-3 flex flex-wrap items-center gap-2">
+        <span className="rounded-full border border-glass-border bg-bg-surface/90 px-2.5 py-1 font-mono text-[11px] text-text-secondary">
+          {project.category} · {project.language}
+        </span>
+        {project.featured ? (
+          <span className="inline-flex items-center gap-1 rounded-full border border-glass-border bg-bg-surface/90 py-1 pl-1.5 pr-2.5 font-mono text-[11px] text-text-primary">
+            <LottieIcon
+              name="sparkle"
+              play="hover"
+              loop={false}
+              lazy="idle"
+              hoverTargetRef={cardRef}
+              className="block size-4 shrink-0"
+              fallback={<Sparkles aria-hidden="true" className="size-3.5 text-violet-bright" />}
+            />
+            Featured
+          </span>
+        ) : null}
+      </div>
+
+      <div className={cn('flex flex-1 flex-col p-5 sm:p-6', lead && 'lg:flex-none lg:p-8')}>
+        <h3 className={cn('font-display font-semibold text-text-primary', lead ? 'text-h3' : 'text-xl')}>
+          <button
+            type="button"
+            id={openButtonId(project.slug)}
+            aria-haspopup="dialog"
+            data-cursor="view"
+            onClick={open}
+            className={cn(
+              'text-left outline-none transition-colors duration-300 group-hover:text-violet-bright',
+              "after:absolute after:inset-0 after:z-[1] after:rounded-[inherit] after:content-['']",
+              'focus-visible:after:outline-2 focus-visible:after:-outline-offset-2 focus-visible:after:outline-focus-ring focus-visible:after:outline-solid',
+            )}
+          >
+            <motion.span layoutId={morph ? titleLayoutId(project.slug) : undefined} className="inline-block">
+              {project.name}
+            </motion.span>
+          </button>
+        </h3>
+        <p className="mt-1.5 text-sm leading-snug text-cyan-text">{project.tagline}</p>
+
+        {lead && project.problem ? (
+          <p className="mt-5 hidden border-l-2 border-violet-bright/60 pl-4 text-lead text-text-secondary md:block">
+            {project.problem}
           </p>
-          <p className="mt-3 text-sm text-text-muted line-clamp-3 leading-relaxed">
-            {project.shortDescription}
-          </p>
+        ) : null}
+        {lead && project.solution ? (
+          <p className="mt-3 hidden text-sm leading-relaxed text-text-secondary lg:block">{project.solution}</p>
+        ) : null}
+        <p className={cn('mt-3 text-sm leading-relaxed text-text-muted', lead ? 'line-clamp-4' : 'line-clamp-3')}>
+          {project.shortDescription}
+        </p>
 
-          <div className="mt-4 flex flex-wrap gap-1.5">
-            {project.techStack.slice(0, 4).map((t) => (
-              <span key={t} className="px-2 py-0.5 rounded text-[10px] bg-white/5 text-text-muted border border-white/5">
-                {t}
-              </span>
-            ))}
-            {project.techStack.length > 4 && (
-              <span className="px-2 py-0.5 text-[10px] text-text-dim">+{project.techStack.length - 4}</span>
-            )}
-          </div>
-
-          <div className="mt-auto pt-4 flex items-center gap-2 text-xs">
-            {project.liveUrl && (
-              <a
-                href={project.liveUrl}
-                target="_blank"
-                rel="noreferrer"
-                onClick={(e) => e.stopPropagation()}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-violet-bright to-cyan-bright text-white font-medium text-[11px] hover:shadow-[0_0_20px_rgba(168,85,247,0.45)] transition-shadow"
-              >
-                <ExternalLink size={11} /> Live Demo
-              </a>
-            )}
-            <a
-              href={project.githubUrl}
-              target="_blank"
-              rel="noreferrer"
-              onClick={(e) => e.stopPropagation()}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-white/[0.08] text-text-muted hover:text-text-primary hover:border-white/20 text-[11px] transition-colors"
+        <ul className="mt-4 flex flex-wrap gap-1.5" aria-label="Technologies">
+          {shownTech.map((t) => (
+            <li
+              key={t}
+              className="rounded-md border border-hairline bg-surface-tint px-2 py-0.5 text-[11px] leading-5 text-text-muted"
             >
-              <Github size={11} /> Code
-            </a>
-            <span className="ml-auto font-mono text-[10px] text-text-dim">{project.language}</span>
-          </div>
+              {t}
+            </li>
+          ))}
+          {extraTech > 0 ? (
+            <li className="px-1 text-[11px] leading-5 text-text-dim">
+              +{extraTech}
+              <span className="sr-only"> more</span>
+            </li>
+          ) : null}
+        </ul>
+
+        <div className="mt-auto flex flex-wrap items-center gap-2 pt-5">
+          {project.liveUrl ? (
+            <Button
+              href={project.liveUrl}
+              size="sm"
+              variant="primary"
+              cursor="open"
+              leadingIcon={<ExternalLink aria-hidden="true" className="size-3.5" />}
+              className="z-10"
+            >
+              Live demo<span className="sr-only"> of {project.name}</span>
+            </Button>
+          ) : null}
+          <Button
+            href={project.githubUrl}
+            size="sm"
+            variant="secondary"
+            cursor="open"
+            leadingIcon={<Github aria-hidden="true" className="size-3.5" />}
+            className="z-10"
+          >
+            Code<span className="sr-only"> for {project.name}</span>
+          </Button>
         </div>
-      </GlassCard>
-    </motion.div>
+      </div>
+    </GlassCard>
   );
-}
+});

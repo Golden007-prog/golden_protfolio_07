@@ -1,0 +1,51 @@
+/* Package: skills — skills sphere, constellation, tools marquee. */
+
+@layer components {
+  /* Constellation stars bob a few pixels; a still sky under reduced motion or the pause switch. */
+  .skills-drift {
+    animation: skills-drift 8s var(--ease-in-out) infinite;
+  }
+  html[data-motion='reduced'] .skills-drift,
+  html[data-motion-paused] .skills-drift {
+    animation: none;
+  }
+
+  /* Below 640px the category radios scroll sideways; the edges fade instead of cutting a chip. */
+  @media (max-width: 639.98px) {
+    .skills-filter-scroller {
+      -webkit-mask-image: linear-gradient(to right, transparent 0, #000 1.25rem, #000 calc(100% - 1.25rem), transparent 100%);
+      mask-image: linear-gradient(to right, transparent 0, #000 1.25rem, #000 calc(100% - 1.25rem), transparent 100%);
+    }
+  }
+
+  /* The sphere takes horizontal drags; vertical swipes still scroll the page. */
+  .skills-sphere {
+    touch-action: pan-y;
+    cursor: grab;
+  }
+  .skills-sphere[data-dragging] {
+    cursor: grabbing;
+  }
+  .skills-sphere[data-node-hover] {
+    cursor: pointer;
+  }
+
+  /* The tools marquee fades out at the card edges instead of cutting items. */
+  .skills-tools-marquee {
+    -webkit-mask-image: linear-gradient(to right, transparent 0, #000 2rem, #000 calc(100% - 2rem), transparent 100%);
+    mask-image: linear-gradient(to right, transparent 0, #000 2rem, #000 calc(100% - 2rem), transparent 100%);
+  }
+
+  @keyframes skills-drift {
+    0%,
+    100% {
+      transform: translate3d(0, 0, 0);
+    }
+    33% {
+      transform: translate3d(2px, -3px, 0);
+    }
+    66% {
+      transform: translate3d(-2px, 2px, 0);
+    }
+  }
+}

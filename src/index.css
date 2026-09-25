@@ -1,93 +1,168 @@
 @import "tailwindcss";
+@import "./styles/features/shell.css";
+@import "./styles/features/hero.css";
+@import "./styles/features/story.css";
+@import "./styles/features/skills.css";
+@import "./styles/features/projects.css";
+@import "./styles/features/contact.css";
+@import "./styles/features/platform.css";
 
 /* ============================
    Theme tokens (swap via [data-theme="light"])
+   Layered so feature stylesheets (e.g. print) can override them.
+   Text tokens are checked by scripts/check-contrast.mjs; keep them as #RRGGBB.
    ============================ */
-:root {
-  /* Dark (default) */
-  --app-bg-base: #060609;
-  --app-bg-surface: #0D0D14;
-  --app-bg-elevated: #111118;
-  --app-bg-sunken: #0A0A10;
-  --app-bg-footer: #050508;
+@layer theme {
+  :root {
+    color-scheme: dark;
 
-  --app-glass-fill: rgba(255, 255, 255, 0.03);
-  --app-glass-fill-strong: rgba(255, 255, 255, 0.06);
-  --app-glass-border: rgba(255, 255, 255, 0.08);
-  --app-glass-border-strong: rgba(255, 255, 255, 0.14);
-  --app-glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-  --app-glass-shadow-strong: 0 24px 64px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    /* Dark (default) */
+    --app-bg-base: #060609;
+    --app-bg-surface: #0D0D14;
+    --app-bg-elevated: #111118;
+    --app-bg-sunken: #0A0A10;
+    --app-bg-footer: #050508;
 
-  --app-text-primary: #FAFAFA;
-  --app-text-secondary: #CBD5E1;
-  --app-text-muted: #94A3B8;
-  --app-text-dim: #64748B;
+    --app-glass-fill: rgba(255, 255, 255, 0.03);
+    --app-glass-fill-strong: rgba(255, 255, 255, 0.06);
+    --app-glass-fill-dense: rgba(13, 13, 20, 0.86);
+    --app-glass-fill-strong-dense: rgba(17, 17, 24, 0.94);
+    --app-glass-border: rgba(255, 255, 255, 0.08);
+    --app-glass-border-strong: rgba(255, 255, 255, 0.14);
+    --app-glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    --app-glass-shadow-strong: 0 24px 64px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    --app-glass-sheen: rgba(168, 85, 247, 0.14);
 
-  /* Accent tokens — desaturated variants used in light mode */
-  --app-violet: #7C3AED;
-  --app-violet-bright: #A855F7;
-  --app-cyan: #06B6D4;
-  --app-cyan-bright: #22D3EE;
-  --app-amber: #F59E0B;
-  --app-pink: #EC4899;
+    --app-text-primary: #FAFAFA;
+    --app-text-secondary: #CBD5E1;
+    --app-text-muted: #94A3B8;
+    --app-text-dim: #8491A7;
 
-  --app-selection-bg: rgba(124, 58, 237, 0.45);
-  --app-selection-fg: #FAFAFA;
-  --app-scroll-thumb: linear-gradient(180deg, #7C3AED, #06B6D4);
-  --app-scroll-thumb-hover: linear-gradient(180deg, #A855F7, #22D3EE);
+    /* Text-safe accents and state colours (AA on every surface) */
+    --app-cyan-text: #22D3EE;
+    --app-amber-text: #F59E0B;
+    --app-positive: #34D399;
+    --app-negative: #FB7185;
+    --app-success: #34D399;
+    --app-danger: #FB7185;
+    --app-focus-ring: #C084FC;
 
-  --app-aurora:
-    radial-gradient(ellipse at 20% 50%, rgba(124, 58, 237, 0.18), transparent 55%),
-    radial-gradient(ellipse at 80% 20%, rgba(6, 182, 212, 0.12), transparent 55%),
-    radial-gradient(ellipse at 50% 85%, rgba(236, 72, 153, 0.09), transparent 55%);
+    /* Hairlines and quiet fills */
+    --app-hairline: rgba(255, 255, 255, 0.06);
+    --app-surface-tint: rgba(255, 255, 255, 0.04);
+    --app-heat-0: rgba(255, 255, 255, 0.05);
 
-  --app-bokeh-opacity: 0.25;
-  --app-noise-opacity: 0.04;
-  --app-noise-blend: overlay;
-}
+    /* Accent tokens — desaturated variants used in light mode */
+    --app-violet: #7C3AED;
+    --app-violet-bright: #A855F7;
+    --app-cyan: #06B6D4;
+    --app-cyan-bright: #22D3EE;
+    --app-amber: #F59E0B;
+    --app-pink: #EC4899;
 
-:root[data-theme="light"] {
-  /* Warm cream — not pure white */
-  --app-bg-base: #F7F5F0;
-  --app-bg-surface: #FFFFFF;
-  --app-bg-elevated: #EDE9E0;
-  --app-bg-sunken: #EDE9E0;
-  --app-bg-footer: #E8E2D2;
+    --app-glow-violet: 0 0 40px rgba(124, 58, 237, 0.35);
+    --app-glow-cyan: 0 0 40px rgba(6, 182, 212, 0.30);
 
-  /* Inverted glass: white tint on warm cream, dark hairline */
-  --app-glass-fill: rgba(255, 255, 255, 0.68);
-  --app-glass-fill-strong: rgba(255, 255, 255, 0.86);
-  --app-glass-border: rgba(20, 20, 30, 0.08);
-  --app-glass-border-strong: rgba(20, 20, 30, 0.16);
-  --app-glass-shadow: 0 1px 2px rgba(20, 20, 30, 0.04), 0 8px 24px rgba(20, 20, 30, 0.06);
-  --app-glass-shadow-strong: 0 4px 16px rgba(20, 20, 30, 0.08), 0 24px 48px rgba(20, 20, 30, 0.08);
+    --app-selection-bg: rgba(124, 58, 237, 0.45);
+    --app-selection-fg: #FAFAFA;
+    --app-scroll-thumb: linear-gradient(180deg, #7C3AED, #06B6D4);
+    --app-scroll-thumb-hover: linear-gradient(180deg, #A855F7, #22D3EE);
+    --app-scrollbar-thumb: rgba(168, 85, 247, 0.45);
 
-  /* High-contrast type — body at #2A2A33 not #71717A */
-  --app-text-primary: #0F0F14;
-  --app-text-secondary: #2A2A33;
-  --app-text-muted: #55555F;
-  --app-text-dim: #7C7C86;
+    --app-aurora:
+      radial-gradient(ellipse at 20% 50%, rgba(124, 58, 237, 0.18), transparent 55%),
+      radial-gradient(ellipse at 80% 20%, rgba(6, 182, 212, 0.12), transparent 55%),
+      radial-gradient(ellipse at 50% 85%, rgba(236, 72, 153, 0.09), transparent 55%);
 
-  --app-selection-bg: rgba(109, 40, 217, 0.22);
-  --app-selection-fg: #0F0F14;
-  --app-scroll-thumb: linear-gradient(180deg, #6D28D9, #0891B2);
-  --app-scroll-thumb-hover: linear-gradient(180deg, #5B21B6, #0E7490);
+    --app-bokeh-opacity: 0.25;
+    --app-noise-opacity: 0.04;
+    --app-noise-blend: overlay;
 
-  --app-aurora:
-    radial-gradient(ellipse at 20% 50%, rgba(109, 40, 217, 0.05), transparent 55%),
-    radial-gradient(ellipse at 80% 20%, rgba(8, 145, 178, 0.04), transparent 55%);
+    /* Layout */
+    --section-space: clamp(5rem, 10vw, 9rem);
+    --container-max: 1440px;
+    --nav-offset: 88px;
+    --dock-height: 56px;
+    --dock-clearance: calc(1.5rem + env(safe-area-inset-bottom));
 
-  --app-bokeh-opacity: 0;
-  --app-noise-opacity: 0;
-  --app-noise-blend: normal;
+    /* Stacking */
+    --z-dock: 45;
+    --z-nav: 50;
+    --z-overlay: 60;
+    --z-toast: 70;
+    --z-cursor: 80;
 
-  /* Desaturated accents for light mode */
-  --app-violet: #6D28D9;
-  --app-violet-bright: #7C3AED;
-  --app-cyan: #0891B2;
-  --app-cyan-bright: #0E7490;
-  --app-amber: #D97706;
-  --app-pink: #DB2777;
+    /* Motion durations (mirrors src/lib/motion.ts; eases live in @theme) */
+    --dur-quick: 160ms;
+    --dur-base: 420ms;
+    --dur-reveal: 900ms;
+    --dur-hero: 1200ms;
+  }
+
+  :root[data-theme="light"] {
+    color-scheme: light;
+
+    /* Warm cream — not pure white */
+    --app-bg-base: #F7F5F0;
+    --app-bg-surface: #FFFFFF;
+    --app-bg-elevated: #EDE9E0;
+    --app-bg-sunken: #EDE9E0;
+    --app-bg-footer: #E8E2D2;
+
+    /* Inverted glass: white tint on warm cream, dark hairline */
+    --app-glass-fill: rgba(255, 255, 255, 0.68);
+    --app-glass-fill-strong: rgba(255, 255, 255, 0.86);
+    --app-glass-fill-dense: rgba(255, 255, 255, 0.92);
+    --app-glass-fill-strong-dense: rgba(255, 255, 255, 0.97);
+    --app-glass-border: rgba(20, 20, 30, 0.08);
+    --app-glass-border-strong: rgba(20, 20, 30, 0.16);
+    --app-glass-shadow: 0 1px 2px rgba(20, 20, 30, 0.04), 0 8px 24px rgba(20, 20, 30, 0.06);
+    --app-glass-shadow-strong: 0 4px 16px rgba(20, 20, 30, 0.08), 0 24px 48px rgba(20, 20, 30, 0.08);
+    --app-glass-sheen: rgba(124, 58, 237, 0.08);
+
+    /* High-contrast type — body at #2A2A33 not #71717A */
+    --app-text-primary: #0F0F14;
+    --app-text-secondary: #2A2A33;
+    --app-text-muted: #55555F;
+    --app-text-dim: #5F5F69;
+
+    --app-cyan-text: #0B6B85;
+    --app-amber-text: #A3480A;
+    --app-positive: #046C4E;
+    --app-negative: #BE123C;
+    --app-success: #046C4E;
+    --app-danger: #BE123C;
+    --app-focus-ring: #6D28D9;
+
+    --app-hairline: rgba(20, 20, 30, 0.08);
+    --app-surface-tint: rgba(20, 20, 30, 0.035);
+    --app-heat-0: rgba(20, 20, 30, 0.07);
+
+    --app-glow-violet: 0 4px 18px rgba(10, 10, 15, 0.08);
+    --app-glow-cyan: 0 4px 18px rgba(10, 10, 15, 0.08);
+
+    --app-selection-bg: rgba(109, 40, 217, 0.22);
+    --app-selection-fg: #0F0F14;
+    --app-scroll-thumb: linear-gradient(180deg, #6D28D9, #0891B2);
+    --app-scroll-thumb-hover: linear-gradient(180deg, #5B21B6, #0E7490);
+    --app-scrollbar-thumb: rgba(109, 40, 217, 0.4);
+
+    --app-aurora:
+      radial-gradient(ellipse at 20% 50%, rgba(109, 40, 217, 0.05), transparent 55%),
+      radial-gradient(ellipse at 80% 20%, rgba(8, 145, 178, 0.04), transparent 55%);
+
+    --app-bokeh-opacity: 0;
+    --app-noise-opacity: 0;
+    --app-noise-blend: normal;
+
+    /* Desaturated accents for light mode */
+    --app-violet: #6D28D9;
+    --app-violet-bright: #7C3AED;
+    --app-cyan: #0891B2;
+    --app-cyan-bright: #0E7490;
+    --app-amber: #D97706;
+    --app-pink: #DB2777;
+  }
 }
 
 @theme {
@@ -95,6 +170,8 @@
   --color-bg-base: var(--app-bg-base);
   --color-bg-surface: var(--app-bg-surface);
   --color-bg-elevated: var(--app-bg-elevated);
+  --color-bg-sunken: var(--app-bg-sunken);
+  --color-bg-footer: var(--app-bg-footer);
 
   /* Glass */
   --color-glass-fill: var(--app-glass-fill);
@@ -110,389 +187,419 @@
   --color-amber: var(--app-amber);
   --color-pink: var(--app-pink);
 
-  /* Surface extras */
-  --color-bg-sunken: var(--app-bg-sunken);
-  --color-bg-footer: var(--app-bg-footer);
-
   /* Text */
   --color-text-primary: var(--app-text-primary);
   --color-text-secondary: var(--app-text-secondary);
   --color-text-muted: var(--app-text-muted);
   --color-text-dim: var(--app-text-dim);
+  --color-cyan-text: var(--app-cyan-text);
+  --color-amber-text: var(--app-amber-text);
 
-  /* Fonts */
-  --font-display: 'Clash Display', 'Cabinet Grotesk', system-ui, sans-serif;
-  --font-body: 'Satoshi', 'General Sans', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', 'Space Mono', ui-monospace, monospace;
-  --font-elegant: 'Cormorant Garamond', 'Instrument Serif', serif;
+  /* State */
+  --color-positive: var(--app-positive);
+  --color-negative: var(--app-negative);
+  --color-success: var(--app-success);
+  --color-danger: var(--app-danger);
+  --color-focus-ring: var(--app-focus-ring);
 
-  /* Legacy aliases (kept so pre-Phase-5 components still compile) */
-  --color-void-black: #0A0A0F;
-  --color-card-dark: #111118;
-  --color-influence-red: #A855F7;
-  --color-neon-cyan: #22D3EE;
-  --font-oswald: 'Clash Display', sans-serif;
-  --font-playfair: 'Satoshi', serif;
-  --font-inter: 'Satoshi', sans-serif;
+  /* Lines and quiet fills */
+  --color-hairline: var(--app-hairline);
+  --color-surface-tint: var(--app-surface-tint);
+  --color-heat-0: var(--app-heat-0);
 
-  /* Motion */
+  /* Fonts — platform sets --ff-* on <html> through next/font */
+  --font-display: var(--ff-display, 'Clash Display'), 'Cabinet Grotesk', system-ui, sans-serif;
+  --font-body: var(--ff-body, 'Satoshi'), 'General Sans', system-ui, sans-serif;
+  --font-mono: var(--ff-mono, 'JetBrains Mono'), 'Space Mono', ui-monospace, monospace;
+  --font-elegant: var(--ff-elegant, 'Cormorant Garamond'), 'Instrument Serif', serif;
+  --default-font-family: var(--font-body);
+  --default-mono-font-family: var(--font-mono);
+
+  /* Fluid type scale */
+  --text-display: clamp(3rem, 7.5vw, 7rem);
+  --text-display--line-height: 0.9;
+  --text-display--letter-spacing: -0.035em;
+  --text-h1: clamp(2.75rem, 5vw + 1.5rem, 5.5rem);
+  --text-h1--line-height: 1;
+  --text-h1--letter-spacing: -0.03em;
+  --text-h2: clamp(2.25rem, 5vw + 1rem, 4.5rem);
+  --text-h2--line-height: 1.05;
+  --text-h2--letter-spacing: -0.02em;
+  --text-h3: clamp(1.375rem, 1vw + 1.1rem, 1.875rem);
+  --text-h3--line-height: 1.2;
+  --text-h3--letter-spacing: -0.01em;
+  --text-lead: clamp(1.0625rem, 0.35vw + 0.95rem, 1.25rem);
+  --text-lead--line-height: 1.6;
+  --text-eyebrow: 0.6875rem;
+  --text-eyebrow--line-height: 1.4;
+  --text-eyebrow--letter-spacing: 0.25em;
+}
+
+/* Motion (mirrors src/lib/motion.ts `ease`). Static: inline styles read these without a utility using them. */
+@theme static {
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-
-  /* Animations */
-  --animate-float: float 10s ease-in-out infinite;
-  --animate-pulse-slow: pulseSlow 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  --animate-aurora: auroraShift 18s ease-in-out infinite;
-  --animate-blink: blink 1s step-end infinite;
-
-  @keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-20px); }
-  }
-  @keyframes pulseSlow {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
-  }
-  @keyframes auroraShift {
-    0%, 100% { transform: translate3d(0,0,0) scale(1); }
-    50% { transform: translate3d(-4%, 2%, 0) scale(1.08); }
-  }
-  @keyframes blink {
-    0%, 50% { opacity: 1; }
-    51%, 100% { opacity: 0; }
-  }
-  @keyframes scrollBounce {
-    0% { transform: translateY(-100%); opacity: 0; }
-    20% { opacity: 1; }
-    80% { opacity: 1; }
-    100% { transform: translateY(400%); opacity: 0; }
-  }
-  @keyframes rippleExpand {
-    0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
-    100% { transform: translate(-50%, -50%) scale(4); opacity: 0; }
-  }
+  --ease-in-expo: cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-curtain: cubic-bezier(0.87, 0, 0.13, 1);
 }
+
+/* Contract utilities always ship, even before (or without) a static className using them. */
+@source inline("glass glass-strong glass-interactive gradient-text text-outline aurora-bg glow-violet glow-cyan container-padding section-shell tap-safe tap-safe-sm ring-focus scrollbar-none scrollbar-thin z-nav z-dock z-overlay z-toast z-cursor text-display text-h1 text-h2 text-h3 text-lead text-eyebrow border-hairline bg-surface-tint bg-heat-0 text-positive text-negative text-success text-danger text-cyan-text text-amber-text");
 
 /* ============================
-   Base
+   Base — layered so every utility wins over element defaults
    ============================ */
-html {
-  scroll-behavior: auto; /* Lenis handles smooth scroll */
-  background-color: var(--color-bg-base);
-  transition: background-color 0.4s ease;
-}
-
-/* ============================
-   Cinematic theme swap — circular reveal from toggle origin
-   Uses the View Transitions API when available.
-   ============================ */
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation: none;
-  mix-blend-mode: normal;
-}
-::view-transition-old(root) {
-  z-index: 1;
-}
-::view-transition-new(root) {
-  z-index: 2;
-  animation: theme-reveal 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  clip-path: circle(0% at var(--theme-origin-x, 50%) var(--theme-origin-y, 50%));
-}
-@keyframes theme-reveal {
-  from {
-    clip-path: circle(0% at var(--theme-origin-x, 50%) var(--theme-origin-y, 50%));
+@layer base {
+  html {
+    scroll-behavior: auto; /* Lenis handles smooth scroll */
+    scroll-padding-top: var(--nav-offset);
+    scrollbar-gutter: stable;
+    scrollbar-color: var(--app-scrollbar-thumb) var(--color-bg-base);
+    background-color: var(--color-bg-base);
+    transition: background-color 0.4s ease;
   }
-  to {
-    clip-path: circle(160% at var(--theme-origin-x, 50%) var(--theme-origin-y, 50%));
+
+  body {
+    background-color: var(--color-bg-base);
+    color: var(--color-text-primary);
+    font-family: var(--font-body);
+    /* clip, not hidden: hidden would make body a scroll container and break position: sticky */
+    overflow-x: clip;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    line-height: 1.5;
+    transition: background-color 0.4s ease, color 0.4s ease;
   }
-}
 
-/* During transition: pause GPU-heavy animations so the reveal reads cleanly */
-html.theme-transitioning * {
-  animation-play-state: paused !important;
-}
-html.theme-transitioning ::view-transition-old(root),
-html.theme-transitioning ::view-transition-new(root) {
-  animation-play-state: running !important;
-}
+  /* Silky cross-fade on themable tokens for elements that can't
+     participate in the View Transition snapshot (e.g. fixed layers). */
+  body,
+  nav, header, footer, aside, section, main,
+  .glass, .glass-strong,
+  [data-theme-transition] {
+    transition:
+      background-color 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+      border-color 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+      color 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+      box-shadow 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
 
-/* Silky cross-fade on themable tokens for non-root elements that can't
-   participate in the VT snapshot (e.g., fixed-position layers). */
-body,
-nav, header, footer, aside, section, main,
-.glass, .glass-strong,
-[data-theme-transition] {
-  transition:
-    background-color 0.5s cubic-bezier(0.16, 1, 0.3, 1),
-    border-color 0.5s cubic-bezier(0.16, 1, 0.3, 1),
-    color 0.35s cubic-bezier(0.16, 1, 0.3, 1),
-    box-shadow 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-}
+  /* The View Transition snapshot must capture final colours, not mid-fade ones. */
+  html.theme-transitioning *,
+  html.theme-transitioning *::before,
+  html.theme-transitioning *::after {
+    transition: none !important;
+  }
 
-@media (prefers-reduced-motion: reduce) {
-  ::view-transition-old(root),
-  ::view-transition-new(root) {
-    animation: none !important;
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+  }
+
+  h1 { font-size: var(--text-h1); }
+  h2 { font-size: var(--text-h2); }
+
+  p {
+    font-family: var(--font-body);
+    line-height: 1.65;
+    color: var(--color-text-secondary);
+  }
+
+  ::selection {
+    background: var(--app-selection-bg);
+    color: var(--app-selection-fg);
+  }
+
+  :where(a, button, [role="button"], input, textarea, select, summary, [tabindex]:not([tabindex="-1"])):focus-visible {
+    outline: 2px solid var(--app-focus-ring);
+    outline-offset: 3px;
+  }
+
+  html.lenis, html.lenis body { height: auto; }
+  .lenis.lenis-smooth { scroll-behavior: auto !important; }
+  .lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+  .lenis.lenis-stopped { overflow: hidden; }
+
+  /* Safari still reads these; Chromium and Firefox use scrollbar-color above. */
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: var(--color-bg-base); }
+  ::-webkit-scrollbar-thumb {
+    background: var(--app-scroll-thumb);
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--app-scroll-thumb-hover);
+  }
+
+  /* The native cursor hides only once CometCursor is live (it adds the class). */
+  @media not (forced-colors: active) {
+    html.has-custom-cursor,
+    html.has-custom-cursor *:not(input, textarea, select, [contenteditable]) {
+      cursor: none !important;
+    }
+  }
+
+  /* Lite tier (coarse pointer / low power): backdrop blur only on nav, dock and dialogs. */
+  html[data-lite] :not(.glass-keep) {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+
+  /* One reduced-motion signal: html[data-motion] reflects the OS setting AND the in-page override. */
+  html[data-motion="reduced"],
+  html[data-motion="reduced"] *,
+  html[data-motion="reduced"] *::before,
+  html[data-motion="reduced"] *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    transition-delay: 0s !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Session pause toggle (WCAG 2.2.2): freezes CSS keyframes without touching hover transitions. */
+  html[data-motion-paused] *,
+  html[data-motion-paused] *::before,
+  html[data-motion-paused] *::after {
+    animation-play-state: paused !important;
+  }
+
+  /* No-JS and hydration-failure safety net.
+     Every element that server-renders a hidden initial style must carry data-reveal. */
+  html:not(.js) [data-reveal],
+  html:not(.js) .hero-char {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
     clip-path: none !important;
   }
+  html:not(.js) .intro-curtain {
+    display: none !important;
+  }
+
+  /* JS ran but hydration hasn't (failed chunk, very slow CPU): force content visible after 4s.
+     Providers add html.hydrated on mount, which drops these and lets normal reveals take over. */
+  html.js:not(.hydrated) [data-reveal],
+  html.js:not(.hydrated) .hero-char {
+    animation: failsafe-reveal 0.6s cubic-bezier(0.16, 1, 0.3, 1) 4s forwards;
+    animation-play-state: running !important;
+  }
+  html.js[data-intro="pending"]:not(.hydrated) .intro-curtain {
+    animation: failsafe-hide 0.4s ease-out 4s forwards;
+    animation-play-state: running !important;
+  }
 }
 
-html.lenis, html.lenis body { height: auto; }
-.lenis.lenis-smooth { scroll-behavior: auto !important; }
-.lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
-.lenis.lenis-stopped { overflow: hidden; }
-
-body {
-  background-color: var(--color-bg-base);
-  color: var(--color-text-primary);
-  font-family: var(--font-body);
-  overflow-x: hidden;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  line-height: 1.5;
-  transition: background-color 0.4s ease, color 0.4s ease;
+@keyframes failsafe-reveal {
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+    clip-path: none;
+  }
 }
-
-h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-display);
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  line-height: 1.05;
-}
-
-p {
-  font-family: var(--font-body);
-  line-height: 1.65;
-  color: var(--color-text-secondary);
-}
-
-h1 { font-size: clamp(2.75rem, 10vw, 7rem); }
-h2 { font-size: clamp(2rem, 6vw, 4.5rem); }
-
-::selection {
-  background: var(--app-selection-bg);
-  color: var(--app-selection-fg);
+@keyframes failsafe-hide {
+  to {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
 }
 
 /* ============================
    Utilities
    ============================ */
+@property --glass-sheen {
+  syntax: '<color>';
+  inherits: false;
+  initial-value: transparent;
+}
+
 @utility glass {
-  background: var(--color-glass-fill);
-  backdrop-filter: blur(20px) saturate(140%);
-  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  background-color: var(--color-glass-fill);
+  @apply backdrop-blur-[20px] backdrop-saturate-[1.4];
   border: 1px solid var(--color-glass-border);
   border-radius: 1rem;
   box-shadow: var(--app-glass-shadow);
+
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    background-color: var(--app-glass-fill-dense);
+  }
+  :where(html[data-lite]) &:not(.glass-keep) {
+    background-color: var(--app-glass-fill-dense);
+  }
+  @media (forced-colors: active) {
+    border-color: CanvasText;
+  }
 }
 
 @utility glass-strong {
-  background: var(--color-glass-fill-strong);
-  backdrop-filter: blur(32px) saturate(160%);
-  -webkit-backdrop-filter: blur(32px) saturate(160%);
+  background-color: var(--color-glass-fill-strong);
+  @apply backdrop-blur-[32px] backdrop-saturate-[1.6];
   border: 1px solid var(--color-glass-border-strong);
   border-radius: 1.25rem;
   box-shadow: var(--app-glass-shadow-strong);
+
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    background-color: var(--app-glass-fill-strong-dense);
+  }
+  :where(html[data-lite]) &:not(.glass-keep) {
+    background-color: var(--app-glass-fill-strong-dense);
+  }
+  @media (forced-colors: active) {
+    border-color: CanvasText;
+  }
+}
+
+/* Hover border lift plus a radial sheen that follows --mx/--my (written by GlassCard). */
+@utility glass-interactive {
+  background-image: radial-gradient(
+    420px circle at var(--mx, 50%) var(--my, 50%),
+    var(--glass-sheen),
+    transparent 65%
+  );
+  transition:
+    --glass-sheen var(--dur-base) var(--ease-out-expo),
+    border-color var(--dur-base) var(--ease-out-expo),
+    box-shadow var(--dur-base) var(--ease-out-expo);
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      --glass-sheen: var(--app-glass-sheen);
+      border-color: var(--color-glass-border-strong);
+      box-shadow: var(--app-glass-shadow-strong);
+    }
+  }
+  &:focus-visible,
+  &:focus-within {
+    border-color: var(--color-glass-border-strong);
+  }
+  @media (forced-colors: active) {
+    border: 1px solid CanvasText;
+  }
 }
 
 @utility aurora-bg {
   background: var(--app-aurora);
 }
 
-/* About portrait panel — theme-aware */
-.about-portrait {
-  border: 1px solid var(--app-glass-border-strong);
-  box-shadow: var(--app-glass-shadow-strong);
-}
-.about-portrait-bg {
-  background: linear-gradient(135deg, #0F0F1A 0%, #1A1028 45%, #0A1826 100%);
-}
-:root[data-theme="light"] .about-portrait-bg {
-  background: linear-gradient(135deg, #F5EFE6 0%, #EAE4F4 45%, #E3EEF2 100%);
-}
-.about-portrait-blob-a {
-  background: radial-gradient(circle, var(--app-violet-bright) 0%, transparent 70%);
-  filter: blur(40px);
-}
-.about-portrait-blob-b {
-  background: radial-gradient(circle, var(--app-cyan-bright) 0%, transparent 70%);
-  filter: blur(40px);
-}
-.about-portrait-mark {
-  background: linear-gradient(135deg, var(--app-violet-bright) 0%, var(--app-cyan-bright) 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
 @utility gradient-text {
-  background: linear-gradient(135deg, #FAFAFA 0%, #A855F7 50%, #22D3EE 100%);
+  background-image: linear-gradient(
+    135deg,
+    var(--app-text-primary) 0%,
+    var(--app-violet-bright) 50%,
+    var(--app-cyan-bright) 100%
+  );
+  background-size: 200% 200%;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  background-size: 200% 200%;
-  animation: auroraShift 10s ease-in-out infinite;
+  animation: gradient-pan 10s var(--ease-in-out) infinite alternate;
+
+  @media (forced-colors: active) {
+    background-image: none;
+    color: CanvasText;
+    -webkit-text-fill-color: CanvasText;
+  }
 }
 
 @utility text-outline {
-  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.18);
+  -webkit-text-stroke: 1px color-mix(in oklab, var(--app-text-primary) 18%, transparent);
   color: transparent;
+
+  @media (forced-colors: active) {
+    -webkit-text-stroke: 0;
+    color: CanvasText;
+  }
 }
 
 @utility container-padding {
   @apply px-5 sm:px-8 md:px-12 lg:px-20 xl:px-24;
 }
 
+@utility section-shell {
+  padding-block: var(--section-space);
+  @apply px-5 sm:px-8 md:px-12 lg:px-20 xl:px-24;
+}
+
 @utility glow-violet {
-  box-shadow: 0 0 40px rgba(124, 58, 237, 0.35);
+  box-shadow: var(--app-glow-violet);
 }
 
 @utility glow-cyan {
-  box-shadow: 0 0 40px rgba(6, 182, 212, 0.30);
+  box-shadow: var(--app-glow-cyan);
 }
 
-/* Elements marked .dark-only are hidden in light mode (heavy neon / background videos). */
-:root[data-theme="light"] .dark-only {
-  display: none !important;
-}
-/* Elements marked .light-only are hidden in dark mode (pastel background videos, airy accents). */
-:root:not([data-theme="light"]) .light-only {
-  display: none !important;
-}
-/* Soften violet glow shadows on interactive elements in light mode. */
-:root[data-theme="light"] .glow-violet,
-:root[data-theme="light"] .glow-cyan {
-  box-shadow: 0 4px 18px rgba(10, 10, 15, 0.08);
+/* Hit area >= 44x44 on every pointer. */
+@utility tap-safe {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  min-width: 44px;
 }
 
-/* ============================
-   Scrollbar
-   ============================ */
-::-webkit-scrollbar { width: 8px; }
-::-webkit-scrollbar-track { background: var(--color-bg-base); }
-::-webkit-scrollbar-thumb {
-  background: var(--app-scroll-thumb);
-  border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: var(--app-scroll-thumb-hover);
-}
+/* Compact controls: 36px under a mouse, the full 44px wherever a coarse pointer exists. */
+@utility tap-safe-sm {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  min-width: 36px;
 
-/* ============================
-   Cursor & interactions (retained)
-   ============================ */
-* { cursor: none !important; }
-input, textarea { cursor: text !important; }
-@media (hover: none) {
-  * { cursor: auto !important; }
-}
-
-.click-ripple {
-  position: fixed;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  border: 1px solid rgba(168, 85, 247, 0.6);
-  pointer-events: none;
-  z-index: 9998;
-  animation: rippleExpand 0.6s ease-out forwards;
-}
-
-.typing-cursor {
-  display: inline-block;
-  width: 2px;
-  height: 1em;
-  background: var(--color-violet-bright);
-  margin-left: 2px;
-  animation: var(--animate-blink);
-  vertical-align: text-bottom;
-}
-
-.scroll-indicator { animation: scrollBounce 2s ease-in-out infinite; }
-
-@media (prefers-reduced-motion: reduce) {
-  .click-ripple,
-  .scroll-indicator,
-  .typing-cursor {
-    animation: none !important;
-  }
-  *, *::before, *::after {
-    animation-duration: 0.001ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.001ms !important;
-    scroll-behavior: auto !important;
+  @media (any-pointer: coarse) {
+    min-height: 44px;
+    min-width: 44px;
   }
 }
 
-.character-cursor {
-  position: fixed;
-  top: 0; left: 0;
-  width: 56px; height: 56px;
-  z-index: 99999;
-  pointer-events: none;
-  will-change: transform;
-  transition: opacity 0.3s ease;
-}
-.cc-avatar {
-  width: 56px; height: 56px;
-  object-fit: contain;
-  pointer-events: none;
-  user-select: none;
-  position: relative;
-  z-index: 2;
-  transition: transform 0.12s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  filter: drop-shadow(0 0 8px rgba(168, 85, 247, 0.5));
-}
-.cc-glow {
-  position: absolute;
-  top: 50%; left: 50%;
-  width: 64px; height: 64px;
-  margin-left: -32px; margin-top: -32px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(168, 85, 247, 0.4) 0%, transparent 70%);
-  z-index: 1;
-  transition: opacity 0.2s ease, transform 0.2s ease;
-  pointer-events: none;
-}
-.cc-pointing .cc-avatar {
-  filter: drop-shadow(0 0 12px rgba(168, 85, 247, 0.9))
-          drop-shadow(0 0 24px rgba(34, 211, 238, 0.4));
-}
-.cc-clicking .cc-avatar {
-  filter: drop-shadow(0 0 16px rgba(255, 255, 255, 0.9))
-          drop-shadow(0 0 30px rgba(168, 85, 247, 0.6));
+@utility ring-focus {
+  &:focus-visible {
+    outline: 2px solid var(--app-focus-ring);
+    outline-offset: 3px;
+  }
 }
 
-@media (pointer: coarse) {
-  body, a, button, input, textarea, select, [role="button"], [tabindex] {
-    cursor: auto !important;
+@utility scrollbar-none {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
   }
-  .character-cursor { display: none !important; }
+}
+
+@utility scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--app-scrollbar-thumb) transparent;
+}
+
+@utility z-dock { z-index: var(--z-dock); }
+@utility z-nav { z-index: var(--z-nav); }
+@utility z-overlay { z-index: var(--z-overlay); }
+@utility z-toast { z-index: var(--z-toast); }
+@utility z-cursor { z-index: var(--z-cursor); }
+
+@keyframes gradient-pan {
+  from { background-position: 0% 50%; }
+  to { background-position: 100% 50%; }
 }
 
 /* ============================
-   Glitch text
+   Components shared across packages
    ============================ */
-.glitch-active::before,
-.glitch-active::after {
-  content: attr(data-text);
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%;
-  pointer-events: none;
-  mix-blend-mode: screen;
+@layer components {
+  /* Elements marked .dark-only are hidden in light mode (heavy neon / background videos). */
+  :root[data-theme="light"] .dark-only {
+    display: none !important;
+  }
+  /* Elements marked .light-only are hidden in dark mode (pastel background videos, airy accents). */
+  :root:not([data-theme="light"]) .light-only {
+    display: none !important;
+  }
 }
-.glitch-active::before {
-  color: #EC4899;
-  animation: glitchShift 0.22s steps(2, end) 1;
-  clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%);
-}
-.glitch-active::after {
-  color: #22D3EE;
-  animation: glitchShift2 0.22s steps(2, end) 1;
-  clip-path: polygon(0 55%, 100% 55%, 100% 100%, 0 100%);
-}
+
+/* Used by GlitchText's aria-hidden layers through animate-[glitchShift…] utilities. */
 @keyframes glitchShift {
   0% { transform: translate(0, 0); }
   25% { transform: translate(-3px, 1px); }
@@ -507,114 +614,14 @@ input, textarea { cursor: text !important; }
   75% { transform: translate(1px, -1px); }
   100% { transform: translate(0, 0); }
 }
-@media (prefers-reduced-motion: reduce) {
-  .glitch-active::before,
-  .glitch-active::after { display: none; }
-}
 
-/* ============================
-   Featured card: subtle static border + hover light-beam trace
-   ============================ */
-@property --beam-angle {
-  syntax: '<angle>';
-  initial-value: 0deg;
-  inherits: false;
-}
-.featured-card::before {
-  content: "";
-  position: absolute;
-  inset: -1px;
-  border-radius: 1.25rem;
-  padding: 1px;
-  background: conic-gradient(
-    from var(--beam-angle),
-    rgba(168, 85, 247, 0) 0deg,
-    rgba(168, 85, 247, 0) 330deg,
-    rgba(168, 85, 247, 0.95) 350deg,
-    rgba(34, 211, 238, 1) 358deg,
-    rgba(168, 85, 247, 0.95) 6deg,
-    rgba(168, 85, 247, 0) 26deg
-  );
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.35s ease;
-  z-index: 1;
-}
-.featured-card:hover::before {
-  opacity: 1;
-  animation: featuredBeamTrace 2.4s linear infinite;
-}
-@keyframes featuredBeamTrace {
-  to { --beam-angle: 360deg; }
-}
-@supports not (background: conic-gradient(from var(--beam-angle), red, blue)) {
-  .featured-card:hover::before { opacity: 0.6; animation: none; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .featured-card:hover::before { animation: none; opacity: 0.55; }
-}
-
-/* ============================
-   Bokeh particles
-   ============================ */
-.bokeh {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  overflow: hidden;
-}
-.bokeh span {
-  position: absolute;
-  bottom: -120px;
-  border-radius: 50%;
-  filter: blur(1.5px);
-  opacity: var(--app-bokeh-opacity);
-  animation: bokehRise linear infinite;
-}
-@keyframes bokehRise {
-  0% { transform: translate(0, 0) scale(1); opacity: 0; }
-  10% { opacity: 0.35; }
-  90% { opacity: 0.25; }
-  100% { transform: translate(var(--dx, 20px), -110vh) scale(0.9); opacity: 0; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .bokeh { display: none; }
-}
-
-/* ============================
-   Noise overlay
-   ============================ */
-.noise-overlay {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 1;
-  opacity: var(--app-noise-opacity);
-  mix-blend-mode: var(--app-noise-blend);
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.85 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
-}
-@media (prefers-reduced-motion: reduce) {
-  .noise-overlay { display: none; }
-}
-
-/* ============================
-   Touch ergonomics
-   Only on coarse pointers, so mouse layouts keep their tight rhythm.
-   ============================ */
-@media (pointer: coarse) {
-  .tap-safe {
-    min-height: 44px;
-    display: inline-flex;
-    align-items: center;
-  }
-  .tap-safe-sm {
-    min-height: 36px;
-    display: inline-flex;
-    align-items: center;
+/* Forced colours: gradient-clipped text falls back to solid system text. */
+@layer utilities {
+  @media (forced-colors: active) {
+    .bg-clip-text {
+      background-image: none;
+      -webkit-text-fill-color: CanvasText;
+      color: CanvasText;
+    }
   }
 }

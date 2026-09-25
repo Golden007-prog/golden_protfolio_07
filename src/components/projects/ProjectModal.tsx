@@ -1,265 +1,199 @@
-import { AnimatePresence, motion } from 'framer-motion';
-import { X, Github, ExternalLink, Target, Wrench, Sparkles, Star, Clock, Share2, Check, AlertCircle, TrendingUp, Lightbulb } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
-import { createPortal } from 'react-dom';
-import type { Project } from './ProjectCard';
+'use client';
 
-type Props = { project: Project | null; onClose: () => void };
+import { AnimatePresence, motion, useScroll, type Variants } from 'framer-motion';
+import { ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from 'react';
+import { Button } from '@/components/ui/Button';
+import { Dialog } from '@/components/ui/Dialog';
+import { PROJECTS, type Project } from '@/data/projects';
+import { useHotkeys } from '@/hooks/useHotkeys';
+import { useMotionPrefs } from '@/hooks/useMotionPrefs';
+import { useRenderCount } from '@/lib/devRenderCount';
+import { duration, ease } from '@/lib/motion';
+import { ProjectCaseStudy } from './ProjectCaseStudy';
 
-export function ProjectModal({ project, onClose }: Props) {
-  const [copied, setCopied] = useState(false);
+type Props = {
+  /** The project to show; undefined closes the dialog. */
+  project: Project | undefined;
+  /** The grid's current order after filtering; prev/next stay inside it. */
+  list: readonly Project[];
+  /** The card the dialog was opened from, which morphs into the hero. */
+  morphSlug: string | null;
+  onClose: () => void;
+  onNavigate: (slug: string) => void;
+  onSelectTech: (family: string) => void;
+};
 
-  const readMin = useMemo(() => {
-    if (!project) return 0;
-    const words = `${project.shortDescription} ${project.fullDescription}`.trim().split(/\s+/).length;
-    return Math.max(1, Math.round(words / 220));
-  }, [project]);
+type Step = 1 | -1;
 
-  const handleShare = async () => {
-    if (!project) return;
-    const url = `${window.location.origin}${window.location.pathname}#projects`;
-    try {
-      if (navigator.share) {
-        await navigator.share({ title: project.name, text: project.tagline, url });
-      } else {
-        await navigator.clipboard.writeText(url);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 1800);
-      }
-    } catch {
-      // user cancelled or clipboard denied — ignore
-    }
-  };
+// Slides in the travel direction; reduced motion drops x, leaving a crossfade.
+const SLIDE: Variants = {
+  enter: (dir: number) => ({ opacity: 0, x: dir * 48 }),
+  center: { opacity: 1, x: 0, transition: { duration: duration.base, ease: ease.out } },
+  exit: (dir: number) => ({ opacity: 0, x: dir * -48, transition: { duration: 0.2, ease: ease.in } }),
+};
 
-  useEffect(() => {
-    if (!project) return;
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    window.addEventListener('keydown', onKey);
-    return () => {
-      document.body.style.overflow = prev;
-      window.removeEventListener('keydown', onKey);
-    };
-  }, [project, onClose]);
+const pad = (n: number) => String(n).padStart(2, '0');
 
-  if (typeof document === 'undefined') return null;
+const titleIdFor = (slug: string) => `project-dialog-title-${slug}`;
 
-  const base = '/';
-  const body = (
-    <AnimatePresence>
-      {project && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          onClick={onClose}
-          className="fixed inset-0 z-[100] bg-bg-base/80 backdrop-blur-md overflow-y-auto overscroll-contain"
-          role="dialog"
-          aria-modal="true"
-          aria-label={project.name}
-        >
-          <button
-            type="button"
-            onClick={(e) => { e.stopPropagation(); onClose(); }}
-            aria-label="Close"
-            className="fixed top-4 right-4 md:top-6 md:right-6 z-[110] w-11 h-11 rounded-full glass-strong flex items-center justify-center hover:border-violet-bright/60 transition-colors"
-          >
-            <X className="w-5 h-5 text-text-primary" />
-          </button>
-          <div className="flex min-h-full items-start md:items-center justify-center p-4 md:p-8">
-            <motion.div
-              onClick={(e) => e.stopPropagation()}
-              initial={{ opacity: 0, y: 40, scale: 0.96 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 20, scale: 0.98 }}
-              transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-              className="relative w-full max-w-5xl bg-bg-surface border border-glass-border rounded-2xl shadow-2xl my-auto overflow-hidden"
-            >
-              <div className="relative h-56 md:h-72 overflow-hidden">
-                <img
-                  src={project.thumbnail.startsWith('/') ? base + project.thumbnail.slice(1) : project.thumbnail}
-                  alt={project.name}
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-bg-surface via-bg-surface/60 to-transparent" />
-                <div className="absolute bottom-6 left-6 right-6 md:left-10 md:right-10">
-                  <p className="text-[10px] uppercase tracking-[0.3em] text-violet-bright font-mono mb-2">
-                    {project.category}
-                    {project.featured && <span className="ml-3 text-cyan-bright">· Featured</span>}
-                  </p>
-                  <h2 className="text-3xl md:text-5xl font-display font-bold text-text-primary">{project.name}</h2>
-                  <div className="mt-2 flex flex-wrap items-center gap-3">
-                    <p className="font-mono text-sm text-text-muted">{project.tagline}</p>
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/[0.06] border border-white/[0.08] text-[10px] font-mono text-text-muted">
-                      <Clock size={10} /> {readMin} min read
-                    </span>
-                  </div>
-                </div>
-              </div>
+/**
+ * The project dialog on ui/Dialog (focus trap, inert page, scroll lock, Escape,
+ * selection-safe backdrop). It keeps the last project while it animates out, and
+ * steps through the filtered grid with the chevrons, the arrow keys or a swipe.
+ */
+export function ProjectModal({ project, list, morphSlug, onClose, onNavigate, onSelectTech }: Props) {
+  useRenderCount('ProjectModal');
+  const [last, setLast] = useState(project);
+  if (project && project !== last) setLast(project);
+  const current = project ?? last;
+  const closeRef = useRef<HTMLElement>(null);
 
-              <div className="p-6 md:p-10 space-y-8">
-                <div className="flex flex-wrap gap-2">
-                  {project.techStack.map((t) => (
-                    <span key={t} className="px-3 py-1 text-xs rounded-full bg-violet/10 border border-violet-bright/20 text-violet-bright">
-                      {t}
-                    </span>
-                  ))}
-                </div>
-
-                {project.problem ? (
-                  <section>
-                    <h3 className="flex items-center gap-2 text-[10px] uppercase tracking-[0.25em] text-violet-bright font-mono mb-3">
-                      <Target size={12} /> The problem
-                    </h3>
-                    <p className="text-base md:text-lg text-text-secondary leading-relaxed">{project.problem}</p>
-                  </section>
-                ) : (
-                  <section>
-                    <h3 className="flex items-center gap-2 text-[10px] uppercase tracking-[0.25em] text-violet-bright font-mono mb-3">
-                      <Target size={12} /> What I built
-                    </h3>
-                    <p className="text-base md:text-lg text-text-secondary leading-relaxed">{project.shortDescription}</p>
-                  </section>
-                )}
-
-                {project.solution && (
-                  <section>
-                    <h3 className="flex items-center gap-2 text-[10px] uppercase tracking-[0.25em] text-violet-bright font-mono mb-3">
-                      <Wrench size={12} /> My approach
-                    </h3>
-                    <p className="text-base text-text-secondary leading-relaxed">{project.solution}</p>
-                  </section>
-                )}
-
-                {project.fullDescription && project.fullDescription !== project.shortDescription && !project.solution && (
-                  <section>
-                    <h3 className="flex items-center gap-2 text-[10px] uppercase tracking-[0.25em] text-violet-bright font-mono mb-3">
-                      <Wrench size={12} /> How it works
-                    </h3>
-                    <p className="text-base text-text-secondary leading-relaxed">{project.fullDescription}</p>
-                  </section>
-                )}
-
-                {project.metrics && project.metrics.length > 0 && (
-                  <section>
-                    <h3 className="flex items-center gap-2 text-[10px] uppercase tracking-[0.25em] text-violet-bright font-mono mb-4">
-                      <TrendingUp size={12} /> Outcomes
-                    </h3>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                      {project.metrics.map((m) => (
-                        <Metric key={m.label} value={m.value} label={m.label} />
-                      ))}
-                    </div>
-                  </section>
-                )}
-
-                {project.challenges && project.challenges.length > 0 && (
-                  <section>
-                    <h3 className="flex items-center gap-2 text-[10px] uppercase tracking-[0.25em] text-violet-bright font-mono mb-4">
-                      <AlertCircle size={12} /> Challenges & solutions
-                    </h3>
-                    <div className="space-y-3">
-                      {project.challenges.map((c, i) => (
-                        <div key={i} className="p-4 md:p-5 rounded-xl bg-white/[0.02] border border-white/[0.06]">
-                          <p className="text-sm font-medium text-text-primary mb-1.5">
-                            <span className="text-amber">⚡</span> {c.challenge}
-                          </p>
-                          <p className="text-sm text-text-muted leading-relaxed">
-                            <span className="text-violet-bright">→</span> {c.solution}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  </section>
-                )}
-
-                {project.lessons && (
-                  <section>
-                    <h3 className="flex items-center gap-2 text-[10px] uppercase tracking-[0.25em] text-violet-bright font-mono mb-3">
-                      <Lightbulb size={12} /> What I'd do differently
-                    </h3>
-                    <p className="text-sm text-text-muted italic leading-relaxed">{project.lessons}</p>
-                  </section>
-                )}
-
-                <section>
-                  <h3 className="flex items-center gap-2 text-[10px] uppercase tracking-[0.25em] text-violet-bright font-mono mb-4">
-                    <Sparkles size={12} /> At a glance
-                  </h3>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    <Metric value={project.techStack.length.toString()} label="Stack deps" />
-                    <Metric value={project.topics.length.toString()} label="Domain tags" />
-                    <Metric value={project.language} label="Primary lang" />
-                    <Metric
-                      value={project.stars > 0 ? `${project.stars}★` : (project.liveUrl ? 'Live' : 'OSS')}
-                      label={project.stars > 0 ? 'GitHub stars' : 'Status'}
-                      icon={project.stars > 0 ? <Star size={12} /> : undefined}
-                    />
-                  </div>
-                </section>
-
-                {project.topics.length > 0 && (
-                  <section>
-                    <h3 className="text-[10px] uppercase tracking-[0.25em] text-violet-bright font-mono mb-4">
-                      Domains
-                    </h3>
-                    <div className="flex flex-wrap gap-2">
-                      {project.topics.map((t) => (
-                        <span key={t} className="px-3 py-1 text-xs rounded-full bg-white/[0.04] border border-white/[0.06] text-text-secondary">
-                          #{t}
-                        </span>
-                      ))}
-                    </div>
-                  </section>
-                )}
-
-                <section className="flex flex-wrap gap-3 pt-4 border-t border-white/[0.06]">
-                  <a
-                    href={project.githubUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/[0.04] border border-white/[0.08] text-sm text-text-secondary hover:border-violet-bright/60 hover:text-text-primary transition-all"
-                  >
-                    <Github size={14} /> View Code
-                  </a>
-                  {project.liveUrl && (
-                    <a
-                      href={project.liveUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-violet to-violet-bright text-white text-sm hover:from-violet-bright hover:to-cyan-bright hover:shadow-[0_0_40px_rgba(168,85,247,0.4)] transition-all"
-                    >
-                      <ExternalLink size={14} /> Live Demo
-                    </a>
-                  )}
-                  <button
-                    type="button"
-                    onClick={handleShare}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/[0.04] border border-white/[0.08] text-sm text-text-secondary hover:border-cyan-bright/50 hover:text-text-primary transition-all"
-                  >
-                    {copied ? <><Check size={14} className="text-emerald-400" /> Copied</> : <><Share2 size={14} /> Share</>}
-                  </button>
-                </section>
-              </div>
-            </motion.div>
-          </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+  return (
+    <Dialog
+      open={Boolean(project)}
+      onClose={onClose}
+      labelledBy={current ? titleIdFor(current.slug) : undefined}
+      initialFocusRef={closeRef}
+      panelClassName="max-w-5xl overflow-clip"
+    >
+      {current ? (
+        <ModalBody
+          project={current}
+          list={list}
+          morphSlug={morphSlug}
+          closeRef={closeRef}
+          onClose={onClose}
+          onNavigate={onNavigate}
+          onSelectTech={onSelectTech}
+        />
+      ) : null}
+    </Dialog>
   );
-
-  return createPortal(body, document.body);
 }
 
-function Metric({ value, label, icon }: { value: string; label: string; icon?: React.ReactNode }) {
+function ModalBody({
+  project,
+  list,
+  morphSlug,
+  closeRef,
+  onClose,
+  onNavigate,
+  onSelectTech,
+}: Omit<Props, 'project'> & { project: Project; closeRef: RefObject<HTMLElement | null> }) {
+  const { reduce } = useMotionPrefs();
+  const rootRef = useRef<HTMLDivElement>(null);
+  const scrollerRef = useRef<HTMLElement | null>(null);
+  const focusTitle = useRef(false);
+  const [dir, setDir] = useState<number>(0);
+  // Only the project the dialog opened on morphs; later ones slide.
+  const [morphFor] = useState(morphSlug);
+  const [moved, setMoved] = useState(false);
+
+  // Dialog's modal variant scrolls an outer wrapper; the progress bar and the
+  // table of contents follow that element.
+  useLayoutEffect(() => {
+    scrollerRef.current = rootRef.current?.closest<HTMLElement>('[data-dialog-scroller]') ?? rootRef.current;
+  }, []);
+  const { scrollYProgress } = useScroll({ container: scrollerRef });
+
+  useEffect(() => {
+    scrollerRef.current?.scrollTo({ top: 0 });
+    if (focusTitle.current) {
+      focusTitle.current = false;
+      document.getElementById(titleIdFor(project.slug))?.focus({ preventScroll: true });
+    }
+  }, [project.slug]);
+
+  const nav = list.some((p) => p.slug === project.slug) ? list : PROJECTS;
+  const index = Math.max(0, nav.findIndex((p) => p.slug === project.slug));
+  const count = nav.length;
+
+  const goTo = (slug: string, step: Step) => {
+    setDir(step);
+    setMoved(true);
+    onNavigate(slug);
+  };
+  const go = (step: Step) => {
+    if (count < 2) return;
+    goTo(nav[(index + step + count) % count].slug, step);
+  };
+
+  useHotkeys({ arrowleft: () => go(-1), arrowright: () => go(1) }, { enabled: count > 1 });
+
+  const morph = !reduce && !moved && project.slug === morphFor;
+  const shareUrl = `${window.location.origin}/?project=${project.slug}`;
+
   return (
-    <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06] text-center">
-      <p className="flex items-center justify-center gap-1.5 text-2xl md:text-3xl font-display font-bold bg-gradient-to-br from-violet-bright to-cyan-bright bg-clip-text text-transparent">
-        {icon}
-        {value}
+    <div ref={rootRef} className="relative">
+      <div className="sticky top-0 z-20 h-0">
+        <motion.div
+          aria-hidden="true"
+          data-project-progress=""
+          className="absolute inset-x-0 top-0 h-0.5 origin-left bg-[linear-gradient(90deg,var(--app-violet-bright),var(--app-cyan-bright))]"
+          style={{ scaleX: scrollYProgress }}
+        />
+        <div className="absolute inset-x-0 top-0 flex items-center justify-between gap-2 p-3 sm:p-4">
+          {count > 1 ? (
+            <div className="flex items-center gap-1 rounded-full border border-glass-border bg-bg-surface/85 p-1 backdrop-blur-md">
+              <Button variant="icon" aria-label="Previous project" onClick={() => go(-1)} className="border-transparent bg-transparent">
+                <ChevronLeft aria-hidden="true" className="size-5" />
+              </Button>
+              <span className="min-w-14 text-center font-mono text-xs tabular-nums text-text-secondary" data-project-counter="">
+                {pad(index + 1)} / {pad(count)}
+              </span>
+              <Button variant="icon" aria-label="Next project" onClick={() => go(1)} className="border-transparent bg-transparent">
+                <ChevronRight aria-hidden="true" className="size-5" />
+              </Button>
+            </div>
+          ) : (
+            <span />
+          )}
+          <Button
+            ref={closeRef}
+            variant="icon"
+            aria-label="Close"
+            onClick={onClose}
+            className="bg-bg-surface/85 backdrop-blur-md"
+          >
+            <X aria-hidden="true" className="size-5" />
+          </Button>
+        </div>
+      </div>
+
+      <p className="sr-only" aria-live="polite" aria-atomic="true">
+        {moved ? `${project.name}, project ${index + 1} of ${count}` : ''}
       </p>
-      <p className="text-[10px] text-text-dim uppercase tracking-wider mt-1">{label}</p>
+
+      <div className="relative">
+        <AnimatePresence mode="popLayout" custom={dir}>
+          {/* The first project arrives with the dialog (and the morph), so only later ones slide in. */}
+          <motion.div
+            key={project.slug}
+            custom={dir}
+            variants={SLIDE}
+            initial={moved ? 'enter' : false}
+            animate="center"
+            exit="exit"
+          >
+            <ProjectCaseStudy
+              project={project}
+              variant="modal"
+              titleId={titleIdFor(project.slug)}
+              shareUrl={shareUrl}
+              morph={morph}
+              delay={morph ? duration.base : 0.12}
+              onSwipe={count > 1 ? go : undefined}
+              onSelectProject={(slug) => {
+                focusTitle.current = true;
+                goTo(slug, 1);
+              }}
+              onSelectTech={onSelectTech}
+              scrollContainer={scrollerRef}
+            />
+          </motion.div>
+        </AnimatePresence>
+      </div>
     </div>
   );
 }

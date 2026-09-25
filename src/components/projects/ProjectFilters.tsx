@@ -1,0 +1,189 @@
+'use client';
+
+import { motion } from 'framer-motion';
+import { Radio, Search, X } from 'lucide-react';
+import { useId, useMemo, type ReactNode } from 'react';
+import { Button } from '@/components/ui/Button';
+import { CATEGORIES, PROJECTS, allTech, filterProjects, type ProjectFilter, type TechFacet } from '@/data/projects';
+import { spring } from '@/lib/motion';
+import { setUrlParams } from '@/lib/urlState';
+import { cn } from '@/utils/cn';
+
+const MAX_TECH_FACETS = 10;
+
+type Props = {
+  filter: ProjectFilter;
+  /** Projects left after every filter. */
+  shown: number;
+  /** id of the grid the controls filter. */
+  controls: string;
+};
+
+/** Removes every projects filter from the URL (the hash and ?project stay). */
+export function clearProjectFilters(): void {
+  setUrlParams({ q: null, cat: null, tech: null, live: null });
+}
+
+export function isFiltering(f: ProjectFilter): boolean {
+  return Boolean(f.q || f.cat || f.tech || f.live);
+}
+
+function Pill({
+  pressed,
+  onClick,
+  count,
+  group,
+  children,
+}: {
+  pressed: boolean;
+  onClick: () => void;
+  count?: number;
+  /** layoutId of the sliding active background, one per group. */
+  group: string;
+  children: ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      aria-pressed={pressed}
+      onClick={onClick}
+      className={cn(
+        'relative isolate inline-flex min-h-11 shrink-0 items-center gap-2 rounded-full border px-4 text-sm ring-focus transition-colors duration-200',
+        pressed
+          ? 'border-transparent text-white'
+          : 'border-glass-border-strong bg-glass-fill text-text-secondary hover:border-violet-bright hover:text-text-primary',
+      )}
+    >
+      {pressed ? (
+        <motion.span
+          aria-hidden="true"
+          layoutId={group}
+          transition={spring.ui}
+          className="absolute inset-0 -z-[1] rounded-full bg-violet"
+        />
+      ) : null}
+      <span>{children}</span>
+      {count !== undefined ? (
+        <span className={cn('font-mono text-xs tabular-nums', pressed ? 'text-white' : 'text-text-muted')}>
+          <span className="sr-only">, </span>
+          {count}
+          <span className="sr-only"> {count === 1 ? 'project' : 'projects'}</span>
+        </span>
+      ) : null}
+    </button>
+  );
+}
+
+/**
+ * Search, category, technology and live-demo filters. All state lives in the URL
+ * (?q ?cat ?tech ?live) through urlState, which merges writes and keeps the hash,
+ * so a filtered view is a shareable link and the static page needs no Suspense.
+ */
+export function ProjectFilters({ filter, shown, controls }: Props) {
+  const searchId = useId();
+
+  const categories = useMemo(() => {
+    const pool = filterProjects(PROJECTS, filter, 'cat');
+    return CATEGORIES.map((name) => ({ name, count: pool.filter((p) => p.category === name).length }));
+  }, [filter]);
+  const allCount = useMemo(() => filterProjects(PROJECTS, filter, 'cat').length, [filter]);
+
+  const techs = useMemo(() => {
+    const facets: TechFacet[] = allTech(filterProjects(PROJECTS, filter, 'tech'))
+      .filter((f) => f.count > 1)
+      .slice(0, MAX_TECH_FACETS);
+    if (filter.tech && !facets.some((f) => f.name === filter.tech)) {
+      const count = filterProjects(PROJECTS, filter).length;
+      facets.unshift({ name: filter.tech, count });
+    }
+    return facets;
+  }, [filter]);
+
+  const liveCount = useMemo(() => filterProjects(PROJECTS, filter, 'live').filter((p) => p.liveUrl).length, [filter]);
+  const active = isFiltering(filter);
+
+  return (
+    <div className="mb-10 flex flex-col gap-4 md:mb-12">
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+        <div className="relative min-w-0 sm:w-80">
+          <label htmlFor={searchId} className="sr-only">
+            Search projects
+          </label>
+          <Search aria-hidden="true" className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-text-muted" />
+          <input
+            id={searchId}
+            type="search"
+            value={filter.q}
+            onChange={(e) => setUrlParams({ q: e.target.value || null })}
+            placeholder="Search name, tech or topic"
+            autoComplete="off"
+            spellCheck={false}
+            enterKeyHint="search"
+            aria-controls={controls}
+            className="h-11 w-full rounded-full border border-glass-border-strong bg-glass-fill pl-11 pr-4 text-sm text-text-primary ring-focus transition-colors placeholder:text-text-muted hover:border-violet-bright"
+          />
+        </div>
+        <div className="flex flex-wrap items-center gap-3">
+          <Pill
+            pressed={filter.live}
+            onClick={() => setUrlParams({ live: filter.live ? null : '1' })}
+            count={liveCount}
+            group="projects-live-pill"
+          >
+            <span className="inline-flex items-center gap-2">
+              <Radio aria-hidden="true" className="size-4" />
+              Live demo only
+            </span>
+          </Pill>
+          {active ? (
+            <Button variant="ghost" size="sm" onClick={clearProjectFilters} leadingIcon={<X aria-hidden="true" className="size-4" />}>
+              Clear filters
+            </Button>
+          ) : null}
+        </div>
+        <p className="font-mono text-xs text-text-muted sm:ml-auto" aria-hidden="true">
+          {shown} / {PROJECTS.length}
+        </p>
+      </div>
+
+      <div role="group" aria-label="Filter by category" className="flex flex-wrap gap-2">
+        <Pill pressed={!filter.cat} onClick={() => setUrlParams({ cat: null })} count={allCount} group="projects-cat-pill">
+          All
+        </Pill>
+        {categories.map((c) => (
+          <Pill
+            key={c.name}
+            pressed={filter.cat === c.name}
+            onClick={() => setUrlParams({ cat: filter.cat === c.name ? null : c.name })}
+            count={c.count}
+            group="projects-cat-pill"
+          >
+            {c.name}
+          </Pill>
+        ))}
+      </div>
+
+      <div
+        role="group"
+        aria-label="Filter by technology"
+        className="-m-1 flex gap-2 overflow-x-auto p-1 scrollbar-none sm:flex-wrap sm:overflow-visible"
+      >
+        {techs.map((t) => (
+          <Pill
+            key={t.name}
+            pressed={filter.tech === t.name}
+            onClick={() => setUrlParams({ tech: filter.tech === t.name ? null : t.name })}
+            count={t.count}
+            group="projects-tech-pill"
+          >
+            {t.name}
+          </Pill>
+        ))}
+      </div>
+
+      <p className="sr-only" aria-live="polite" aria-atomic="true" data-projects-status="">
+        {shown} {shown === 1 ? 'project' : 'projects'}
+      </p>
+    </div>
+  );
+}

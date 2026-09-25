@@ -1,100 +1,101 @@
-import { useState, useRef, useLayoutEffect } from 'react';
-import { createPortal } from 'react-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { SkillModal } from './SkillModal';
-import type { SkillDetail } from '../../types/skills';
+'use client';
 
-type Props = {
-  name: string;
-  detail?: SkillDetail;
-  accent: 'violet' | 'cyan' | 'amber' | 'pink';
-  delay?: number;
+import { motion, type Variants } from 'framer-motion';
+import { REDUCED_TRANSITION } from '@/components/motion/Reveal';
+import { Tooltip } from '@/components/ui/Tooltip';
+import { useMotionPrefs } from '@/hooks/useMotionPrefs';
+import { spring } from '@/lib/motion';
+import { highlightParts, loadSkillDetail, PROJECT_COUNTS } from '@/lib/skills';
+import { cn } from '@/utils/cn';
+import type { Skill, SkillAccent } from '@/types/skills';
+import { useSkillActions } from './SkillFocusContext';
+
+const ACCENT: Record<SkillAccent, string> = {
+  violet: 'border-violet-bright/45 group-hover:border-violet-bright group-hover:bg-violet/10',
+  cyan: 'border-cyan-bright/45 group-hover:border-cyan-bright group-hover:bg-cyan/10',
+  amber: 'border-amber/50 group-hover:border-amber group-hover:bg-amber/10',
+  pink: 'border-pink/45 group-hover:border-pink group-hover:bg-pink/10',
 };
 
-const ACCENT_BORDER: Record<Props['accent'], string> = {
-  violet: 'border-violet-bright/40 hover:border-violet-bright hover:bg-violet/10',
-  cyan: 'border-cyan-bright/40 hover:border-cyan-bright hover:bg-cyan/10',
-  amber: 'border-amber/40 hover:border-amber hover:bg-amber/10',
-  pink: 'border-pink/40 hover:border-pink hover:bg-pink/10',
+// Each pill rises into place on a UI spring, cascaded by its card's list.
+const ITEM: Record<'motion' | 'reduced', Variants> = {
+  motion: { hidden: { opacity: 0, y: 8 }, visible: { opacity: 1, y: 0, transition: spring.ui } },
+  reduced: { hidden: { opacity: 0, y: 8 }, visible: { opacity: 1, y: 0, transition: REDUCED_TRANSITION } },
 };
 
-export function SkillPill({ name, detail, accent, delay = 0 }: Props) {
-  const [showTooltip, setShowTooltip] = useState(false);
-  const [showModal, setShowModal] = useState(false);
-  const [pos, setPos] = useState({ x: 0, y: 0 });
-  const pillRef = useRef<HTMLButtonElement>(null);
+type Props = { skill: Skill; query: string };
 
-  const hasDetail = !!detail && !!detail.shortDef;
+/**
+ * A skill in a card. Mouse hover or keyboard focus shows its one-line definition
+ * (never on touch, so a tap goes straight to the modal) and centres its node on
+ * the sphere. The border and the label carry layoutIds the modal panel and title
+ * share, so the modal grows out of the pill that opened it.
+ */
+export function SkillPill({ skill, query }: Props) {
+  const { open, hover } = useSkillActions();
+  const { reduce } = useMotionPrefs();
+  const count = PROJECT_COUNTS[skill.name] ?? 0;
+  const warm = () => void loadSkillDetail(skill.slug).catch(() => {});
 
-  useLayoutEffect(() => {
-    if (!showTooltip || !pillRef.current) return;
-    const update = () => {
-      if (!pillRef.current) return;
-      const rect = pillRef.current.getBoundingClientRect();
-      setPos({ x: rect.left + rect.width / 2, y: rect.top });
-    };
-    update();
-    window.addEventListener('scroll', update, true);
-    window.addEventListener('resize', update);
-    return () => {
-      window.removeEventListener('scroll', update, true);
-      window.removeEventListener('resize', update);
-    };
-  }, [showTooltip]);
+  const tip = (
+    <span className="block">
+      <strong className="font-semibold text-text-primary">{skill.term}</strong>
+      {skill.def}
+      <span className="mt-2 block font-mono text-eyebrow uppercase text-cyan-text">Click to learn more</span>
+    </span>
+  );
 
   return (
-    <>
-      <motion.button
-        ref={pillRef}
-        type="button"
-        initial={{ opacity: 0, y: 8 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ delay, duration: 0.4 }}
-        viewport={{ once: true }}
-        onClick={() => hasDetail && setShowModal(true)}
-        onMouseEnter={() => setShowTooltip(true)}
-        onMouseLeave={() => setShowTooltip(false)}
-        onFocus={() => setShowTooltip(true)}
-        onBlur={() => setShowTooltip(false)}
-        className={`relative inline-flex items-center px-3 py-1 rounded-full text-xs text-text-secondary border bg-white/5 transition-all duration-300 ${ACCENT_BORDER[accent]} ${hasDetail ? 'cursor-pointer' : 'cursor-default'}`}
-      >
-        {name}
-      </motion.button>
-
-      {typeof document !== 'undefined' && createPortal(
-        <AnimatePresence>
-          {showTooltip && hasDetail && (
-            <motion.div
-              initial={{ opacity: 0, y: 6, scale: 0.96 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 6, scale: 0.96 }}
-              transition={{ duration: 0.15, ease: 'easeOut' }}
-              className="fixed z-[9999] pointer-events-none"
-              style={{
-                left: `${pos.x}px`,
-                top: `${pos.y}px`,
-                transform: 'translate(-50%, calc(-100% - 12px))',
-              }}
-            >
-              <div className="w-72 bg-bg-surface/95 border border-glass-border-strong rounded-xl px-4 py-3 shadow-2xl backdrop-blur-xl">
-                <p
-                  className="text-xs text-text-secondary leading-relaxed"
-                  dangerouslySetInnerHTML={{ __html: detail!.shortDef }}
-                />
-                <p className="text-[10px] text-violet-bright mt-2 font-mono uppercase tracking-wider">
-                  Click to learn more →
-                </p>
-              </div>
-              <div className="absolute left-1/2 top-full w-2 h-2 bg-bg-surface border-r border-b border-glass-border-strong -translate-x-1/2 -translate-y-1/2 rotate-45" />
-            </motion.div>
-          )}
-        </AnimatePresence>,
-        document.body,
-      )}
-
-      <AnimatePresence>
-        {showModal && detail && <SkillModal skill={detail} onClose={() => setShowModal(false)} />}
-      </AnimatePresence>
-    </>
+    <motion.li data-reveal="" variants={reduce ? ITEM.reduced : ITEM.motion}>
+      <Tooltip content={tip} maxWidth={288} delay={250}>
+        <button
+          type="button"
+          aria-haspopup="dialog"
+          data-skill-pill={skill.slug}
+          data-cursor="open"
+          onClick={(e) => open(skill.name, { opener: e.currentTarget, morph: true })}
+          onPointerEnter={(e) => {
+            if (e.pointerType !== 'mouse') return;
+            hover(skill.name);
+            warm();
+          }}
+          onPointerLeave={(e) => {
+            if (e.pointerType === 'mouse') hover(null);
+          }}
+          onFocus={() => {
+            hover(skill.name);
+            warm();
+          }}
+          onBlur={() => hover(null)}
+          className="group relative tap-safe-sm rounded-full px-3 text-xs text-text-secondary ring-focus transition-colors hover:text-text-primary"
+        >
+          <motion.span
+            aria-hidden="true"
+            layoutId={reduce ? undefined : `skill-panel-${skill.slug}`}
+            className={cn(
+              'absolute inset-x-0 inset-y-0.5 rounded-full border bg-surface-tint transition-colors duration-300 any-pointer-coarse:inset-y-1.5',
+              ACCENT[skill.accent],
+            )}
+          />
+          <motion.span layoutId={reduce ? undefined : `skill-title-${skill.slug}`} className="relative whitespace-nowrap">
+            {highlightParts(skill.name, query).map((part, i) =>
+              part.match ? (
+                <mark key={i} className="rounded-sm bg-amber/25 px-px text-text-primary">
+                  {part.text}
+                </mark>
+              ) : (
+                <span key={i}>{part.text}</span>
+              ),
+            )}
+          </motion.span>
+          {count > 0 ? (
+            <span className="relative ml-1.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full border border-glass-border-strong bg-bg-surface px-1 font-mono text-[10px] leading-none text-text-secondary">
+              <span aria-hidden="true">{count}</span>
+              <span className="sr-only">, used in {count === 1 ? '1 project' : `${count} projects`}</span>
+            </span>
+          ) : null}
+        </button>
+      </Tooltip>
+    </motion.li>
   );
 }

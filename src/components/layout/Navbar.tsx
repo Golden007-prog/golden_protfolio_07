@@ -1,215 +1,267 @@
-import { useEffect, useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
-import { Menu, X } from 'lucide-react';
-import { useScrollProgress } from '../../hooks/useScrollProgress';
-import { cn } from '../../utils/cn';
-import { ThemeToggle } from '../shared/ThemeToggle';
+'use client';
 
-const LINKS = [
-  { href: '#hero', label: 'Home' },
-  { href: '#about', label: 'About' },
-  { href: '#skills', label: 'Skills' },
-  { href: '#projects', label: 'Projects' },
-  { href: '#experience', label: 'Experience' },
-  { href: '#contact', label: 'Contact' },
-];
+import { useEffect, useRef, useState, useSyncExternalStore, type MouseEvent as ReactMouseEvent } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { LayoutGroup, animate, motion, useMotionValue, useMotionValueEvent, useScroll } from 'framer-motion';
+import { Search } from 'lucide-react';
+import { MobileMenu, type MenuOrigin } from '@/components/layout/MobileMenu';
+import { MotionToggle } from '@/components/shared/MotionToggle';
+import { ThemeToggle } from '@/components/shared/ThemeToggle';
+import { Button } from '@/components/ui/Button';
+import { DownloadCvButton } from '@/components/ui/DownloadCvButton';
+import { smoothScrollTo } from '@/contexts/LenisContext';
+import { useActiveSection } from '@/hooks/useActiveSection';
+import { matchesMedia, subscribeMedia, useMediaQuery } from '@/hooks/useMediaQuery';
+import { getMotionPrefs } from '@/hooks/useMotionPrefs';
+import { useRenderCount } from '@/lib/devRenderCount';
+import { ease, spring } from '@/lib/motion';
+import { SECTIONS, SITE, sectionHref, type SectionId } from '@/lib/site';
+import { setUrlHash } from '@/lib/urlState';
+import { cn } from '@/utils/cn';
 
-export function Navbar() {
-  const progress = useScrollProgress();
-  const [open, setOpen] = useState(false);
-  const [active, setActive] = useState('hero');
-  const [hidden, setHidden] = useState(false);
-  const scrolled = progress > 0.01;
+/** Condensed look after this many px. */
+const CONDENSE_AT = 80;
+/** Downward scroll faster than this (px/s) tucks the nav away. */
+const HIDE_VELOCITY = 900;
+const HIDDEN_Y = -120;
+const DESKTOP = '(min-width: 768px)';
+
+const noopSubscribe = () => () => {};
+function isMacPlatform(): boolean {
+  const nav = navigator as Navigator & { userAgentData?: { platform?: string } };
+  return /mac|iphone|ipad|ipod/i.test(nav.userAgentData?.platform || nav.platform || '');
+}
+
+/** 'Ctrl K' on the server and until hydration, then the platform's own modifier. */
+function KbdHint() {
+  const mac = useSyncExternalStore(noopSubscribe, isMacPlatform, () => false);
+  return (
+    <kbd className="hidden rounded-md border border-hairline px-1.5 py-0.5 font-mono text-[11px] font-normal text-text-muted lg:inline">
+      {mac ? '⌘K' : 'Ctrl K'}
+    </kbd>
+  );
+}
+
+function scrollToSection(e: ReactMouseEvent<HTMLAnchorElement>, id: SectionId) {
+  e.preventDefault();
+  smoothScrollTo(id);
+  setUrlHash(id);
+}
+
+/** The section links: their own component, so an active-section change never re-renders Navbar. */
+function NavLinks({ pathname }: { pathname: string }) {
+  const onHome = pathname === '/';
+  const active = useActiveSection();
+  const [ink, setInk] = useState<SectionId | null>(null);
+
+  return (
+    <LayoutGroup id="nav-links">
+      <ul className="hidden items-center md:flex" onPointerLeave={() => setInk(null)}>
+        {SECTIONS.map(({ id, label }) => {
+          const isActive = onHome && active === id;
+          return (
+            <li key={id}>
+              <Link
+                href={sectionHref(id, pathname)}
+                aria-current={isActive ? 'location' : undefined}
+                onClick={onHome ? (e) => scrollToSection(e, id) : undefined}
+                onPointerEnter={() => setInk(id)}
+                onFocus={() => setInk(id)}
+                onBlur={() => setInk(null)}
+                className={cn(
+                  'tap-safe-sm relative rounded-full px-2 text-[13px] font-medium ring-focus transition-colors lg:px-3.5 lg:text-sm',
+                  isActive ? 'text-text-primary' : 'text-text-muted hover:text-text-primary',
+                )}
+              >
+                {ink === id ? (
+                  <motion.span layoutId="nav-ink" aria-hidden="true" className="absolute inset-0 rounded-full bg-surface-tint" transition={spring.ui} />
+                ) : null}
+                <span className="relative">{label}</span>
+                {isActive ? (
+                  <motion.span
+                    layoutId="nav-active"
+                    aria-hidden="true"
+                    className="absolute inset-x-3 bottom-1 h-px rounded-full bg-gradient-to-r from-violet-bright to-cyan-bright"
+                    transition={spring.layout}
+                  />
+                ) : null}
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+    </LayoutGroup>
+  );
+}
+
+type Props = {
+  /** Opens the command palette (App owns it, so the palette code stays out of the first chunk). */
+  onOpenPalette?: () => void;
+};
+
+/**
+ * Floating glass nav. Scroll-driven changes (progress bar, condensing, hiding on
+ * fast downward scroll) go through motion values and data attributes, so
+ * scrolling never re-renders it.
+ */
+export function Navbar({ onOpenPalette }: Props) {
+  useRenderCount('Navbar');
+  const pathname = usePathname();
+  const onHome = pathname === '/';
+  const navRef = useRef<HTMLElement>(null);
+  const burgerRef = useRef<HTMLButtonElement>(null);
+  const { scrollY, scrollYProgress } = useScroll();
+  const navY = useMotionValue(0);
+  const shown = useRef({ scrolled: false, hidden: false, lastY: 0, menuOpen: false });
+
+  const [menu, setMenu] = useState<{ open: boolean; origin: MenuOrigin | null }>({ open: false, origin: null });
+  const isDesktop = useMediaQuery(DESKTOP);
+  const menuOpen = menu.open && !isDesktop;
 
   useEffect(() => {
-    const io = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((e) => {
-          if (e.isIntersecting) setActive(e.target.id);
-        });
-      },
-      { rootMargin: '-40% 0px -50% 0px' },
-    );
-    LINKS.forEach(({ href }) => {
-      const el = document.querySelector(href);
-      if (el) io.observe(el);
-    });
-    return () => io.disconnect();
+    shown.current.menuOpen = menuOpen;
+  }, [menuOpen]);
+
+  // The menu is a phone layout: reaching 768px closes it and frees the page.
+  useEffect(
+    () =>
+      subscribeMedia(DESKTOP, () => {
+        if (matchesMedia(DESKTOP)) setMenu((m) => (m.open ? { ...m, open: false } : m));
+      }),
+    [],
+  );
+
+  const setHidden = (hidden: boolean) => {
+    const s = shown.current;
+    if (s.hidden === hidden) return;
+    // Under reduced motion the nav simply stays put.
+    if (hidden && getMotionPrefs().reduce) return;
+    s.hidden = hidden;
+    navRef.current?.toggleAttribute('data-hidden', hidden);
+    animate(navY, hidden ? HIDDEN_Y : 0, hidden ? { duration: 0.28, ease: ease.in } : spring.ui);
+  };
+
+  const applyScroll = (y: number) => {
+    const s = shown.current;
+    const scrolled = y > CONDENSE_AT;
+    if (scrolled !== s.scrolled) {
+      s.scrolled = scrolled;
+      navRef.current?.toggleAttribute('data-scrolled', scrolled);
+    }
+    const delta = y - s.lastY;
+    s.lastY = y;
+    const hasFocus = navRef.current?.contains(document.activeElement) ?? false;
+    if (y < CONDENSE_AT || s.menuOpen || hasFocus) setHidden(false);
+    else if (delta > 0 && scrollY.getVelocity() > HIDE_VELOCITY) setHidden(true);
+    else if (delta < -2) setHidden(false);
+  };
+
+  useMotionValueEvent(scrollY, 'change', applyScroll);
+
+  // A reload mid-page starts condensed.
+  useEffect(() => {
+    const y = window.scrollY;
+    shown.current.lastY = y;
+    if (y > CONDENSE_AT) {
+      shown.current.scrolled = true;
+      navRef.current?.setAttribute('data-scrolled', '');
+    }
   }, []);
 
-  useEffect(() => {
-    let lastY = window.scrollY;
-    let ticking = false;
-    const onScroll = () => {
-      if (ticking) return;
-      ticking = true;
-      requestAnimationFrame(() => {
-        const y = window.scrollY;
-        const delta = y - lastY;
-        if (y < 80) {
-          setHidden(false);
-        } else if (delta > 8) {
-          setHidden(true);
-        } else if (delta < -8) {
-          setHidden(false);
-        }
-        lastY = y;
-        ticking = false;
-      });
-    };
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
+  const openMenu = () => {
+    const r = burgerRef.current?.getBoundingClientRect();
+    setMenu({ open: true, origin: r ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : null });
+  };
+  const closeMenu = () => setMenu((m) => ({ ...m, open: false }));
 
-  useEffect(() => {
-    if (!open) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setOpen(false);
-    };
-    window.addEventListener('keydown', onKey);
-    return () => {
-      document.body.style.overflow = prev;
-      window.removeEventListener('keydown', onKey);
-    };
-  }, [open]);
+  const goHome = (e: ReactMouseEvent<HTMLAnchorElement>) => {
+    if (!onHome) return;
+    e.preventDefault();
+    smoothScrollTo(0, { focus: false });
+    setUrlHash(null);
+  };
 
   return (
     <>
-      <div className="fixed top-0 left-0 right-0 z-50 h-[2px] bg-transparent">
-        <motion.div
-          className="h-full bg-gradient-to-r from-violet via-violet-bright to-cyan-bright origin-left"
-          style={{ scaleX: progress }}
-        />
-      </div>
+      <motion.div
+        aria-hidden="true"
+        className="pointer-events-none fixed inset-x-0 top-0 z-nav h-0.5 origin-left bg-gradient-to-r from-violet via-violet-bright to-cyan-bright"
+        style={{ scaleX: scrollYProgress }}
+      />
 
       <motion.nav
-        initial={{ y: -30, opacity: 0 }}
-        animate={{ y: hidden && !open ? -80 : 0, opacity: hidden && !open ? 0 : 1 }}
-        transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+        ref={navRef}
+        id="site-nav"
+        aria-label="Main"
+        initial={false}
+        style={{ y: navY }}
+        onFocusCapture={() => setHidden(false)}
         className={cn(
-          'fixed top-3 sm:top-4 left-1/2 -translate-x-1/2 z-40 max-w-[calc(100vw-1rem)]',
-          'flex items-center gap-0.5 sm:gap-1 rounded-full px-2 sm:px-3 py-1.5 sm:py-2',
-          scrolled ? 'glass-strong' : 'glass',
+          'glass glass-keep fixed inset-x-0 top-3 z-nav mx-auto flex w-fit max-w-[calc(100vw_-_1rem)] items-center gap-1 rounded-full p-1.5 sm:top-4 md:gap-0.5 lg:gap-1',
+          'transition-[background-color,border-color,box-shadow] duration-300',
+          'data-scrolled:border-glass-border-strong data-scrolled:bg-glass-fill-strong data-scrolled:shadow-[var(--app-glass-shadow-strong)]',
         )}
       >
-        <a
-          href="#hero"
-          className="tap-safe font-display font-bold text-sm tracking-wide px-3 sm:px-4 text-text-primary"
+        <Link
+          href="/"
+          onClick={goHome}
+          aria-label={`${SITE.name}, home`}
+          className="tap-safe rounded-full px-3 font-display text-sm font-bold tracking-wide text-text-primary ring-focus"
         >
           OB<span className="text-violet-bright">.</span>
-        </a>
-        <div className="hidden md:flex items-center gap-1">
-          {LINKS.map((l) => {
-            const isActive = active === l.href.slice(1);
-            return (
-              <a
-                key={l.href}
-                href={l.href}
-                className={cn(
-                  'relative px-4 py-1.5 text-sm font-medium rounded-full transition-colors',
-                  isActive ? 'text-white' : 'text-text-muted hover:text-text-primary',
-                )}
-              >
-                {isActive && (
-                  <motion.span
-                    layoutId="nav-active-pill"
-                    className="absolute inset-0 rounded-full bg-gradient-to-r from-violet via-violet-bright to-cyan-bright shadow-[0_0_18px_rgba(168,85,247,0.45)]"
-                    transition={{ type: 'spring', stiffness: 380, damping: 32 }}
-                  />
-                )}
-                <span className="relative z-10">{l.label}</span>
-              </a>
-            );
-          })}
-        </div>
-        <ThemeToggle className="ml-0.5 sm:ml-1" />
-        <button
-          className="md:hidden p-2 text-text-primary rounded-full hover:bg-glass-fill-strong transition-colors"
-          onClick={() => setOpen((v) => !v)}
-          aria-label={open ? 'Close menu' : 'Open menu'}
-          aria-expanded={open}
+        </Link>
+
+        <NavLinks pathname={pathname} />
+
+        {onOpenPalette ? (
+          <span className="hidden md:inline-flex">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onOpenPalette}
+              aria-label="Search the site"
+              aria-keyshortcuts="Control+K Meta+K /"
+              data-palette-trigger=""
+              leadingIcon={<Search aria-hidden="true" className="size-4 shrink-0" />}
+              className="px-2.5"
+            >
+              <KbdHint />
+            </Button>
+          </span>
+        ) : null}
+
+        {/* Resume stays in the bar at every width: 'CV' where the links leave little room. */}
+        <span className="inline-flex md:hidden lg:inline-flex">
+          <DownloadCvButton size="sm" label="Resume" />
+        </span>
+        <span className="hidden md:inline-flex lg:hidden">
+          <DownloadCvButton size="sm" label="CV" />
+        </span>
+
+        <ThemeToggle />
+        <span className="hidden md:inline-flex">
+          <MotionToggle />
+        </span>
+
+        <Button
+          ref={burgerRef}
+          variant="icon"
+          aria-label="Menu"
+          aria-expanded={menuOpen}
+          aria-controls="mobile-menu"
+          onClick={openMenu}
+          className="size-11 md:hidden"
         >
-          <AnimatePresence mode="wait" initial={false}>
-            {open ? (
-              <motion.span
-                key="x"
-                initial={{ rotate: -90, opacity: 0 }}
-                animate={{ rotate: 0, opacity: 1 }}
-                exit={{ rotate: 90, opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                className="inline-flex"
-              >
-                <X size={18} />
-              </motion.span>
-            ) : (
-              <motion.span
-                key="m"
-                initial={{ rotate: 90, opacity: 0 }}
-                animate={{ rotate: 0, opacity: 1 }}
-                exit={{ rotate: -90, opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                className="inline-flex"
-              >
-                <Menu size={18} />
-              </motion.span>
-            )}
-          </AnimatePresence>
-        </button>
+          <span className="burger">
+            <span />
+            <span />
+            <span />
+          </span>
+        </Button>
       </motion.nav>
 
-      <AnimatePresence>
-        {open && (
-          <>
-            <motion.div
-              key="nav-backdrop"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.25 }}
-              className="md:hidden fixed inset-0 z-30 bg-bg-base/60 backdrop-blur-sm"
-              onClick={() => setOpen(false)}
-              aria-hidden
-            />
-            <motion.div
-              key="nav-sheet"
-              initial={{ opacity: 0, y: -20, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -12, scale: 0.98 }}
-              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              className="md:hidden fixed top-20 left-4 right-4 z-40 glass-strong p-5 sm:p-6 flex flex-col gap-1"
-              role="dialog"
-              aria-modal="true"
-            >
-              {LINKS.map((l, i) => {
-                const isActive = active === l.href.slice(1);
-                return (
-                  <motion.a
-                    key={l.href}
-                    href={l.href}
-                    onClick={() => setOpen(false)}
-                    initial={{ opacity: 0, x: -12 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.04 * i + 0.1, duration: 0.3 }}
-                    className={cn(
-                      'py-3 px-3 rounded-lg text-base font-medium transition-colors flex items-center justify-between',
-                      isActive
-                        ? 'text-text-primary bg-glass-fill-strong'
-                        : 'text-text-secondary hover:text-text-primary hover:bg-glass-fill',
-                    )}
-                  >
-                    <span>{l.label}</span>
-                    {isActive && (
-                      <span className="w-1.5 h-1.5 rounded-full bg-violet-bright shadow-[0_0_8px_rgba(168,85,247,0.8)]" />
-                    )}
-                  </motion.a>
-                );
-              })}
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+      <MobileMenu open={menuOpen} onClose={closeMenu} origin={menu.origin} />
     </>
   );
 }

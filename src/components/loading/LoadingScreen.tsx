@@ -1,164 +1,226 @@
-import { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+'use client';
 
-interface Props {
-  onComplete: () => void;
+import { useEffect, useRef, useState, type CSSProperties, type RefObject } from 'react';
+import { Button } from '@/components/ui/Button';
+import { useIntro } from '@/contexts/IntroContext';
+import { useHydrated } from '@/hooks/useHydrated';
+import { getMotionPrefs } from '@/hooks/useMotionPrefs';
+import { useScrollLock } from '@/hooks/useScrollLock';
+
+/** The curtain stays at least this long after navigation start... */
+const MIN_MS = 600;
+/** ...and never longer, whatever the fonts and the hero are doing. */
+const CAP_MS = 1400;
+const EXIT_MS = 750;
+
+const FIRST = 'Oikantik’s';
+const SECOND = 'Portfolio';
+
+// Mirrors ease.curtain / ease.out / ease.in from lib/motion for WAAPI.
+const CURTAIN = 'cubic-bezier(0.87, 0, 0.13, 1)';
+const OUT = 'cubic-bezier(0.16, 1, 0.3, 1)';
+const IN = 'cubic-bezier(0.7, 0, 0.84, 0)';
+
+function navStart(): number {
+  return typeof window.__navStart === 'number' ? window.__navStart : Date.now() - performance.now();
 }
 
-export default function LoadingScreen({ onComplete }: Props) {
-  const [progress, setProgress] = useState(0);
-  const [ready, setReady] = useState(false);
-  const [dismissing, setDismissing] = useState(false);
-  const [hoveringButton, setHoveringButton] = useState(false);
+function Letters({ word, offset }: { word: string; offset: number }) {
+  return (
+    <>
+      {Array.from(word).map((ch, i) => (
+        <span key={i} className="intro-letter" style={{ '--i': offset + i } as CSSProperties}>
+          {ch}
+        </span>
+      ))}
+    </>
+  );
+}
+
+type Props = {
+  /** The page behind the curtain: made inert while it shows, and settled from 1.04 to 1 as it leaves. */
+  pageRef?: RefObject<HTMLElement | null>;
+};
+
+/**
+ * First-visit intro curtain. It is always server-rendered, and CSS shows it only
+ * under html.js[data-intro=pending], so it covers the page from the first paint
+ * (no flash) and never appears without JS. After hydration it waits for the web
+ * fonts and the hero, bounded to 600-1400ms from navigation start, then splits
+ * open and calls markDone(). Skip, any key, a click or a wheel ends it early.
+ */
+export default function LoadingScreen({ pageRef }: Props) {
+  const hydrated = useHydrated();
+  const { phase, heroReady, markDone } = useIntro();
+  const active = hydrated && phase === 'pending';
+  const [fontsReady, setFontsReady] = useState(false);
+  const [exiting, setExiting] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  useScrollLock(active);
 
   useEffect(() => {
-    const start = Date.now();
-    const minDuration = 2500;
+    const page = pageRef?.current;
+    if (!active || !page) return;
+    page.inert = true;
+    return () => {
+      page.inert = false;
+    };
+  }, [active, pageRef]);
 
-    const interval = setInterval(() => {
-      const elapsed = Date.now() - start;
-      const pct = Math.min(100, (elapsed / minDuration) * 100);
-      setProgress(pct);
-      if (pct >= 100) {
-        clearInterval(interval);
-        setTimeout(() => setReady(true), 300);
-      }
-    }, 30);
+  useEffect(() => {
+    if (!active) return;
+    let alive = true;
+    (document.fonts?.ready ?? Promise.resolve())
+      .catch(() => undefined)
+      .then(() => {
+        if (alive) setFontsReady(true);
+      });
+    return () => {
+      alive = false;
+    };
+  }, [active]);
 
-    return () => clearInterval(interval);
-  }, []);
+  // Leave when ready, but not before MIN_MS, and at CAP_MS regardless.
+  useEffect(() => {
+    if (!active || exiting) return;
+    const start = navStart();
+    const at = fontsReady && heroReady ? Math.max(start + MIN_MS, Date.now()) : start + CAP_MS;
+    const timer = window.setTimeout(() => setExiting(true), Math.max(0, at - Date.now()));
+    return () => window.clearTimeout(timer);
+  }, [active, exiting, fontsReady, heroReady]);
 
-  const handleEnterClick = () => {
-    setDismissing(true);
-    setTimeout(onComplete, 900);
-  };
+  // Any key, click, tap or wheel skips. Tab and bare modifiers do not, so the Skip button stays reachable.
+  useEffect(() => {
+    if (!active || exiting) return;
+    const skip = () => setExiting(true);
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Tab' || e.key === 'Shift' || e.key === 'Control' || e.key === 'Alt' || e.key === 'Meta') return;
+      skip();
+    };
+    window.addEventListener('keydown', onKey);
+    window.addEventListener('pointerdown', skip);
+    window.addEventListener('wheel', skip, { passive: true });
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      window.removeEventListener('pointerdown', skip);
+      window.removeEventListener('wheel', skip);
+    };
+  }, [active, exiting]);
 
-  const titleWord = 'Portfolio';
-  const charsRevealed = Math.floor((progress / 100) * titleWord.length);
+  // Nothing scrolls while the curtain is up, including during the exit.
+  useEffect(() => {
+    if (!active) return;
+    const block = (e: Event) => e.preventDefault();
+    const blockKeys = (e: KeyboardEvent) => {
+      if ([' ', 'PageDown', 'PageUp', 'ArrowDown', 'ArrowUp', 'Home', 'End'].includes(e.key)) e.preventDefault();
+    };
+    window.addEventListener('wheel', block, { passive: false });
+    window.addEventListener('touchmove', block, { passive: false });
+    window.addEventListener('keydown', blockKeys);
+    return () => {
+      window.removeEventListener('wheel', block);
+      window.removeEventListener('touchmove', block);
+      window.removeEventListener('keydown', blockKeys);
+    };
+  }, [active]);
+
+  // The exit: text lifts away, the two panels split, the page settles from 1.04.
+  useEffect(() => {
+    if (!exiting) return;
+    const root = rootRef.current;
+    const page = pageRef?.current ?? null;
+    if (!root || getMotionPrefs().reduce || typeof root.animate !== 'function') {
+      markDone();
+      return;
+    }
+
+    const content = root.querySelector<HTMLElement>('.intro-content');
+    const top = root.querySelector<HTMLElement>('[data-side="top"]');
+    const bottom = root.querySelector<HTMLElement>('[data-side="bottom"]');
+    const anims: Animation[] = [];
+    const run = (el: Element | null, frames: Keyframe[], opts: KeyframeAnimationOptions) => {
+      if (el) anims.push(el.animate(frames, { fill: 'both', ...opts }));
+    };
+
+    run(content, [{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'translateY(-12px)' }], {
+      duration: 240,
+      easing: IN,
+    });
+    run(top, [{ transform: 'translateY(0)' }, { transform: 'translateY(-100%)' }], {
+      duration: EXIT_MS,
+      delay: 100,
+      easing: CURTAIN,
+    });
+    run(bottom, [{ transform: 'translateY(0)' }, { transform: 'translateY(100%)' }], {
+      duration: EXIT_MS,
+      delay: 100,
+      easing: CURTAIN,
+    });
+    // The content settles, not the whole wrapper: a transform there would re-anchor
+    // every fixed descendant (nav, dock) to the page for the length of the exit.
+    const stage = page?.querySelector<HTMLElement>('#main') ?? page;
+    if (stage) {
+      // Scale about the middle of what is on screen, not the middle of the whole page.
+      stage.style.transformOrigin = `50% ${Math.round(window.scrollY + window.innerHeight / 2)}px`;
+      run(stage, [{ transform: 'scale(1.04)' }, { transform: 'none' }], { duration: EXIT_MS, delay: 100, easing: OUT });
+    }
+
+    let alive = true;
+    Promise.all(anims.map((a) => a.finished)).then(
+      () => {
+        if (!alive) return;
+        markDone();
+        // Drop the finished transforms entirely rather than leaving scale(1) behind.
+        anims.forEach((a) => a.cancel());
+        if (stage) stage.style.transformOrigin = '';
+        // Positions measured while the page was scaled are stale.
+        import('gsap/ScrollTrigger')
+          .then(({ ScrollTrigger }) => ScrollTrigger.refresh())
+          .catch(() => {});
+      },
+      () => {},
+    );
+    return () => {
+      alive = false;
+      anims.forEach((a) => a.cancel());
+      if (stage) stage.style.transformOrigin = '';
+    };
+  }, [exiting, markDone, pageRef]);
+
+  // Once the intro is over (or was never due) the curtain leaves the DOM.
+  if (hydrated && phase === 'done') return null;
 
   return (
-    <AnimatePresence>
-      {!dismissing && (
-        <motion.div
-          initial={{ opacity: 1 }}
-          exit={{ opacity: 0, transition: { duration: 0.8, ease: [0.76, 0, 0.24, 1] } }}
-          className="fixed inset-0 z-[200] bg-bg-base flex flex-col items-center justify-center overflow-hidden"
+    <div ref={rootRef} className="intro-curtain" data-intro-curtain="" data-state={exiting ? 'exit' : 'idle'}>
+      <div className="intro-panel" data-side="top" />
+      <div className="intro-panel" data-side="bottom" />
+      <div className="intro-content">
+        <div role="status" className="flex flex-col items-center gap-6">
+          <p className="intro-title">
+            <span className="sr-only">
+              {FIRST} {SECOND}. Loading.
+            </span>
+            <span aria-hidden="true" data-word="first">
+              <Letters word={FIRST} offset={0} />
+            </span>
+            <span aria-hidden="true" data-word="second">
+              <Letters word={SECOND} offset={FIRST.length} />
+            </span>
+          </p>
+          <span className="intro-bar" aria-hidden="true">
+            <span />
+          </span>
+        </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setExiting(true)}
+          className="absolute bottom-[max(2rem,env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2 text-text-secondary"
         >
-          <div
-            aria-hidden
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              background:
-                'radial-gradient(ellipse at 25% 40%, rgba(168, 85, 247, 0.18), transparent 55%), radial-gradient(ellipse at 75% 60%, rgba(6, 182, 212, 0.14), transparent 55%)',
-              filter: 'blur(40px)',
-            }}
-          />
-
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.2, ease: 'easeOut' }}
-            className="relative z-10 flex flex-col items-center"
-          >
-            <h1
-              className="font-elegant text-[32px] md:text-[44px] font-light tracking-tight flex items-baseline"
-              style={{ fontFamily: 'var(--font-elegant)' }}
-            >
-              <span className="italic font-light text-white/90">Oikantik&rsquo;s</span>
-              <span className="font-semibold ml-3">
-                {titleWord.split('').map((char, i) => {
-                  const revealed = i < charsRevealed;
-                  return (
-                    <motion.span
-                      key={i}
-                      animate={{
-                        opacity: revealed ? 1 : 0.15,
-                      }}
-                      transition={{ duration: 0.4, ease: 'easeOut' }}
-                      style={
-                        revealed
-                          ? {
-                              background:
-                                'linear-gradient(135deg, #A855F7 0%, #06B6D4 100%)',
-                              WebkitBackgroundClip: 'text',
-                              backgroundClip: 'text',
-                              WebkitTextFillColor: 'transparent',
-                              color: 'transparent',
-                            }
-                          : { color: '#3a3a3a' }
-                      }
-                    >
-                      {char}
-                    </motion.span>
-                  );
-                })}
-              </span>
-            </h1>
-          </motion.div>
-
-          <div className="relative z-10 mt-10 h-10 flex items-center justify-center">
-            <AnimatePresence>
-              {ready && (
-                <motion.button
-                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                  transition={{ duration: 0.6, ease: [0.34, 1.56, 0.64, 1] }}
-                  onClick={handleEnterClick}
-                  onMouseEnter={() => setHoveringButton(true)}
-                  onMouseLeave={() => setHoveringButton(false)}
-                  className="relative px-9 py-2.5 rounded-full overflow-hidden border border-purple-400/40 text-xs tracking-[0.25em] uppercase font-medium"
-                >
-                  <motion.div
-                    className="absolute inset-0 rounded-full"
-                    initial={{ scale: 0, opacity: 0 }}
-                    animate={{
-                      scale: hoveringButton ? 1.25 : 0,
-                      opacity: hoveringButton ? 1 : 0,
-                    }}
-                    transition={{ duration: 0.4, ease: [0.76, 0, 0.24, 1] }}
-                    style={{
-                      background:
-                        'linear-gradient(135deg, #A855F7 0%, #06B6D4 100%)',
-                    }}
-                  />
-                  <span
-                    className={`relative z-10 transition-colors duration-300 ${
-                      hoveringButton ? 'text-black' : 'text-white/90'
-                    }`}
-                  >
-                    Enter
-                  </span>
-                </motion.button>
-              )}
-            </AnimatePresence>
-          </div>
-
-          {!ready && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.4 }}
-              className="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 z-10"
-            >
-              <div className="w-24 h-px bg-white/10 overflow-hidden rounded-full">
-                <motion.div
-                  className="h-full"
-                  style={{
-                    background:
-                      'linear-gradient(90deg, #A855F7 0%, #06B6D4 100%)',
-                  }}
-                  animate={{ width: `${progress}%` }}
-                  transition={{ duration: 0.2 }}
-                />
-              </div>
-              <span className="text-[10px] tracking-[0.3em] uppercase text-white/40 font-mono">
-                {progress >= 100 ? 'Ready' : 'Loading'}
-              </span>
-            </motion.div>
-          )}
-        </motion.div>
-      )}
-    </AnimatePresence>
+          Skip intro
+        </Button>
+      </div>
+    </div>
   );
 }

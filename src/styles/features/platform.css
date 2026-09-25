@@ -1,0 +1,216 @@
+/* Package: platform — app routes, not-found, print. */
+
+/* Page boxes are not selected elements, so this sits outside the layer where every browser applies it. */
+@media print {
+  @page {
+    size: A4;
+    margin: 18mm;
+  }
+}
+
+@layer components {
+  /* ============================
+     Print: a single-column light document with its links spelled out.
+     Browsers skip backgrounds by default, so nothing may depend on one.
+     Components can opt out of print with data-print="hide".
+     ============================ */
+  @media print {
+    /* Light tokens on white, whatever the screen theme is. */
+    :root {
+      color-scheme: light;
+      --app-bg-base: #FFFFFF;
+      --app-bg-surface: #FFFFFF;
+      --app-bg-elevated: #FFFFFF;
+      --app-bg-sunken: #FFFFFF;
+      --app-bg-footer: #FFFFFF;
+      --app-glass-fill: transparent;
+      --app-glass-fill-strong: transparent;
+      --app-glass-fill-dense: transparent;
+      --app-glass-fill-strong-dense: transparent;
+      --app-glass-border: rgba(20, 20, 30, 0.16);
+      --app-glass-border-strong: rgba(20, 20, 30, 0.24);
+      --app-glass-shadow: none;
+      --app-glass-shadow-strong: none;
+      --app-glass-sheen: transparent;
+      --app-text-primary: #0F0F14;
+      --app-text-secondary: #2A2A33;
+      --app-text-muted: #55555F;
+      --app-text-dim: #5F5F69;
+      --app-cyan-text: #0B6B85;
+      --app-amber-text: #A3480A;
+      --app-positive: #046C4E;
+      --app-negative: #BE123C;
+      --app-success: #046C4E;
+      --app-danger: #BE123C;
+      --app-hairline: rgba(20, 20, 30, 0.16);
+      --app-surface-tint: transparent;
+      --app-heat-0: rgba(20, 20, 30, 0.07);
+      --app-violet: #6D28D9;
+      --app-violet-bright: #6D28D9;
+      --app-cyan: #0E7490;
+      --app-cyan-bright: #0E7490;
+      --app-amber: #A3480A;
+      --app-pink: #BE185D;
+      --app-glow-violet: none;
+      --app-glow-cyan: none;
+      --app-aurora: none;
+      --app-bokeh-opacity: 0;
+      --app-noise-opacity: 0;
+      --section-space: 12mm;
+    }
+
+    /* No half-finished theme cross-fade in the snapshot. Animations stay: removing a
+       finished fill-forwards reveal would drop the element back to its hidden start. */
+    *,
+    *::before,
+    *::after {
+      transition: none !important;
+    }
+
+    html,
+    body {
+      background: #FFFFFF !important;
+      color: var(--app-text-primary) !important;
+    }
+    body {
+      font-size: 11pt;
+      line-height: 1.5;
+    }
+
+    /* Chrome that only makes sense on screen. */
+    canvas,
+    video,
+    iframe,
+    audio,
+    nav,
+    #site-nav,
+    [data-mobile-menu],
+    .fixed,
+    .bokeh,
+    .noise-overlay,
+    .intro-curtain,
+    [data-dock],
+    [data-toast-region],
+    [data-dialog-root],
+    [data-tooltip],
+    [data-lottie],
+    [data-footer-marquee],
+    #site-footer button,
+    [data-print="hide"] {
+      display: none !important;
+    }
+
+    /* Decorative layers (scrims, glows, ripples) are aria-hidden. Without background
+       graphics Chrome paints a gradient scrim as an opaque box over the image under it. */
+    [aria-hidden="true"]:is(.absolute, .fixed) {
+      display: none !important;
+    }
+    /* Copy pulled up over a hero image would print on top of the picture. */
+    :is([class^="-mt-"], [class*=" -mt-"], [class*=":-mt-"]) {
+      margin-top: 1rem !important;
+    }
+
+    /* Expand: no viewport-tall heroes, pinned scenes, clipped scrollers or multi-column grids. */
+    main,
+    section,
+    header,
+    footer,
+    article,
+    .pin-spacer {
+      min-height: 0 !important;
+      height: auto !important;
+      max-height: none !important;
+    }
+    .pin-spacer {
+      padding: 0 !important;
+    }
+    .pin-spacer > *,
+    .sticky {
+      position: static !important;
+    }
+    /* Scrollers would cut their content at the fold; decorative clips stay. */
+    main :is(.overflow-auto, .overflow-y-auto, .overflow-x-auto, .overflow-scroll, [data-lenis-prevent]) {
+      overflow: visible !important;
+      max-height: none !important;
+    }
+    .grid {
+      grid-template-columns: minmax(0, 1fr) !important;
+    }
+    .grid > * {
+      grid-column: auto !important;
+      grid-row: auto !important;
+    }
+    .container-padding,
+    .section-shell {
+      padding-inline: 0 !important;
+    }
+
+    /* Anything a scroll animation left mid-flight prints in its final state. */
+    [data-reveal],
+    .hero-char,
+    main [style*="opacity:0"],
+    main [style*="opacity: 0"] {
+      opacity: 1 !important;
+      transform: none !important;
+      filter: none !important;
+      clip-path: none !important;
+      visibility: visible !important;
+    }
+
+    /* Gradient-clipped and outlined text would print invisible without backgrounds. */
+    .gradient-text,
+    .bg-clip-text,
+    .text-outline,
+    .text-transparent {
+      background: none !important;
+      color: var(--app-text-primary) !important;
+      -webkit-text-fill-color: currentColor !important;
+      -webkit-text-stroke: 0 !important;
+    }
+    .text-white {
+      color: var(--app-text-primary) !important;
+    }
+
+    .glass,
+    .glass-strong,
+    .glass-interactive {
+      -webkit-backdrop-filter: none !important;
+      backdrop-filter: none !important;
+      box-shadow: none !important;
+      background-image: none !important;
+    }
+    .aurora-bg {
+      background: none !important;
+    }
+
+    h1,
+    h2,
+    h3 {
+      break-after: avoid;
+    }
+    article,
+    figure,
+    li,
+    .glass,
+    .glass-strong {
+      break-inside: avoid;
+    }
+    img,
+    svg {
+      max-width: 100% !important;
+      break-inside: avoid;
+    }
+
+    /* Spell out where links go. In-page and relative links are left alone. */
+    a[href^="http"]::after,
+    a[href^="mailto:"]::after,
+    a[href^="tel:"]::after {
+      content: " (" attr(href) ")";
+      font-family: var(--font-mono);
+      font-size: 0.8em;
+      font-weight: 400;
+      color: var(--app-text-muted);
+      overflow-wrap: anywhere;
+    }
+  }
+}

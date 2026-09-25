@@ -1,59 +1,61 @@
 'use client';
 
-import { useEffect } from 'react';
-import { ThemeProvider } from '../src/contexts/ThemeContext';
+import { useEffect, useState, type ReactNode } from 'react';
+import { MotionConfig } from 'framer-motion';
+import { ToastProvider } from '@/components/ui/Toast';
+import { IntroProvider } from '@/contexts/IntroContext';
+import { LenisProvider } from '@/contexts/LenisContext';
+import { ThemeProvider } from '@/contexts/ThemeContext';
+import { useHydrated } from '@/hooks/useHydrated';
+import { getMotionPrefs, useMotionPrefs } from '@/hooks/useMotionPrefs';
+import { duration, ease } from '@/lib/motion';
 
-export function Providers({ children }: { children: React.ReactNode }) {
+const DEFAULT_TRANSITION = { ease: ease.out, duration: duration.base };
+
+export function Providers({ children }: { children: ReactNode }) {
+  const prefs = useMotionPrefs();
+  const hydrated = useHydrated();
+  // framer-motion fixes each element's reduced-motion mode when the element is
+  // created, but hydration renders see the store's server snapshot (reduce: false).
+  // So the hydration pass reads the real preference (OS and stored override)
+  // directly. It only feeds context, never markup, so hydration still matches.
+  const [hydrationReduce] = useState(() => typeof window !== 'undefined' && getMotionPrefs().reduce);
+  const reduce = hydrated ? prefs.reduce : hydrationReduce;
+
+  // Drops the hydration-failure safety net in index.css: reveals are ours now.
   useEffect(() => {
-    let cleanup = () => {};
+    document.documentElement.classList.add('hydrated');
+  }, []);
+
+  // ScrollTrigger is registered once for the app; measurements taken before the
+  // web fonts land are stale, so refresh when they have.
+  useEffect(() => {
     let cancelled = false;
-
-    (async () => {
-      const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-      const [{ default: Lenis }, { default: gsap }, { ScrollTrigger }] = await Promise.all([
-        import('lenis'),
-        import('gsap'),
-        import('gsap/ScrollTrigger'),
-      ]);
-      if (cancelled) return;
-
-      gsap.registerPlugin(ScrollTrigger);
-
-      if (prefersReduced) {
-        cleanup = () => ScrollTrigger.killAll();
-        return;
-      }
-
-      const lenis = new Lenis({
-        duration: 1.2,
-        easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-        orientation: 'vertical',
-        smoothWheel: true,
-        // Native momentum on touch devices beats a JS-driven scroll loop.
-        syncTouch: false,
+    Promise.all([import('gsap'), import('gsap/ScrollTrigger')])
+      .then(([{ default: gsap }, { ScrollTrigger }]) => {
+        if (cancelled) return;
+        gsap.registerPlugin(ScrollTrigger);
+        document.fonts?.ready.then(() => {
+          if (!cancelled) ScrollTrigger.refresh();
+        });
+      })
+      .catch(() => {
+        /* scroll effects degrade to their static state */
       });
-
-      const onScroll = () => ScrollTrigger.update();
-      lenis.on('scroll', onScroll);
-
-      const raf = (time: number) => lenis.raf(time * 1000);
-      gsap.ticker.add(raf);
-      gsap.ticker.lagSmoothing(0);
-
-      cleanup = () => {
-        gsap.ticker.remove(raf);
-        lenis.off('scroll', onScroll);
-        lenis.destroy();
-        ScrollTrigger.killAll();
-      };
-    })();
-
     return () => {
       cancelled = true;
-      cleanup();
     };
   }, []);
 
-  return <ThemeProvider>{children}</ThemeProvider>;
+  return (
+    <MotionConfig reducedMotion={reduce ? 'always' : 'never'} transition={DEFAULT_TRANSITION}>
+      <LenisProvider>
+        <IntroProvider>
+          <ThemeProvider>
+            <ToastProvider>{children}</ToastProvider>
+          </ThemeProvider>
+        </IntroProvider>
+      </LenisProvider>
+    </MotionConfig>
+  );
 }

@@ -1,324 +1,491 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { MessageSquare, X, Send, Sparkles } from 'lucide-react';
-import profile from '../../data/profile.json';
-import projects from '../../data/projects.json';
+'use client';
 
-type Msg = { from: 'bot' | 'user'; text: string; actions?: Array<{ label: string; url: string }> };
+import {
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type FormEvent,
+  type KeyboardEvent as ReactKeyboardEvent,
+  type ReactNode,
+  type RefObject,
+} from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { ArrowUpRight, MessageSquare, PenLine, Send, Sparkles, X } from 'lucide-react';
+import profile from '@/data/profile.json';
+import projects from '@/data/projects.json';
+import { LottieIcon } from '@/components/shared/LottieIcon';
+import { Button } from '@/components/ui/Button';
+import { Dialog } from '@/components/ui/Dialog';
+import { DownloadCvButton } from '@/components/ui/DownloadCvButton';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
+import { useMotionPrefs } from '@/hooks/useMotionPrefs';
+import { emit } from '@/lib/events';
+import { duration, ease } from '@/lib/motion';
+import { slugify } from '@/lib/slug';
+import { answer as ask, isMultiSentence, STARTERS, type AskAnswer, type AskData } from '@/utils/askme';
 
-type SkillMap = Record<string, string[]>;
+type Msg = { id: number; from: 'bot' | 'user'; text: string; answer?: AskAnswer };
+type Project = (typeof projects)[number];
 
-const STARTERS = [
-  'What do you work on?',
-  'Show me your best projects',
-  'What tech do you use?',
-  'How do I hire you?',
-];
+const DATA: AskData = { profile, projects };
+const BY_SLUG = new Map<string, Project>(projects.map((p) => [slugify(p.name), p]));
 
-function formatExperience() {
-  return profile.experience
-    .map((e) => `· ${e.role} @ ${e.company} (${e.duration}) — ${e.highlights[0]}`)
-    .join('\n');
+const GREETING: Msg = {
+  id: 0,
+  from: 'bot',
+  text: "Hi, I'm Oikantik's portfolio assistant. Ask about projects, skills, or how to work together.",
+};
+
+const Q_PHONE = '(max-width: 639.98px)';
+// Chips and links inside answers: 36px under a mouse, 44px on touch (tap-safe-sm).
+const CHIP =
+  'tap-safe-sm inline-flex items-center gap-1 rounded-full border border-glass-border bg-glass-fill px-3 text-xs font-medium text-text-secondary ring-focus transition-colors hover:border-glass-border-strong hover:text-text-primary';
+
+function renderInline(text: string): ReactNode {
+  return text.split('\n').map((line, i) => (
+    <span key={i} className="block">
+      {line.split(/\*\*(.+?)\*\*/g).map((part, j) =>
+        j % 2 === 1 ? (
+          <strong key={j} className="font-semibold text-text-primary">
+            {part}
+          </strong>
+        ) : (
+          <span key={j}>{part}</span>
+        ),
+      )}
+    </span>
+  ));
 }
 
-function topProjects(n = 3) {
-  return (projects as Array<{ name: string; tagline: string; featured: boolean; githubUrl: string; liveUrl: string | null }>)
-    .filter((p) => p.featured)
-    .slice(0, n);
+function MiniProject({ slug, onShow }: { slug: string; onShow: (slug: string) => void }) {
+  const p = BY_SLUG.get(slug);
+  const [imgOk, setImgOk] = useState(true);
+  if (!p) return null;
+  return (
+    <div data-ask-project={slug} className="flex gap-3 rounded-xl border border-glass-border bg-glass-fill p-2">
+      {imgOk && p.thumbnail ? (
+        // Thumbnails are a mix of local and GitHub-hosted files, shown at 64px; next/image adds nothing here.
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={p.thumbnail}
+          alt=""
+          width={64}
+          height={48}
+          loading="lazy"
+          decoding="async"
+          referrerPolicy="no-referrer"
+          onError={() => setImgOk(false)}
+          className="h-12 w-16 shrink-0 rounded-lg object-cover"
+        />
+      ) : (
+        <span aria-hidden="true" className="h-12 w-16 shrink-0 rounded-lg bg-heat-0" />
+      )}
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-semibold leading-5 text-text-primary">{p.name}</p>
+        <p className="line-clamp-2 text-xs leading-4 text-text-muted">{p.tagline}</p>
+        <div className="mt-1.5 flex flex-wrap gap-1.5">
+          <button type="button" onClick={() => onShow(slug)} className={CHIP} data-cursor="open">
+            Show in Projects
+          </button>
+          {p.liveUrl ? (
+            <a href={p.liveUrl} target="_blank" rel="noopener noreferrer" className={CHIP}>
+              Live
+              <ArrowUpRight aria-hidden="true" className="size-3" />
+              <span className="sr-only"> demo of {p.name} (opens in new tab)</span>
+            </a>
+          ) : null}
+          <a href={p.githubUrl} target="_blank" rel="noopener noreferrer" className={CHIP}>
+            Code
+            <ArrowUpRight aria-hidden="true" className="size-3" />
+            <span className="sr-only"> of {p.name} on GitHub (opens in new tab)</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  );
 }
 
-function searchProjects(q: string) {
-  const lc = q.toLowerCase();
-  return (projects as Array<{ name: string; tagline: string; shortDescription: string; techStack: string[]; topics: string[]; githubUrl: string; liveUrl: string | null }>)
-    .map((p) => {
-      const hay = `${p.name} ${p.tagline} ${p.shortDescription} ${p.techStack.join(' ')} ${p.topics.join(' ')}`.toLowerCase();
-      const score = lc.split(/\s+/).filter(Boolean).reduce((s, w) => s + (hay.includes(w) ? 1 : 0), 0);
-      return { p, score };
-    })
-    .filter((x) => x.score > 0)
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 3)
-    .map((x) => x.p);
-}
-
-function matchSkill(q: string): string | null {
-  const lc = q.toLowerCase();
-  const skills = profile.skills as SkillMap;
-  for (const [cat, list] of Object.entries(skills)) {
-    for (const s of list) {
-      if (lc.includes(s.toLowerCase())) return `${s} — in **${cat}**. I've used it in production workflows; ask about a specific project.`;
-    }
-  }
-  return null;
-}
-
-function answer(q: string): Msg {
-  const lc = q.toLowerCase().trim();
-  if (!lc) return { from: 'bot', text: "Ask me anything about Oikantik's work, projects, or skills." };
-
-  if (/(hire|work with|contact|email|reach)/.test(lc)) {
-    return {
-      from: 'bot',
-      text: `Easiest way: drop a note at **${profile.email}** or use the contact form below. Open to AI/ML engineering roles and consulting.`,
-      actions: [
-        { label: 'Email', url: `mailto:${profile.email}` },
-        { label: 'LinkedIn', url: profile.links.linkedin },
-      ],
-    };
-  }
-
-  if (/(resume|cv|download)/.test(lc)) {
-    const base = '/';
-    return { from: 'bot', text: 'Here is my CV.', actions: [{ label: 'Download CV', url: `${base}oikantik_basu_u.pdf` }] };
-  }
-
-  if (/(about|who are you|yourself|background|bio)/.test(lc)) {
-    return { from: 'bot', text: profile.about.slice(0, 320) + '…' };
-  }
-
-  if (/(experience|job|work history|role|company|companies)/.test(lc)) {
-    return { from: 'bot', text: formatExperience() };
-  }
-
-  if (/(education|degree|college|university|study)/.test(lc)) {
-    return {
-      from: 'bot',
-      text: profile.education.map((e) => `· ${e.degree} — ${e.institution} (${e.year}) · ${e.status}`).join('\n'),
-    };
-  }
-
-  if (/(stack|tech|tools|language|framework)/.test(lc)) {
-    const skills = profile.skills as SkillMap;
-    return {
-      from: 'bot',
-      text: Object.entries(skills)
-        .map(([cat, list]) => `**${cat}:** ${list.slice(0, 6).join(', ')}`)
-        .join('\n'),
-    };
-  }
-
-  if (/(best|top|featured|favorite|highlight) (project|work)/.test(lc) || /(show|list) (me )?(projects?|work)/.test(lc)) {
-    const top = topProjects();
-    return {
-      from: 'bot',
-      text: top.map((p) => `· **${p.name}** — ${p.tagline}`).join('\n'),
-      actions: top.map((p) => ({ label: p.name, url: p.liveUrl || p.githubUrl })),
-    };
-  }
-
-  if (/(project|built|made|created|shipped)/.test(lc)) {
-    const results = searchProjects(lc);
-    if (results.length) {
-      return {
-        from: 'bot',
-        text: results.map((p) => `· **${p.name}** — ${p.tagline}`).join('\n'),
-        actions: results.map((p) => ({ label: p.name, url: p.liveUrl || p.githubUrl })),
-      };
-    }
-  }
-
-  const skillHit = matchSkill(lc);
-  if (skillHit) return { from: 'bot', text: skillHit };
-
-  // Last resort: try project search regardless of keyword
-  const results = searchProjects(lc);
-  if (results.length) {
-    return {
-      from: 'bot',
-      text: `Here's what matched:\n${results.map((p) => `· **${p.name}** — ${p.tagline}`).join('\n')}`,
-      actions: results.map((p) => ({ label: p.name, url: p.liveUrl || p.githubUrl })),
-    };
-  }
-
-  return {
-    from: 'bot',
-    text: "I didn't catch that. Try asking about **projects**, **tech stack**, **experience**, or how to **hire** me.",
-  };
-}
-
-function renderInline(text: string) {
-  const lines = text.split('\n');
-  return lines.map((line, i) => {
-    const parts = line.split(/\*\*(.+?)\*\*/g);
+function Bubble({
+  msg,
+  onShowProject,
+  onWrite,
+}: {
+  msg: Msg;
+  onShowProject: (slug: string) => void;
+  onWrite: (draft: string) => void;
+}) {
+  const a = msg.answer;
+  const draft = a?.handoff;
+  if (msg.from === 'user') {
     return (
-      <span key={i} className="block">
-        {parts.map((p, j) => (j % 2 === 1 ? <strong key={j} className="text-violet-bright">{p}</strong> : <span key={j}>{p}</span>))}
-      </span>
+      <div className="flex justify-end">
+        <p className="max-w-[85%] whitespace-pre-wrap rounded-2xl rounded-br-md bg-violet px-3.5 py-2.5 text-sm leading-relaxed text-white">
+          <span className="sr-only">You: </span>
+          {msg.text}
+        </p>
+      </div>
     );
-  });
+  }
+  return (
+    <div className="flex justify-start" data-ask-answer={a?.intent ?? 'greeting'}>
+      <div className="max-w-[92%] rounded-2xl rounded-bl-md border border-glass-border bg-surface-tint px-3.5 py-2.5 text-sm leading-relaxed text-text-secondary">
+        <div>{renderInline(msg.text)}</div>
+        {a && a.projects.length > 0 ? (
+          <div className="mt-2.5 grid gap-2">
+            {a.projects.map((slug) => (
+              <MiniProject key={slug} slug={slug} onShow={onShowProject} />
+            ))}
+          </div>
+        ) : null}
+        {a && (a.actions.length > 0 || draft) ? (
+          <div className="mt-2.5 flex flex-wrap gap-1.5">
+            {a.actions.map((act) =>
+              act.kind === 'cv' ? (
+                <DownloadCvButton key="cv" variant="secondary" size="sm" />
+              ) : (
+                <Button key={act.href} href={act.href} external={act.external} variant="secondary" size="sm" cursor="open">
+                  {act.label}
+                </Button>
+              ),
+            )}
+            {draft ? (
+              <Button
+                variant="primary"
+                size="sm"
+                shine={false}
+                leadingIcon={<PenLine aria-hidden="true" className="size-3.5" />}
+                onClick={() => onWrite(draft)}
+                data-ask-handoff=""
+              >
+                Write to Oikantik
+              </Button>
+            ) : null}
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
 }
 
-export function AskMeBot() {
-  const [open, setOpen] = useState(false);
+type BodyProps = {
+  ids: { title: string; subtitle: string; input: string };
+  messages: Msg[];
+  typing: boolean;
+  asked: boolean;
+  input: string;
+  setInput: (v: string) => void;
+  onSend: (q: string) => void;
+  onClose: () => void;
+  onShowProject: (slug: string) => void;
+  onWrite: (draft: string) => void;
+  logRef: RefObject<HTMLDivElement | null>;
+  inputRef: RefObject<HTMLInputElement | null>;
+};
+
+function ChatBody({ ids, messages, typing, asked, input, setInput, onSend, onClose, onShowProject, onWrite, logRef, inputRef }: BodyProps) {
+  const submit = (e: FormEvent) => {
+    e.preventDefault();
+    onSend(input);
+  };
+  return (
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="flex items-center gap-3 border-b border-hairline px-4 py-2">
+        <span className="grid size-9 shrink-0 place-items-center rounded-full bg-[linear-gradient(135deg,var(--app-violet),var(--app-cyan))] text-white">
+          <Sparkles aria-hidden="true" className="size-4" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <h2 id={ids.title} className="font-display text-base font-semibold leading-6 tracking-normal text-text-primary">
+            Ask Oikantik
+          </h2>
+          <p id={ids.subtitle} className="text-xs leading-4 text-text-muted" data-ask-subtitle="">
+            Quick answers from this site&apos;s data (not an LLM)
+          </p>
+        </div>
+        <Button variant="icon" size="md" aria-label="Close assistant" onClick={onClose}>
+          <X aria-hidden="true" className="size-4" />
+        </Button>
+      </div>
+
+      <div
+        ref={logRef}
+        role="log"
+        aria-live="polite"
+        aria-relevant="additions"
+        aria-label="Conversation"
+        data-lenis-prevent=""
+        data-ask-log=""
+        className="ask-log min-h-0 flex-1 space-y-3 overflow-y-auto px-4 py-4"
+      >
+        {messages.map((m) => (
+          <Bubble key={m.id} msg={m} onShowProject={onShowProject} onWrite={onWrite} />
+        ))}
+        {typing ? (
+          <div aria-hidden="true" className="flex justify-start" data-ask-typing="">
+            <span className="rounded-2xl rounded-bl-md border border-glass-border bg-surface-tint px-2 py-1">
+              <LottieIcon
+                name="typing"
+                play="auto"
+                loop
+                lazy={false}
+                className="block h-6 w-12"
+                fallback={<span className="block px-2 font-mono text-sm leading-6 text-text-muted">…</span>}
+              />
+            </span>
+          </div>
+        ) : null}
+      </div>
+
+      {!asked ? (
+        <div className="flex flex-wrap gap-2 px-4 pb-3" data-ask-starters="">
+          {STARTERS.map((s) => (
+            <button
+              key={s}
+              type="button"
+              onClick={() => onSend(s)}
+              className="tap-safe rounded-full border border-glass-border bg-glass-fill px-4 text-sm text-text-secondary ring-focus transition-colors hover:border-glass-border-strong hover:text-text-primary"
+            >
+              {s}
+            </button>
+          ))}
+          <DownloadCvButton variant="secondary" size="md" className="text-sm" />
+        </div>
+      ) : null}
+
+      <form onSubmit={submit} className="flex items-center gap-2 border-t border-hairline p-3">
+        <label htmlFor={ids.input} className="sr-only">
+          Ask a question
+        </label>
+        <input
+          id={ids.input}
+          ref={inputRef}
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Ask a question…"
+          autoComplete="off"
+          enterKeyHint="send"
+          maxLength={200}
+          className="tap-safe min-w-0 flex-1 rounded-full border border-glass-border-strong bg-glass-fill px-4 text-base text-text-primary ring-focus placeholder:text-text-muted"
+        />
+        <Button type="submit" variant="primary" size="md" shine={false} aria-label="Send" disabled={!input.trim()} className="w-11 px-0">
+          <Send aria-hidden="true" className="size-4" />
+        </Button>
+      </form>
+    </div>
+  );
+}
+
+/**
+ * The site's quick-answer assistant: a launcher in the floating dock that opens a
+ * non-modal panel above it, or a modal bottom sheet below 640px. Answers come from
+ * src/utils/askme.ts (rule-based, from this site's own data); project answers
+ * carry mini cards, and hire or project answers can hand a draft to the contact form.
+ */
+export function AskMeBot({ onOpenChange }: { onOpenChange?: (open: boolean) => void }) {
+  const { reduce, finePointer } = useMotionPrefs();
+  const isPhone = useMediaQuery(Q_PHONE);
+  const [open, setOpenState] = useState(false);
+  const [messages, setMessages] = useState<Msg[]>([GREETING]);
+  const [typing, setTyping] = useState(false);
   const [input, setInput] = useState('');
-  const [messages, setMessages] = useState<Msg[]>([
-    { from: 'bot', text: `Hey — I'm Oikantik's portfolio assistant. Ask about projects, skills, or how to work together.` },
-  ]);
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const [breathe, setBreathe] = useState(true);
+
+  const launcherRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
-  const toggleRef = useRef<HTMLButtonElement>(null);
+  const logRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const timers = useRef(new Set<number>());
+  const nextId = useRef(1);
+  const onOpenChangeRef = useRef(onOpenChange);
+  useEffect(() => {
+    onOpenChangeRef.current = onOpenChange;
+  });
 
-  const starters = useMemo(() => STARTERS, []);
+  const baseId = useId();
+  const ids = { title: `${baseId}-title`, subtitle: `${baseId}-subtitle`, input: `${baseId}-input` };
+  const panelId = `${baseId}-panel`;
+  const asked = messages.some((m) => m.from === 'user');
+
+  const later = (fn: () => void, ms: number) => {
+    const id = window.setTimeout(() => {
+      timers.current.delete(id);
+      fn();
+    }, ms);
+    timers.current.add(id);
+  };
 
   useEffect(() => {
-    if (open && inputRef.current) {
-      setTimeout(() => inputRef.current?.focus(), 100);
+    const pending = timers.current;
+    return () => pending.forEach((id) => window.clearTimeout(id));
+  }, []);
+
+  const setOpen = (v: boolean) => {
+    setOpenState(v);
+    if (v) setBreathe(false);
+    onOpenChangeRef.current?.(v);
+  };
+
+  const close = (refocus: boolean) => {
+    setOpen(false);
+    if (refocus) requestAnimationFrame(() => launcherRef.current?.focus({ preventScroll: true }));
+  };
+
+  const push = (m: Omit<Msg, 'id'>) => setMessages((list) => [...list, { ...m, id: nextId.current++ }]);
+
+  const send = (text: string) => {
+    const q = text.trim();
+    if (!q || typing) return;
+    const a = ask(q, DATA);
+    push({ from: 'user', text: q });
+    setInput('');
+    const reply = { from: 'bot' as const, text: a.text, answer: a };
+    // A short beat of "typing" before longer answers only; none under reduced motion.
+    if (!reduce && isMultiSentence(a.text)) {
+      setTyping(true);
+      later(() => {
+        setTyping(false);
+        push(reply);
+      }, 300 + Math.min(150, a.text.length));
+    } else {
+      push(reply);
     }
-  }, [open]);
+  };
 
+  const showProject = (slug: string) => {
+    close(false);
+    later(() => emit('project:open', { slug }), 60);
+  };
+
+  // After the sheet's focus trap has let go, so the contact form can take focus.
+  const write = (draft: string) => {
+    close(false);
+    later(() => emit('contact:prefill', { message: draft }), 60);
+  };
+
+  // Newest message in view.
   useEffect(() => {
-    if (!open) return;
-    const handlePointerDown = (e: MouseEvent | TouchEvent) => {
-      const target = e.target as Node;
-      if (panelRef.current?.contains(target)) return;
-      if (toggleRef.current?.contains(target)) return;
+    const log = logRef.current;
+    if (log) log.scrollTop = log.scrollHeight;
+  }, [messages.length, typing, open]);
+
+  // Desktop: focus the field on open (fine pointers only, so no keyboard pops up).
+  useEffect(() => {
+    if (open && !isPhone && finePointer) inputRef.current?.focus({ preventScroll: true });
+  }, [open, isPhone, finePointer]);
+
+  // Desktop panel is non-modal: a press anywhere else closes it.
+  useEffect(() => {
+    if (!open || isPhone) return;
+    const onDown = (e: PointerEvent) => {
+      const t = e.target as Node;
+      if (panelRef.current?.contains(t) || launcherRef.current?.contains(t)) return;
+      // Presses inside another overlay (a project dialog, a toast) leave the panel alone.
+      if ((t as Element).closest?.('[data-dialog-root], [data-toast-region]')) return;
       setOpen(false);
     };
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setOpen(false);
-    };
-    document.addEventListener('mousedown', handlePointerDown);
-    document.addEventListener('touchstart', handlePointerDown);
-    document.addEventListener('keydown', handleKey);
-    return () => {
-      document.removeEventListener('mousedown', handlePointerDown);
-      document.removeEventListener('touchstart', handlePointerDown);
-      document.removeEventListener('keydown', handleKey);
-    };
-  }, [open]);
+    document.addEventListener('pointerdown', onDown, { passive: true });
+    return () => document.removeEventListener('pointerdown', onDown);
+  }, [open, isPhone]);
 
+  // Phone sheet: follow the on-screen keyboard through the visual viewport.
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
-  }, [messages, open]);
+    const vv = window.visualViewport;
+    if (!open || !isPhone || !vv) return;
+    const root = document.documentElement;
+    const update = () => {
+      const kb = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+      root.style.setProperty('--ask-kb', `${Math.round(kb)}px`);
+      root.style.setProperty('--ask-vvh', `${Math.round(vv.height)}px`);
+    };
+    update();
+    vv.addEventListener('resize', update, { passive: true });
+    vv.addEventListener('scroll', update, { passive: true });
+    return () => {
+      vv.removeEventListener('resize', update);
+      vv.removeEventListener('scroll', update);
+      root.style.removeProperty('--ask-kb');
+      root.style.removeProperty('--ask-vvh');
+    };
+  }, [open, isPhone]);
 
-  const send = (text?: string) => {
-    const q = (text ?? input).trim();
-    if (!q) return;
-    setMessages((m) => [...m, { from: 'user', text: q }]);
-    setInput('');
-    setTimeout(() => setMessages((m) => [...m, answer(q)]), 280);
+  const onPanelKeyDown = (e: ReactKeyboardEvent) => {
+    if (e.key !== 'Escape' || e.nativeEvent.isComposing) return;
+    e.preventDefault();
+    e.stopPropagation();
+    close(true);
   };
+
+  const body = (
+    <ChatBody
+      ids={ids}
+      messages={messages}
+      typing={typing}
+      asked={asked}
+      input={input}
+      setInput={setInput}
+      onSend={send}
+      onClose={() => close(true)}
+      onShowProject={showProject}
+      onWrite={write}
+      logRef={logRef}
+      inputRef={inputRef}
+    />
+  );
 
   return (
     <>
-      <motion.button
-        ref={toggleRef}
-        onClick={() => setOpen((o) => !o)}
-        aria-label={open ? 'Close assistant' : 'Open assistant'}
-        initial={{ scale: 0, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ delay: 1.5, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        className="fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full bg-gradient-to-br from-violet to-violet-bright shadow-[0_8px_32px_rgba(124,58,237,0.5)] flex items-center justify-center text-white hover:shadow-[0_12px_40px_rgba(168,85,247,0.6)] transition-shadow"
+      <button
+        ref={launcherRef}
+        type="button"
+        aria-label="Ask Oikantik"
+        aria-haspopup="dialog"
+        aria-expanded={open}
+        aria-controls={open && !isPhone ? panelId : undefined}
+        data-ask-launcher=""
+        data-breathe={breathe && !reduce ? '' : undefined}
+        onAnimationEnd={() => setBreathe(false)}
+        onClick={() => (open ? close(true) : setOpen(true))}
+        onKeyDown={open && !isPhone ? onPanelKeyDown : undefined}
+        className="ask-launcher grid size-14 shrink-0 place-items-center rounded-full bg-[linear-gradient(135deg,var(--app-violet),color-mix(in_oklab,var(--app-violet)_60%,var(--app-violet-bright)))] text-white ring-focus transition-[filter] duration-200 ease-out hover:brightness-110"
       >
-        <AnimatePresence mode="wait">
-          {open ? (
-            <motion.span key="x" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }}>
-              <X size={22} />
-            </motion.span>
-          ) : (
-            <motion.span key="msg" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }}>
-              <MessageSquare size={22} />
-            </motion.span>
-          )}
-        </AnimatePresence>
-      </motion.button>
+        {open ? <X aria-hidden="true" className="size-5" /> : <MessageSquare aria-hidden="true" className="size-5" />}
+      </button>
 
       <AnimatePresence>
-        {open && (
+        {open && !isPhone ? (
           <motion.div
+            key="ask-panel"
             ref={panelRef}
-            initial={{ opacity: 0, y: 20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed bottom-24 right-6 z-40 w-[calc(100vw-3rem)] max-w-sm h-[520px] max-h-[calc(100vh-8rem)] glass-strong rounded-2xl flex flex-col overflow-hidden"
+            id={panelId}
+            role="dialog"
+            aria-modal="false"
+            aria-labelledby={ids.title}
+            aria-describedby={ids.subtitle}
+            data-ask-panel=""
+            onKeyDown={onPanelKeyDown}
+            initial={{ opacity: 0, y: 12, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1, transition: { duration: duration.base, ease: ease.out } }}
+            exit={{ opacity: 0, y: 8, scale: 0.98, transition: { duration: 0.2, ease: ease.in } }}
+            style={{ transformOrigin: '100% 100%' }}
+            className="ask-panel glass-strong glass-keep flex flex-col overflow-clip"
           >
-            <div className="flex items-center gap-3 px-4 py-3 border-b border-white/[0.06]">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet to-cyan-bright flex items-center justify-center">
-                <Sparkles size={14} className="text-white" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-text-primary">Ask Oikantik</p>
-                <p className="text-[10px] font-mono text-text-dim">Portfolio assistant · beta</p>
-              </div>
-            </div>
-
-            <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
-              {messages.map((m, i) => (
-                <div key={i} className={`flex ${m.from === 'user' ? 'justify-end' : 'justify-start'}`}>
-                  <div
-                    className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed ${
-                      m.from === 'user'
-                        ? 'bg-gradient-to-br from-violet to-violet-bright text-white'
-                        : 'bg-white/[0.04] border border-white/[0.06] text-text-secondary'
-                    }`}
-                  >
-                    <div className="whitespace-pre-wrap">{renderInline(m.text)}</div>
-                    {m.actions && m.actions.length > 0 && (
-                      <div className="mt-2 flex flex-wrap gap-1.5">
-                        {m.actions.map((a) => (
-                          <a
-                            key={a.label}
-                            href={a.url}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="text-[11px] px-2 py-1 rounded-full bg-violet-bright/20 border border-violet-bright/30 text-violet-bright hover:bg-violet-bright/30 transition-colors"
-                          >
-                            {a.label}
-                          </a>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {messages.length <= 2 && (
-              <div className="px-4 pb-2 flex flex-wrap gap-1.5">
-                {starters.map((s) => (
-                  <button
-                    key={s}
-                    onClick={() => send(s)}
-                    className="text-[11px] px-2.5 py-1 rounded-full bg-white/[0.03] border border-white/[0.06] text-text-muted hover:border-violet-bright/40 hover:text-text-primary transition-colors"
-                  >
-                    {s}
-                  </button>
-                ))}
-              </div>
-            )}
-
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                send();
-              }}
-              className="flex items-center gap-2 p-3 border-t border-white/[0.06]"
-            >
-              <input
-                ref={inputRef}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder="Ask a question…"
-                className="flex-1 bg-white/[0.03] border border-white/[0.06] rounded-full px-4 py-2 text-sm text-text-primary placeholder:text-text-dim focus:outline-none focus:border-violet-bright/50"
-              />
-              <button
-                type="submit"
-                aria-label="Send"
-                disabled={!input.trim()}
-                className="w-9 h-9 rounded-full bg-gradient-to-br from-violet to-violet-bright text-white flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed hover:shadow-[0_0_20px_rgba(168,85,247,0.4)] transition-shadow"
-              >
-                <Send size={14} />
-              </button>
-            </form>
+            {body}
           </motion.div>
-        )}
+        ) : null}
       </AnimatePresence>
+
+      <Dialog
+        open={open && isPhone}
+        onClose={() => close(true)}
+        variant="sheet"
+        labelledBy={ids.title}
+        describedBy={ids.subtitle}
+        panelClassName="ask-sheet"
+      >
+        <div data-ask-sheet="" className="h-full">
+          {body}
+        </div>
+      </Dialog>
     </>
   );
 }

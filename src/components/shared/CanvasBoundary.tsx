@@ -2,13 +2,13 @@
 
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 
-type Props = { children: ReactNode; fallback?: ReactNode };
+type Props = { children: ReactNode; fallback?: ReactNode; onError?: (error: Error) => void };
 type State = { failed: boolean };
 
 /**
  * WebGL is the least reliable thing on the page: blocked contexts, driver
  * quirks, a texture that will not fetch. None of that should take the site
- * down, so a failed canvas simply renders nothing.
+ * down, so a failed canvas renders its fallback (or nothing) instead.
  */
 export class CanvasBoundary extends Component<Props, State> {
   state: State = { failed: false };
@@ -18,8 +18,8 @@ export class CanvasBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
+    this.props.onError?.(error);
     if (process.env.NODE_ENV !== 'production') {
-      // eslint-disable-next-line no-console
       console.warn('[canvas] disabled after error:', error.message, info.componentStack);
     }
   }

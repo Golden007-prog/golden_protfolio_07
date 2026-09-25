@@ -1,0 +1,76 @@
+/* Package: projects — project grid, cards, dialog and case studies. */
+
+@property --beam-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@layer components {
+  /* ============================
+     Featured card: a light beam traces the edge on hover or keyboard focus.
+     The card clips (overflow: clip), so the ring sits just inside its border.
+     ============================ */
+  .featured-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    border-radius: inherit;
+    padding: 1px;
+    background: conic-gradient(
+      from var(--beam-angle),
+      rgb(168 85 247 / 0) 0deg,
+      rgb(168 85 247 / 0) 330deg,
+      var(--app-violet-bright) 350deg,
+      var(--app-cyan-bright) 358deg,
+      var(--app-violet-bright) 6deg,
+      rgb(168 85 247 / 0) 26deg
+    );
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity var(--dur-base) var(--ease-out-expo);
+  }
+  .featured-card:is(:hover, :focus-within)::before {
+    opacity: 1;
+    animation: featuredBeamTrace 2.4s linear infinite;
+  }
+  @supports not (background: conic-gradient(from var(--beam-angle), red, blue)) {
+    .featured-card:is(:hover, :focus-within)::before {
+      opacity: 0.6;
+      animation: none;
+    }
+  }
+  html[data-motion="reduced"] .featured-card:is(:hover, :focus-within)::before {
+    animation: none;
+    opacity: 0.55;
+  }
+
+  /* ============================
+     Card media: a slow push-in on hover, only for a mouse and only with motion on.
+     ============================ */
+  html[data-motion="full"] .project-card .project-zoom {
+    transition: scale 0.7s var(--ease-out-expo);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    html[data-motion="full"] .project-card:hover .project-zoom {
+      scale: 1.04;
+    }
+  }
+
+  @media (forced-colors: active) {
+    .featured-card::before {
+      display: none;
+    }
+  }
+}
+
+@keyframes featuredBeamTrace {
+  to {
+    --beam-angle: 360deg;
+  }
+}

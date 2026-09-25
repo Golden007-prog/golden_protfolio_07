@@ -1,283 +1,452 @@
-import { lazy, Suspense, useEffect, useRef, useState } from 'react';
+'use client';
+
+import { lazy, useEffect, useLayoutEffect, useRef } from 'react';
+import Image from 'next/image';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import profile from '../../data/profile.json';
-import { Magnetic } from '../shared/Magnetic';
-import { LottieIcon } from '../shared/LottieIcon';
-import { CanvasBoundary } from '../shared/CanvasBoundary';
-import { BackgroundVideo } from '../shared/BackgroundVideo';
-import { useDeviceCapability } from '../../hooks/useDeviceCapability';
+import { useGSAP } from '@gsap/react';
+import { ChevronDown, Hand } from 'lucide-react';
+import { BackgroundVideo } from '@/components/shared/BackgroundVideo';
+import { Deferred3D } from '@/components/shared/Deferred3D';
+import { LottieIcon } from '@/components/shared/LottieIcon';
+import { Button } from '@/components/ui/Button';
+import { CopyButton } from '@/components/ui/CopyButton';
+import { DownloadCvButton } from '@/components/ui/DownloadCvButton';
+import { LocalTime } from '@/components/ui/LocalTime';
+import { SocialLinks } from '@/components/ui/SocialLinks';
+import { useIntro } from '@/contexts/IntroContext';
+import { useSmoothScrollTo } from '@/contexts/LenisContext';
+import { useDeviceCapability } from '@/hooks/useDeviceCapability';
+import { getMotionPrefs, useMotionPrefs } from '@/hooks/useMotionPrefs';
+import { useRenderCount } from '@/lib/devRenderCount';
+import { heroScroll, resetHeroScroll } from '@/lib/heroScrollStore';
+import { pointer, subscribePointer, subscribeScroll, usePointerTracking } from '@/lib/pointerStore';
+import { SITE } from '@/lib/site';
+import { RoleTicker } from './RoleTicker';
 
-const ROLES = [
-  'Gen AI & Data Science Engineer',
-  'LLM Agent Architect',
-  'Production ML Engineer',
-  'Data Pipeline Builder',
-];
+gsap.registerPlugin(ScrollTrigger, useGSAP);
 
-function useTypewriterCycle(words: string[], typeMs = 60, holdMs = 2200, eraseMs = 30) {
-  const [text, setText] = useState('');
-  useEffect(() => {
-    let cancelled = false;
-    let i = 0;
-    const run = async () => {
-      while (!cancelled) {
-        const word = words[i % words.length];
-        for (let c = 0; c <= word.length && !cancelled; c++) {
-          setText(word.slice(0, c));
-          await new Promise((r) => setTimeout(r, typeMs));
-        }
-        await new Promise((r) => setTimeout(r, holdMs));
-        for (let c = word.length; c >= 0 && !cancelled; c--) {
-          setText(word.slice(0, c));
-          await new Promise((r) => setTimeout(r, eraseMs));
-        }
-        i++;
-      }
-    };
-    run();
-    return () => {
-      cancelled = true;
-    };
-  }, [words, typeMs, holdMs, eraseMs]);
-  return text;
-}
+const HeroCanvas = lazy(() => import('./HeroCanvas'));
 
-function greeting() {
-  const h = new Date().getHours();
-  if (h < 5) return 'Burning the midnight oil?';
-  if (h < 12) return 'Good morning';
-  if (h < 17) return 'Good afternoon';
-  if (h < 21) return 'Good evening';
-  return 'Late-night browsing?';
-}
+const FIRST_NAME = SITE.shortName;
+const LAST_NAME = SITE.name.slice(SITE.shortName.length).trim();
 
-const HeroCanvas = lazy(() => import('./HeroCanvas').then((m) => ({ default: m.HeroCanvas })));
+// Matches IntroContext's failsafe: a hydration later than this has already shown the
+// name through the index.css failsafe, so it must not be hidden again and replayed.
+const INTRO_FAILSAFE_MS = 4000;
+// heroReady for the curtain even if neither the model nor a fallback reports in.
+const HERO_READY_CAP_MS = 2500;
+const CUE_HIDE_Y = 100;
 
-gsap.registerPlugin(ScrollTrigger);
+const WAVE_SEGMENT = [0, 31] as const;
+// scroll.json's near-white stroke disappears on cream; light uses text-muted.
+const CUE_COLORS = { light: { '#E2F6FD': '#55555F' } };
 
-function splitChars(text: string) {
-  return text.split('').map((char, i) => (
-    <span key={i} className="char inline-block" style={{ perspective: '1000px' }}>
-      {char === ' ' ? '\u00A0' : char}
+// The model still: Deferred3D's server and fallback render, shown by hero.css on
+// phones, under reduced motion and on lite devices (and lazy, so never fetched when hidden).
+const HERO_STILL = (
+  <div data-depth="12" className="absolute inset-0">
+    <Image
+      src="/images/hero-still.webp"
+      alt=""
+      fill
+      sizes="(max-width: 767px) 82vw, (max-width: 1023px) 45vw, 58vw"
+      className="hero-still object-contain object-center"
+    />
+  </div>
+);
+
+function WaveHello({ play }: { play: boolean }) {
+  const hand = <Hand aria-hidden="true" className="size-4 text-text-secondary" />;
+  return (
+    <span className="inline-flex size-6 shrink-0 items-center justify-center">
+      {play ? (
+        <LottieIcon name="wave" play="once" lazy="idle" segment={WAVE_SEGMENT} className="block size-6" fallback={hand} />
+      ) : (
+        hand
+      )}
     </span>
-  ));
+  );
 }
 
-export function HeroSection() {
-  const base = '/';
-  const { allowHeavy3D } = useDeviceCapability();
-  const sectionRef = useRef<HTMLElement>(null);
-  const firstNameRef = useRef<HTMLSpanElement>(null);
-  const lastNameRef = useRef<HTMLSpanElement>(null);
-  const scrollIndicatorRef = useRef<HTMLDivElement>(null);
-  const role = useTypewriterCycle(ROLES);
+function ScrollCue() {
+  const scrollTo = useSmoothScrollTo();
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
+  // A DOM attribute, not state: crossing the threshold never re-renders the hero.
   useEffect(() => {
-    const ctx = gsap.context(() => {
-      const chars = sectionRef.current?.querySelectorAll('.char');
-      if (chars && chars.length) {
-        gsap.fromTo(
-          chars,
-          { y: 120, opacity: 0, rotateX: -80 },
-          {
-            y: 0,
-            opacity: 1,
-            rotateX: 0,
-            stagger: 0.035,
-            duration: 1.1,
-            ease: 'power3.out',
-            delay: 0.4,
-          },
-        );
-      }
-      if (lastNameRef.current) {
-        gsap.fromTo(
-          lastNameRef.current,
-          { y: 120, opacity: 0 },
-          {
-            y: 0,
-            opacity: 1,
-            duration: 1.1,
-            ease: 'power3.out',
-            delay: 0.4 + 0.035 * (chars?.length ?? 0),
-          },
-        );
-      }
-
-      gsap.to([firstNameRef.current, lastNameRef.current], {
-        y: -60,
-        opacity: 0.15,
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: '40% top',
-          end: 'bottom top',
-          scrub: true,
-        },
-      });
-
-      gsap.to(scrollIndicatorRef.current, {
-        opacity: 0,
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: '10% top',
-          end: '20% top',
-          scrub: true,
-        },
-      });
-    }, sectionRef);
-
-    return () => ctx.revert();
+    const el = buttonRef.current;
+    if (!el) return;
+    const sync = () => el.toggleAttribute('data-hidden', window.scrollY > CUE_HIDE_Y);
+    sync();
+    return subscribeScroll(sync);
   }, []);
 
   return (
-    <section ref={sectionRef} id="hero" className="relative h-screen">
-      <div className="relative h-screen overflow-hidden">
-        <div className="absolute inset-0 z-0 pointer-events-none dark-only">
-          <BackgroundVideo
-            variant="dark"
-            src={`${base}videos/hero-bg.mp4`}
-            poster={`${base}images/skills-bg.webp`}
-            className="w-full h-full object-cover opacity-20"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-bg-base via-bg-base/80 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-bg-base/90" />
-        </div>
+    <div data-hero-cue="" data-reveal="" className="hero-cue hero-intro">
+      <button
+        ref={buttonRef}
+        type="button"
+        aria-label="Scroll to About"
+        onClick={() => scrollTo('about')}
+        className="hero-cue-button tap-safe ring-focus rounded-full text-text-muted hover:text-text-primary"
+      >
+        <LottieIcon
+          name="scroll"
+          play="hover"
+          lazy="idle"
+          hoverTargetRef={buttonRef}
+          colors={CUE_COLORS}
+          className="block size-8"
+          fallback={<ChevronDown aria-hidden="true" className="size-5" />}
+        />
+      </button>
+    </div>
+  );
+}
 
-        <div className="absolute inset-0 z-0 pointer-events-none light-only">
-          <BackgroundVideo
-            variant="light"
-            src={`${base}videos/hero-bg-light.mp4`}
-            className="w-full h-full object-cover opacity-55"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-bg-base via-bg-base/60 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-bg-base/80" />
-        </div>
+export function HeroSection() {
+  useRenderCount('HeroSection');
+  usePointerTracking();
+  const { reduce, lite, scale, finePointer, hover } = useMotionPrefs();
+  const { isTouch } = useDeviceCapability();
+  const { done, heroReady, setHeroReady } = useIntro();
+  const sectionRef = useRef<HTMLElement>(null);
+  const introPending = useRef(false);
 
-        <div className="absolute right-0 top-0 w-full lg:w-[58%] h-full">
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0 z-0 overflow-hidden dark-only"
-          >
-            <div
-              className="absolute top-[18%] right-[10%] w-[420px] h-[420px] rounded-full"
-              style={{
-                background: 'radial-gradient(circle, rgba(168,85,247,0.35), transparent 70%)',
-                filter: 'blur(120px)',
-              }}
-            />
-            <div
-              className="absolute bottom-[10%] right-[28%] w-[360px] h-[360px] rounded-full"
-              style={{
-                background: 'radial-gradient(circle, rgba(6,182,212,0.22), transparent 70%)',
-                filter: 'blur(110px)',
-              }}
-            />
-            <div
-              className="absolute top-[35%] right-[5%] w-[260px] h-[260px] rounded-full"
-              style={{
-                background: 'radial-gradient(circle, rgba(236,72,153,0.18), transparent 70%)',
-                filter: 'blur(100px)',
-              }}
+  // Decided once, at hydration: only a first visit on '/' (bootstrap data-intro=pending)
+  // plays the full reveal. It runs before IntroProvider's effects can end the intro.
+  useLayoutEffect(() => {
+    const attr = document.documentElement.getAttribute('data-intro');
+    const start = window.__navStart;
+    const late = typeof start === 'number' && Date.now() - start > INTRO_FAILSAFE_MS;
+    if ((attr === 'pending' || attr === 'playing') && !late && !getMotionPrefs().reduce) {
+      introPending.current = true;
+      heroScroll.bloom = 0;
+      sectionRef.current?.setAttribute('data-intro', 'play');
+    }
+  }, []);
+
+  useEffect(() => {
+    const t = window.setTimeout(setHeroReady, HERO_READY_CAP_MS);
+    return () => {
+      window.clearTimeout(t);
+      resetHeroScroll();
+    };
+  }, [setHeroReady]);
+
+  // Intro timeline (first visit, after the curtain) and the scroll exit scrub.
+  useGSAP(
+    (_context, contextSafe) => {
+      const section = sectionRef.current;
+      if (!section || !done || !contextSafe) return;
+      if (reduce) {
+        // Motion was reduced before the reveal could run: nothing hides or dims the hero.
+        introPending.current = false;
+        heroScroll.bloom = 1;
+        return;
+      }
+      const q = gsap.utils.selector(section);
+
+      // Inner wrappers only: the intro never animates these, so the two can't fight over y/opacity.
+      const buildExit = contextSafe(() => {
+        const travel = (vh: number) => () => -window.innerHeight * vh * scale;
+        const video = q('[data-hero-video]');
+        gsap
+          .timeline({
+            defaults: { ease: 'none' },
+            scrollTrigger: {
+              trigger: section,
+              start: 'top top',
+              end: 'bottom top',
+              scrub: 0.6,
+              invalidateOnRefresh: true,
+              onUpdate: (self) => {
+                heroScroll.progress = self.progress;
+              },
+            },
+          })
+          .fromTo(q('[data-hero-exit="kicker"]'), { y: 0 }, { y: travel(0.3) }, 0)
+          .fromTo(q('[data-hero-exit="first"]'), { y: 0 }, { y: travel(0.12) }, 0)
+          .fromTo(q('[data-hero-exit="last"]'), { y: 0, opacity: 1 }, { y: travel(0.2), opacity: 0.15 }, 0)
+          .fromTo(
+            video,
+            lite ? { scale: 1 } : { scale: 1, filter: 'blur(0px)' },
+            lite ? { scale: 1.08 } : { scale: 1.08, filter: 'blur(6px)' },
+            0,
+          );
+      });
+
+      let removeSkip = () => {};
+
+      if (introPending.current) {
+        introPending.current = false;
+        // A proxy, so reverting the timeline never drops the live bloom back to 0.
+        const bloom = { v: 0 };
+        const tl = gsap.timeline({
+          defaults: { ease: 'expo.out' },
+          onComplete: () => {
+            removeSkip();
+            buildExit();
+            ScrollTrigger.refresh();
+          },
+        });
+        tl.fromTo(q('[data-hero-hairline]'), { scaleX: 0 }, { scaleX: 1, duration: 0.9, ease: 'power3.inOut', clearProps: 'transform' }, 0)
+          .fromTo(
+            q('[data-hero-kicker-item]'),
+            { opacity: 0, x: -8 },
+            { opacity: 1, x: 0, duration: 0.6, stagger: 0.06, clearProps: 'transform,opacity' },
+            0.05,
+          )
+          .fromTo(
+            q('.hero-first .hero-char'),
+            { yPercent: 110, rotateX: -70, opacity: 0, transformPerspective: 800, transformOrigin: '50% 100%' },
+            { yPercent: 0, rotateX: 0, opacity: 1, duration: 0.9, stagger: 0.03, clearProps: 'transform,opacity' },
+            0.1,
+          )
+          .fromTo(
+            q('.hero-last'),
+            { clipPath: 'inset(-20% 100% -20% -8%)', opacity: 1, backgroundPosition: '100% 50%' },
+            {
+              clipPath: 'inset(-20% -8% -20% -8%)',
+              backgroundPosition: '0% 50%',
+              duration: 1.1,
+              ease: 'power3.inOut',
+              clearProps: 'clipPath,opacity,backgroundPosition',
+            },
+            0.35,
+          )
+          .fromTo(
+            bloom,
+            { v: 0 },
+            {
+              v: 1,
+              duration: 1.2,
+              ease: 'power2.out',
+              onUpdate: () => {
+                heroScroll.bloom = bloom.v;
+              },
+            },
+            0.6,
+          )
+          .fromTo(
+            q('[data-hero-rise]'),
+            { y: 16 * scale, opacity: 0 },
+            { y: 0, opacity: 1, duration: 0.8, stagger: 0.08, clearProps: 'transform,opacity' },
+            0.75,
+          )
+          .fromTo(
+            q('[data-hero-cue]'),
+            { y: -6, opacity: 0 },
+            { y: 0, opacity: 1, duration: 0.6, clearProps: 'transform,opacity' },
+            1.1,
+          );
+
+        // Any scroll during the reveal jumps it to the end, then the scrub takes over.
+        const skip = () => {
+          if (tl.progress() < 1) tl.progress(1);
+        };
+        const onScroll = () => {
+          if (window.scrollY > 4) skip();
+        };
+        window.addEventListener('wheel', skip, { passive: true });
+        window.addEventListener('touchmove', skip, { passive: true });
+        window.addEventListener('scroll', onScroll, { passive: true });
+        removeSkip = () => {
+          window.removeEventListener('wheel', skip);
+          window.removeEventListener('touchmove', skip);
+          window.removeEventListener('scroll', onScroll);
+        };
+      } else {
+        buildExit();
+      }
+
+      return () => {
+        removeSkip();
+        heroScroll.progress = 0;
+        heroScroll.bloom = 1;
+      };
+    },
+    { dependencies: [done, reduce, lite, scale], scope: sectionRef, revertOnUpdate: true },
+  );
+
+  // Pointer parallax: three depths from one rAF loop that sleeps when the pointer rests.
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section || reduce || !finePointer || !hover) return;
+    let raf = 0;
+    let last = 0;
+    let x = 0;
+    let y = 0;
+    let inView = true;
+    const layers = () => section.querySelectorAll<HTMLElement>('[data-depth]');
+
+    const frame = (now: number) => {
+      raf = 0;
+      const dt = last ? Math.min(64, now - last) : 16.7;
+      last = now;
+      const k = 1 - Math.pow(0.9, dt / 16.7);
+      const tx = pointer.active ? pointer.nx : 0;
+      const ty = pointer.active ? pointer.ny : 0;
+      x += (tx - x) * k;
+      y += (ty - y) * k;
+      layers().forEach((el) => {
+        const d = Number(el.dataset.depth) || 0;
+        el.style.transform = `translate3d(${(x * d).toFixed(2)}px, ${(-y * d).toFixed(2)}px, 0)`;
+      });
+      if (Math.abs(tx - x) > 0.0005 || Math.abs(ty - y) > 0.0005) raf = requestAnimationFrame(frame);
+      else last = 0;
+    };
+    const kick = () => {
+      if (!raf && inView) raf = requestAnimationFrame(frame);
+    };
+
+    const unsubscribe = subscribePointer(kick);
+    const io = new IntersectionObserver(([entry]) => {
+      inView = Boolean(entry?.isIntersecting);
+      if (inView) kick();
+    });
+    io.observe(section);
+    return () => {
+      unsubscribe();
+      io.disconnect();
+      cancelAnimationFrame(raf);
+      layers().forEach((el) => el.style.removeProperty('transform'));
+    };
+  }, [reduce, finePointer, hover]);
+
+  return (
+    <section
+      ref={sectionRef}
+      id="hero"
+      aria-labelledby="hero-title"
+      data-hero-ready={heroReady ? '' : undefined}
+      className="hero relative isolate flex min-h-[100svh] flex-col"
+    >
+      {/* Backdrop. overflow-clip (not hidden) keeps it sticky-safe while the scrub scales the video. */}
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 overflow-clip">
+        <div data-hero-video="" className="absolute inset-0">
+          <div className="dark-only absolute inset-0">
+            <BackgroundVideo
+              variant="dark"
+              src="/videos/hero-bg.mp4"
+              poster="/images/hero-poster.webp"
+              className="h-full w-full object-cover opacity-20"
             />
           </div>
-          {allowHeavy3D ? (
-            <CanvasBoundary>
-              <Suspense fallback={<div className="w-full h-full animate-pulse" />}>
-                <HeroCanvas />
-              </Suspense>
-            </CanvasBoundary>
-          ) : (
-            <div className="w-full h-full bg-[radial-gradient(ellipse_at_60%_45%,rgba(168,85,247,0.22),transparent_62%),radial-gradient(ellipse_at_35%_65%,rgba(34,211,238,0.16),transparent_58%)]" />
-          )}
+          <div className="light-only absolute inset-0">
+            <BackgroundVideo
+              variant="light"
+              src="/videos/hero-bg-light.mp4"
+              className="h-full w-full object-cover opacity-55"
+            />
+          </div>
         </div>
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-bg-base/90" />
+      </div>
 
-        <div className="absolute inset-0 bg-gradient-to-r from-bg-base via-bg-base/70 to-transparent lg:via-bg-base/40 z-10 pointer-events-none" />
+      <div aria-hidden="true" className="hero-visual">
+        <div data-depth="-22" className="dark-only absolute inset-0">
+          <span className="hero-glow hero-glow-a" />
+          <span className="hero-glow hero-glow-b" />
+          <span className="hero-glow hero-glow-c" />
+        </div>
+        <div data-depth="12" className="hero-halo absolute inset-0" />
+        <Deferred3D id="hero" className="absolute inset-0" fallback={HERO_STILL} onFallback={setHeroReady}>
+          <HeroCanvas onReady={setHeroReady} />
+        </Deferred3D>
+      </div>
 
-        <div className="relative z-20 h-full container-padding mx-auto max-w-[1440px] flex flex-col justify-center">
-          <p className="font-mono text-[10px] uppercase tracking-[0.35em] text-text-dim mb-8">
-            <span className="text-cyan-bright">{greeting()}</span> · {profile.location} · Available for hire
-          </p>
+      <div aria-hidden="true" className="hero-scrim" />
 
-          <h1 className="font-display font-bold leading-[0.9] tracking-[-0.035em] pb-2">
-            <span
-              ref={firstNameRef}
-              className="block text-[clamp(3rem,7.5vw,7rem)] text-text-primary"
-            >
-              {splitChars('Oikantik')}
+      <div className="relative z-10 mx-auto flex w-full max-w-[1440px] flex-1 flex-col justify-center">
+        <div className="hero-col">
+          <div data-hero-exit="kicker" className="flex flex-wrap items-center gap-x-3 gap-y-2">
+            <span data-hero-hairline="" data-reveal="" className="hero-intro hero-hairline" aria-hidden="true" />
+            <span data-hero-kicker-item="" data-reveal="" className="hero-intro inline-flex items-center gap-2">
+              <WaveHello play={done} />
+              <span aria-hidden="true" className="hero-status-dot" />
+              <span className="font-mono text-xs text-text-secondary">{SITE.availability.status}</span>
             </span>
-            <span
-              ref={lastNameRef}
-              className="block text-[clamp(3rem,7.5vw,7rem)] bg-gradient-to-r from-[#A855F7] via-[#EC4899] to-[#22D3EE] bg-clip-text pb-1 drop-shadow-[0_2px_18px_rgba(168,85,247,0.35)]"
-              style={{
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                color: 'transparent',
-              }}
-            >
-              Basu.
+            <span data-hero-kicker-item="" data-reveal="" className="hero-intro inline-flex">
+              <LocalTime showOffset city={SITE.location} />
             </span>
-          </h1>
+          </div>
 
-          <div className="mt-8 max-w-md min-h-[80px]">
-            <p className="font-mono text-sm text-violet-bright/80">
-              <span className="text-text-dim">&gt;_</span> {role}
-              <span className="typing-cursor" />
-            </p>
-            <p className="mt-3 text-text-muted text-sm leading-relaxed">
-              LLM fine-tuning · RAG · Multi-agent systems. Shipping production
-              ML &amp; agentic AI from Bengaluru.
+          <div data-depth="-6" className="hero-name-layer">
+            <h1 id="hero-title" aria-label={SITE.name} className="hero-name font-display font-bold text-text-primary">
+              <span data-hero-exit="first" className="block">
+                <span aria-hidden="true" className="hero-first">
+                  {Array.from(FIRST_NAME).map((char, i) => (
+                    <span key={i} className="hero-char">
+                      {char}
+                    </span>
+                  ))}
+                </span>
+              </span>
+              <span data-hero-exit="last" className="block">
+                <span aria-hidden="true" className="hero-char hero-last">
+                  {LAST_NAME}.
+                </span>
+              </span>
+            </h1>
+          </div>
+
+          <div data-hero-rise="" data-reveal="" className="hero-intro hero-copy">
+            <RoleTicker active={done} />
+            <p className="hero-tagline text-sm leading-relaxed text-text-muted">
+              LLM fine-tuning · RAG · Multi-agent systems. Shipping production ML &amp; agentic AI from Bengaluru.
             </p>
           </div>
 
-          <div className="mt-10 flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3 sm:gap-4">
-            <Magnetic strength={0.3}>
-              <a
+          <div className="hero-ctas">
+            <span data-hero-rise="" data-reveal="" className="hero-intro flex">
+              <Button
                 href="#projects"
-                className="group relative inline-flex items-center justify-center px-6 sm:px-7 py-3 sm:py-3.5 bg-text-primary text-bg-base text-sm font-medium rounded-full transition-all duration-300 hover:scale-[1.03] hover:shadow-[0_0_40px_rgba(168,85,247,0.35)] w-full sm:w-auto"
+                variant="primary"
+                size="lg"
+                shine
+                magnetic
+                cursor="view"
+                className="w-full px-4 text-sm sm:w-auto sm:px-7 sm:text-[15px]"
               >
-                View Projects
-                <span className="inline-block ml-2 group-hover:translate-x-1 transition-transform">→</span>
-              </a>
-            </Magnetic>
-            <Magnetic strength={0.3}>
-              <a
-                href="#contact"
-                className="group inline-flex items-center justify-center px-6 sm:px-7 py-3 sm:py-3.5 text-text-secondary text-sm font-medium border border-glass-border-strong rounded-full backdrop-blur-sm hover:border-violet-bright/60 hover:text-text-primary hover:bg-violet-bright/5 transition-all duration-300 w-full sm:w-auto"
+                View projects
+              </Button>
+            </span>
+            <span data-hero-rise="" data-reveal="" className="hero-intro flex">
+              {/* On a phone, copying an address is awkward: open the mail app with the subject filled in. */}
+              <Button
+                href={isTouch ? SITE.mailtoHref : '#contact'}
+                variant="secondary"
+                size="lg"
+                cursor={isTouch ? 'open' : undefined}
+                data-hero-contact=""
+                className="hero-beam w-full px-4 text-sm sm:w-auto sm:px-7 sm:text-[15px]"
               >
                 Get in touch
-                <span className="inline-block ml-2 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all">→</span>
-              </a>
-            </Magnetic>
-            <Magnetic strength={0.45}>
-              <a
-                href={`${base}oikantik_basu_u.pdf`}
-                download
-                className="inline-flex items-center justify-center sm:justify-start px-4 sm:px-5 py-3 sm:py-3.5 text-xs font-mono uppercase tracking-wider text-violet-bright/90 hover:text-cyan-bright transition-colors"
-              >
-                Download CV ↓
-              </a>
-            </Magnetic>
+              </Button>
+            </span>
+            <span data-hero-rise="" data-reveal="" className="hero-intro hero-cta-cv flex">
+              <DownloadCvButton
+                variant="outline"
+                size="md"
+                showMeta
+                showView
+                className="flex w-full sm:inline-flex sm:w-auto [&>a]:whitespace-nowrap [&>a]:px-4 sm:[&>a]:px-5 [&>[data-cv-download]]:flex-1 sm:[&>[data-cv-download]]:flex-none"
+              />
+            </span>
+          </div>
+
+          <div data-hero-rise="" data-reveal="" className="hero-intro hero-meta flex flex-wrap items-center gap-2">
+            <CopyButton value={SITE.email} label={SITE.email} variant="ghost" size="md" className="-ml-2" />
+            <SocialLinks size="md" />
           </div>
         </div>
-
-        <div
-          ref={scrollIndicatorRef}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2"
-        >
-          <span className="font-mono text-[9px] uppercase tracking-[0.3em] text-text-dim">Scroll</span>
-          <LottieIcon
-            src="/lottie/scroll.json"
-            lazy={false}
-            className="block w-6 h-10 opacity-80"
-            fallback={
-              <span className="relative block w-px h-10 overflow-hidden bg-white/5">
-                <span className="absolute inset-x-0 top-0 h-3 bg-gradient-to-b from-violet-bright to-transparent scroll-indicator" />
-              </span>
-            }
-          />
-        </div>
       </div>
+
+      <ScrollCue />
     </section>
   );
 }
+
+export default HeroSection;

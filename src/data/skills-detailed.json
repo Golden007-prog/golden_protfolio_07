@@ -242,7 +242,7 @@
       "Healthcare applications for accurate medical knowledge.",
       "Enterprise search and question-answering systems over proprietary data."
     ],
-    "officialDocs": "https://cloud.google.com/vertex-ai/docs/generative-ai/rag/overview",
+    "officialDocs": "https://docs.cloud.google.com/gemini-enterprise-agent-platform/build/rag-engine/rag-overview",
     "researchPapers": [
       {
         "title": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks",
@@ -421,7 +421,7 @@
       "Improving content generation, such as summarization, creative writing, and code generation, to be more relevant and human-preferred.",
       "Personalization of LLMs for individualized learning plans and AI assistants."
     ],
-    "officialDocs": "https://aws.amazon.com/what-is/rlhf/",
+    "officialDocs": "https://aws.amazon.com/what-is/reinforcement-learning-from-human-feedback/",
     "researchPapers": [
       {
         "title": "A Survey of Reinforcement Learning from Human Feedback",
@@ -568,7 +568,7 @@
       "Financial Information Aggregation and Analysis: Aggregating and analyzing data from multiple sources with sophisticated decision-making.",
       "Autonomous AI Agents: Designing agents that can work independently, make decisions, and complete tasks without constant human input."
     ],
-    "officialDocs": "https://docs.langchain.com/docs/langgraph/",
+    "officialDocs": "https://docs.langchain.com/oss/python/langgraph/overview",
     "researchPapers": [],
     "relatedRepos": [],
     "heroImage": "/skills/langgraph.webp",
@@ -845,7 +845,7 @@
       "Building intelligent conversational agents and virtual assistants for customer service.",
       "Enhancing internal knowledge bases with intelligent Q&A and summarization capabilities."
     ],
-    "officialDocs": "https://aws.amazon.com/bedrock/documentation/",
+    "officialDocs": "https://docs.aws.amazon.com/bedrock/latest/userguide/what-is-bedrock.html",
     "researchPapers": [
       {
         "title": "Analysis of LLM Performance on AWS Bedrock: Receipt-item Categorisation Case Study",
@@ -896,7 +896,7 @@
       "Generating diverse content such as emails, advertising copy, and creative text",
       "On-device AI applications for privacy-first document processing and voice assistants"
     ],
-    "officialDocs": "https://ai.google.dev/gemma",
+    "officialDocs": "https://ai.google.dev/gemma/docs",
     "researchPapers": [
       {
         "title": "Gemma: Open Models Based on Gemini Research and Technology",
@@ -981,7 +981,7 @@
       "Automating workflows and building custom AI agents",
       "Scientific research and mathematical discovery"
     ],
-    "officialDocs": "https://ai.google.dev/gemini",
+    "officialDocs": "https://ai.google.dev/gemini-api/docs",
     "researchPapers": [
       {
         "title": "Gemini: A Family of Highly Capable Multimodal Models",
@@ -1123,7 +1123,7 @@
       "Providing long-term memory and context for AI agents",
       "Powering semantic search engines and AI-driven chatbots"
     ],
-    "officialDocs": "https://docs.chromadb.com/",
+    "officialDocs": "https://docs.trychroma.com/docs/overview/introduction",
     "researchPapers": [
       {
         "title": "When Large Language Models Meet Vector Databases: A Survey",
@@ -1273,7 +1273,7 @@
       "Processing long, complex, or unstructured documents (e.g., legal contracts, technical reports, academic papers) to maintain logical sections.",
       "Optimizing content generation tools, such as automatic summarization, by ensuring input coherence."
     ],
-    "officialDocs": "https://chonkie.io/docs/chunkers/semantic-chunker",
+    "officialDocs": "https://docs.chonkie.ai/oss/chunkers/semantic-chunker",
     "researchPapers": [
       {
         "title": "Toward General Semantic Chunking: A Discriminative Framework for Ultra-Long Documents",
@@ -1452,7 +1452,7 @@
       "Healthcare (reducing medication errors, improving diagnostic accuracy)",
       "Content generation and summarization (reducing hallucination rates, improving relevance)"
     ],
-    "officialDocs": "https://openai.com/blog/a-practical-guide-to-building-agents",
+    "officialDocs": "https://cdn.openai.com/business-guides-and-resources/a-practical-guide-to-building-agents.pdf",
     "researchPapers": [
       {
         "title": "Taming Uncertainty via Automation: Observing, Analyzing, and Optimizing Agentic AI Systems",
@@ -1544,7 +1544,7 @@
       "Streamlining financial operations, including fraud detection, compliance checks, and automated loan processing.",
       "Enhancing software development workflows through automated bug fixing, test generation, and code review."
     ],
-    "officialDocs": "https://cloud.google.com/vertex-ai/docs/generative-ai/agents/evaluate-agents",
+    "officialDocs": "https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/evaluation-agents",
     "researchPapers": [
       {
         "title": "Beyond Accuracy: A Multi-Dimensional Framework for Evaluating Enterprise Agentic AI Systems",
@@ -1631,7 +1631,7 @@
       "Software Development (debugging, testing, code generation, vulnerability remediation)",
       "Supply Chain Optimization and Inventory Management"
     ],
-    "officialDocs": "https://learn.microsoft.com/en-us/azure/ai-studio/overview-observability-foundry-control-plane",
+    "officialDocs": "https://learn.microsoft.com/en-us/azure/foundry/concepts/observability",
     "researchPapers": [
       {
         "title": "Taming Uncertainty via Automation: Observing, Analyzing, and Optimizing Agentic AI Systems",
@@ -2055,11 +2055,11 @@
       "Natural Language Processing (NLP) for tasks like sentiment analysis, language detection, text summarization, and building chatbots.",
       "Recommendation systems, providing personalized suggestions for content or products."
     ],
-    "officialDocs": "https://www.tensorflow.org/docs",
+    "officialDocs": "https://www.tensorflow.org/guide",
     "researchPapers": [
       {
-        "title": "TensorFlow: A System for Large-Scale Machine Learning",
-        "url": "https://www.tensorflow.org/static/guide/tensorflow_whitepaper.pdf",
+        "title": "TensorFlow: Large-Scale Machine Learning on Heterogeneous Distributed Systems",
+        "url": "https://arxiv.org/abs/1603.04467",
         "authors": "Martín Abadi, Ashish Agarwal, Paul Barham, Eugene Brevdo, Zhifeng Chen, Craig Citro, Greg Corrado, Andy Davis, Jeffrey Dean, Matthieu Devin, Sanjay Ghemawat, Ian Goodfellow, Andrew Harp, Geoffrey Irving, Michael Isard, Rafal Jozefowicz, Lukasz Kaiser, Manjunath Kudlur, Josh Levenberg, Dan Mané, Rajat Monga, Sherry Moore, Derek Murray, Chris Olah, Mike Schuster, Jonathon Shlens, Benoit Steiner, Ilya Sutskever, Kunal Talwar, Paul Tucker, Vincent Vanhoucke, Vijay Vasudevan, Fernanda Viégas, Oriol Vinyals, Pete Warden, Martin Wattenberg, Martin Wicke, Yuan Yu, Xiaoqiang Zheng"
       }
     ],
@@ -2316,11 +2316,6 @@
         "title": "NLTK-Powered Text Summarization: Streamlining Information Access",
         "url": "https://www.ijnrd.org/papers/IJNRD2405341.pdf",
         "authors": "G. Manasa, K. S. R. S. Lakshmi, Dr. M. S. R. Murty"
-      },
-      {
-        "title": "AI based Attorney Using NLTK Library",
-        "url": "https://www.scispace.com/publication/307406145/ai-based-attorney-using-nltk-library",
-        "authors": "Jujjavarapu Sujan Chowdary"
       }
     ],
     "relatedRepos": [],
@@ -2793,7 +2788,7 @@
       "Healthcare Data Analysis (e.g., patient outcomes, operational efficiency)",
       "Non-profit Impact Measurement"
     ],
-    "officialDocs": "https://help.tableau.com/current/online/en-us/online_help.htm",
+    "officialDocs": "https://help.tableau.com/current/online/en-us/to_get_started.htm",
     "researchPapers": [
       {
         "title": "Criticality: Scaffolding Decision-Making with Interactive Critical Thinking and Evidence-Based Reasoning Traces",
@@ -3318,17 +3313,17 @@
       },
       {
         "title": "Model Algorithm Research based on Python Fast API",
-        "url": "https://www.lse.ac.uk/science-and-engineering/assets/docs/journals/frontiers-in-science-and-engineering/vol3-no9/chen-j-2023-model-algorithm-research-based-on-python-fast-api.pdf",
+        "url": "https://doi.org/10.54691/fse.v3i9.5591",
         "authors": "Chen, J."
       },
       {
         "title": "Django vs. FastAPI: A Comparative Study for High-Performance Web Applications",
-        "url": "https://zenodo.org/records/10986755",
+        "url": "https://zenodo.org/records/15119179",
         "authors": "Jadhav Sangram Bharat, Prof. Sonali Sagar Gholve"
       },
       {
         "title": "Integration of FastAPI-Based Machine Learning Model with Android Application for Real-Time Calories Burnt Prediction",
-        "url": "https://opastpublishers.com/open-access-articles/integration-of-fastapi-based-machine-learning-model-with-android-application-for-real-time-calories-burnt-prediction.pdf",
+        "url": "https://www.opastpublishers.com/open-access-articles/integration-of-fastapibased-machine-learning-model-with-android-application-for-realtime-calories-burnt-prediction.pdf",
         "authors": "Neha Bansal, Bhawna Singla"
       }
     ],

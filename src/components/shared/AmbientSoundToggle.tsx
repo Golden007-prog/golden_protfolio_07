@@ -1,127 +1,148 @@
-import { useEffect, useRef, useState } from 'react';
-import { motion } from 'framer-motion';
-import { Volume2, VolumeX } from 'lucide-react';
+'use client';
 
-const STORAGE_KEY = 'ob-ambient-on';
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { VolumeX } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
+import { Tooltip } from '@/components/ui/Tooltip';
+import { useHotkeys } from '@/hooks/useHotkeys';
 
-export function AmbientSoundToggle() {
+type Engine = { ctx: AudioContext; master: GainNode };
+type AudioWindow = Window & { webkitAudioContext?: typeof AudioContext };
+
+const VOLUME = 0.04;
+const FADE_IN_S = 1.2;
+const FADE_OUT_S = 0.8;
+// A little past the fade-out, so the context suspends only once it is silent.
+const SUSPEND_AFTER_MS = 900;
+// A2, E3, A3: a quiet open fifth.
+const CHORD = [110, 164.81, 220];
+
+const noopSubscribe = () => () => {};
+function audioCtor(): typeof AudioContext | undefined {
+  if (typeof window === 'undefined') return undefined;
+  return window.AudioContext ?? (window as AudioWindow).webkitAudioContext;
+}
+const hasAudio = () => Boolean(audioCtor());
+
+function createEngine(): Engine | null {
+  const Ctor = audioCtor();
+  if (!Ctor) return null;
+  try {
+    const ctx = new Ctor();
+    const master = ctx.createGain();
+    master.gain.value = 0;
+    master.connect(ctx.destination);
+    CHORD.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      osc.type = i === 0 ? 'sine' : 'triangle';
+      osc.frequency.value = freq;
+      const lfo = ctx.createOscillator();
+      const depth = ctx.createGain();
+      lfo.frequency.value = 0.1 + i * 0.05;
+      depth.gain.value = 0.4;
+      lfo.connect(depth);
+      depth.connect(osc.frequency);
+      osc.connect(master);
+      osc.start();
+      lfo.start();
+    });
+    return { ctx, master };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * A soft ambient drone. One AudioContext is built on the first press and then
+ * only faded (gain ramps) and suspended or resumed, never torn down, so rapid
+ * on/off/on presses always leave the state the button shows. It suspends while
+ * the tab is hidden. 'm' toggles it (a single-key shortcut, so it obeys the
+ * shortcut switch). Never starts by itself.
+ */
+export function AmbientSoundToggle({ className }: { className?: string }) {
+  const supported = useSyncExternalStore(noopSubscribe, hasAudio, () => true);
   const [on, setOn] = useState(false);
-  const [supported, setSupported] = useState(true);
-  const ctxRef = useRef<AudioContext | null>(null);
-  const gainRef = useRef<GainNode | null>(null);
-  const oscRefs = useRef<OscillatorNode[]>([]);
+  const onRef = useRef(false);
+  const engineRef = useRef<Engine | null>(null);
+  const suspendTimer = useRef<number | undefined>(undefined);
 
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const AC = window.AudioContext || (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-    if (!AC) {
-      setSupported(false);
-      return;
+  const fade = (next: boolean) => {
+    engineRef.current ??= next ? createEngine() : null;
+    const engine = engineRef.current;
+    if (!engine) return false;
+    const { ctx, master } = engine;
+    window.clearTimeout(suspendTimer.current);
+    const t = ctx.currentTime;
+    master.gain.cancelScheduledValues(t);
+    master.gain.setValueAtTime(master.gain.value, t);
+    if (next) {
+      void ctx.resume().catch(() => {});
+      master.gain.linearRampToValueAtTime(VOLUME, t + FADE_IN_S);
+    } else {
+      master.gain.linearRampToValueAtTime(0, t + FADE_OUT_S);
+      suspendTimer.current = window.setTimeout(() => {
+        if (!onRef.current) void ctx.suspend().catch(() => {});
+      }, SUSPEND_AFTER_MS);
     }
-    const pref = localStorage.getItem(STORAGE_KEY);
-    if (pref === '1') {
-      // Don't auto-start — browsers require user gesture; we just remember intent
-    }
-  }, []);
-
-  const start = () => {
-    try {
-      const AC = window.AudioContext || (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-      const ctx = new AC();
-      const master = ctx.createGain();
-      master.gain.setValueAtTime(0, ctx.currentTime);
-      master.gain.linearRampToValueAtTime(0.04, ctx.currentTime + 1.2);
-      master.connect(ctx.destination);
-
-      const freqs = [110, 164.81, 220]; // A2, E3, A3 — gentle chord
-      const oscs: OscillatorNode[] = [];
-      freqs.forEach((f, i) => {
-        const osc = ctx.createOscillator();
-        osc.type = i === 0 ? 'sine' : 'triangle';
-        osc.frequency.value = f;
-        const lfo = ctx.createOscillator();
-        const lfoGain = ctx.createGain();
-        lfo.frequency.value = 0.1 + i * 0.05;
-        lfoGain.gain.value = 0.4;
-        lfo.connect(lfoGain);
-        lfoGain.connect(osc.frequency);
-        osc.connect(master);
-        osc.start();
-        lfo.start();
-        oscs.push(osc);
-      });
-      ctxRef.current = ctx;
-      gainRef.current = master;
-      oscRefs.current = oscs;
-    } catch {
-      setSupported(false);
-    }
-  };
-
-  const stop = () => {
-    const ctx = ctxRef.current;
-    const master = gainRef.current;
-    if (!ctx || !master) return;
-    master.gain.cancelScheduledValues(ctx.currentTime);
-    master.gain.setValueAtTime(master.gain.value, ctx.currentTime);
-    master.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.8);
-    setTimeout(() => {
-      oscRefs.current.forEach((o) => {
-        try {
-          o.stop();
-        } catch {
-          /* already stopped */
-        }
-      });
-      ctx.close().catch(() => {});
-      ctxRef.current = null;
-      gainRef.current = null;
-      oscRefs.current = [];
-    }, 900);
+    return true;
   };
 
   const toggle = () => {
-    if (on) {
-      stop();
-      setOn(false);
-      localStorage.setItem(STORAGE_KEY, '0');
-    } else {
-      start();
-      setOn(true);
-      localStorage.setItem(STORAGE_KEY, '1');
-    }
+    const next = !onRef.current;
+    if (next && !fade(true)) return;
+    if (!next) fade(false);
+    onRef.current = next;
+    setOn(next);
   };
 
+  useHotkeys({ m: toggle }, { enabled: supported });
+
+  // Hidden tab: silence the context outright; bring it back only if still on.
   useEffect(() => {
-    return () => {
-      if (ctxRef.current) {
-        oscRefs.current.forEach((o) => {
-          try {
-            o.stop();
-          } catch {
-            /* ignore */
-          }
-        });
-        ctxRef.current.close().catch(() => {});
-      }
+    const onVisibility = () => {
+      const engine = engineRef.current;
+      if (!engine) return;
+      if (document.hidden) void engine.ctx.suspend().catch(() => {});
+      else if (onRef.current) void engine.ctx.resume().catch(() => {});
     };
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => document.removeEventListener('visibilitychange', onVisibility);
   }, []);
+
+  useEffect(
+    () => () => {
+      window.clearTimeout(suspendTimer.current);
+      void engineRef.current?.ctx.close().catch(() => {});
+      engineRef.current = null;
+    },
+    [],
+  );
 
   if (!supported) return null;
 
   return (
-    <motion.button
-      onClick={toggle}
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ delay: 1.8, duration: 0.5 }}
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
-      aria-label={on ? 'Mute ambient sound' : 'Play ambient sound'}
-      aria-pressed={on}
-      className={`fixed bottom-6 right-24 z-40 w-11 h-11 rounded-full glass-strong flex items-center justify-center text-text-muted hover:text-violet-bright transition-colors ${on ? 'ring-1 ring-violet-bright/40' : ''}`}
-    >
-      {on ? <Volume2 size={16} /> : <VolumeX size={16} />}
-    </motion.button>
+    <Tooltip content={on ? 'Ambient sound: on (M)' : 'Ambient sound: off (M)'}>
+      <Button
+        variant="icon"
+        size="md"
+        aria-label="Ambient sound"
+        aria-pressed={on}
+        aria-keyshortcuts="M"
+        data-sound-toggle=""
+        data-on={on ? '' : undefined}
+        onClick={toggle}
+        className={className}
+      >
+        {on ? (
+          <span aria-hidden="true" className="eq flex h-4 items-end gap-[3px]">
+            <span className="eq-bar block h-4 w-[3px] rounded-full bg-violet-bright" />
+            <span className="eq-bar block h-4 w-[3px] rounded-full bg-violet-bright" />
+            <span className="eq-bar block h-4 w-[3px] rounded-full bg-violet-bright" />
+          </span>
+        ) : (
+          <VolumeX aria-hidden="true" className="size-4" />
+        )}
+      </Button>
+    </Tooltip>
   );
 }

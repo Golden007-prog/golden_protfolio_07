@@ -10,6 +10,7 @@
     "skipLibCheck": true,
     "strict": true,
     "noEmit": true,
+    "allowImportingTsExtensions": true,
     "esModuleInterop": true,
     "module": "ESNext",
     "moduleResolution": "bundler",
@@ -42,6 +43,16 @@
   "exclude": [
     "node_modules",
     "dist",
-    ".next"
+    ".next",
+    "out",
+    "build",
+    ".venv",
+    "meshy",
+    "linkedin-mcp",
+    "cv",
+    "img",
+    ".claude-flow",
+    "test-results",
+    "playwright-report"
   ]
 }

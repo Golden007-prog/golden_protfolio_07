@@ -1,75 +1,64 @@
-import { motion } from 'framer-motion';
-import { GraduationCap } from 'lucide-react';
-import { SectionWrapper } from '../layout/SectionWrapper';
-import { SectionHeading } from '../shared/SectionHeading';
-import { ScrollReveal } from '../shared/ScrollReveal';
-import { GlassCard } from '../shared/GlassCard';
-import { GitHubHeatmap } from '../shared/GitHubHeatmap';
-import { LeetCodeHeatmap } from '../shared/LeetCodeHeatmap';
-import { ReadingList } from '../shared/ReadingList';
-import { TimelineCard } from './TimelineCard';
-import profile from '../../data/profile.json';
+'use client';
 
+import { SectionWrapper } from '@/components/layout/SectionWrapper';
+import { Reveal } from '@/components/motion';
+import { GitHubHeatmap } from '@/components/shared/GitHubHeatmap';
+import { LazyMount } from '@/components/shared/LazyMount';
+import { LeetCodeHeatmap } from '@/components/shared/LeetCodeHeatmap';
+import { ReadingList } from '@/components/shared/ReadingList';
+import { SectionHeading } from '@/components/shared/SectionHeading';
+import { Skeleton } from '@/components/ui/Skeleton';
+import profile from '@/data/profile.json';
+import { EducationCard } from './EducationCard';
+import { TimelineCard } from './TimelineCard';
+import { TimelineSpine, type SpineItem } from './TimelineSpine';
+
+const SKILLS: readonly string[] = Object.values(profile.skills).flat();
+
+const ROLES: readonly SpineItem[] = profile.experience.map((exp) => ({
+  key: `${exp.company}-${exp.start}`,
+  content: <TimelineCard exp={exp} skills={SKILLS} />,
+}));
+
+/**
+ * Story first: the timeline and education, then the live activity heatmaps,
+ * which mount (and start their third-party fetches) only when scrolled near.
+ */
 export function ExperienceSection() {
   return (
     <SectionWrapper id="experience">
       <SectionHeading
-        kicker="04 / Experience"
+        sectionId="experience"
         title="The journey so *far*."
         subtitle="Internships, freelance AI work, and a Master's in progress — all pulling in the same direction."
       />
 
-      <ScrollReveal className="mb-8">
-        <GitHubHeatmap />
-      </ScrollReveal>
+      <TimelineSpine items={ROLES} />
 
-      <ScrollReveal className="mb-16">
-        <LeetCodeHeatmap />
-      </ScrollReveal>
+      <Reveal className="mt-16 md:mt-20">
+        <EducationCard education={profile.education} />
+      </Reveal>
 
-      <div className="relative">
-        <motion.div
-          initial={{ scaleY: 0 }}
-          whileInView={{ scaleY: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 1.5, ease: 'easeOut' }}
-          style={{ transformOrigin: 'top' }}
-          className="absolute left-4 md:left-6 top-0 bottom-0 w-[2px] bg-gradient-to-b from-violet-bright via-cyan-bright to-transparent"
-        />
-
-        <div className="space-y-8 md:space-y-10 pl-12 md:pl-20">
-          {profile.experience.map((exp, i) => (
-            <div key={`${exp.company}-${i}`} className="relative">
-              <span className="absolute -left-[34px] md:-left-[58px] top-7 w-3 h-3 rounded-full bg-violet-bright glow-violet ring-4 ring-bg-base" />
-              <span className="absolute -left-[30px] md:-left-[54px] top-[34px] h-[2px] w-6 md:w-10 bg-gradient-to-r from-violet-bright/70 to-transparent" />
-              <TimelineCard exp={exp} />
-            </div>
-          ))}
-        </div>
+      <div className="mt-16 grid grid-cols-1 gap-8 md:mt-20">
+        <LazyMount
+          rootMargin="400px"
+          className="story-heat-slot story-heat-slot--github min-w-0"
+          placeholder={<Skeleton variant="block" className="story-heat-skeleton" />}
+        >
+          <GitHubHeatmap />
+        </LazyMount>
+        <LazyMount
+          rootMargin="400px"
+          className="story-heat-slot story-heat-slot--leetcode min-w-0"
+          placeholder={<Skeleton variant="block" className="story-heat-skeleton" />}
+        >
+          <LeetCodeHeatmap />
+        </LazyMount>
       </div>
 
-      <ScrollReveal className="mt-20">
-        <GlassCard strong className="p-8 md:p-10">
-          <div className="flex items-center gap-2 text-cyan-bright mb-6">
-            <GraduationCap size={16} />
-            <span className="font-mono text-[10px] uppercase tracking-[0.25em]">Education</span>
-          </div>
-          <div className="grid md:grid-cols-2 gap-6">
-            {profile.education.map((edu) => (
-              <div key={edu.institution} className="border-l-2 border-violet-bright/40 pl-5">
-                <p className="font-display text-lg font-semibold">{edu.degree}</p>
-                <p className="text-violet-bright text-sm mt-0.5">{edu.institution}</p>
-                <p className="mt-2 font-mono text-xs text-text-muted">{edu.year}</p>
-                <p className="mt-1 text-xs text-cyan-bright/80">{edu.status}</p>
-              </div>
-            ))}
-          </div>
-        </GlassCard>
-      </ScrollReveal>
-
-      <ScrollReveal className="mt-10">
+      <Reveal className="mt-10">
         <ReadingList />
-      </ScrollReveal>
+      </Reveal>
     </SectionWrapper>
   );
 }

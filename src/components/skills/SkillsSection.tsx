@@ -1,122 +1,210 @@
-import { Suspense, lazy, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { SectionWrapper } from '../layout/SectionWrapper';
-import { SectionHeading } from '../shared/SectionHeading';
-import { ScrollReveal } from '../shared/ScrollReveal';
-import { SkillCard } from './SkillCard';
+'use client';
+
+import { AnimatePresence, motion } from 'framer-motion';
+import { lazy, useEffect, useMemo, useState } from 'react';
+import { SectionWrapper } from '@/components/layout/SectionWrapper';
+import { Reveal } from '@/components/motion';
+import { BackgroundVideo } from '@/components/shared/BackgroundVideo';
+import { Deferred3D } from '@/components/shared/Deferred3D';
+import { LottieIcon } from '@/components/shared/LottieIcon';
+import { SectionHeading } from '@/components/shared/SectionHeading';
+import { Button } from '@/components/ui/Button';
+import { useMotionPrefs } from '@/hooks/useMotionPrefs';
+import { duration, ease } from '@/lib/motion';
+import { ACCENT_MAP, CATEGORIES, findSkill, SKILLS } from '@/lib/skills';
 import { SentimentDemo } from './SentimentDemo';
-import profile from '../../data/profile.json';
-import { CanvasBoundary } from '../shared/CanvasBoundary';
-import { BackgroundVideo } from '../shared/BackgroundVideo';
-import { useDeviceCapability } from '../../hooks/useDeviceCapability';
+import { SkillCard } from './SkillCard';
+import { SkillConstellation } from './SkillConstellation';
+import { SkillFilterBar } from './SkillFilterBar';
+import { SkillFocusProvider, useSkillActions, useSkillFocus, useSkillList, useSkillMode } from './SkillFocusContext';
+import { SkillModal } from './SkillModal';
 
-const SkillSphere = lazy(() => import('./SkillSphere').then((m) => ({ default: m.SkillSphere })));
+const SkillSphere = lazy(() => import('./SkillSphere'));
 
-const ACCENT_MAP: Record<string, 'violet' | 'cyan' | 'amber' | 'pink'> = {
-  'GenAI & LLMs': 'violet',
-  'Agentic AI': 'cyan',
-  'Data Science & ML': 'amber',
-  'Analytics & Viz': 'pink',
-  'Infrastructure': 'violet',
+const SUBTITLE = {
+  sphere: "Spin it, or tap a node to lock it center-stage. Every one is something I've shipped production code with.",
+  constellation: "Tap a node to open it. Every one is something I've shipped production code with.",
 };
 
-export function SkillsSection() {
-  const base = '/';
-  const { allowHeavy3D } = useDeviceCapability();
-  const categories = Object.entries(profile.skills);
-  const [filter, setFilter] = useState<string>('All');
-  const filtered = filter === 'All' ? categories : categories.filter(([c]) => c === filter);
+const CARD_ENTER = { duration: duration.base, ease: ease.out };
+
+/** Polite announcement of the node locked on the sphere or constellation. */
+function SelectionAnnouncer() {
+  const { selected } = useSkillFocus();
+  const [text, setText] = useState('');
+  useEffect(() => {
+    const skill = findSkill(selected);
+    // Deferred a tick so the button's own name is read first.
+    const t = window.setTimeout(() => setText(skill ? `${skill.name} selected, ${skill.category}` : ''), 120);
+    return () => window.clearTimeout(t);
+  }, [selected]);
+  return (
+    <p aria-live="polite" aria-atomic="true" className="sr-only" data-skills-selection="">
+      {text}
+    </p>
+  );
+}
+
+function ReleaseChip() {
+  const { selected } = useSkillFocus();
+  const { select } = useSkillActions();
+  return (
+    <div className="mt-3 flex min-h-11 justify-center">
+      {selected ? (
+        <Button variant="secondary" size="md" onClick={() => select(null)} className="font-mono text-[11px] uppercase tracking-[0.2em]">
+          {selected} · release
+        </Button>
+      ) : null}
+    </div>
+  );
+}
+
+function SkillStage() {
+  return (
+    <div className="lg:sticky lg:top-28">
+      <div className="mx-auto aspect-square w-full max-w-[min(420px,88vw)] lg:max-w-none">
+        <Deferred3D id="skills" fallback={<SkillConstellation />} className="relative h-full w-full">
+          <SkillSphere />
+        </Deferred3D>
+      </div>
+      <ReleaseChip />
+      <SelectionAnnouncer />
+    </div>
+  );
+}
+
+function SkillGrid() {
+  const { filter, query, visible } = useSkillList();
+  const { setQuery } = useSkillActions();
+  const { reduce } = useMotionPrefs();
+
+  const groups = useMemo(
+    () =>
+      CATEGORIES.map((category) => ({
+        category,
+        total: SKILLS.filter((s) => s.category === category).length,
+        skills: visible.filter((s) => s.category === category),
+      })).filter((g) => g.skills.length > 0),
+    [visible],
+  );
+
+  if (groups.length === 0) {
+    const q = query.trim();
+    return (
+      <div className="flex flex-col items-center gap-4 rounded-2xl border border-hairline bg-surface-tint px-6 py-10 text-center" data-skills-empty="">
+        <LottieIcon name="emptySearch" play="once" loop={false} className="block size-28" fallback={null} />
+        <p className="text-sm text-text-secondary">
+          No skills match “{q}”{filter === 'All' ? '' : ` in ${filter}`}.
+        </p>
+        <Button variant="secondary" size="sm" onClick={() => setQuery('')}>
+          Clear search
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <AnimatePresence mode="popLayout" initial={false}>
+        {groups.map((g) => (
+          <motion.div
+            key={g.category}
+            layout={reduce ? false : 'position'}
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0, transition: CARD_ENTER }}
+            exit={{ opacity: 0, scale: 0.97, transition: { duration: 0.2, ease: ease.in } }}
+          >
+            <SkillCard
+              category={g.category}
+              skills={g.skills}
+              total={g.total}
+              accent={ACCENT_MAP[g.category] ?? 'violet'}
+              query={query}
+            />
+          </motion.div>
+        ))}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+/**
+ * The subtitle says what the stage can do: spin the sphere, or tap the constellation.
+ * Both lines share one grid cell and the inactive one is only invisible, so the
+ * box keeps the taller line's height and nothing below moves when the sphere mounts.
+ */
+function SkillsHeading() {
+  const { sphereLive } = useSkillMode();
+  return (
+    <SectionHeading
+      sectionId="skills"
+      title="Tools in the *arsenal*."
+      subtitle={
+        <span className="grid">
+          <span className={sphereLive ? '[grid-area:1/1]' : 'invisible [grid-area:1/1]'}>{SUBTITLE.sphere}</span>
+          <span className={sphereLive ? 'invisible [grid-area:1/1]' : '[grid-area:1/1]'}>{SUBTITLE.constellation}</span>
+        </span>
+      }
+    />
+  );
+}
+
+function SkillsBody() {
   return (
     <SectionWrapper id="skills">
       <BackgroundVideo
         variant="dark"
-        src={`${base}videos/skills-bg.mp4`}
-        poster={`${base}images/skills-bg.webp`}
-        className="absolute inset-0 -z-10 w-full h-full object-cover opacity-25 pointer-events-none dark-only"
+        src="/videos/skills-bg.mp4"
+        poster="/images/skills-bg.webp"
+        className="dark-only pointer-events-none absolute inset-0 -z-10 h-full w-full object-cover opacity-25"
       />
       <div
-        className="absolute inset-0 -z-10 pointer-events-none light-only overflow-hidden"
+        className="light-only pointer-events-none absolute inset-0 -z-10 overflow-clip"
         style={{
-          maskImage:
-            'radial-gradient(ellipse 85% 75% at 50% 50%, black 35%, rgba(0,0,0,0.35) 70%, transparent 100%)',
-          WebkitMaskImage:
-            'radial-gradient(ellipse 85% 75% at 50% 50%, black 35%, rgba(0,0,0,0.35) 70%, transparent 100%)',
+          maskImage: 'radial-gradient(ellipse 85% 75% at 50% 50%, #000 35%, rgb(0 0 0 / 0.35) 70%, transparent 100%)',
+          WebkitMaskImage: 'radial-gradient(ellipse 85% 75% at 50% 50%, #000 35%, rgb(0 0 0 / 0.35) 70%, transparent 100%)',
         }}
       >
         <BackgroundVideo
           variant="light"
-          src={`${base}videos/skills-bg-light.mp4`}
-          className="w-full h-full object-cover opacity-40"
+          src="/videos/skills-bg-light.mp4"
+          className="h-full w-full object-cover opacity-40"
           style={{ filter: 'saturate(0.75) brightness(1.02)' }}
         />
       </div>
-      <div className="absolute inset-0 -z-10 bg-gradient-to-b from-bg-base/50 via-transparent to-bg-base/70 pointer-events-none light-only" />
+      <div className="light-only pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-bg-base/50 via-transparent to-bg-base/70" />
       <div
-        className="absolute inset-0 -z-10 opacity-20 pointer-events-none mix-blend-screen dark-only"
-        style={{ backgroundImage: `url(${base}images/skills-neural.webp)`, backgroundSize: 'cover', backgroundPosition: 'center' }}
+        aria-hidden="true"
+        className="dark-only pointer-events-none absolute inset-0 -z-10 opacity-20 mix-blend-screen"
+        style={{ backgroundImage: 'url(/images/skills-neural.webp)', backgroundSize: 'cover', backgroundPosition: 'center' }}
       />
-      <div className="absolute inset-0 -z-10 bg-gradient-to-b from-bg-base/70 via-transparent to-bg-base/90 pointer-events-none" />
-      <SectionHeading
-        kicker="02 / Skills"
-        title="Tools in the *arsenal*."
-        subtitle="Spin it, or tap a node to lock it center-stage. Every one is something I've shipped production code with."
-      />
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-bg-base/70 via-transparent to-bg-base/90" />
 
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 items-start">
-        <ScrollReveal className="lg:col-span-2 h-[500px] sticky top-28">
-          {allowHeavy3D ? (
-            <CanvasBoundary>
-              <Suspense fallback={<div className="glass w-full h-full animate-pulse" />}>
-                <SkillSphere />
-              </Suspense>
-            </CanvasBoundary>
-          ) : null}
-        </ScrollReveal>
+      <SkillsHeading />
 
+      <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-5 lg:gap-8">
+        <div className="lg:col-span-2 lg:self-stretch">
+          <SkillStage />
+        </div>
         <div className="lg:col-span-3">
-          <div className="flex flex-wrap gap-2 mb-5">
-            {['All', ...categories.map(([c]) => c)].map((c) => {
-              const active = filter === c;
-              return (
-                <button
-                  key={c}
-                  onClick={() => setFilter(c)}
-                  className={`relative px-3.5 py-1.5 rounded-full text-xs font-mono uppercase tracking-wider transition-colors ${active ? 'text-white' : 'text-text-muted hover:text-text-primary'}`}
-                >
-                  {active && (
-                    <motion.span
-                      layoutId="skills-filter-pill"
-                      className="absolute inset-0 rounded-full bg-gradient-to-r from-violet to-violet-bright shadow-[0_0_18px_rgba(168,85,247,0.35)]"
-                      transition={{ type: 'spring', stiffness: 380, damping: 32 }}
-                    />
-                  )}
-                  <span className="relative z-10">{c}</span>
-                </button>
-              );
-            })}
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <AnimatePresence mode="popLayout">
-              {filtered.map(([cat, items], i) => (
-                <motion.div
-                  key={cat}
-                  layout
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10, scale: 0.97 }}
-                  transition={{ duration: 0.4, delay: i * 0.06, ease: [0.16, 1, 0.3, 1] }}
-                >
-                  <SkillCard category={cat} items={items as string[]} accent={ACCENT_MAP[cat] ?? 'violet'} />
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </div>
+          <SkillFilterBar />
+          <SkillGrid />
         </div>
       </div>
 
-      <ScrollReveal className="mt-16">
+      <Reveal className="mt-16">
         <SentimentDemo />
-      </ScrollReveal>
+      </Reveal>
+
+      <SkillModal />
     </SectionWrapper>
+  );
+}
+
+export function SkillsSection() {
+  return (
+    <SkillFocusProvider>
+      <SkillsBody />
+    </SkillFocusProvider>
   );
 }

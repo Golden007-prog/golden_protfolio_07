@@ -1,295 +1,225 @@
-import { useEffect, useMemo, useState } from 'react';
-import { motion } from 'framer-motion';
-import { Code2 } from 'lucide-react';
+'use client';
 
-type Stats = {
-  totalSolved: number;
-  easySolved: number;
-  mediumSolved: number;
-  hardSolved: number;
-  ranking: number;
-  acceptanceRate: number;
-};
+import { useEffect, useId, useMemo, useRef, useState, useSyncExternalStore, type CSSProperties } from 'react';
+import { ArrowUpRight, Code2 } from 'lucide-react';
+import { CountUp } from '@/components/motion';
+import { ContributionGrid, HeatLegend, HeatStat } from '@/components/shared/ContributionGrid';
+import { Button } from '@/components/ui/Button';
+import { Skeleton } from '@/components/ui/Skeleton';
+import { getLive, IDLE_ENTRY, loadLive, subscribeLive, type LeetCodeLive } from '@/lib/live-data';
+import { SITE } from '@/lib/site';
+import { activeDays, formatDay, lastYearDays, plural, totalCount, usernameFromUrl } from '@/utils/contributionStats';
+import { cn } from '@/utils/cn';
 
-type CalendarDay = { date: string; count: number; level: 0 | 1 | 2 | 3 | 4 };
+const USER = usernameFromUrl(SITE.links.leetcode);
 
-const USERNAME = 'oikantik007';
-const STATS_ENDPOINT = `https://leetcode-stats-api.herokuapp.com/${USERNAME}`;
-const CALENDAR_ENDPOINT = `https://alfa-leetcode-api.onrender.com/userProfileCalendar?username=${USERNAME}`;
-const CACHE_KEY = 'ob-leetcode-heatmap-v1';
-const CACHE_TTL = 6 * 60 * 60 * 1000;
+const SIZE = 112;
+const R = 46;
+const STROKE = 10;
+const CIRC = 2 * Math.PI * R;
 
-const LEVEL_COLORS = [
-  'bg-white/[0.04]',
-  'bg-amber/25',
-  'bg-amber/50',
-  'bg-amber/75',
-  'bg-amber',
-];
+const SEGMENTS = [
+  { key: 'easy', label: 'Easy', stroke: 'stroke-cyan-bright', dot: 'bg-cyan-bright' },
+  { key: 'medium', label: 'Medium', stroke: 'stroke-amber', dot: 'bg-amber' },
+  { key: 'hard', label: 'Hard', stroke: 'stroke-pink', dot: 'bg-pink' },
+] as const;
 
-function bucketLevel(count: number): 0 | 1 | 2 | 3 | 4 {
-  if (count <= 0) return 0;
-  if (count <= 2) return 1;
-  if (count <= 5) return 2;
-  if (count <= 10) return 3;
-  return 4;
-}
+type Counts = Pick<LeetCodeLive, 'easy' | 'medium' | 'hard' | 'totalSolved'>;
 
-function buildCalendar(submissionCalendarJson: string): CalendarDay[] {
-  let raw: Record<string, number> = {};
-  try {
-    raw = JSON.parse(submissionCalendarJson);
-  } catch {
-    return [];
-  }
-  const counts = new Map<string, number>();
-  for (const [ts, c] of Object.entries(raw)) {
-    const d = new Date(Number(ts) * 1000);
-    const key = d.toISOString().slice(0, 10);
-    counts.set(key, (counts.get(key) || 0) + (c as number));
-  }
-
-  const today = new Date();
-  today.setUTCHours(0, 0, 0, 0);
-  const start = new Date(today);
-  start.setUTCDate(start.getUTCDate() - 364);
-
-  const days: CalendarDay[] = [];
-  for (let d = new Date(start); d <= today; d.setUTCDate(d.getUTCDate() + 1)) {
-    const key = d.toISOString().slice(0, 10);
-    const count = counts.get(key) || 0;
-    days.push({ date: key, count, level: bucketLevel(count) });
-  }
-  return days;
-}
-
-export function LeetCodeHeatmap() {
-  const [stats, setStats] = useState<Stats | null>(null);
-  const [days, setDays] = useState<CalendarDay[] | null>(null);
-  const [error, setError] = useState(false);
+/**
+ * Easy / Medium / Hard as arcs of one ring whose lengths are shares of
+ * totalSolved. The arcs draw in once in view (CSS; static under reduced motion).
+ */
+function DifficultyDonut({ counts }: { counts: Counts | null }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [play, setPlay] = useState<'wait' | 'run'>('wait');
 
   useEffect(() => {
-    let alive = true;
-    async function load() {
-      try {
-        const cached = localStorage.getItem(CACHE_KEY);
-        if (cached) {
-          const parsed = JSON.parse(cached) as {
-            at: number;
-            stats: Stats;
-            days: CalendarDay[];
-          };
-          if (Date.now() - parsed.at < CACHE_TTL) {
-            setStats(parsed.stats);
-            setDays(parsed.days);
-            return;
-          }
-        }
-
-        const [statsRes, calRes] = await Promise.allSettled([
-          fetch(STATS_ENDPOINT).then((r) => (r.ok ? r.json() : Promise.reject())),
-          fetch(CALENDAR_ENDPOINT).then((r) => (r.ok ? r.json() : Promise.reject())),
-        ]);
-
-        let nextStats: Stats | null = null;
-        let nextDays: CalendarDay[] = [];
-
-        if (statsRes.status === 'fulfilled') {
-          const s = statsRes.value;
-          nextStats = {
-            totalSolved: s.totalSolved ?? 0,
-            easySolved: s.easySolved ?? 0,
-            mediumSolved: s.mediumSolved ?? 0,
-            hardSolved: s.hardSolved ?? 0,
-            ranking: s.ranking ?? 0,
-            acceptanceRate: s.acceptanceRate ?? 0,
-          };
-        }
-
-        if (calRes.status === 'fulfilled') {
-          const cal = calRes.value;
-          const raw =
-            cal?.data?.matchedUser?.userCalendar?.submissionCalendar ??
-            cal?.submissionCalendar ??
-            '';
-          if (raw) nextDays = buildCalendar(raw);
-        }
-
-        if (!alive) return;
-
-        if (!nextStats && !nextDays.length) {
-          setError(true);
-          return;
-        }
-
-        setStats(nextStats);
-        setDays(nextDays);
-        localStorage.setItem(
-          CACHE_KEY,
-          JSON.stringify({ at: Date.now(), stats: nextStats, days: nextDays }),
-        );
-      } catch {
-        if (alive) setError(true);
-      }
+    const el = ref.current;
+    if (!el || !counts || play === 'run') return;
+    if (typeof IntersectionObserver === 'undefined') {
+      const t = window.setTimeout(() => setPlay('run'), 0);
+      return () => window.clearTimeout(t);
     }
-    load();
-    return () => {
-      alive = false;
-    };
-  }, []);
-
-  const weeks = useMemo<CalendarDay[][]>(() => {
-    if (!days || !days.length) return [];
-    const result: CalendarDay[][] = [];
-    const firstDow = new Date(days[0].date).getUTCDay();
-    let week: CalendarDay[] = Array(firstDow).fill({ date: '', count: 0, level: 0 });
-    for (const d of days) {
-      week.push(d);
-      if (week.length === 7) {
-        result.push(week);
-        week = [];
-      }
-    }
-    if (week.length) result.push(week);
-    return result;
-  }, [days]);
-
-  const totalLastYear = useMemo(
-    () => (days ? days.reduce((s, d) => s + (d.count || 0), 0) : 0),
-    [days],
-  );
-
-  if (error) {
-    return (
-      <div className="glass-strong rounded-2xl p-6 md:p-8 text-center text-sm text-text-dim">
-        LeetCode stats unavailable right now.
-      </div>
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry?.isIntersecting) return;
+        io.disconnect();
+        setPlay('run');
+      },
+      { threshold: 0.4 },
     );
-  }
+    io.observe(el);
+    return () => io.disconnect();
+  }, [counts, play]);
 
-  if (!stats && !days) {
-    return (
-      <div className="glass-strong rounded-2xl p-6 md:p-8 text-center text-sm text-text-dim">
-        Loading LeetCode…
-      </div>
-    );
-  }
+  const total = counts ? counts.totalSolved || counts.easy + counts.medium + counts.hard : 0;
+  const shown = counts ? SEGMENTS.filter((s) => counts[s.key] > 0) : [];
+  const gap = shown.length > 1 ? 3 : 0;
+  let offset = 0;
 
   return (
-    <div className="glass-strong rounded-2xl p-6 md:p-8">
-      <div className="flex items-center justify-between flex-wrap gap-3 mb-5">
-        <div className="flex items-center gap-3">
-          <Code2 size={16} className="text-amber" />
-          <div>
-            <p className="font-display text-lg font-semibold">Live from LeetCode</p>
-            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-text-dim">
-              {stats ? `${stats.totalSolved} solved` : `${totalLastYear} submissions`} · last year
+    <div ref={ref} data-play={play} data-donut="" className="relative size-28 shrink-0">
+      <svg aria-hidden="true" viewBox={`0 0 ${SIZE} ${SIZE}`} className="size-full">
+        <circle cx={SIZE / 2} cy={SIZE / 2} r={R} fill="none" strokeWidth={STROKE} className="stroke-heat-0" />
+        {counts && total > 0
+          ? shown.map((s, i) => {
+              const len = (CIRC * counts[s.key]) / total;
+              const start = offset;
+              offset += len;
+              return (
+                <circle
+                  key={s.key}
+                  cx={SIZE / 2}
+                  cy={SIZE / 2}
+                  r={R}
+                  fill="none"
+                  strokeWidth={STROKE}
+                  strokeDashoffset={-start}
+                  transform={`rotate(-90 ${SIZE / 2} ${SIZE / 2})`}
+                  data-segment={s.key}
+                  data-count={counts[s.key]}
+                  className={cn('lc-arc', s.stroke)}
+                  style={
+                    {
+                      '--len': `${Math.max(0, len - gap).toFixed(2)}px`,
+                      '--circ': `${CIRC.toFixed(2)}px`,
+                      '--delay': `${i * 140}ms`,
+                    } as CSSProperties
+                  }
+                />
+              );
+            })
+          : null}
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <span className="h-7 font-display text-2xl font-bold leading-7 text-text-primary">
+          {counts ? <CountUp value={total} /> : <span className="inline-block h-5 w-10 rounded bg-heat-0 align-middle" />}
+        </span>
+        <span className="font-mono text-[11px] leading-4 text-text-muted">solved</span>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * LeetCode progress from /api/leetcode: all-time solves by difficulty, the streak
+ * and active days LeetCode reports, and a year of submissions. The route falls
+ * back to a build-time snapshot, labelled as such, when LeetCode is unreachable.
+ */
+export function LeetCodeHeatmap() {
+  const titleId = useId();
+  const entry = useSyncExternalStore(subscribeLive, () => getLive('leetcode'), () => IDLE_ENTRY);
+  useEffect(() => loadLive('leetcode'), []);
+
+  const data = entry.data;
+  const ready = entry.status === 'ready' && data !== null;
+  const failed = entry.status === 'error';
+
+  // The window ends on the day the data was fetched, not on the visitor's clock.
+  const endDay = data?.fetchedAt?.slice(0, 10) ?? data?.snapshotAt?.slice(0, 10) ?? '';
+  const list = useMemo(() => (data && endDay ? lastYearDays(data.calendar, endDay) : []), [data, endDay]);
+  const submissions = totalCount(list);
+  const active = activeDays(list);
+
+  const sub = ready
+    ? `${plural(data.totalSolved, 'problem', 'problems')} solved all-time${
+        data.stale && data.snapshotAt ? ` · snapshot ${formatDay(data.snapshotAt.slice(0, 10))}` : ''
+      }`
+    : failed
+      ? 'Stats unavailable right now'
+      : 'Loading stats…';
+
+  const label = `${plural(submissions, 'LeetCode submission', 'LeetCode submissions')} in the last year, on ${plural(
+    active,
+    'day',
+    'days',
+  )}. Arrow keys move between days.`;
+
+  const dash = failed ? '—' : null;
+
+  return (
+    <section
+      aria-labelledby={titleId}
+      data-heatmap="leetcode"
+      data-state={ready ? 'ready' : failed ? 'error' : 'loading'}
+      data-stale={data?.stale ? '' : undefined}
+      className="glass-strong rounded-2xl p-6 [contain:inline-size] md:p-8"
+    >
+      <header className="mb-6 flex items-start justify-between gap-4">
+        <div className="flex min-w-0 items-center gap-3">
+          <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-surface-tint text-amber-text">
+            <Code2 aria-hidden="true" className="size-4" />
+          </span>
+          <div className="min-w-0">
+            <h3 id={titleId} className="font-display text-lg font-semibold leading-6 text-text-primary">
+              Live from LeetCode
+            </h3>
+            <p className="truncate font-mono text-xs leading-5 text-text-muted" data-leetcode-total={ready ? data.totalSolved : undefined}>
+              {sub}
             </p>
           </div>
         </div>
-        <a
-          href={`https://leetcode.com/u/${USERNAME}/`}
-          target="_blank"
-          rel="noreferrer"
-          className="text-[11px] font-mono text-amber hover:text-amber/70 transition-colors"
+        <Button
+          href={SITE.links.leetcode}
+          external
+          variant="ghost"
+          size="sm"
+          cursor="open"
+          aria-label={`${USER} on LeetCode`}
+          trailingIcon={<ArrowUpRight aria-hidden="true" className="size-4" />}
+          className="shrink-0 font-mono text-xs"
         >
-          @{USERNAME} →
-        </a>
-      </div>
+          <span className="hidden sm:inline">@{USER}</span>
+        </Button>
+      </header>
 
-      {stats && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-5">
-          <Stat label="Total" value={stats.totalSolved} tone="violet" />
-          <Stat label="Easy" value={stats.easySolved} tone="cyan" />
-          <Stat label="Medium" value={stats.mediumSolved} tone="amber" />
-          <Stat label="Hard" value={stats.hardSolved} tone="pink" />
-        </div>
-      )}
-
-      {weeks.length > 0 && (
-        <div className="overflow-x-auto scrollbar-none -mx-2 px-2">
-          <div className="flex gap-[3px] min-w-fit">
-            {weeks.map((w, wi) => (
-              <div key={wi} className="flex flex-col gap-[3px]">
-                {Array.from({ length: 7 }).map((_, di) => {
-                  const day = w[di];
-                  if (!day || !day.date) {
-                    return (
-                      <span
-                        key={di}
-                        className="w-[10px] h-[10px] md:w-3 md:h-3 rounded-[2px]"
-                      />
-                    );
-                  }
-                  return (
-                    <motion.span
-                      key={di}
-                      initial={{ opacity: 0, scale: 0.6 }}
-                      whileInView={{ opacity: 1, scale: 1 }}
-                      viewport={{ once: true }}
-                      transition={{
-                        duration: 0.3,
-                        delay: Math.min(wi * 0.01 + di * 0.005, 0.6),
-                      }}
-                      title={`${day.count} submission${day.count === 1 ? '' : 's'} on ${day.date}`}
-                      className={`w-[10px] h-[10px] md:w-3 md:h-3 rounded-[2px] ${LEVEL_COLORS[day.level]}`}
-                    />
-                  );
-                })}
-              </div>
+      <div className="mb-6 grid gap-4 sm:grid-cols-[auto_minmax(0,1fr)] sm:items-center sm:gap-6">
+        <div className="flex min-w-0 items-center gap-4 sm:gap-5">
+          <DifficultyDonut counts={ready ? data : null} />
+          <ul className="grid min-w-0 flex-1 gap-1.5 sm:w-32 sm:flex-none" aria-label="Solved by difficulty">
+            {SEGMENTS.map((s) => (
+              <li key={s.key} className="flex h-6 items-center gap-2 text-sm">
+                <span aria-hidden="true" className={cn('size-2.5 shrink-0 rounded-full', s.dot)} />
+                <span className="text-text-secondary">{s.label}</span>
+                <span className="ml-auto font-mono tabular-nums text-text-primary">
+                  {ready ? data[s.key] : failed ? '—' : <span className="inline-block h-3 w-6 rounded bg-heat-0" />}
+                </span>
+              </li>
             ))}
-          </div>
+          </ul>
+        </div>
+        <dl className="grid grid-cols-2 gap-2 lg:grid-cols-3">
+          <HeatStat label="Max streak">
+            {ready ? <CountUp value={data.streak} suffix={data.streak === 1 ? ' day' : ' days'} /> : dash}
+          </HeatStat>
+          <HeatStat label="Active days">{ready ? <CountUp value={data.totalActiveDays} /> : dash}</HeatStat>
+          <HeatStat label="Global rank" className="col-span-2 lg:col-span-1">
+            {ready ? data.ranking > 0 ? <CountUp value={data.ranking} prefix="#" /> : '—' : dash}
+          </HeatStat>
+        </dl>
+      </div>
+
+      {ready && list.length > 0 ? (
+        <ContributionGrid days={list} tone="amber" unit={['submission', 'submissions']} label={label} />
+      ) : (
+        <div className="cg cg-area">
+          {failed ? (
+            <div className="flex h-full flex-col items-start justify-center gap-2 rounded-2xl border border-dashed border-glass-border px-4">
+              <p className="text-sm leading-6 text-text-secondary">LeetCode stats could not be loaded.</p>
+              <Button variant="outline" size="sm" onClick={() => loadLive('leetcode', { retry: true })}>
+                Try again
+              </Button>
+            </div>
+          ) : (
+            <Skeleton variant="block" className="h-full" />
+          )}
         </div>
       )}
 
-      <div className="mt-4 flex items-center justify-between gap-2 text-[10px] font-mono text-text-dim">
-        {stats && stats.ranking > 0 ? (
-          <span>
-            Global rank <span className="text-amber">#{stats.ranking.toLocaleString()}</span>
-            {stats.acceptanceRate > 0 && (
-              <> · Acceptance {stats.acceptanceRate.toFixed(1)}%</>
-            )}
-          </span>
-        ) : (
-          <span />
-        )}
-        <span className="flex items-center gap-2">
-          <span>Less</span>
-          {LEVEL_COLORS.map((c, i) => (
-            <span key={i} className={`w-2.5 h-2.5 rounded-[2px] ${c}`} />
-          ))}
-          <span>More</span>
-        </span>
+      <div className="mt-4 flex h-5 items-center justify-end">
+        <HeatLegend tone="amber" />
       </div>
-    </div>
-  );
-}
-
-function Stat({
-  label,
-  value,
-  tone,
-}: {
-  label: string;
-  value: number;
-  tone: 'violet' | 'cyan' | 'amber' | 'pink';
-}) {
-  const colorMap: Record<string, string> = {
-    violet: 'text-violet-bright border-violet-bright/25',
-    cyan: 'text-cyan-bright border-cyan-bright/25',
-    amber: 'text-amber border-amber/30',
-    pink: 'text-pink border-pink/25',
-  };
-  return (
-    <div
-      className={`rounded-xl border ${colorMap[tone]} bg-white/[0.02] px-3 py-2.5`}
-    >
-      <p className="font-mono text-[9px] uppercase tracking-[0.25em] text-text-dim">
-        {label}
-      </p>
-      <p className={`font-display text-2xl font-bold mt-1 ${colorMap[tone].split(' ')[0]}`}>
-        {value}
-      </p>
-    </div>
+    </section>
   );
 }

@@ -1,197 +1,203 @@
-import { useEffect, useRef, useState } from 'react';
+'use client';
 
-interface TrailPoint {
-  x: number;
-  y: number;
-  life: number;
+import { useEffect, useRef } from 'react';
+import { ArrowDown, ArrowUpRight, Copy, MoveHorizontal } from 'lucide-react';
+import { useThemeTokens } from '@/hooks/useThemeTokens';
+import { pointer, subscribePointer, usePointerTracking } from '@/lib/pointerStore';
+
+type Mode = 'default' | 'hover' | 'view' | 'open' | 'copy' | 'download' | 'drag' | 'hide';
+
+const CONTEXT_MODES = new Set<Mode>(['view', 'open', 'copy', 'download', 'drag', 'hide']);
+const TEXT_ENTRY = 'input, textarea, select, [contenteditable]:not([contenteditable="false"]), iframe';
+const INTERACTIVE = 'a[href], button, [role="button"], summary, label, [tabindex]:not([tabindex="-1"])';
+
+const IDLE_MS = 1200;
+const MAX_TRAIL = 28;
+const MIN_DIST = 1.5;
+
+type TrailPoint = { x: number; y: number; life: number };
+
+function modeFor(target: EventTarget | null): Mode {
+  if (!(target instanceof Element)) return 'default';
+  // Text entry keeps the native I-beam (index.css never hides it there); frames draw their own cursor.
+  if (target.closest(TEXT_ENTRY)) return 'hide';
+  const tagged = target.closest<HTMLElement>('[data-cursor]')?.dataset.cursor as Mode | undefined;
+  if (tagged && CONTEXT_MODES.has(tagged)) return tagged;
+  return target.closest(INTERACTIVE) ? 'hover' : 'default';
 }
 
+/**
+ * Comet cursor for fine hover pointers (App mounts it only there, never under
+ * reduced motion or forced colours). It reads the shared pointer store, draws
+ * only while the pointer moves or the tail is fading (the rAF loop stops after
+ * 1.2s idle), and reflects the hovered [data-cursor] as a contextual ring. The
+ * native cursor is hidden only once the comet has drawn (html.has-custom-cursor).
+ */
 export default function CometCursor() {
+  usePointerTracking();
+  const tokens = useThemeTokens();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const headRef = useRef<HTMLDivElement>(null);
-  const hoveringRef = useRef(false);
-  const [hovering, setHovering] = useState(false);
-  const [visible, setVisible] = useState(false);
+  const colors = useRef({ base: tokens.violetBright, hover: tokens.cyanBright });
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    colors.current = { base: tokens.violetBright, hover: tokens.cyanBright };
+  }, [tokens.violetBright, tokens.cyanBright]);
 
-    const isTouch = window.matchMedia('(hover: none)').matches;
-
+  useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    const headEl = headRef.current;
+    const ctx = canvas?.getContext('2d');
+    if (!canvas || !headEl || !ctx) return;
+    const root = document.documentElement;
 
-    const dpr = window.devicePixelRatio || 1;
+    let dpr = 1;
     const resize = () => {
-      canvas.width = window.innerWidth * dpr;
-      canvas.height = window.innerHeight * dpr;
-      canvas.style.width = `${window.innerWidth}px`;
-      canvas.style.height = `${window.innerHeight}px`;
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
-      ctx.scale(dpr, dpr);
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.round(window.innerWidth * dpr);
+      canvas.height = Math.round(window.innerHeight * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
     resize();
-    window.addEventListener('resize', resize);
 
-    const mouse = { x: 0, y: 0 };
-    const head = { x: 0, y: 0 };
+    const head = { x: pointer.x, y: pointer.y };
     const trail: TrailPoint[] = [];
-    let rafId = 0;
-    let initialized = false;
-    let fadeTimer: ReturnType<typeof setTimeout> | null = null;
-    const MAX_TRAIL = 28;
-    const MIN_DIST = 1.5;
+    let mode: Mode = 'default';
+    let started = false;
+    let raf = 0;
+    let running = false;
+    let lastMove = 0;
+    let lastFrame = 0;
 
-    const setPoint = (x: number, y: number) => {
-      mouse.x = x;
-      mouse.y = y;
-      if (!initialized) {
-        head.x = x;
-        head.y = y;
-        initialized = true;
-      }
-      setVisible(true);
-      if (fadeTimer) { clearTimeout(fadeTimer); fadeTimer = null; }
+    const setMode = (next: Mode) => {
+      if (next === mode) return;
+      mode = next;
+      headEl.dataset.mode = next;
     };
 
-    const handleMove = (e: MouseEvent) => setPoint(e.clientX, e.clientY);
-    const handleLeave = () => setVisible(false);
-    const handleEnter = () => setVisible(true);
-
-    const handleTouch = (e: TouchEvent) => {
-      const t = e.touches[0];
-      if (!t) return;
-      setPoint(t.clientX, t.clientY);
-
-      const el = document.elementFromPoint(t.clientX, t.clientY) as HTMLElement | null;
-      const isInteractive = !!el?.closest(
-        'a, button, input, textarea, [role="button"], [data-cursor-hover]',
-      );
-      hoveringRef.current = isInteractive;
-      setHovering(isInteractive);
+    // data-running mirrors the loop, so tests can see it stop when idle.
+    const setRunning = (on: boolean) => {
+      running = on;
+      headEl.toggleAttribute('data-running', on);
     };
 
-    const handleTouchEnd = () => {
-      if (fadeTimer) clearTimeout(fadeTimer);
-      fadeTimer = setTimeout(() => setVisible(false), 450);
-      hoveringRef.current = false;
-      setHovering(false);
+    const teardown = () => {
+      setRunning(false);
+      cancelAnimationFrame(raf);
+      root.classList.remove('has-custom-cursor');
+      headEl.removeAttribute('data-visible');
     };
 
-    const handleOver = (e: Event) => {
-      const target = e.target as HTMLElement;
-      const isInteractive = !!target.closest(
-        'a, button, input, textarea, [role="button"], [data-cursor-hover]',
-      );
-      hoveringRef.current = isInteractive;
-      setHovering(isInteractive);
-    };
-
-    const animate = () => {
-      const spring = 0.22;
-      head.x += (mouse.x - head.x) * spring;
-      head.y += (mouse.y - head.y) * spring;
+    const draw = (now: number) => {
+      const dt = lastFrame ? Math.min(64, now - lastFrame) : 16.7;
+      lastFrame = now;
+      // Frame-rate independent follow (0.22 per 60Hz frame).
+      const k = 1 - Math.pow(1 - 0.22, dt / 16.7);
+      head.x += (pointer.x - head.x) * k;
+      head.y += (pointer.y - head.y) * k;
 
       const last = trail[trail.length - 1];
-      const dx = last ? head.x - last.x : MIN_DIST + 1;
-      const dy = last ? head.y - last.y : MIN_DIST + 1;
-      if (dx * dx + dy * dy >= MIN_DIST * MIN_DIST) {
+      if (!last || (head.x - last.x) ** 2 + (head.y - last.y) ** 2 >= MIN_DIST * MIN_DIST) {
         trail.push({ x: head.x, y: head.y, life: 1 });
       }
       while (trail.length > MAX_TRAIL) trail.shift();
-      for (let i = 0; i < trail.length; i++) trail[i].life *= 0.92;
+      const decay = Math.pow(0.92, dt / 16.7);
+      for (const p of trail) p.life *= decay;
       while (trail.length && trail[0].life < 0.05) trail.shift();
 
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      if (trail.length > 1) {
+      ctx.clearRect(0, 0, canvas.width / dpr, canvas.height / dpr);
+      if (mode !== 'hide' && trail.length > 1) {
         ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
+        ctx.strokeStyle = mode === 'default' ? colors.current.base : colors.current.hover;
         for (let i = 0; i < trail.length - 1; i++) {
-          const p1 = trail[i];
-          const p2 = trail[i + 1];
           const t = i / (trail.length - 1);
-          const alpha = t * p1.life * 0.85;
-          ctx.beginPath();
-          ctx.moveTo(p1.x, p1.y);
-          ctx.lineTo(p2.x, p2.y);
+          ctx.globalAlpha = t * trail[i].life * 0.85;
           ctx.lineWidth = 0.6 + t * 4.5;
-          ctx.strokeStyle = hoveringRef.current
-            ? `rgba(34, 211, 238, ${alpha})`
-            : `rgba(168, 85, 247, ${alpha})`;
+          ctx.beginPath();
+          ctx.moveTo(trail[i].x, trail[i].y);
+          ctx.lineTo(trail[i + 1].x, trail[i + 1].y);
           ctx.stroke();
         }
+        ctx.globalAlpha = 1;
       }
-
-      if (headRef.current) {
-        headRef.current.style.transform = `translate3d(${head.x}px, ${head.y}px, 0) translate(-50%, -50%)`;
-      }
-
-      rafId = requestAnimationFrame(animate);
+      headEl.style.transform = `translate3d(${head.x}px, ${head.y}px, 0) translate(-50%, -50%)`;
     };
 
-    animate();
-
-    if (isTouch) {
-      window.addEventListener('touchstart', handleTouch, { passive: true });
-      window.addEventListener('touchmove', handleTouch, { passive: true });
-      window.addEventListener('touchend', handleTouchEnd, { passive: true });
-      window.addEventListener('touchcancel', handleTouchEnd, { passive: true });
-    } else {
-      window.addEventListener('mousemove', handleMove);
-      window.addEventListener('mouseleave', handleLeave);
-      window.addEventListener('mouseenter', handleEnter);
-      document.addEventListener('mouseover', handleOver);
-    }
-
-    return () => {
-      cancelAnimationFrame(rafId);
-      if (fadeTimer) clearTimeout(fadeTimer);
-      window.removeEventListener('resize', resize);
-      if (isTouch) {
-        window.removeEventListener('touchstart', handleTouch);
-        window.removeEventListener('touchmove', handleTouch);
-        window.removeEventListener('touchend', handleTouchEnd);
-        window.removeEventListener('touchcancel', handleTouchEnd);
-      } else {
-        window.removeEventListener('mousemove', handleMove);
-        window.removeEventListener('mouseleave', handleLeave);
-        window.removeEventListener('mouseenter', handleEnter);
-        document.removeEventListener('mouseover', handleOver);
+    const tick = (now: number) => {
+      try {
+        draw(now);
+      } catch {
+        teardown();
+        return;
       }
+      const settled = Math.abs(pointer.x - head.x) < 0.3 && Math.abs(pointer.y - head.y) < 0.3;
+      if (now - lastMove > IDLE_MS && trail.length === 0 && settled) {
+        setRunning(false);
+        lastFrame = 0;
+        return;
+      }
+      raf = requestAnimationFrame(tick);
+    };
+
+    const wake = () => {
+      lastMove = performance.now();
+      if (running) return;
+      setRunning(true);
+      raf = requestAnimationFrame(tick);
+    };
+
+    const unsubscribe = subscribePointer(() => {
+      if (!pointer.active) {
+        headEl.removeAttribute('data-visible');
+        return;
+      }
+      if (!started) {
+        started = true;
+        head.x = pointer.x;
+        head.y = pointer.y;
+        headEl.style.transform = `translate3d(${head.x}px, ${head.y}px, 0) translate(-50%, -50%)`;
+        root.classList.add('has-custom-cursor');
+      }
+      headEl.setAttribute('data-visible', '');
+      wake();
+    });
+
+    const onOver = (e: PointerEvent) => {
+      if (e.pointerType !== 'mouse') return;
+      setMode(modeFor(e.target));
+    };
+
+    document.addEventListener('pointerover', onOver, { passive: true });
+    window.addEventListener('resize', resize);
+    return () => {
+      unsubscribe();
+      document.removeEventListener('pointerover', onOver);
+      window.removeEventListener('resize', resize);
+      teardown();
     };
   }, []);
 
   return (
     <>
-      <canvas
-        ref={canvasRef}
-        aria-hidden
-        className="pointer-events-none fixed inset-0"
-        style={{
-          zIndex: 99998,
-          opacity: visible ? 1 : 0,
-          transition: 'opacity 0.25s',
-        }}
-      />
-      <div
-        ref={headRef}
-        aria-hidden
-        className="pointer-events-none fixed top-0 left-0 rounded-full transition-[width,height,background] duration-200"
-        style={{
-          zIndex: 99999,
-          width: hovering ? '18px' : '10px',
-          height: hovering ? '18px' : '10px',
-          background: hovering ? '#06B6D4' : '#A855F7',
-          boxShadow: hovering
-            ? '0 0 20px rgba(6, 182, 212, 0.6), 0 0 40px rgba(6, 182, 212, 0.3)'
-            : '0 0 15px rgba(168, 85, 247, 0.6), 0 0 30px rgba(168, 85, 247, 0.3)',
-          opacity: visible ? 1 : 0,
-          willChange: 'transform',
-        }}
-      />
+      <canvas ref={canvasRef} aria-hidden="true" className="comet-canvas size-full" />
+      <div ref={headRef} aria-hidden="true" className="comet-head" data-mode="default" data-comet="">
+        <span className="comet-label" data-for="view">
+          View
+        </span>
+        <span className="comet-label" data-for="drag">
+          <MoveHorizontal className="size-3.5" />
+          Drag
+        </span>
+        <span className="comet-label" data-for="open">
+          <ArrowUpRight className="size-4" />
+        </span>
+        <span className="comet-label" data-for="copy">
+          <Copy className="size-3.5" />
+        </span>
+        <span className="comet-label" data-for="download">
+          <ArrowDown className="size-4" />
+        </span>
+      </div>
     </>
   );
 }

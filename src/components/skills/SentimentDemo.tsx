@@ -1,149 +1,204 @@
-import { useMemo, useState } from 'react';
+'use client';
+
 import { motion } from 'framer-motion';
-import { Sparkles, RotateCcw } from 'lucide-react';
-
-const POSITIVE = [
-  'love', 'great', 'awesome', 'amazing', 'excellent', 'fantastic', 'brilliant',
-  'happy', 'good', 'wonderful', 'beautiful', 'perfect', 'best', 'enjoy',
-  'delighted', 'thrilled', 'win', 'elegant', 'smooth', 'fast', 'clean',
-];
-const NEGATIVE = [
-  'hate', 'terrible', 'awful', 'bad', 'poor', 'worst', 'horrible',
-  'sad', 'angry', 'broken', 'slow', 'buggy', 'ugly', 'frustrating',
-  'disappointing', 'mess', 'fail', 'crash', 'laggy', 'confusing', 'painful',
-];
-const INTENSIFIERS = ['very', 'really', 'extremely', 'super', 'so'];
-const NEGATIONS = ['not', "n't", 'never', 'no'];
-
-type Result = { label: 'positive' | 'neutral' | 'negative'; score: number; matches: string[] };
-
-function analyze(text: string): Result {
-  if (!text.trim()) return { label: 'neutral', score: 0, matches: [] };
-  const tokens = text.toLowerCase().match(/[a-z']+/g) ?? [];
-  let score = 0;
-  const matches: string[] = [];
-  for (let i = 0; i < tokens.length; i++) {
-    const t = tokens[i];
-    const prev = tokens[i - 1] ?? '';
-    const prev2 = tokens[i - 2] ?? '';
-    let w = 0;
-    if (POSITIVE.includes(t)) w = 1;
-    else if (NEGATIVE.includes(t)) w = -1;
-    if (w === 0) continue;
-    if (INTENSIFIERS.includes(prev) || INTENSIFIERS.includes(prev2)) w *= 1.6;
-    if (NEGATIONS.includes(prev) || NEGATIONS.includes(prev2)) w *= -1;
-    score += w;
-    matches.push(t);
-  }
-  const normalized = Math.max(-1, Math.min(1, score / Math.max(3, tokens.length / 2)));
-  const label: Result['label'] = normalized > 0.12 ? 'positive' : normalized < -0.12 ? 'negative' : 'neutral';
-  return { label, score: normalized, matches };
-}
+import { RotateCcw, Sparkles } from 'lucide-react';
+import { useEffect, useId, useMemo, useState } from 'react';
+import { LottieIcon } from '@/components/shared/LottieIcon';
+import { emit } from '@/lib/events';
+import { duration, ease } from '@/lib/motion';
+import { analyze, INTENSIFIER_FACTOR, type Polarity, type SentimentHit } from '@/lib/sentiment';
+import { cn } from '@/utils/cn';
 
 const EXAMPLES = [
   'The new RAG pipeline is blazing fast and surprisingly accurate.',
-  "That deploy pipeline broke again — really frustrating debug session.",
+  'That deploy pipeline broke again — really frustrating debug session.',
   'Meeting went okay, nothing to report.',
 ];
 
+const ANNOUNCE_DELAY_MS = 700;
+
+const LABEL_TONE: Record<Polarity, string> = {
+  positive: 'text-positive',
+  negative: 'text-negative',
+  neutral: 'text-text-muted',
+};
+
+const BAR = { duration: duration.base, ease: ease.out };
+
+function hitTone(hit: SentimentHit) {
+  return hit.weight > 0
+    ? 'border-positive/40 bg-positive/10 text-positive'
+    : 'border-negative/40 bg-negative/10 text-negative';
+}
+
+function describeHit(hit: SentimentHit): string {
+  const parts = [hit.base > 0 ? 'positive word' : 'negative word'];
+  if (hit.intensified) parts.push(`intensified ×${INTENSIFIER_FACTOR}`);
+  if (hit.negated) parts.push('negated');
+  return `${hit.word}: ${parts.join(', ')}, weight ${hit.weight.toFixed(2)}`;
+}
+
+/**
+ * A lexicon sentiment model that runs in the browser (src/lib/sentiment.ts). Each
+ * scored word is listed with what changed its weight (¬ negated, ×1.6 intensified),
+ * the polarity bar grows from the centre with scaleX, and the verdict is announced
+ * politely once typing pauses.
+ */
 export function SentimentDemo() {
   const [text, setText] = useState(EXAMPLES[0]);
   const result = useMemo(() => analyze(text), [text]);
+  const inputId = useId();
+  const hintId = useId();
+  const empty = !text.trim();
 
-  const color =
-    result.label === 'positive'
-      ? 'text-green-400'
-      : result.label === 'negative'
-      ? 'text-pink-400'
-      : 'text-text-muted';
+  const [announcement, setAnnouncement] = useState('');
+  useEffect(() => {
+    const message = empty ? 'Waiting for text' : `Sentiment ${result.label}, score ${result.score.toFixed(2)}`;
+    // Silent until the visitor edits the text, so page load announces nothing.
+    const t = window.setTimeout(
+      () => setAnnouncement((prev) => (prev === '' && text === EXAMPLES[0] ? prev : message)),
+      ANNOUNCE_DELAY_MS,
+    );
+    return () => window.clearTimeout(t);
+  }, [text, empty, result.label, result.score]);
 
-  const pct = Math.round(((result.score + 1) / 2) * 100);
+  const positive = Math.max(0, result.score);
+  const negative = Math.max(0, -result.score);
 
   return (
-    <div className="glass-strong rounded-2xl p-6 md:p-8">
-      <div className="flex items-center justify-between flex-wrap gap-3 mb-5">
+    <div className="glass-strong rounded-2xl p-6 md:p-8" data-sentiment-demo="">
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <Sparkles size={16} className="text-cyan-bright" />
+          <Sparkles aria-hidden="true" size={16} className="shrink-0 text-cyan-text" />
           <div>
-            <p className="font-display text-lg font-semibold">Try it — inline sentiment</p>
-            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-text-dim">
+            <h3 className="font-display text-lg font-semibold text-text-primary">Try it — inline sentiment</h3>
+            <p id={hintId} className="font-mono text-eyebrow uppercase text-text-dim">
               Tiny lexicon model · runs in your browser · no API
             </p>
           </div>
         </div>
-        <button
-          type="button"
-          onClick={() => setText('')}
-          className="tap-safe-sm flex items-center gap-1.5 text-[11px] font-mono text-text-dim hover:text-violet-bright transition-colors"
-        >
-          <RotateCcw size={12} /> Clear
-        </button>
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={() => emit('skill:open', { name: 'Sentiment analysis' })}
+            aria-haspopup="dialog"
+            className="tap-safe-sm rounded-full px-3 font-mono text-[11px] text-text-muted ring-focus transition-colors hover:text-violet-bright"
+          >
+            How it works
+          </button>
+          <button
+            type="button"
+            onClick={() => setText('')}
+            className="tap-safe-sm gap-1.5 rounded-full px-3 font-mono text-[11px] text-text-muted ring-focus transition-colors hover:text-violet-bright"
+          >
+            <RotateCcw aria-hidden="true" size={12} /> Clear
+          </button>
+        </div>
       </div>
 
+      <label htmlFor={inputId} className="sr-only">
+        Text to analyse
+      </label>
       <textarea
+        id={inputId}
+        aria-describedby={hintId}
         value={text}
         onChange={(e) => setText(e.target.value)}
         rows={3}
         placeholder="Type or paste some text…"
-        className="w-full px-4 py-3 rounded-xl bg-glass-fill border border-glass-border-strong text-sm text-text-primary placeholder:text-text-dim focus:outline-none focus:border-violet-bright/70 focus:ring-2 focus:ring-violet-bright/20 resize-none transition-colors"
+        className="w-full resize-none rounded-xl border border-glass-border-strong bg-glass-fill px-4 py-3 text-base text-text-primary ring-focus transition-colors placeholder:text-text-dim focus-visible:border-violet-bright md:text-sm"
       />
 
       <div className="mt-4 flex flex-wrap gap-2">
         {EXAMPLES.map((ex, i) => (
           <button
-            key={i}
+            key={ex}
             type="button"
             onClick={() => setText(ex)}
-            className="text-[11px] px-2.5 py-1 rounded-full bg-glass-fill border border-glass-border-strong text-text-muted hover:border-cyan-bright/60 hover:text-text-primary transition-colors"
+            aria-pressed={text === ex}
+            className="tap-safe-sm rounded-full border border-glass-border-strong bg-glass-fill px-3 text-[11px] text-text-muted ring-focus transition-colors hover:border-cyan-bright hover:text-text-primary aria-pressed:border-cyan-bright aria-pressed:text-text-primary"
           >
             Example {i + 1}
           </button>
         ))}
       </div>
 
-      <div className="mt-6 grid md:grid-cols-3 gap-3">
-        <div className="md:col-span-2 p-4 rounded-xl bg-glass-fill border border-glass-border-strong">
-          <p className="text-[10px] font-mono uppercase tracking-wider text-text-dim">Polarity</p>
-          <div className="mt-3 h-2 rounded-full bg-glass-border overflow-hidden relative">
-            <div className="absolute inset-y-0 left-1/2 w-px bg-glass-border-strong" />
+      <div className="mt-6 grid gap-3 md:grid-cols-3">
+        <div className="rounded-xl border border-glass-border-strong bg-glass-fill p-4 md:col-span-2">
+          <p className="font-mono text-[10px] uppercase tracking-wider text-text-dim">Polarity</p>
+          <div
+            role="meter"
+            aria-label="Polarity"
+            aria-valuemin={-1}
+            aria-valuemax={1}
+            aria-valuenow={Number(result.score.toFixed(2))}
+            aria-valuetext={`${result.score.toFixed(2)}, ${result.label}`}
+            className="relative mt-3 h-2 overflow-clip rounded-full bg-heat-0"
+          >
             <motion.div
-              className={`h-full ${result.score >= 0 ? 'bg-gradient-to-r from-cyan-bright to-green-400' : 'bg-gradient-to-r from-pink-500 to-red-500'}`}
-              style={{
-                marginLeft: result.score >= 0 ? '50%' : `${pct}%`,
-                width: `${Math.abs(result.score) * 50}%`,
-              }}
-              animate={{
-                marginLeft: result.score >= 0 ? '50%' : `${pct}%`,
-                width: `${Math.abs(result.score) * 50}%`,
-              }}
-              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+              className="absolute inset-y-0 right-1/2 w-1/2 origin-right rounded-l-full bg-negative"
+              initial={false}
+              animate={{ scaleX: negative }}
+              transition={BAR}
             />
+            <motion.div
+              className="absolute inset-y-0 left-1/2 w-1/2 origin-left rounded-r-full bg-positive"
+              initial={false}
+              animate={{ scaleX: positive }}
+              transition={BAR}
+            />
+            <div aria-hidden="true" className="absolute inset-y-0 left-1/2 w-px bg-glass-border-strong" />
           </div>
-          <div className="mt-2 flex justify-between font-mono text-[10px] text-text-dim">
+          <div aria-hidden="true" className="mt-2 flex justify-between font-mono text-[10px] text-text-dim">
             <span>−1.0 negative</span>
             <span>0 neutral</span>
             <span>+1.0 positive</span>
           </div>
         </div>
-        <div className="p-4 rounded-xl bg-glass-fill border border-glass-border-strong flex flex-col items-center justify-center">
-          <p className="text-[10px] font-mono uppercase tracking-wider text-text-dim">Label</p>
-          <p className={`mt-2 font-display text-2xl font-bold capitalize ${color}`}>{result.label}</p>
-          <p className="mt-1 font-mono text-[10px] text-text-dim">score {result.score.toFixed(2)}</p>
+        <div className="flex flex-col items-center justify-center rounded-xl border border-glass-border-strong bg-glass-fill p-4">
+          <p className="font-mono text-[10px] uppercase tracking-wider text-text-dim">Label</p>
+          {empty ? (
+            <p className="mt-2 flex items-center gap-2 text-sm text-text-muted" data-sentiment-label="idle">
+              <LottieIcon name="dots" className="block h-5 w-8" fallback={<span aria-hidden="true">…</span>} />
+              Waiting for text
+            </p>
+          ) : (
+            <>
+              <p
+                className={cn('mt-2 font-display text-2xl font-bold capitalize', LABEL_TONE[result.label])}
+                data-sentiment-label={result.label}
+              >
+                {result.label}
+              </p>
+              <p className="mt-1 font-mono text-[10px] text-text-dim">score {result.score.toFixed(2)}</p>
+            </>
+          )}
         </div>
       </div>
 
-      {result.matches.length > 0 && (
-        <div className="mt-3 flex flex-wrap gap-1.5">
-          {result.matches.map((m, i) => (
-            <span
-              key={i}
-              className="px-2 py-0.5 rounded text-[10px] font-mono bg-violet/10 border border-violet-bright/20 text-violet-bright"
+      {result.hits.length > 0 ? (
+        <ul className="mt-3 flex flex-wrap gap-1.5" aria-label="Scored words">
+          {result.hits.map((hit, i) => (
+            <li
+              key={`${hit.start}-${i}`}
+              title={describeHit(hit)}
+              className={cn('inline-flex items-baseline gap-1 rounded border px-2 py-0.5 font-mono text-[11px]', hitTone(hit))}
             >
-              {m}
-            </span>
+              <span className="sr-only">{describeHit(hit)}</span>
+              <span aria-hidden="true">{hit.word}</span>
+              {hit.negated ? <span aria-hidden="true">¬</span> : null}
+              {hit.intensified ? <span aria-hidden="true">×{INTENSIFIER_FACTOR}</span> : null}
+            </li>
           ))}
-        </div>
-      )}
+        </ul>
+      ) : null}
+      {result.hits.length > 0 ? (
+        <p className="mt-2 font-mono text-[10px] text-text-dim">¬ negated · ×{INTENSIFIER_FACTOR} intensified</p>
+      ) : null}
+
+      <p aria-live="polite" aria-atomic="true" className="sr-only" data-sentiment-live="">
+        {announcement}
+      </p>
     </div>
   );
 }

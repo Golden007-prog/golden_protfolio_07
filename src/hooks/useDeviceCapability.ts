@@ -1,82 +1,97 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useSyncExternalStore } from 'react';
+import { getDeviceSignals, getMotionPrefs, subscribeMotionPrefs } from './useMotionPrefs';
 
 export type DeviceCapability = {
-  /** Resolved after mount; false during SSR and the first client render. */
+  /** False on the server and during hydration; true once real values are known. */
   ready: boolean;
-  /** Coarse pointer or a narrow viewport. */
+  /** Coarse primary pointer. */
   isTouch: boolean;
+  /** Narrower than 640px. */
   isSmall: boolean;
-  /** User asked the OS to reduce motion. */
+  /** useMotionPrefs().reduce, so the in-page override counts. */
   reducedMotion: boolean;
-  /** Data Saver, a metered connection, or 2g/3g. */
+  /** Data Saver on, or a 2g/3g connection. */
   saveData: boolean;
-  /** Few cores or little RAM reported. */
+  /** At most 4 cores or 4 GB, or Data Saver. */
   lowPower: boolean;
-  /** Heavy WebGL scenes are worth mounting. */
+  hover: boolean;
+  finePointer: boolean;
+  /** Heavy WebGL scenes are worth downloading and mounting. */
   allowHeavy3D: boolean;
   /** Decorative background video is worth downloading. */
   allowVideo: boolean;
 };
 
-const SSR: DeviceCapability = {
+// Nothing heavy is assumed before the client has measured, so SSR HTML carries no
+// canvas and hydration never pulls the three chunk on devices that opt out.
+const SERVER_CAPABILITY: DeviceCapability = Object.freeze({
   ready: false,
   isTouch: false,
   isSmall: false,
   reducedMotion: false,
   saveData: false,
   lowPower: false,
-  // Assume capable so the markup matches on the server, then correct after mount.
-  allowHeavy3D: true,
-  allowVideo: true,
-};
+  hover: false,
+  finePointer: false,
+  allowHeavy3D: false,
+  allowVideo: false,
+});
 
-type NetworkInformation = { saveData?: boolean; effectiveType?: string };
+let cached: DeviceCapability | null = null;
 
-function measure(): DeviceCapability {
-  const isTouch = window.matchMedia('(pointer: coarse)').matches;
-  const isSmall = window.matchMedia('(max-width: 900px)').matches;
-  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+// Software rasterisers (a blocklisted GPU, a VM, headless CI) draw these scenes at a
+// few frames per second while holding the main thread for every frame, so the page
+// gets the stills instead. No WebGL at all counts the same way.
+const SOFTWARE_RENDERER = /swiftshader|llvmpipe|softpipe|software|basic render/i;
+let gpuOk: boolean | null = null;
 
-  const conn = (navigator as Navigator & { connection?: NetworkInformation }).connection;
-  const saveData = Boolean(conn?.saveData) || /(^|-)2g$/.test(conn?.effectiveType ?? '');
-
-  const cores = navigator.hardwareConcurrency ?? 8;
-  const memory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory ?? 8;
-  const lowPower = cores <= 4 || memory <= 4;
-
-  return {
-    ready: true,
-    isTouch,
-    isSmall,
-    reducedMotion,
-    saveData,
-    lowPower,
-    allowHeavy3D: !reducedMotion && !saveData && !(isSmall && lowPower),
-    allowVideo: !reducedMotion && !saveData,
-  };
+function hasHardwareWebGL(): boolean {
+  if (gpuOk !== null) return gpuOk;
+  try {
+    const canvas = document.createElement('canvas');
+    const gl = (canvas.getContext('webgl2') ?? canvas.getContext('webgl')) as WebGLRenderingContext | null;
+    if (!gl) {
+      gpuOk = false;
+    } else {
+      const info = gl.getExtension('WEBGL_debug_renderer_info');
+      const renderer = String(gl.getParameter(info ? info.UNMASKED_RENDERER_WEBGL : gl.RENDERER) ?? '');
+      gpuOk = !SOFTWARE_RENDERER.test(renderer);
+      gl.getExtension('WEBGL_lose_context')?.loseContext();
+    }
+  } catch {
+    gpuOk = false;
+  }
+  return gpuOk;
 }
 
-/**
- * One place to decide whether this device should be asked to run the expensive
- * parts of the page. Everything resolves after mount so server and client
- * markup agree.
- */
+function getCapability(): DeviceCapability {
+  if (typeof window === 'undefined') return SERVER_CAPABILITY;
+  const prefs = getMotionPrefs();
+  const s = getDeviceSignals();
+  const saveData = s.saveData || s.slowNetwork;
+  const heavyWanted = !prefs.reduce && !saveData && !(s.belowSm && s.lowPower);
+  const next: DeviceCapability = {
+    ready: true,
+    isTouch: s.coarse,
+    isSmall: s.belowSm,
+    reducedMotion: prefs.reduce,
+    saveData,
+    lowPower: s.lowPower,
+    hover: prefs.hover,
+    finePointer: prefs.finePointer,
+    allowHeavy3D: heavyWanted && hasHardwareWebGL(),
+    allowVideo: !prefs.reduce && !saveData && !s.belowSm,
+  };
+  if (cached && (Object.keys(next) as (keyof DeviceCapability)[]).every((k) => cached![k] === next[k])) {
+    return cached;
+  }
+  cached = next;
+  return next;
+}
+
+/** One shared store for every consumer; it rides on the motion-prefs listeners. */
 export function useDeviceCapability(): DeviceCapability {
-  const [cap, setCap] = useState<DeviceCapability>(SSR);
-
-  useEffect(() => {
-    const sync = () => setCap(measure());
-    sync();
-    const queries = [
-      window.matchMedia('(pointer: coarse)'),
-      window.matchMedia('(max-width: 900px)'),
-      window.matchMedia('(prefers-reduced-motion: reduce)'),
-    ];
-    queries.forEach((q) => q.addEventListener('change', sync));
-    return () => queries.forEach((q) => q.removeEventListener('change', sync));
-  }, []);
-
-  return cap;
+  return useSyncExternalStore(subscribeMotionPrefs, getCapability, () => SERVER_CAPABILITY);
 }

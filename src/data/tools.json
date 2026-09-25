@@ -1,0 +1,32 @@
+[
+  {
+    "icon": "Code",
+    "label": "Editor",
+    "value": "VS Code · Cursor"
+  },
+  {
+    "icon": "Laptop",
+    "label": "OS",
+    "value": "macOS · WSL"
+  },
+  {
+    "icon": "Terminal",
+    "label": "Shell",
+    "value": "zsh · oh-my-zsh"
+  },
+  {
+    "icon": "GitBranch",
+    "label": "Dev flow",
+    "value": "GitHub · conventional commits"
+  },
+  {
+    "icon": "Box",
+    "label": "Containers",
+    "value": "Docker · Compose"
+  },
+  {
+    "icon": "Keyboard",
+    "label": "Keyboard",
+    "value": "Keychron K2 · mono"
+  }
+]

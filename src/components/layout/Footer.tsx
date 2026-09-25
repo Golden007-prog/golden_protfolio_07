@@ -1,33 +1,200 @@
-import profile from '../../data/profile.json';
+'use client';
 
-const LAUNCH_DATE = new Date('2026-04-01T00:00:00Z');
+import { useId } from 'react';
+import { usePathname } from 'next/navigation';
+import { ArrowUp } from 'lucide-react';
+import { Marquee } from '@/components/motion';
+import { toggleReducedMotion } from '@/components/shared/MotionToggle';
+import { smoothScrollTo } from '@/contexts/LenisContext';
+import { useMotionPrefs } from '@/hooks/useMotionPrefs';
+import { track } from '@/lib/analytics';
+import { SECTIONS, SITE, sectionHref } from '@/lib/site';
+import { formatIsoDate, isoYear } from '@/utils/dates';
 
-function daysSinceLaunch() {
-  const ms = Date.now() - LAUNCH_DATE.getTime();
-  return Math.max(0, Math.floor(ms / 86_400_000));
+// Inlined at build time (next.config env), so the server HTML and the hydrating
+// client read the same values whatever the visitor's clock says.
+const BUILD_TIME = process.env.NEXT_PUBLIC_BUILD_TIME ?? '';
+const UPDATED = formatIsoDate(BUILD_TIME);
+const YEAR = isoYear(BUILD_TIME);
+const COMMIT = process.env.NEXT_PUBLIC_COMMIT ?? '';
+const SHA = /^[0-9a-f]{7,40}$/i.test(COMMIT) ? COMMIT : null;
+
+const HEADING = 'font-mono text-eyebrow uppercase text-text-dim';
+const LINK =
+  'ring-focus -mx-1 inline-flex min-h-9 items-center gap-2 rounded px-1 text-sm text-text-secondary transition-colors hover:text-text-primary any-pointer-coarse:min-h-11';
+const NEW_TAB = <span className="sr-only"> (opens in new tab)</span>;
+
+const ELSEWHERE = [
+  { label: 'GitHub', href: SITE.links.github },
+  { label: 'LinkedIn', href: SITE.links.linkedin },
+  { label: 'LeetCode', href: SITE.links.leetcode },
+  { label: 'Source code', href: SITE.repoUrl },
+];
+
+/** The in-page 'Reduce motion' setting; the same override the nav's motion toggle writes. */
+function ReduceMotionSwitch() {
+  const { reduce } = useMotionPrefs();
+  const labelId = useId();
+
+  // Off pins full motion when the OS asks for less, else follows the OS again.
+  const toggle = () => toggleReducedMotion(!reduce);
+
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={reduce}
+      aria-labelledby={labelId}
+      data-footer-motion-switch=""
+      onClick={toggle}
+      className="tap-safe ring-focus gap-3 rounded-full px-3 text-sm text-text-secondary transition-colors hover:text-text-primary"
+    >
+      <span id={labelId}>Reduce motion</span>
+      <span aria-hidden="true" className="story-switch" data-on={reduce ? '' : undefined}>
+        <span className="story-switch-thumb" />
+      </span>
+    </button>
+  );
 }
 
+/**
+ * Site footer (#site-footer): a sitemap that works from any route, contact and CV
+ * links, a build stamp from the build itself (never the visitor's clock, which
+ * would break hydration), a reduce-motion switch and back to top. The bottom
+ * padding keeps every link clear of the floating dock.
+ */
 export function Footer() {
-  const days = daysSinceLaunch();
+  const pathname = usePathname() ?? '/';
+
+  const backToTop = () => {
+    smoothScrollTo(0);
+    document.getElementById('main')?.focus({ preventScroll: true });
+  };
+
   return (
-    <footer
-      className="relative container-padding py-12 border-t border-glass-border"
-      style={{ zIndex: 40, backgroundColor: 'var(--app-bg-footer)' }}
-    >
-      <div className="absolute inset-0 -z-10" style={{ backgroundColor: 'var(--app-bg-footer)' }} />
-      <div className="mx-auto max-w-[1440px] flex flex-col md:flex-row items-center justify-between gap-6">
-        <div className="flex flex-col items-center md:items-start gap-1">
-          <p className="font-mono text-xs tracking-[0.2em] uppercase text-text-dim">
-            © {new Date().getFullYear()} {profile.name} — Crafted with GSAP, R3F & Gemini
-          </p>
-          <p className="font-mono text-[10px] tracking-[0.25em] uppercase text-text-dim/70">
-            Launched {days} {days === 1 ? 'day' : 'days'} ago · v1.0
-          </p>
+    <footer id="site-footer" className="story-footer relative z-30 border-t border-glass-border bg-bg-footer container-padding pt-16">
+      <div className="mx-auto max-w-[1440px]">
+        <div aria-hidden="true" data-footer-marquee="" className="mb-14 select-none overflow-x-clip">
+          <Marquee speed={30} gap="3rem" pauseOnHover={false}>
+            <span className="text-outline font-display text-[clamp(3.5rem,11vw,9rem)] font-bold leading-none tracking-[-0.03em]">
+              {SITE.name}
+            </span>
+            <span className="size-3 shrink-0 rounded-full bg-violet-bright" />
+          </Marquee>
         </div>
-        <div className="flex items-center gap-5 text-xs font-mono uppercase tracking-wider text-text-muted">
-          <a href={profile.links.github} target="_blank" rel="noreferrer" className="tap-safe hover:text-violet-bright transition-colors">GitHub</a>
-          <a href={profile.links.linkedin} target="_blank" rel="noreferrer" className="tap-safe hover:text-violet-bright transition-colors">LinkedIn</a>
-          <a href={profile.links.leetcode} target="_blank" rel="noreferrer" className="tap-safe hover:text-violet-bright transition-colors">LeetCode</a>
+
+        <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-12">
+          <div className="lg:col-span-5">
+            <p className="font-display text-2xl font-semibold text-text-primary">{SITE.name}</p>
+            <p className="mt-2 max-w-sm text-sm text-text-muted">{SITE.headline}</p>
+            <p className="mt-4 inline-flex items-center gap-2 text-sm text-text-secondary">
+              <span aria-hidden="true" className="size-2 rounded-full bg-success" />
+              {SITE.availability.status}
+            </p>
+          </div>
+
+          <nav aria-labelledby="footer-sitemap" className="lg:col-span-2">
+            <h2 id="footer-sitemap" className={HEADING}>
+              Sections
+            </h2>
+            <ul className="mt-3 flex flex-col">
+              {SECTIONS.map((s) => (
+                <li key={s.id}>
+                  <a href={sectionHref(s.id, pathname)} className={LINK}>
+                    <span aria-hidden="true" className="font-mono text-[11px] text-text-dim">
+                      {s.index}
+                    </span>
+                    {s.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          <div className="lg:col-span-2">
+            <h2 id="footer-elsewhere" className={HEADING}>
+              Elsewhere
+            </h2>
+            <ul aria-labelledby="footer-elsewhere" className="mt-3 flex flex-col">
+              {ELSEWHERE.map((l) => (
+                <li key={l.label}>
+                  <a href={l.href} target="_blank" rel="noopener noreferrer" className={LINK}>
+                    {l.label}
+                    {NEW_TAB}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="lg:col-span-3">
+            <h2 id="footer-contact" className={HEADING}>
+              Get in touch
+            </h2>
+            <ul aria-labelledby="footer-contact" className="mt-3 flex flex-col">
+              <li>
+                <a href={SITE.mailtoHref} className={`${LINK} [overflow-wrap:anywhere]`}>
+                  {SITE.email}
+                </a>
+              </li>
+              <li>
+                <a href={SITE.phoneHref} className={LINK}>
+                  {SITE.phone}
+                </a>
+              </li>
+              <li>
+                <a href={SITE.cvPath} download={SITE.cvFileName} className={LINK} onClick={() => track('cv_download')}>
+                  Download CV <span className="font-mono text-xs text-text-dim">{SITE.cvMeta}</span>
+                </a>
+              </li>
+              <li>
+                <a href={SITE.vcardPath} download className={LINK} onClick={() => track('vcard_download')}>
+                  Save contact (vCard)
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="mt-12 flex flex-col gap-4 border-t border-hairline pt-6 md:flex-row md:items-center md:justify-between">
+          <p data-build-stamp="" className="font-mono text-xs text-text-muted">
+            {YEAR ? `© ${YEAR} ` : '© '}
+            {SITE.name} — Crafted with GSAP, R3F &amp; Gemini
+            {UPDATED && (
+              <>
+                <span aria-hidden="true"> · </span>
+                <span className="whitespace-nowrap">
+                  Updated <time dateTime={BUILD_TIME}>{UPDATED}</time>
+                </span>
+              </>
+            )}
+            {SHA && (
+              <>
+                <span aria-hidden="true"> · </span>
+                <a
+                  href={`${SITE.repoUrl}/commit/${SHA}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="tap-safe-sm ring-focus rounded underline decoration-text-dim underline-offset-4 transition-colors hover:text-text-primary"
+                >
+                  <span className="sr-only">Commit </span>
+                  {SHA.slice(0, 7)}
+                  {NEW_TAB}
+                </a>
+              </>
+            )}
+          </p>
+          <div className="flex flex-wrap items-center gap-2">
+            <ReduceMotionSwitch />
+            <button
+              type="button"
+              onClick={backToTop}
+              className="tap-safe ring-focus gap-2 rounded-full border border-glass-border px-4 text-sm text-text-secondary transition-colors hover:border-glass-border-strong hover:text-text-primary"
+            >
+              <ArrowUp aria-hidden="true" className="size-4" />
+              Back to top
+            </button>
+          </div>
         </div>
       </div>
     </footer>

@@ -1,0 +1,440 @@
+/* Package: shell — intro curtain, theme swap, cursor, section sheets, global chrome (noise, bokeh). */
+
+@layer components {
+  /* ============================
+     Intro curtain. Server-rendered on every page load and shown only on a
+     first visit (html.js[data-intro=pending], set by the head bootstrap), so
+     no-JS, deep-link, returning and reduced-motion visitors never see it.
+     ============================ */
+  .intro-curtain {
+    display: none;
+  }
+  html.js[data-intro="pending"] .intro-curtain {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 75; /* above toasts (70), under the cursor (80) */
+    /* Its own 1px scroller: a wheel or swipe before hydration stops here
+       instead of moving the page behind (the JS scroll lock takes over later). */
+    overflow-y: scroll;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+  }
+  .intro-curtain::-webkit-scrollbar {
+    display: none;
+  }
+  .intro-curtain::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1px;
+    height: calc(100% + 1px);
+  }
+
+  .intro-panel {
+    position: absolute;
+    inset-inline: 0;
+    height: calc(50% + 1px);
+    will-change: transform;
+  }
+  .intro-panel[data-side="top"] {
+    top: 0;
+    background:
+      radial-gradient(ellipse 70% 90% at 30% 100%, color-mix(in oklab, var(--app-violet) 16%, transparent), transparent 70%),
+      var(--app-bg-base);
+  }
+  .intro-panel[data-side="bottom"] {
+    bottom: 0;
+    background:
+      radial-gradient(ellipse 70% 90% at 70% 0%, color-mix(in oklab, var(--app-cyan) 12%, transparent), transparent 70%),
+      var(--app-bg-base);
+  }
+
+  .intro-content {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    padding-inline: 24px;
+  }
+  .intro-title {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: center;
+    column-gap: 0.3em;
+    margin: 0;
+    font-family: var(--font-elegant);
+    font-size: clamp(2rem, 1.4rem + 3vw, 2.75rem);
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    color: var(--app-text-primary);
+  }
+  .intro-title [data-word="first"] {
+    font-style: italic;
+    font-weight: 300;
+    color: var(--app-text-secondary);
+  }
+  .intro-title [data-word="second"] {
+    font-weight: 600;
+  }
+  .intro-letter {
+    display: inline-block;
+    animation: intro-letter 700ms var(--ease-out-expo) both;
+    animation-delay: calc(var(--i) * 35ms + 120ms);
+  }
+  .intro-bar {
+    width: 96px;
+    height: 1px;
+    overflow: clip;
+    background: var(--app-hairline);
+  }
+  .intro-bar > span {
+    display: block;
+    height: 100%;
+    transform-origin: left center;
+    background: linear-gradient(90deg, var(--app-violet-bright), var(--app-cyan-bright));
+    animation: intro-bar 1400ms var(--ease-out-expo) both;
+  }
+  .intro-curtain[data-state="exit"] .intro-bar > span {
+    animation: none;
+  }
+  /* The pause switch freezes keyframes; the curtain must never freeze its text invisible. */
+  html[data-motion-paused] .intro-letter,
+  html[data-motion-paused] .intro-bar > span {
+    animation: none;
+  }
+
+  /* ============================
+     Theme swap: light opens as an iris from the control that asked for it,
+     dark closes back into it. ThemeContext sets the origin, the reach (the
+     farthest corner) and data-theme-dir around startViewTransition.
+     ============================ */
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+    mix-blend-mode: normal;
+  }
+  html[data-theme-dir="to-light"]::view-transition-old(root),
+  html[data-theme-dir="to-dark"]::view-transition-new(root) {
+    z-index: 1;
+  }
+  html[data-theme-dir="to-light"]::view-transition-new(root) {
+    z-index: 2;
+    animation: theme-iris-open 700ms var(--ease-out-expo) both;
+  }
+  html[data-theme-dir="to-dark"]::view-transition-old(root) {
+    z-index: 2;
+    animation: theme-iris-close 560ms var(--ease-in-out) both;
+  }
+  html[data-motion="reduced"]::view-transition-old(root),
+  html[data-motion="reduced"]::view-transition-new(root) {
+    animation: none !important;
+    clip-path: none !important;
+  }
+
+  /* During the swap: hold GPU-heavy loops so the reveal reads cleanly. */
+  html.theme-transitioning * {
+    animation-play-state: paused !important;
+  }
+
+  /* ============================
+     Section sheets (SectionTransition). Off on lite devices and under reduced
+     motion, where the one scroll-scrubbed effect per viewport is the hero's.
+     ============================ */
+  .sheet-lip {
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+    height: 10rem;
+    pointer-events: none;
+    background: linear-gradient(to bottom, var(--app-surface-tint), transparent);
+  }
+  .sheet-hairline {
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+    z-index: 30;
+    height: 1px;
+    pointer-events: none;
+    transform-origin: center;
+    background: linear-gradient(90deg, transparent, var(--app-violet-bright) 30%, var(--app-cyan-bright) 70%, transparent);
+    opacity: 0.7;
+  }
+  .sheet-dim {
+    position: absolute;
+    inset: 0;
+    z-index: 30;
+    pointer-events: none;
+    background: var(--app-bg-base);
+    opacity: 0;
+  }
+  html[data-lite] .section-sheet,
+  html[data-motion="reduced"] .section-sheet {
+    clip-path: none !important;
+  }
+  html[data-lite] :is(.sheet-lip, .sheet-hairline, .sheet-dim),
+  html[data-motion="reduced"] :is(.sheet-lip, .sheet-hairline, .sheet-dim) {
+    display: none;
+  }
+
+  /* ============================
+     Chapter rail: hidden (and out of the tab order) until the hero has passed.
+     ============================ */
+  .section-rail {
+    transition:
+      opacity 400ms var(--ease-out-expo),
+      visibility 0s linear 400ms;
+  }
+  .section-rail:not([data-visible]) {
+    opacity: 0;
+    visibility: hidden;
+  }
+  .section-rail[data-visible] {
+    transition:
+      opacity 400ms var(--ease-out-expo),
+      visibility 0s;
+  }
+
+  /* ============================
+     Burger: three lines that morph into an X (instant under reduced motion,
+     through the global transition rule).
+     ============================ */
+  .burger {
+    position: relative;
+    display: block;
+    width: 18px;
+    height: 12px;
+  }
+  .burger > span {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 1.5px;
+    border-radius: 1px;
+    background: currentColor;
+    transition:
+      transform 320ms var(--ease-out-expo),
+      opacity 160ms ease;
+  }
+  .burger > span:nth-child(1) {
+    top: 0;
+  }
+  .burger > span:nth-child(2) {
+    top: calc(50% - 0.75px);
+  }
+  .burger > span:nth-child(3) {
+    bottom: 0;
+  }
+  [aria-expanded="true"] .burger > span:nth-child(1),
+  .burger[data-open] > span:nth-child(1) {
+    transform: translateY(5.25px) rotate(45deg);
+  }
+  [aria-expanded="true"] .burger > span:nth-child(2),
+  .burger[data-open] > span:nth-child(2) {
+    opacity: 0;
+    transform: scaleX(0.4);
+  }
+  [aria-expanded="true"] .burger > span:nth-child(3),
+  .burger[data-open] > span:nth-child(3) {
+    transform: translateY(-5.25px) rotate(-45deg);
+  }
+
+  /* ============================
+     Comet cursor (fine hover pointers only; CometCursor adds html.has-custom-cursor).
+     The head's size and look follow data-mode, set from the hovered [data-cursor].
+     ============================ */
+  .comet-canvas {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-cursor);
+    pointer-events: none;
+  }
+  .comet-head {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: var(--z-cursor);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 10px;
+    height: 10px;
+    border: 1px solid transparent;
+    border-radius: 9999px;
+    pointer-events: none;
+    color: var(--app-text-primary);
+    background-color: var(--app-violet-bright);
+    box-shadow: 0 0 15px color-mix(in oklab, var(--app-violet-bright) 60%, transparent);
+    opacity: 0;
+    will-change: transform;
+    transition:
+      width 220ms var(--ease-out-expo),
+      height 220ms var(--ease-out-expo),
+      background-color 200ms ease,
+      border-color 200ms ease,
+      box-shadow 200ms ease,
+      opacity 150ms ease;
+  }
+  .comet-head[data-visible] {
+    opacity: 1;
+  }
+  .comet-head[data-mode="hover"] {
+    width: 18px;
+    height: 18px;
+    background-color: var(--app-cyan-bright);
+    box-shadow: 0 0 20px color-mix(in oklab, var(--app-cyan-bright) 60%, transparent);
+  }
+  .comet-head:is([data-mode="view"], [data-mode="drag"], [data-mode="open"], [data-mode="copy"], [data-mode="download"]) {
+    background-color: color-mix(in oklab, var(--app-bg-base) 80%, transparent);
+    border-color: var(--app-violet-bright);
+    box-shadow: 0 8px 24px color-mix(in oklab, var(--app-bg-base) 50%, transparent);
+  }
+  .comet-head:is([data-mode="view"], [data-mode="drag"]) {
+    width: 64px;
+    height: 64px;
+  }
+  .comet-head:is([data-mode="open"], [data-mode="copy"], [data-mode="download"]) {
+    width: 40px;
+    height: 40px;
+  }
+  .comet-head[data-mode="hide"] {
+    opacity: 0;
+  }
+  .comet-label {
+    display: none;
+    align-items: center;
+    gap: 4px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+  }
+  .comet-head[data-mode="view"] .comet-label[data-for="view"],
+  .comet-head[data-mode="drag"] .comet-label[data-for="drag"],
+  .comet-head[data-mode="open"] .comet-label[data-for="open"],
+  .comet-head[data-mode="copy"] .comet-label[data-for="copy"],
+  .comet-head[data-mode="download"] .comet-label[data-for="download"] {
+    display: inline-flex;
+  }
+
+  /* ============================
+     Bokeh particles (hero backdrop). Hidden in light and under reduced motion;
+     paused once the hero is offscreen and by the pause switch (index.css).
+     ============================ */
+  .bokeh {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+  .bokeh span {
+    position: absolute;
+    bottom: -120px;
+    border-radius: 50%;
+    filter: blur(1.5px);
+    opacity: 0;
+    animation: bokehRise linear infinite;
+  }
+  .bokeh[data-offscreen] span {
+    animation-play-state: paused;
+  }
+  :root[data-theme="light"] .bokeh,
+  html[data-motion="reduced"] .bokeh {
+    display: none;
+  }
+
+  /* ============================
+     Noise overlay
+     ============================ */
+  .noise-overlay {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    opacity: var(--app-noise-opacity);
+    mix-blend-mode: var(--app-noise-blend);
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.85 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  }
+  /* Lite tier: a full-viewport blend layer forces a composite of everything beneath it on every scroll frame. */
+  html[data-lite] .noise-overlay {
+    mix-blend-mode: normal;
+  }
+  html[data-motion="reduced"] .noise-overlay {
+    display: none;
+  }
+
+  @media print {
+    .comet-head,
+    .sheet-lip,
+    .sheet-hairline,
+    .sheet-dim {
+      display: none !important;
+    }
+    .section-sheet {
+      clip-path: none !important;
+    }
+  }
+}
+
+@keyframes intro-letter {
+  from {
+    opacity: 0;
+    transform: translateY(0.45em);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes intro-bar {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes theme-iris-open {
+  from {
+    clip-path: circle(0px at var(--theme-origin-x, 50%) var(--theme-origin-y, 50%));
+  }
+  to {
+    clip-path: circle(var(--theme-reach, 150vmax) at var(--theme-origin-x, 50%) var(--theme-origin-y, 50%));
+  }
+}
+
+@keyframes theme-iris-close {
+  from {
+    clip-path: circle(var(--theme-reach, 150vmax) at var(--theme-origin-x, 50%) var(--theme-origin-y, 50%));
+  }
+  to {
+    clip-path: circle(0px at var(--theme-origin-x, 50%) var(--theme-origin-y, 50%));
+  }
+}
+
+/* The keyframe opacity scales with --app-bokeh-opacity, so a theme that zeroes it really hides the orbs. */
+@keyframes bokehRise {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0;
+  }
+  10% {
+    opacity: calc(var(--app-bokeh-opacity) * 1.4);
+  }
+  90% {
+    opacity: var(--app-bokeh-opacity);
+  }
+  100% {
+    transform: translate(var(--dx, 20px), -110vh) scale(0.9);
+    opacity: 0;
+  }
+}

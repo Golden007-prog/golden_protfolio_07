@@ -1,0 +1,352 @@
+[
+  {
+    "name": "LangChain",
+    "category": "GenAI & LLMs",
+    "term": "LangChain",
+    "def": " is an open-source framework for developing applications powered by large language models (LLMs), simplifying their integration with external data and computation.",
+    "hero": true
+  },
+  {
+    "name": "LlamaIndex",
+    "category": "GenAI & LLMs",
+    "term": "LlamaIndex",
+    "def": " is an open-source data orchestration framework for building large language model (LLM) applications.",
+    "hero": true
+  },
+  {
+    "name": "AutoGen",
+    "category": "GenAI & LLMs",
+    "term": "AutoGen",
+    "def": " is an open-source framework for building AI agents that can converse and collaborate to solve tasks.",
+    "hero": true
+  },
+  {
+    "name": "RAG",
+    "category": "GenAI & LLMs",
+    "term": "RAG",
+    "def": " is an AI framework that enhances large language models by retrieving relevant information from external knowledge bases to ground generated responses.",
+    "hero": true
+  },
+  {
+    "name": "CoT",
+    "category": "GenAI & LLMs",
+    "term": "CoT",
+    "def": " is a prompt engineering technique that guides Large Language Models (LLMs) to break down complex problems into intermediate, logical steps.",
+    "hero": true
+  },
+  {
+    "name": "RLHF",
+    "category": "GenAI & LLMs",
+    "term": "RLHF",
+    "def": " is a machine learning technique that uses human feedback to optimize AI models, particularly Large Language Models, to align with human preferences and values.",
+    "hero": true
+  },
+  {
+    "name": "ReAct",
+    "category": "GenAI & LLMs",
+    "term": "ReAct",
+    "def": " is a framework enabling LLMs to interleave reasoning steps with external actions for dynamic problem-solving.",
+    "hero": true
+  },
+  {
+    "name": "LangGraph",
+    "category": "GenAI & LLMs",
+    "term": "LangGraph",
+    "def": " is an open-source AI agent framework built on LangChain for orchestrating complex, stateful generative AI workflows using a graph-based architecture.",
+    "hero": true
+  },
+  {
+    "name": "Hugging Face",
+    "category": "GenAI & LLMs",
+    "term": "Hugging Face",
+    "def": " is an open-source platform and community providing tools, models, and datasets for building, training, and deploying GenAI and LLMs.",
+    "hero": false
+  },
+  {
+    "name": "GPT API",
+    "category": "GenAI & LLMs",
+    "term": "GPT API",
+    "def": " is a programmatic interface providing access to OpenAI's Generative Pre-trained Transformer models for integration into various applications.",
+    "hero": true
+  },
+  {
+    "name": "Claude API",
+    "category": "GenAI & LLMs",
+    "term": "Claude API",
+    "def": " is a RESTful API providing programmatic access to Anthropic's Claude AI models for advanced GenAI applications.",
+    "hero": true
+  },
+  {
+    "name": "AWS Bedrock",
+    "category": "GenAI & LLMs",
+    "term": "AWS Bedrock",
+    "def": " is a fully managed service providing access to foundation models for building and scaling generative AI applications.",
+    "hero": true
+  },
+  {
+    "name": "Gemma",
+    "category": "GenAI & LLMs",
+    "term": "Gemma",
+    "def": " is a family of lightweight, state-of-the-art open models developed by Google DeepMind, based on Gemini technology.",
+    "hero": true
+  },
+  {
+    "name": "Gemini",
+    "category": "GenAI & LLMs",
+    "term": "Gemini",
+    "def": " is Google's family of multimodal large language models (LLMs) designed to understand and operate across various data types.",
+    "hero": true
+  },
+  {
+    "name": "Multi-agent orchestration",
+    "category": "Agentic AI",
+    "term": "Multi-agent orchestration",
+    "def": " is the process of coordinating multiple AI agents to work together in a structured, goal-oriented way.",
+    "hero": true
+  },
+  {
+    "name": "Chroma",
+    "category": "Agentic AI",
+    "term": "Chroma",
+    "def": " is an open-source, AI-native vector database designed for efficiently storing and querying embeddings and metadata.",
+    "hero": true
+  },
+  {
+    "name": "FAISS",
+    "category": "Agentic AI",
+    "term": "FAISS",
+    "def": " is an open-source library by Meta AI for efficient similarity search and clustering of dense vectors.",
+    "hero": false
+  },
+  {
+    "name": "Semantic chunking",
+    "category": "Agentic AI",
+    "term": "Semantic chunking",
+    "def": " is a sophisticated strategy that divides text into meaningful, semantically coherent segments based on content and context, rather than arbitrary size limits.",
+    "hero": true
+  },
+  {
+    "name": "Vectorization",
+    "category": "Agentic AI",
+    "term": "Vectorization",
+    "def": " is the process of converting diverse data into numerical representations (vectors) for AI systems to understand and process efficiently.",
+    "hero": true
+  },
+  {
+    "name": "Performance tuning",
+    "category": "Agentic AI",
+    "term": "Performance tuning",
+    "def": " is the process of optimizing agentic AI systems to enhance their efficiency, reliability, and cost-effectiveness across complex, autonomous tasks.",
+    "hero": true
+  },
+  {
+    "name": "Evaluation metrics",
+    "category": "Agentic AI",
+    "term": "Evaluation metrics",
+    "def": " is a set of measurements used to assess the performance, reliability, and safety of autonomous AI agents across complex, multi-step tasks.",
+    "hero": true
+  },
+  {
+    "name": "Agent observability",
+    "category": "Agentic AI",
+    "term": "Agent observability",
+    "def": " is the ability to see, understand, and explain what AI agents are doing across systems with enough detail to debug, enforce guardrails, and prove compliance.",
+    "hero": true
+  },
+  {
+    "name": "Tracing",
+    "category": "Agentic AI",
+    "term": "Tracing",
+    "def": " is a critical observability technique for agentic AI, capturing the complete execution path of agent workflows.",
+    "hero": true
+  },
+  {
+    "name": "Python",
+    "category": "Data Science & ML",
+    "term": "Python",
+    "def": " is a versatile, high-level programming language widely adopted in Data Science and Machine Learning for its simplicity and extensive libraries.",
+    "hero": true
+  },
+  {
+    "name": "SQL",
+    "category": "Data Science & ML",
+    "term": "SQL",
+    "def": " is a standard language for managing and querying data in relational databases, essential for data storage, retrieval, and manipulation.",
+    "hero": true
+  },
+  {
+    "name": "Pandas",
+    "category": "Data Science & ML",
+    "term": "Pandas",
+    "def": " is an open-source Python library providing high-performance, easy-to-use data structures and analysis tools for manipulating and analyzing structured data.",
+    "hero": true
+  },
+  {
+    "name": "Scikit-learn",
+    "category": "Data Science & ML",
+    "term": "Scikit-learn",
+    "def": " is an open-source Python machine learning library providing simple and efficient tools for predictive data analysis.",
+    "hero": true
+  },
+  {
+    "name": "TensorFlow",
+    "category": "Data Science & ML",
+    "term": "TensorFlow",
+    "def": " is an open-source machine learning platform developed by Google for building and deploying ML models.",
+    "hero": true
+  },
+  {
+    "name": "PyTorch",
+    "category": "Data Science & ML",
+    "term": "PyTorch",
+    "def": " is an open-source deep learning framework that provides flexible tensor computation with strong GPU acceleration.",
+    "hero": true
+  },
+  {
+    "name": "JAX/Tunix",
+    "category": "Data Science & ML",
+    "term": "JAX/Tunix",
+    "def": " is a JAX-native library designed to streamline the post-training of Large Language Models (LLMs).",
+    "hero": true
+  },
+  {
+    "name": "SpaCy",
+    "category": "Data Science & ML",
+    "term": "SpaCy",
+    "def": " is a free, open-source library for advanced Natural Language Processing (NLP) in Python, designed for production use.",
+    "hero": true
+  },
+  {
+    "name": "NLTK",
+    "category": "Data Science & ML",
+    "term": "NLTK",
+    "def": " is a leading open-source Python library for working with human language data, providing tools for various NLP tasks.",
+    "hero": true
+  },
+  {
+    "name": "Statistics",
+    "category": "Data Science & ML",
+    "term": "Statistics",
+    "def": " is the science of collecting, analyzing, interpreting, and presenting data to extract meaningful insights and make informed decisions.",
+    "hero": true
+  },
+  {
+    "name": "Regression",
+    "category": "Data Science & ML",
+    "term": "Regression",
+    "def": " is a supervised machine learning technique used to model and predict a continuous target variable based on one or more input features.",
+    "hero": true
+  },
+  {
+    "name": "Model tuning",
+    "category": "Data Science & ML",
+    "term": "Model tuning",
+    "def": " is the process of optimizing a machine learning model's hyperparameters to achieve the best possible performance on unseen data.",
+    "hero": true
+  },
+  {
+    "name": "EDA",
+    "category": "Analytics & Viz",
+    "term": "EDA",
+    "def": " is the initial process of investigating datasets to summarize their main characteristics, often using statistical graphics and data visualization methods.",
+    "hero": true
+  },
+  {
+    "name": "Data storytelling",
+    "category": "Analytics & Viz",
+    "term": "Data storytelling",
+    "def": " is the practice of combining data, visualizations, and narrative to communicate data-driven insights in a clear and impactful way.",
+    "hero": true
+  },
+  {
+    "name": "Power BI",
+    "category": "Analytics & Viz",
+    "term": "Power BI",
+    "def": " is Microsoft's business analytics platform that helps turn data into actionable insights through interactive visualizations.",
+    "hero": true
+  },
+  {
+    "name": "Tableau",
+    "category": "Analytics & Viz",
+    "term": "Tableau",
+    "def": " is a powerful visual analytics platform that helps people and organizations see, understand, and act on data by transforming raw data into interactive visualizations and dashboards.",
+    "hero": true
+  },
+  {
+    "name": "Clinical text mining",
+    "category": "Analytics & Viz",
+    "term": "Clinical text mining",
+    "def": " is extracting structured information from unstructured clinical narratives using natural language processing and machine learning.",
+    "hero": true
+  },
+  {
+    "name": "Sentiment analysis",
+    "category": "Analytics & Viz",
+    "term": "Sentiment analysis",
+    "def": " is the process of computationally determining the emotional tone (positive, negative, or neutral) expressed in text data.",
+    "hero": false
+  },
+  {
+    "name": "AWS Lambda",
+    "category": "Infrastructure",
+    "term": "AWS Lambda",
+    "def": " is a serverless, event-driven compute service that runs code in response to events and automatically manages the underlying compute resources.",
+    "hero": true
+  },
+  {
+    "name": "API Gateway",
+    "category": "Infrastructure",
+    "term": "API Gateway",
+    "def": " is a server that acts as a single entry point for clients to access backend services, managing API requests and enforcing policies.",
+    "hero": true
+  },
+  {
+    "name": "DynamoDB",
+    "category": "Infrastructure",
+    "term": "DynamoDB",
+    "def": " is a fully managed, serverless NoSQL database service from AWS that supports key-value and document data models.",
+    "hero": true
+  },
+  {
+    "name": "GCP",
+    "category": "Infrastructure",
+    "term": "GCP",
+    "def": " is a suite of cloud computing services providing scalable, secure infrastructure for building, deploying, and managing applications.",
+    "hero": true
+  },
+  {
+    "name": "FastAPI",
+    "category": "Infrastructure",
+    "term": "FastAPI",
+    "def": " is a modern, high-performance Python web framework for building APIs, leveraging standard Python type hints for data validation and automatic documentation.",
+    "hero": true
+  },
+  {
+    "name": "Firebase",
+    "category": "Infrastructure",
+    "term": "Firebase",
+    "def": " is a Google-backed Backend-as-a-Service (BaaS) platform providing a comprehensive suite of cloud services for building and scaling web and mobile applications.",
+    "hero": true
+  },
+  {
+    "name": "Git",
+    "category": "Infrastructure",
+    "term": "Git",
+    "def": " is a distributed version control system used to track changes in source code and data, enabling collaborative development and infrastructure management.",
+    "hero": true
+  },
+  {
+    "name": "CI/CD",
+    "category": "Infrastructure",
+    "term": "CI/CD",
+    "def": " is an automated workflow that builds, tests, and deploys software and infrastructure changes reliably and frequently.",
+    "hero": true
+  },
+  {
+    "name": "VS Code",
+    "category": "Infrastructure",
+    "term": "VS Code",
+    "def": " is a lightweight, open-source code editor widely used for infrastructure management and development across various platforms.",
+    "hero": true
+  }
+]

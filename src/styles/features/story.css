@@ -1,0 +1,309 @@
+/* Package: story — about, experience timeline, principles, reading list, footer. */
+
+@layer components {
+  /* ---------- About: portrait panel ---------- */
+  .about-portrait {
+    border: 1px solid var(--app-glass-border-strong);
+    box-shadow: var(--app-glass-shadow-strong);
+  }
+  .about-portrait-bg {
+    background: linear-gradient(135deg, #0F0F1A 0%, #1A1028 45%, #0A1826 100%);
+  }
+  :root[data-theme="light"] .about-portrait-bg {
+    background: linear-gradient(135deg, #F5EFE6 0%, #EAE4F4 45%, #E3EEF2 100%);
+  }
+  .about-portrait-blob-a {
+    background: radial-gradient(circle, var(--app-violet-bright) 0%, transparent 70%);
+    filter: blur(40px);
+  }
+  .about-portrait-blob-b {
+    background: radial-gradient(circle, var(--app-cyan-bright) 0%, transparent 70%);
+    filter: blur(40px);
+  }
+  /* Drawn in the text colour, so the grid reads on the dark panel and on cream alike. */
+  .about-portrait-grid {
+    --grid-line: color-mix(in oklab, var(--app-text-primary) 8%, transparent);
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+  .about-portrait-rule {
+    background: linear-gradient(to right, color-mix(in oklab, var(--app-cyan-text) 60%, transparent), transparent);
+  }
+  .about-portrait-mark {
+    background: linear-gradient(135deg, var(--app-violet-bright) 0%, var(--app-cyan-bright) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  @media (forced-colors: active) {
+    .about-portrait-mark {
+      background: none;
+      color: CanvasText;
+    }
+  }
+
+  /* ---------- About: scroll-brightened bio (ScrubText) ----------
+     --p (0..1) is written by one scroll value; --n is the word count and --i the
+     word index. Words brighten in a six-word wave from 0.6 to 1. The default --p
+     of 1 keeps the server HTML and no-JS visits fully legible. */
+  .story-scrub {
+    --p: 1;
+  }
+  .story-scrub-word {
+    opacity: calc(0.6 + 0.4 * clamp(0, (var(--p) * (var(--n) + 6) - var(--i)) / 6, 1));
+  }
+
+  /* ---------- Experience: timeline spine ----------
+     The track, the fill, the head and every node are centred on --spine-x, so the
+     dots sit exactly on the line at every width. */
+  .story-timeline {
+    --spine-x: 1rem;
+    position: relative;
+  }
+  .story-timeline-list {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+  .story-timeline-item {
+    position: relative;
+    padding-left: calc(var(--spine-x) + 1.75rem);
+  }
+  @media (min-width: 768px) {
+    .story-timeline {
+      --spine-x: 1.5rem;
+    }
+    .story-timeline-list {
+      gap: 2.5rem;
+    }
+    .story-timeline-item {
+      padding-left: calc(var(--spine-x) + 3rem);
+    }
+  }
+  .story-spine-track,
+  .story-spine-fill {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: calc(var(--spine-x) - 1px);
+    width: 2px;
+    border-radius: 1px;
+    pointer-events: none;
+  }
+  .story-spine-track {
+    background: var(--app-glass-border-strong);
+  }
+  .story-spine-fill {
+    background: linear-gradient(
+      to bottom,
+      var(--app-violet-bright),
+      var(--app-cyan-bright) 75%,
+      color-mix(in oklab, var(--app-cyan-bright) 25%, transparent)
+    );
+    transform-origin: 50% 0;
+  }
+  .story-spine-head {
+    position: absolute;
+    z-index: 1;
+    top: -5px;
+    left: calc(var(--spine-x) - 5px);
+    width: 10px;
+    height: 10px;
+    border-radius: 9999px;
+    background: var(--app-cyan-bright);
+    box-shadow:
+      0 0 0 3px color-mix(in oklab, var(--app-cyan-bright) 25%, transparent),
+      0 0 18px 4px color-mix(in oklab, var(--app-cyan-bright) 55%, transparent);
+    opacity: 0;
+    pointer-events: none;
+  }
+  .story-spine-node {
+    position: absolute;
+    z-index: 1;
+    top: 2rem;
+    left: calc(var(--spine-x) - 7px);
+    width: 14px;
+    height: 14px;
+    border-radius: 9999px;
+    border: 2px solid var(--app-glass-border-strong);
+    background: var(--color-bg-base);
+    transition:
+      transform var(--dur-base) var(--ease-out-expo),
+      border-color var(--dur-base) var(--ease-out-expo),
+      box-shadow var(--dur-base) var(--ease-out-expo);
+  }
+  .story-spine-node[data-lit] {
+    transform: scale(1.2);
+    border-color: transparent;
+    background: linear-gradient(135deg, var(--app-violet-bright), var(--app-cyan-bright));
+    box-shadow:
+      0 0 0 4px var(--color-bg-base),
+      0 0 14px 2px color-mix(in oklab, var(--app-violet-bright) 55%, transparent),
+      0 0 26px 6px color-mix(in oklab, var(--app-cyan-bright) 30%, transparent);
+  }
+  :root[data-theme="light"] .story-spine-node[data-lit] {
+    box-shadow:
+      0 0 0 4px var(--color-bg-base),
+      0 2px 10px color-mix(in oklab, var(--app-violet-bright) 35%, transparent);
+  }
+  @media (forced-colors: active) {
+    .story-spine-track,
+    .story-spine-fill,
+    .story-spine-node[data-lit] {
+      background: CanvasText;
+    }
+  }
+
+  /* Heatmap slots keep roughly each card's loaded height reserved, before the card
+     mounts and while it fetches, so nothing below them jumps. The values sit just
+     under the cards' measured heights at each breakpoint, so a loaded card never
+     leaves a gap beneath it. */
+  .story-heat-slot--github {
+    --heat-slot-h: 27rem;
+  }
+  .story-heat-slot--leetcode {
+    --heat-slot-h: 36rem;
+  }
+  @media (min-width: 640px) {
+    .story-heat-slot--github {
+      --heat-slot-h: 22rem;
+    }
+    .story-heat-slot--leetcode {
+      --heat-slot-h: 27rem;
+    }
+  }
+  @media (min-width: 768px) {
+    .story-heat-slot--github {
+      --heat-slot-h: 24rem;
+    }
+    .story-heat-slot--leetcode {
+      --heat-slot-h: 29rem;
+    }
+  }
+  @media (min-width: 1024px) {
+    .story-heat-slot--leetcode {
+      --heat-slot-h: 26.5rem;
+    }
+  }
+  .story-heat-slot {
+    min-height: var(--heat-slot-h);
+  }
+  .story-heat-slot .story-heat-skeleton {
+    height: var(--heat-slot-h);
+  }
+
+  /* ---------- Principles: grid, or a sticky deck on wide fine-pointer screens ----------
+     The deck needs full motion and no lite tier; both attributes are set on <html>
+     before first paint, so the layout never changes during hydration. */
+  .story-deck {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.25rem;
+  }
+  @media (min-width: 768px) {
+    .story-deck {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 1024px) {
+    .story-deck {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+  .story-deck-item {
+    --i: 0;
+  }
+  .story-deck-item:nth-child(2) { --i: 1; }
+  .story-deck-item:nth-child(3) { --i: 2; }
+  .story-deck-item:nth-child(4) { --i: 3; }
+  .story-deck-item:nth-child(5) { --i: 4; }
+  .story-deck-item:nth-child(6) { --i: 5; }
+  .story-deck-dim {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: var(--color-bg-base);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  @media (min-width: 1024px) and (pointer: fine) and (hover: hover) {
+    :root:not([data-lite]):not([data-motion="reduced"]) .story-principles {
+      display: grid;
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      column-gap: 4rem;
+      align-items: start;
+    }
+    :root:not([data-lite]):not([data-motion="reduced"]) .story-principles-head {
+      position: sticky;
+      top: calc(var(--nav-offset) + 32px);
+    }
+    :root:not([data-lite]):not([data-motion="reduced"]) .story-deck {
+      display: block;
+      padding-bottom: 12vh;
+    }
+    /* PhilosophySection reads this top back from the computed style for its scrub. */
+    :root:not([data-lite]):not([data-motion="reduced"]) .story-deck-item {
+      position: sticky;
+      top: calc(var(--nav-offset) + 32px + var(--i) * 16px);
+      margin-bottom: 1.5rem;
+    }
+    /* Stacked cards must hide the ones beneath; !important because .glass-strong is a
+       utility, which outranks this layer. */
+    :root:not([data-lite]):not([data-motion="reduced"]) .story-deck-card {
+      background-color: var(--app-glass-fill-strong-dense) !important;
+    }
+  }
+
+  /* ---------- Footer ---------- */
+  .story-footer {
+    padding-bottom: calc(var(--dock-clearance) + var(--dock-height) + 1rem);
+  }
+  .story-switch {
+    position: relative;
+    display: inline-block;
+    flex-shrink: 0;
+    width: 2.25rem;
+    height: 1.25rem;
+    border-radius: 9999px;
+    border: 1px solid var(--app-glass-border-strong);
+    background: var(--app-surface-tint);
+    transition:
+      background-color var(--dur-quick) var(--ease-out-expo),
+      border-color var(--dur-quick) var(--ease-out-expo);
+  }
+  .story-switch-thumb {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 14px;
+    height: 14px;
+    border-radius: 9999px;
+    background: var(--app-text-muted);
+    transition:
+      transform var(--dur-base) var(--ease-out-expo),
+      background-color var(--dur-quick) var(--ease-out-expo);
+  }
+  .story-switch[data-on] {
+    border-color: transparent;
+    background: var(--app-violet);
+  }
+  .story-switch[data-on] .story-switch-thumb {
+    transform: translateX(1rem);
+    background: #FFFFFF;
+  }
+  @media (forced-colors: active) {
+    .story-switch {
+      border-color: CanvasText;
+    }
+    .story-switch-thumb {
+      background: CanvasText;
+    }
+    .story-switch[data-on] {
+      background: Highlight;
+    }
+  }
+}

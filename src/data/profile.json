@@ -10,6 +10,11 @@
     "leetcode": "https://leetcode.com/oikantik007",
     "hire": "https://pingpen.in/hire"
   },
+  "availability": {
+    "status": "Available for hire",
+    "focus": "Production LLM agents & RAG systems",
+    "openTo": "Full-time & contract · Remote / Bengaluru"
+  },
   "about": "Data Science and Gen AI developer with hands-on experience in LLM fine-tuning, RAG systems, agentic AI architectures, and production ML deployments. Proficient in building and deploying solutions using LangChain, LlamaIndex, AutoGen, and leading LLM APIs (GPT, Claude, Bedrock, Gemini). Experienced in exploratory data analysis, data visualization, vector database optimization (Chroma/FAISS), and translating model outputs into actionable business insights. Skilled in Python, SQL, and cloud platforms (AWS, GCP), with a strong foundation in statistics and machine learning. Pursuing a Master's in Data Science from the University of Pittsburgh.",
   "stats": {
     "yearsExperience": 3,
@@ -21,6 +26,8 @@
       "company": "iHUB DivyaSampark @ IIT Roorkee",
       "role": "Agentic Systems and Design Program",
       "duration": "Jan 2026 - Present",
+      "start": "2026-01",
+      "end": null,
       "location": "Remote",
       "description": "Architecting multi-agent systems using ReAct framework and LangGraph for autonomous reasoning. Building advanced RAG pipelines with LlamaIndex, LangChain, and vector databases (Chroma/FAISS), optimizing retrieval accuracy through semantic chunking and vectorization. Implementing LLMOps best practices for production deployment including agent observability (tracing), evaluation frameworks, and REST API serving via FastAPI.",
       "highlights": [
@@ -38,6 +45,8 @@
       "company": "Mindrift",
       "role": "Freelance AI Agent Specialist",
       "duration": "Jun 2025 - Present",
+      "start": "2025-06",
+      "end": null,
       "location": "Remote",
       "description": "Conducting RLHF evaluations to align LLMs (GPT, Claude) with safety and accuracy guidelines. Evaluating complex Python code generation and reasoning traces using AutoGen-based multi-agent workflows. Identifying and documenting hallucinations and logic failures in state-of-the-art models, building evaluation metrics that improved model reliability.",
       "highlights": [
@@ -55,6 +64,8 @@
       "company": "Unified Mentor Private Limited",
       "role": "Data Science Intern",
       "duration": "Mar 2025 - Jun 2025",
+      "start": "2025-03",
+      "end": "2025-06",
       "location": "Gurgaon, Haryana",
       "description": "Performed exploratory data analysis and regression modeling on IBM HR Analytics dataset, uncovering key attrition drivers via interactive visualizations. Built SQL-based data mining queries to extract and transform structured datasets, delivering actionable insights on TCS stock trends through time-series analysis.",
       "highlights": [
@@ -74,12 +85,16 @@
       "institution": "University of Pittsburgh (Coursera)",
       "degree": "Master's in Data Science (Online MDS)",
       "year": "Sept 2025 - Feb 2027",
+      "start": "2025-09",
+      "end": "2027-02",
       "status": "In progress, Summer Term 2026"
     },
     {
       "institution": "Techno International New Town, Kolkata",
       "degree": "B.Tech in Computer Science & Engineering",
       "year": "Oct 2020 - Jul 2024",
+      "start": "2020-10",
+      "end": "2024-07",
       "status": "CGPA: 8.22"
     }
   ],
