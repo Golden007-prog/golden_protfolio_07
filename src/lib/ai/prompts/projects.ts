@@ -480,6 +480,15 @@ export const INTERESTS: readonly Interest[] = [
   { id: 'forecasting', label: 'Forecasting', topics: ['forecasting', 'time-series'], tech: ['Prophet'], text: /\bforecast/i },
 ];
 
+/** True when `re` matches `text` somewhere a negation does not govern: MarketPulse 'makes no forecasting claims'. */
+function mentionsPlainly(re: RegExp, text: string): boolean {
+  const all = new RegExp(re.source, re.flags.includes('g') ? re.flags : `${re.flags}g`);
+  for (const m of text.matchAll(all)) {
+    if (!/\b(?:no|not|never|without|nor)\s+(?:\w+\s+)?$/i.test(text.slice(Math.max(0, m.index - 30), m.index))) return true;
+  }
+  return false;
+}
+
 /** Projects whose topics, stack families or description match the interest. */
 export function interestSeeds(interest: Interest, projects: readonly ProjectSource[]): string[] {
   return projects
@@ -487,7 +496,7 @@ export function interestSeeds(interest: Interest, projects: readonly ProjectSour
       (p) =>
         p.topics.some((t) => interest.topics.includes(t)) ||
         families(p).some((f) => interest.tech.includes(f)) ||
-        interest.text.test([p.shortDescription, p.fullDescription, p.problem ?? '', p.solution ?? ''].join(' ')),
+        mentionsPlainly(interest.text, [p.shortDescription, p.fullDescription, p.problem ?? '', p.solution ?? ''].join(' ')),
     )
     .map((p) => p.slug);
 }

@@ -2,6 +2,8 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import { SITE_COPY } from '../../data/site-copy.ts';
+import { parseAchievements } from '../achievements.ts';
+import { parseCertifications } from '../certifications.ts';
 import { buildCorpus, entities, type CorpusSources } from './corpus.ts';
 import {
   BLURB_SHORT_MAX,
@@ -66,11 +68,13 @@ const src: CorpusSources = {
   skillsIndex: read('skills-index.json'),
   liveSnapshot: read('live-snapshot.json'),
   siteCopy: SITE_COPY,
+  certifications: parseCertifications(read('certifications.json')),
+  achievements: parseAchievements(read('achievements.json')),
 };
 const chunks = buildCorpus(src);
 const facts = new Map(chunks.filter((c) => c.cls === 'self').map((c) => [c.id, c.text]));
-const ents = entities({ profile: src.profile, projects: src.projects, skills: src.skillsIndex, reading: src.reading });
-const data: FitData = { profile: src.profile, projects: src.projects };
+const ents = entities({ profile: src.profile, projects: src.projects, skills: src.skillsIndex, reading: src.reading, certifications: src.certifications, achievements: src.achievements });
+const data: FitData = { profile: src.profile, projects: src.projects, certifications: src.certifications, achievements: src.achievements };
 const vocab = vocabulary(data);
 const TODAY = '2026-09';
 const SITE_LINKS = { url: 'https://www.basuoikantik.in', cvUrl: 'https://www.basuoikantik.in/cv', builtAt: 'Sep 25, 2026' };
@@ -276,9 +280,16 @@ test('verify: the client drops rows whose ids the site cannot have', () => {
   assert.equal(plausibleId('project:omni-lab#stack', data), true);
   assert.equal(plausibleId('project:nope#stack', data), false);
   assert.equal(plausibleId('ref:react', data), false);
+  assert.equal(plausibleId('cert:claude-academy', data), true);
+  assert.equal(plausibleId('cert:google-ai-professional-certificate', data), true);
+  assert.equal(plausibleId('cert:aws-certified', data), false);
+  assert.equal(plausibleId('achievement:ai-for-bharat-finalist', data), true);
+  assert.equal(plausibleId('achievement:hackathon-winner', data), false);
+  // A client that has not loaded the credential data rejects those ids rather than guessing.
+  assert.equal(plausibleId('cert:claude-academy', { profile: src.profile, projects: src.projects }), false);
   const rows: FitRow[] = [
     { requirement: 'a', kind: 'must', status: 'evidenced', evidence: [{ id: 'exp:0', quote: 'LangGraph' }], source: 'ai' },
-    { requirement: 'b', kind: 'must', status: 'evidenced', evidence: [{ id: 'exp:7', quote: 'x' }], source: 'ai' },
+    { requirement: 'b', kind: 'must', status: 'evidenced', evidence: [{ id: 'exp:99', quote: 'x' }], source: 'ai' },
     { requirement: 'c', kind: 'must', status: 'not-listed', evidence: [], source: 'ai' },
   ];
   const { res, discarded } = checkFitResponse({ rows, projects: [], rankedBy: 'lexical', dropped: 0, model: 'm' }, data);
@@ -479,8 +490,9 @@ test('lenses: a production-flag render with unreviewed fixtures hides every chip
   assert.deepEqual(visibleLenses({ version: 1, entries: {} }, true), []);
 });
 
-test('lenses: the committed store holds only claim-bearing, well-formed entries citing their own sources', () => {
+test('lenses: the committed store holds only claim-bearing, well-formed entries citing their own sources', (t) => {
   const store: LensStore = read('ai-generated/recruiter.json');
+  const stale: string[] = [];
   for (const [key, entry] of Object.entries(store.entries)) {
     const def = LENSES.find((l) => `lens:${l.id}` === key);
     assert.ok(def, `unknown key ${key}`);
@@ -494,8 +506,18 @@ test('lenses: the committed store holds only claim-bearing, well-formed entries 
         assert.equal(spellsNumber(s.text), false, s.text);
       }
     }
-    assert.deepEqual(entry.value.projects, lensProjects(def, data), `${key} projects`);
+    // Projects are counted in code when the lens is written. A reviewed lens must still
+    // match that count. A draft may lag new data until `npm run ai:generate` rewrites it
+    // (its hash covers the projects); it still names only real projects, and drafts never
+    // render in production.
+    const current = lensProjects(def, data);
+    for (const slug of entry.value.projects) assert.ok(data.projects.some((p) => p.slug === slug), `${key}: ${slug}`);
+    if (entry.reviewed) assert.deepEqual(entry.value.projects, current, `${key} projects`);
+    else if (entry.value.projects.join() !== current.join()) stale.push(key);
   }
+  const shown = visibleLenses(store, false).map((l) => `lens:${l.def.id}`);
+  for (const key of stale) assert.ok(!shown.includes(key), `${key} is stale and must not render in production`);
+  if (stale.length) t.diagnostic(`stale lens drafts (regenerate with npm run ai:generate): ${stale.join(', ')}`);
 });
 
 test('lenses: only known ids, sources the data backs, projects counted in code', () => {
@@ -804,6 +826,11 @@ test('requirementCap: employers, venues and credentials the profile does not lis
   const certified = { ...ents, certifications: ['AWS Certified Machine Learning Specialty'] };
   assert.equal(requirementCap(req('AWS Certified Machine Learning Specialty'), ['AWS Certified Machine Learning Specialty (2026)'], certified), null);
   assert.equal(requirementCap(req('AWS Certified Machine Learning Specialty'), ['AWS Lambda'], certified), 'credential');
+  // With the real list: a listed credential cited by its chunk stands; an unlisted one or a licence never does.
+  const gaipc = [facts.get('cert:google-ai-professional-certificate')!];
+  assert.equal(requirementCap(req('Google AI Professional Certificate'), gaipc, ents), null);
+  assert.equal(requirementCap(req('Google Cloud Professional Machine Learning Engineer certification'), gaipc, ents), 'credential');
+  assert.equal(requirementCap(req('Licensed Professional Engineer'), gaipc, ents), 'credential');
 });
 
 test('onlySiteTerms: a requirement that is just site terms, not a larger ask naming one', () => {

@@ -18,7 +18,7 @@ const isTouch = (info: TestInfo) => Boolean(projectUse(info).hasTouch);
 const isReduced = (info: TestInfo) => projectUse(info).reducedMotion === 'reduce';
 
 const ALL_SKILLS = Object.values(profile.skills as Record<string, string[]>).flat();
-const GEMINI_PROJECTS = 6;
+const GEMINI_PROJECTS = 8;
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {

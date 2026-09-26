@@ -3,6 +3,8 @@ import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import { SITE_COPY } from '../../data/site-copy.ts';
 import { estimateTokens, packContext, passesGate, scopeFilter } from './context.ts';
+import { parseAchievements } from '../achievements.ts';
+import { parseCertifications } from '../certifications.ts';
 import { buildCorpus, CORE_CARD_IDS, type CorpusSources } from './corpus.ts';
 import { buildBm25, hybrid } from './retrieval.ts';
 
@@ -16,6 +18,8 @@ const src: CorpusSources = {
   skillsIndex: read('skills-index.json'),
   liveSnapshot: read('live-snapshot.json'),
   siteCopy: SITE_COPY,
+  certifications: parseCertifications(read('certifications.json')),
+  achievements: parseAchievements(read('achievements.json')),
 };
 const chunks = buildCorpus(src);
 const byId = new Map(chunks.map((c) => [c.id, c]));

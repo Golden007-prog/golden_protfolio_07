@@ -8,7 +8,8 @@
     "linkedin": "https://linkedin.com/in/oikantik-basu-b13919278",
     "github": "https://github.com/Golden007-prog",
     "leetcode": "https://leetcode.com/oikantik007",
-    "hire": "https://pingpen.in/hire"
+    "hire": "https://pingpen.in/hire",
+    "coreforge": "https://goldensdmat.in"
   },
   "availability": {
     "status": "Available for hire",
@@ -78,6 +79,81 @@
         { "value": "20y", "label": "TCS stock analyzed" },
         { "value": "R² 0.999", "label": "Trend fit" }
       ]
+    },
+    {
+      "company": "GOLDEN's Coreforge",
+      "role": "Owner",
+      "duration": "Jul 2026 - Present",
+      "start": "2026-07",
+      "end": null,
+      "location": "India · On-site",
+      "url": "https://goldensdmat.in",
+      "description": "Founded GOLDEN's Coreforge and developed goldensdmat.in, a practice platform for the dMAT (digitaler Mastertest) for students applying to German Master's programmes. Engineered question-generation algorithms in TypeScript using Claude so every task is unique and verifiable, authored a content bank of 295 questions across academic fields, and built the backend on Supabase with cross-device sync and leaderboards.",
+      "highlights": [
+        "Founded GOLDEN's Coreforge and built goldensdmat.in for dMAT practice",
+        "Question generators in TypeScript with Claude: unique, verifiable tasks",
+        "Supabase backend with cross-device sync and leaderboards"
+      ],
+      "metrics": [
+        { "value": "295", "label": "Questions authored" }
+      ]
+    },
+    {
+      "company": "Alignerr",
+      "role": "Freelance · Project Scatter",
+      "duration": "May 2025 - Jul 2025",
+      "start": "2025-05",
+      "end": "2025-07",
+      "location": "Remote",
+      "description": "Developed an advanced version of Project Scatter, a custom visualization toolkit in Python for interactive scatter plots of multidimensional datasets: reusable 2D and 3D scatter functions with cluster annotations, static and interactive output with Seaborn and Plotly, real-time correlation insights, label toggles and hover tooltips, and vectorized plotting for large datasets. Shared as a Python module for team-wide use.",
+      "highlights": [
+        "Reusable 2D and 3D scatter functions with cluster annotations",
+        "Seaborn and Plotly output with label toggles and hover tooltips",
+        "Vectorized plotting for large datasets, shared as a team-wide module"
+      ]
+    },
+    {
+      "company": "Outlier",
+      "role": "Freelance AI Trainer",
+      "duration": "May 2025 - Jun 2025",
+      "start": "2025-05",
+      "end": "2025-06",
+      "location": "Remote",
+      "description": "Designed and evaluated training data to enhance machine learning model performance. Collaborated with cross-functional teams to refine model outputs and ensure ethical AI behavior, and developed evaluation rubrics to improve the accuracy and reliability of AI in real-world applications.",
+      "highlights": [
+        "Designed and evaluated model training data",
+        "Refined model outputs for ethical AI behavior",
+        "Evaluation rubrics for accuracy and reliability"
+      ]
+    },
+    {
+      "company": "Telangana Desam Leader",
+      "role": "WordPress Developer",
+      "duration": "Apr 2023 - Jun 2024",
+      "start": "2023-04",
+      "end": "2024-06",
+      "location": "Remote",
+      "earlier": true,
+      "description": "Developed a blog website focused on spreading awareness and managed its weekly updates.",
+      "highlights": [
+        "Built an awareness-focused blog website",
+        "Managed weekly updates"
+      ]
+    },
+    {
+      "company": "K.pop Merchandise",
+      "role": "Freelance WordPress Developer",
+      "duration": "Jan 2021 - Feb 2022",
+      "start": "2021-01",
+      "end": "2022-02",
+      "location": "",
+      "earlier": true,
+      "description": "Built websites using WordPress and Elementor Pro with custom CSS. Used Power BI and Excel for data entry and analysis for Shiprocket operations, and worked on B2B business processes.",
+      "highlights": [
+        "WordPress and Elementor Pro sites with custom CSS",
+        "Power BI and Excel analysis for Shiprocket operations",
+        "B2B business processes"
+      ]
     }
   ],
   "education": [
@@ -117,6 +193,5 @@
     "Infrastructure": [
       "AWS Lambda", "API Gateway", "DynamoDB", "GCP", "FastAPI", "Firebase", "Git", "CI/CD", "VS Code"
     ]
-  },
-  "certifications": []
+  }
 }

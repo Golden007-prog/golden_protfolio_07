@@ -22,6 +22,10 @@ import { apiKey, embedTexts, loadCorpus, readJson, ROOT, VECTORS_PATH } from './
 // query drops it to 0.931; renaming '#tagline' ids gave 0.889 and folding ReAct
 // into React 0.926 in a dry run. Raise it when retrieval or the eval set
 // improves; never lower it to make a change pass.
+// 2026-09-26, with the credential, hackathon-result and new-role queries: 44
+// queries, lexical 0.951, hybrid 0.985. The one new partial miss is 'React':
+// govprep, ksp-dappa and the-calcutta-classics now list React too and outrank
+// two of the three stack chunks the row expects.
 export const RECALL_FLOOR = 0.95;
 const K = 5;
 

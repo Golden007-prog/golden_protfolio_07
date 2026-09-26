@@ -2,7 +2,8 @@ import type { Locator, Page, Request, TestInfo } from '@playwright/test';
 import discovery from '../../src/data/ai-generated/discovery.json' with { type: 'json' };
 import profile from '../../src/data/profile.json' with { type: 'json' };
 import projects from '../../src/data/projects.json' with { type: 'json' };
-import { defaultStops, normalizeStops, type GoalPresetId } from '../../src/lib/ai/tour';
+import { CONTACT_COPY, PHILOSOPHY, SECTION_COPY } from '../../src/data/site-copy';
+import { defaultStops, normalizeStops, sectionBlocks, sectionSourceOf, sourceHash, toolKey, type GoalPresetId, type ToolMode, type ToolSection } from '../../src/lib/ai/tour';
 import { aiPost, assertSafeServer, countAiRequests, mockAiFallback, mockAiJson, mockAiStream } from './ai-mocks';
 import { collectPageErrors, expect, expectNoHorizontalOverflow, test } from './helpers';
 
@@ -29,6 +30,10 @@ const CATALOG = { slugs: projects.map((p) => p.slug), expCount: profile.experien
 const FEATURED = projects.filter((p) => p.featured).map((p) => p.slug);
 type StoreEntry = { value?: { stops?: unknown } };
 const ENTRIES = (discovery as { entries: Record<string, StoreEntry> }).entries;
+const SECTION_SOURCE = sectionSourceOf({ profile, sectionCopy: SECTION_COPY, tenets: PHILOSOPHY, contact: CONTACT_COPY });
+/** SectionTools' freshness gate: the stored version's hash must match today's original. */
+const isCurrent = (section: ToolSection, mode: ToolMode) =>
+  (ENTRIES[toolKey(section, mode)] as { hash?: string } | undefined)?.hash === sourceHash(sectionBlocks(section, SECTION_SOURCE), mode);
 
 /** The stops a goal chip plays: the precomputed order when valid, else the built-in one (as GuidedTour does). */
 function chipStops(id: GoalPresetId): string[] {
@@ -235,7 +240,8 @@ test.describe("palette 'By meaning' group (#193)", () => {
     const posts = recordPosts(page, 'retrieve');
     await home(page);
     const input = await openPalette(page);
-    await input.fill('tutor');
+    // A thin query (fewer than three lexical matches) is the one that also searches by meaning.
+    await input.fill('storyteller');
     const before = await page.getByRole('option').allTextContents();
     expect(before.some((t) => t.includes('Content Storyteller'))).toBe(true);
     await expect.poll(() => posts().length).toBe(1);
@@ -510,11 +516,17 @@ test.describe('section tools (#197)', () => {
     await tools.locator('[data-tool-original]').click();
     await expect(text).toHaveAttribute('lang', 'en');
 
-    for (const section of ['about', 'experience', 'philosophy', 'contact']) {
+    // A stored version shows only while its hash matches today's section; a stale one
+    // (a role added since it was generated) falls back to the English original.
+    const shown: string[] = [];
+    for (const section of ['about', 'experience', 'philosophy', 'contact'] as const) {
       await tools.locator(`[data-tool-section="${section}"]`).click();
       await tools.locator('[data-tool-mode="hi"]').click();
-      await expect(text).toHaveAttribute('lang', 'hi');
+      const lang = isCurrent(section, 'hi') ? 'hi' : 'en';
+      await expect(text).toHaveAttribute('lang', lang);
+      if (lang === 'hi') shown.push(section);
     }
+    expect(shown.length, 'at least one Hindi version is current').toBeGreaterThan(0);
 
     const panel = await page.locator('[role="dialog"]').filter({ has: tools }).boundingBox();
     expect(panel && panel.x >= -0.5 && panel.x + panel.width <= width(info) + 0.5).toBe(true);

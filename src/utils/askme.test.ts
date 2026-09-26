@@ -90,7 +90,7 @@ test('no skill answer claims production use', () => {
 test('skill answers only name projects whose stack lists the skill', () => {
   const a = ask('Which projects use Gemini?');
   assert.equal(a.intent, 'skill');
-  assert.match(a.text, /6 projects/);
+  assert.match(a.text, /8 projects/);
   const rag = ask('Do you know RAG?');
   assert.match(rag.text, /No project on this site lists it/);
 });

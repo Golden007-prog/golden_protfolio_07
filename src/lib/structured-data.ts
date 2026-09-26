@@ -11,6 +11,7 @@ export type ProfileData = {
   email: string;
   about?: string;
   links: Readonly<Record<string, string>>;
+  experience?: ReadonlyArray<{ company: string; url?: string }>;
   education?: ReadonlyArray<{ institution: string; end?: string | null }>;
   skills?: Readonly<Record<string, readonly string[]>>;
 };
@@ -25,7 +26,35 @@ export type ProjectData = {
   liveUrl?: string | null;
 };
 
+/** A credential as src/lib/certifications.ts parses it; only the fields the graph uses. */
+export type CredentialData = {
+  id: string;
+  title: string;
+  issuer: string;
+  platform: string;
+  kind: string;
+  issued: string;
+  url: string;
+  partOf?: string;
+};
+
+/** An entry as src/lib/achievements.ts parses it; only the fields the graph uses. */
+export type AchievementEntry = {
+  title: string;
+  date: string;
+  kind: string;
+  summary: string;
+  links: ReadonlyArray<{ url: string }>;
+};
+
 type JsonLd = Record<string, unknown>;
+
+// The issuer's own word for each credential kind, so a course badge never reads as a certification.
+const CREDENTIAL_KIND_LABEL: Readonly<Record<string, string>> = {
+  'course-completion-badge': 'Course completion badge',
+  'professional-certificate': 'Professional certificate',
+  'course-certificate': 'Course certificate',
+};
 
 const PROFILE_LINKS = ['github', 'linkedin', 'leetcode'] as const;
 
@@ -80,11 +109,81 @@ function monthOf(now: Date): string {
   return now.toISOString().slice(0, 7);
 }
 
+/** 'https://www.example.com/x' -> 'example.com'; '' when it does not parse. */
+function hostOf(url: string): string {
+  try {
+    return new URL(url).hostname.replace(/^www\./, '');
+  } catch {
+    return '';
+  }
+}
+
+/**
+ * One EducationalOccupationalCredential per credential, each linking to the
+ * issuer's public verification page. credentialCategory is 'badge' for a Claude
+ * Academy course-completion badge (the site never calls those certifications) and
+ * 'certificate' for the rest; the description carries the issuer's own kind and the platform, and a
+ * course that counts towards a professional certificate points at it with isPartOf.
+ */
+export function credentialNodes(siteUrl: string, credentials: readonly CredentialData[]): JsonLd[] {
+  const idOf = (c: CredentialData) => `${siteUrl}/#credential-${c.id}`;
+  const programs = new Map(credentials.filter((c) => c.kind === 'professional-certificate').map((c) => [c.title, idOf(c)]));
+  return credentials.map((c) => {
+    const kind = CREDENTIAL_KIND_LABEL[c.kind];
+    const program = c.partOf ? programs.get(c.partOf) : undefined;
+    return {
+      '@type': 'EducationalOccupationalCredential',
+      '@id': idOf(c),
+      name: c.title,
+      ...(kind ? { description: `${kind} on ${c.platform}` } : {}),
+      credentialCategory: c.kind === 'course-completion-badge' ? 'badge' : 'certificate',
+      recognizedBy: { '@type': 'Organization', name: c.issuer },
+      url: c.url,
+      dateCreated: c.issued,
+      ...(program ? { isPartOf: { '@id': program } } : {}),
+    };
+  });
+}
+
+/**
+ * Organisations he founded: each 'founder' achievement joined, by the host of its
+ * links, to the experience entry whose url is the same site, which gives the
+ * organisation's name. A founder entry with no matching role is left out. The
+ * @id is `<its origin>/#organization`, the id src/lib/coreforge/jsonld.ts gives
+ * GOLDEN's Coreforge, so a page that also renders that graph describes one entity.
+ */
+export function foundedOrganizations(
+  personId: string,
+  experience: NonNullable<ProfileData['experience']>,
+  achievements: readonly AchievementEntry[],
+): JsonLd[] {
+  return achievements
+    .filter((a) => a.kind === 'founder')
+    .flatMap((a) => {
+      const hosts = new Set(a.links.map((l) => hostOf(l.url)).filter(Boolean));
+      const role = experience.find((e) => e.url && hosts.has(hostOf(e.url)));
+      if (!role?.url) return [];
+      return [
+        {
+          '@type': 'Organization',
+          '@id': `${new URL(role.url).origin}/#organization`,
+          name: role.company,
+          url: role.url,
+          description: a.summary,
+          founder: { '@id': personId },
+          foundingDate: a.date,
+        },
+      ];
+    });
+}
+
 export function buildSiteGraph<P extends ProjectData>({
   siteUrl,
   profile,
   projects,
   caseStudyPath,
+  credentials = [],
+  achievements = [],
   now = new Date(),
 }: {
   siteUrl: string;
@@ -92,6 +191,9 @@ export function buildSiteGraph<P extends ProjectData>({
   projects: readonly P[];
   /** The project's case-study route, or null when it has none; the project then links to its demo or source. */
   caseStudyPath: (project: P) => string | null;
+  /** Verified credentials, in the order they should be listed. */
+  credentials?: readonly CredentialData[];
+  achievements?: readonly AchievementEntry[];
   now?: Date;
 }): JsonLd {
   const personId = `${siteUrl}/#person`;
@@ -103,6 +205,10 @@ export function buildSiteGraph<P extends ProjectData>({
     .map((e) => ({ '@type': 'EducationalOrganization', name: e.institution }));
 
   const knowsAbout = [...new Set(Object.values(profile.skills ?? {}).flat())];
+  const hasCredential = credentialNodes(siteUrl, credentials);
+  // Only a finalist placing counts as an award, in the post's own words; builds and submissions are not awards.
+  const award = achievements.filter((a) => a.kind === 'finalist').map((a) => a.title);
+  const founded = foundedOrganizations(personId, profile.experience ?? [], achievements);
 
   const person: JsonLd = {
     '@type': 'Person',
@@ -119,6 +225,8 @@ export function buildSiteGraph<P extends ProjectData>({
     sameAs: profileUrls(profile),
     ...(alumniOf.length ? { alumniOf } : {}),
     ...(knowsAbout.length ? { knowsAbout } : {}),
+    ...(hasCredential.length ? { hasCredential } : {}),
+    ...(award.length ? { award } : {}),
   };
 
   const website: JsonLd = {
@@ -155,7 +263,7 @@ export function buildSiteGraph<P extends ProjectData>({
     }),
   };
 
-  return { '@context': 'https://schema.org', '@graph': [person, website, projectList] };
+  return { '@context': 'https://schema.org', '@graph': [person, website, projectList, ...founded] };
 }
 
 /** JSON for a <script type="application/ld+json">; '<' is escaped so the data can never close the tag. */

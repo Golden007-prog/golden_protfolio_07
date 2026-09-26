@@ -14,6 +14,7 @@ import {
 import {
   ArrowRight,
   AtSign,
+  BadgeCheck,
   BookOpenText,
   Code2,
   Copy,
@@ -41,6 +42,8 @@ import profile from '@/data/profile.json';
 import projects from '@/data/projects.json';
 import type { SectionToolsRequest } from '@/components/ai/discovery/SectionTools';
 import { useAiActionRunner } from '@/components/ai/useAiActionRunner';
+import { CERTS, KIND_LABEL } from '@/components/certifications/data';
+import { revealCredential } from '@/components/certifications/reveal';
 import { LottieIcon } from '@/components/shared/LottieIcon';
 import { toggleReducedMotion } from '@/components/shared/MotionToggle';
 import { Dialog } from '@/components/ui/Dialog';
@@ -61,7 +64,7 @@ import { SECTIONS, SITE, slugify } from '@/lib/site';
 import { setUrlHash } from '@/lib/urlState';
 import { cn } from '@/utils/cn';
 
-type GroupName = 'Recent' | 'Sections' | 'Projects' | 'Skills' | 'Links' | 'Actions' | 'By meaning';
+type GroupName = 'Recent' | 'Sections' | 'Projects' | 'Skills' | 'Credentials' | 'Links' | 'Actions' | 'By meaning';
 
 type Item = {
   id: string;
@@ -82,7 +85,17 @@ type Group = { name: GroupName; items: Item[] };
 
 const RECENT_KEY = 'ob-palette-recent';
 const RECENT_MAX = 5;
-const GROUP_ORDER: Exclude<GroupName, 'Recent' | 'By meaning'>[] = ['Sections', 'Projects', 'Skills', 'Links', 'Actions'];
+const GROUP_ORDER: Exclude<GroupName, 'Recent' | 'By meaning'>[] = ['Sections', 'Projects', 'Skills', 'Credentials', 'Links', 'Actions'];
+/** Long lists that would bury everything else: they appear once there is a query. */
+const QUERY_ONLY: ReadonlySet<GroupName> = new Set(['Skills', 'Credentials']);
+/**
+ * Groups that match on a substring only. Thirty-seven long course titles hold
+ * almost any short query as a scattered subsequence ('tutor' in 'Introduction to
+ * Model Context Protocol'), which would bury the real matches under badges.
+ */
+const SUBSTRING_ONLY: ReadonlySet<GroupName> = new Set(['Credentials']);
+/** fuzzyScore's floor for a substring match (a scattered subsequence scores far below it). */
+const SUBSTRING_SCORE = 500;
 const ASK_ID = 'action:ask-ai';
 
 /* Semantic matches: asked for only when the lexical search is thin. */
@@ -338,6 +351,19 @@ function PaletteBody({
       });
     }
 
+    // The section clears a filter hiding the card and opens what folds it away before scrolling there.
+    for (const c of CERTS.items) {
+      list.push({
+        id: `cert:${c.id}`,
+        group: 'Credentials',
+        label: c.title,
+        hint: `${KIND_LABEL[c.kind]} · ${c.issuer} · ${c.platform}`,
+        keywords: `certification certificate credential badge ${c.issuer} ${c.platform}`,
+        icon: icon(BadgeCheck),
+        run: () => revealCredential(c.id),
+      });
+    }
+
     list.push(
       { id: 'link:github', group: 'Links', label: 'GitHub', hint: 'Opens in a new tab', icon: icon(Github), run: () => openExternal(SITE.links.github) },
       { id: 'link:linkedin', group: 'Links', label: 'LinkedIn', hint: 'Opens in a new tab', icon: icon(Linkedin), run: () => openExternal(SITE.links.linkedin) },
@@ -505,9 +531,8 @@ function PaletteBody({
     if (!q) {
       const recentItems = recent.map((id) => byId.get(id)).filter((i): i is Item => Boolean(i));
       const out: Group[] = recentItems.length ? [{ name: 'Recent', items: recentItems }] : [];
-      // Fifty skills would bury everything else: they appear once there is a query.
       for (const name of GROUP_ORDER) {
-        if (name === 'Skills') continue;
+        if (QUERY_ONLY.has(name)) continue;
         out.push({ name, items: items.filter((i) => i.group === name && !recent.includes(i.id)) });
       }
       return { groups: out.filter((g) => g.items.length > 0), count: 0 };
@@ -517,7 +542,7 @@ function PaletteBody({
         item,
         score: Math.max(fuzzyScore(q, item.label), item.keywords ? fuzzyScore(q, item.keywords) * 0.6 : 0),
       }))
-      .filter((r) => r.score > 0);
+      .filter((r) => r.score > 0 && (!SUBSTRING_ONLY.has(r.item.group) || r.score >= SUBSTRING_SCORE * 0.6));
     const out: (Group & { best: number })[] = [];
     for (const name of GROUP_ORDER) {
       const inGroup = scored.filter((r) => r.item.group === name).sort((a, b) => b.score - a.score);

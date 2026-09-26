@@ -2,6 +2,8 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import { SITE_COPY } from '../../data/site-copy.ts';
+import { parseAchievements } from '../achievements.ts';
+import { parseCertifications } from '../certifications.ts';
 import { buildCorpus, entities, type CorpusSources } from './corpus.ts';
 import { createSentenceFilter, type SentenceFilterOptions } from './streamFilter.ts';
 
@@ -15,9 +17,11 @@ const src: CorpusSources = {
   skillsIndex: read('skills-index.json'),
   liveSnapshot: read('live-snapshot.json'),
   siteCopy: SITE_COPY,
+  certifications: parseCertifications(read('certifications.json')),
+  achievements: parseAchievements(read('achievements.json')),
 };
 const chunks = buildCorpus(src);
-const ents = entities({ profile: src.profile, projects: src.projects, skills: src.skillsIndex, reading: src.reading });
+const ents = entities({ profile: src.profile, projects: src.projects, skills: src.skillsIndex, reading: src.reading, certifications: src.certifications, achievements: src.achievements });
 const CANARY = 'cnry-0123456789abcdef';
 
 function filter(overrides: Partial<SentenceFilterOptions> = {}) {
@@ -67,6 +71,21 @@ test('a canary split across two pushes blocks the answer', () => {
 test("'He is AWS certified [c:profile:about]' is dropped", () => {
   const r = run(['He is AWS certified [c:profile:about].']);
   assert.equal(r.text, '');
+  assert.equal(r.end.dropped, 1);
+});
+
+test('a cited listed credential and its verify link pass; an uncited one is dropped', () => {
+  const url = src.certifications!.items.find((c) => c.title === 'Google AI Professional Certificate')!.url;
+  const r = run([
+    `He holds the Google AI Professional Certificate from Google on Coursera [c:cert:google-ai-professional-certificate]. `,
+    `Verify it at ${url} [c:cert:google-ai-professional-certificate]. `,
+    'He also holds the Claude Code in Action badge. ',
+    'The site lists no AWS certification [c:profile:about].',
+  ]);
+  assert.match(r.text, /Google AI Professional Certificate from Google on Coursera/);
+  assert.ok(r.text.includes(url), 'the verify URL is on the allow-list');
+  assert.ok(!r.text.includes('Claude Code in Action'), 'a listed credential without a citation is still a claim');
+  assert.match(r.text, /no AWS certification/);
   assert.equal(r.end.dropped, 1);
 });
 

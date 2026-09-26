@@ -185,6 +185,7 @@ function MenuSheet({ origin, onClose, closeThen, closeRef }: SheetProps) {
         </Button>
       </div>
 
+      {/* The type scale is sized so the longest label (Certifications) plus the active dot fits a 320px screen. */}
       <nav aria-label="Sections" className="flex flex-1 flex-col justify-center px-5 py-6">
         <ol className="flex flex-col gap-1">
           {SECTIONS.map(({ id, label, index }, i) => {
@@ -200,7 +201,7 @@ function MenuSheet({ origin, onClose, closeThen, closeRef }: SheetProps) {
                   <span className="w-7 shrink-0 font-mono text-xs tabular-nums text-text-muted">{index}</span>
                   <span className="block overflow-clip pb-1">
                     <motion.span
-                      className="block font-display text-[clamp(2rem,1.2rem_+_5vw,3.25rem)] font-semibold leading-[1.05] tracking-tight text-text-primary"
+                      className="block font-display text-[clamp(1.75rem,0.8rem_+_5vw,3.25rem)] font-semibold leading-[1.05] tracking-tight text-text-primary"
                       initial={{ y: '110%' }}
                       animate={{ y: 0, transition: { delay: 0.12 + i * 0.05, duration: 0.5, ease: ease.out } }}
                       exit={{ y: '110%', transition: { duration: 0.2, ease: ease.in } }}

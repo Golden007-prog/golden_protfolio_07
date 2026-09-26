@@ -1,0 +1,82 @@
+{
+  "items": [
+    {
+      "id": "coreforge-launch",
+      "title": "Founded GOLDEN's Coreforge — goldensdmat.in",
+      "date": "2026-07",
+      "kind": "founder",
+      "summary": "A dMAT (digitaler Mastertest) practice platform for students applying to German Master's programmes, free to start: generators for figure sequences (with an inferability check), equation systems (brute-forced to a unique whole-number solution) and Latin squares (verified unique answer cell), real exam timing, a Supabase backend with cross-device sync and leaderboards, and a 295-question content bank.",
+      "links": [{ "label": "Live site", "url": "https://goldensdmat.in" }]
+    },
+    {
+      "id": "promptwars-sankalp",
+      "notes": "Agent count and the live-demo link follow the public Sankalp README (five ADK agents: OrchestratorAgent plus four specialists), not the LinkedIn post wording.",
+      "title": "Sankalp — PromptWars 3, Election Process Education track",
+      "organizers": ["Hack2skill"],
+      "date": "2026-05",
+      "kind": "build",
+      "project": "sankalp",
+      "summary": "Multimodal voter-journey agent: EPIC card OCR with Cloud Vision, multilingual voice, five Google ADK agents (an orchestrator routing to four specialists), Gemini 2.5 Flash routing and Gemini 2.5 Pro narratives, and Firestore sessions on Cloud Run (asia-south1).",
+      "links": [
+        { "label": "GitHub", "url": "https://github.com/Golden007-prog/Sankalp" },
+        { "label": "Live demo", "url": "https://sankalp-frontend-93037232246.asia-south1.run.app" }
+      ]
+    },
+    {
+      "id": "ai-for-bharat-finalist",
+      "title": "Top 36 Finalist — AI for Bharat Hackathon",
+      "organizers": ["Amazon Web Services (AWS)", "Hack2skill"],
+      "date": "2026-04",
+      "kind": "finalist",
+      "project": "vyapar-gyan",
+      "team": "team of two",
+      "summary": "VyaparGyan, an agentic orchestration platform for Bharat's retailers built with generative AI on AWS, was selected as a Top 36 Finalist for the grand finale (April 6-7).",
+      "links": [
+        { "label": "GitHub", "url": "https://github.com/Golden007-prog/Vyapar-Gyan" },
+        { "label": "Live demo", "url": "https://golden007-prog.github.io/Vyapar-Gyan/" }
+      ]
+    },
+    {
+      "id": "gitlab-hackathon-shieldflow",
+      "title": "ShieldFlow — GitLab Hackathon 2026 entry",
+      "organizers": ["GitLab"],
+      "date": "2026-04",
+      "kind": "submission",
+      "summary": "Autonomous security and compliance review pipeline for GitLab merge requests: webhook-triggered agents for change risk, threat modelling, compliance mapping (SOC 2, GDPR, HIPAA), remediation, energy hotspots and a Claude code review, posting a structured comment back to the merge request. Python 3.12, FastAPI, Cloud Run, Gemini and Claude.",
+      "links": [
+        { "label": "GitLab", "url": "https://gitlab.com/basuoikantik-group/basuoikantik-project/-/tree/main" },
+        { "label": "Demo video", "url": "https://youtu.be/Ny-JnxWNWDE" }
+      ]
+    },
+    {
+      "id": "promptwars-pulse",
+      "notes": "'five live Cloud Run services' and 'solo' follow the public PULSE-Stadium-AI README (What's-live table, 'Built solo by Oikantik Basu'); the LinkedIn post says six services, counting one deferred.",
+      "title": "PULSE Stadium AI — Virtual: PromptWars",
+      "organizers": ["Hack2skill"],
+      "date": "2026-04",
+      "kind": "build",
+      "project": "pulse-stadium-ai",
+      "summary": "Multi-agent operating layer for a 40,000-seat stadium: a Gemini 2.5 Pro orchestrator composing five Gemini 2.5 Flash specialist agents through Google ADK, a React Three Fiber digital twin, a voice-enabled fan PWA, five live Cloud Run services and a counterfactual simulator. Built solo in 48 hours.",
+      "links": [
+        { "label": "GitHub", "url": "https://github.com/Golden007-prog/PULSE-Stadium-AI" },
+        { "label": "Live demo", "url": "https://pulse-frontend-524510164011.asia-south1.run.app" }
+      ]
+    },
+    {
+      "id": "kaggle-hai-def",
+      "notes": "Venue follows Kaggle's own title and host (sources/kaggle-snapshot.json correction), not LinkedIn's 'Google DeepMind HAI-DEF challenge'. The id is kept stable for corpus and eval references.",
+      "title": "Submission — The MedGemma Impact Challenge (Kaggle)",
+      "organizers": ["Kaggle", "Google Research"],
+      "date": "2026-02",
+      "kind": "submission",
+      "project": "urbancare-ai",
+      "summary": "UrbanCare AI was submitted to Kaggle's MedGemma Impact Challenge, hosted by Google Research: a 30-agent, 8-layer clinical pipeline built on MedGemma 4B-it and TxGemma 9B via Hugging Face Inference Endpoints, plus Gemini.",
+      "links": [
+        { "label": "Kaggle writeup", "url": "https://www.kaggle.com/competitions/med-gemma-impact-challenge/writeups/urbancare-ai-a-multimodal-clinical-copilot-for-re" },
+        { "label": "GitHub", "url": "https://github.com/Golden007-prog/UrbanCare-AI" },
+        { "label": "Live demo", "url": "https://golden007-prog.github.io/UrbanCare-AI/" },
+        { "label": "Demo video", "url": "https://youtu.be/IHWmYj7MjtM" }
+      ]
+    }
+  ]
+}

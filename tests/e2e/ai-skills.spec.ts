@@ -2,6 +2,8 @@ import type { APIRequestContext, Page, TestInfo } from '@playwright/test';
 import profile from '../../src/data/profile.json' with { type: 'json' };
 import projects from '../../src/data/projects.json' with { type: 'json' };
 import store from '../../src/data/ai-generated/skills.json' with { type: 'json' };
+import { evidenceIds, experienceEvidence } from '../../src/lib/ai/spans';
+import { projectsForSkill } from '../../src/lib/skillProjects';
 import { aiPost, assertSafeServer, mockAiFallback, mockAiJson } from './ai-mocks';
 import { expect, test } from './helpers';
 
@@ -74,17 +76,27 @@ test.describe('ai-skills at 320px, reduced motion', () => {
   });
 
   test.describe('where he has used a skill (#209)', () => {
-    test('Gemini: the six projects, a gated summary with provenance, and no AI request', async ({ page }) => {
+    test('Gemini: the eight projects, a gated summary with provenance, and no AI request', async ({ page }) => {
       const posts = countAiPosts(page);
       await openSkill(page, 'gemini', 'Gemini');
       const usage = modal(page).locator('[data-skill-usage="gemini"]');
       await expect(usage).toBeVisible();
-      await expect(usage.locator('[data-skill-projects] li')).toHaveCount(6);
+      await expect(usage.locator('[data-skill-projects] li')).toHaveCount(8);
       await expect(usage.locator('[data-skill-no-projects]')).toHaveCount(0);
 
       const entry = ENTRIES['summary:gemini'];
       const summary = usage.locator('[data-skill-summary]');
-      if (entry?.reviewed) {
+      // SkillUsage's gate: a summary shows only while its evidence ids equal what the site says today.
+      const today = evidenceIds(
+        projectsForSkill(projects, 'Gemini').map((p) => p.slug),
+        experienceEvidence(profile.experience, 'Gemini'),
+      );
+      const stored = ((entry?.value.evidence as string[] | undefined) ?? []).slice().sort();
+      const current = Boolean(entry) && stored.length === today.length && stored.every((id, i) => id === today[i]);
+      if (entry && !current) {
+        // Stale since a project was added: hidden until it is regenerated and reviewed.
+        await expect(summary).toHaveCount(0);
+      } else if (entry?.reviewed) {
         await expect(summary).toHaveAttribute('data-review', 'reviewed');
         await expect(summary.locator('[data-provenance]')).toHaveText('AI-written · reviewed by Oikantik');
       } else if (entry && LOCAL_BUILD) {
@@ -93,7 +105,7 @@ test.describe('ai-skills at 320px, reduced motion', () => {
         await expect(summary.locator('[data-provenance]')).toHaveText('Draft · not yet reviewed');
         await expect(summary).toContainText(String(entry.value.text));
       }
-      if (entry && (entry.reviewed || LOCAL_BUILD)) await expect(summary.locator('[data-ai-disclosure]')).toContainText('AI-generated · may be wrong');
+      if (entry && current && (entry.reviewed || LOCAL_BUILD)) await expect(summary.locator('[data-ai-disclosure]')).toContainText('AI-generated · may be wrong');
       expect(posts()).toBe(0);
     });
 

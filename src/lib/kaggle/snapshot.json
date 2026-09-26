@@ -1,0 +1,310 @@
+{
+  "source": "snapshot",
+  "fetchedAt": "2026-09-26T02:30:00Z",
+  "profile": {
+    "userName": "oikantikbasu007",
+    "displayName": "Oikantik Basu",
+    "url": "https://www.kaggle.com/oikantikbasu007",
+    "avatar": "https://storage.googleapis.com/kaggle-avatars/images/28291918-kg.png?t=2025-11-30-20-59-25",
+    "joined": "2025-08-10",
+    "tiers": [
+      {
+        "category": "Competitions",
+        "tier": "Contributor"
+      },
+      {
+        "category": "Datasets",
+        "tier": "Contributor"
+      },
+      {
+        "category": "Notebooks",
+        "tier": "Contributor"
+      }
+    ],
+    "competitionPoints": 265,
+    "overallTier": "Contributor"
+  },
+  "badges": [
+    {
+      "name": "5-Day AI Agents Intensive Course with Google",
+      "description": "Completed the 5-Day AI Agents Intensive Course 2025. Participants attended daily seminars, studied white papers, completed daily assignments, and created a capstone project about AI agents.",
+      "achieved": "2025-12-18",
+      "image": "https://www.googleapis.com/download/storage/v1/b/kaggle-user-content/o/inbox%2F10489106%2Fef135f20e49c369cebff513ac3c96eed%2F5-Day_AI_Agents_Intensive_Badge.svg?generation=1763052133996110&alt=media",
+      "featured": true
+    },
+    {
+      "name": "Research Competitor",
+      "description": "Made a submission to a Research competition.",
+      "achieved": "2026-09-24",
+      "image": "https://www.googleapis.com/download/storage/v1/b/kaggle-user-content/o/inbox%2F1488634%2F33a465e5bfb87721b4d97d899c717eb4%2FBadge-3.svg?generation=1727462497490072&alt=media",
+      "featured": true
+    },
+    {
+      "name": "Code Submitter",
+      "description": "Made a submission to a code competition (a reproducible bundle of code rather than a file of predictions).",
+      "achieved": "2026-09-24",
+      "image": "https://www.googleapis.com/download/storage/v1/b/kaggle-user-content/o/inbox%2F1488634%2F08aa345b8928ae96e21ee3586021500e%2FBadge-8.svg?generation=1727462754402917&alt=media",
+      "featured": true
+    },
+    {
+      "name": "Competitor",
+      "description": "Made a submission to a Kaggle competition that is eligible for points or medals.",
+      "achieved": "2026-03-17",
+      "image": "https://www.googleapis.com/download/storage/v1/b/kaggle-user-content/o/inbox%2F1488634%2Fb05e17f63f2eead904a1f04d05bb51a6%2FBadge.svg?generation=1727458564383731&alt=media",
+      "featured": true
+    },
+    {
+      "name": "API Dataset Creator",
+      "description": "Created a dataset using the Kaggle API.",
+      "achieved": "2026-09-25",
+      "image": "https://www.googleapis.com/download/storage/v1/b/kaggle-user-content/o/inbox%2F1488634%2F4bcf6474cdf3503864419523d22b6019%2FBadge-15.svg?generation=1727463114221819&alt=media",
+      "featured": false
+    },
+    {
+      "name": "API Notebook Creator",
+      "description": "Imported a notebook using the Kaggle API.",
+      "achieved": "2026-09-24",
+      "image": "https://www.googleapis.com/download/storage/v1/b/kaggle-user-content/o/inbox%2F1488634%2F4320b13590f043b8c58421eb25f04235%2FBadge-33.svg?generation=1727468143701354&alt=media",
+      "featured": false
+    },
+    {
+      "name": "Colab Coder",
+      "description": "Imported a notebook from Colab or opened a notebook in Colab.",
+      "achieved": "2026-09-24",
+      "image": "https://www.googleapis.com/download/storage/v1/b/kaggle-user-content/o/inbox%2F1488634%2F42167cf9c1c0a74d4e1c7503c010c82d%2FBadge-31.svg?generation=1727468175250681&alt=media",
+      "featured": false
+    },
+    {
+      "name": "Code Forker",
+      "description": "Copied a notebook and made changes to it.",
+      "achieved": "2026-09-23",
+      "image": "https://www.googleapis.com/download/storage/v1/b/kaggle-user-content/o/inbox%2F1488634%2F7567026dd0c594f1193b49a98a976056%2FBadge-35.svg?generation=1727468213893504&alt=media",
+      "featured": false
+    },
+    {
+      "name": "1 Year on Kaggle",
+      "description": "Active on Kaggle for more than 1 year.",
+      "achieved": "2026-09-20",
+      "image": "https://www.googleapis.com/download/storage/v1/b/kaggle-user-content/o/inbox%2F1488634%2F163e0f27360ae958da99dde2a68f7e00%2FBadge-46.svg?generation=1727468408101916&alt=media",
+      "featured": false
+    },
+    {
+      "name": "Dataset Creator",
+      "description": "Created a dataset.",
+      "achieved": "2026-04-21",
+      "image": "https://www.googleapis.com/download/storage/v1/b/kaggle-user-content/o/inbox%2F1488634%2F28e0e70842ce6972f4d68f5b6ecd549a%2FBadge-12.svg?generation=1727462988946700&alt=media",
+      "featured": false
+    },
+    {
+      "name": "Competition Modeler",
+      "description": "Used a model in a competition notebook.",
+      "achieved": "2026-03-17",
+      "image": "https://www.googleapis.com/download/storage/v1/b/kaggle-user-content/o/inbox%2F1488634%2Feb028e2f7e6b3e2bef2b3682f6919224%2FBadge-25.svg?generation=1727468044501552&alt=media",
+      "featured": false
+    },
+    {
+      "name": "March Mania Competitor",
+      "description": "Made a submission to a March Mania competition.",
+      "achieved": "2026-03-17",
+      "image": "https://www.googleapis.com/download/storage/v1/b/kaggle-user-content/o/inbox%2F1488634%2F41ff6ec1c3a3ada0ae1595df7e1a18fd%2FBadge-7.svg?generation=1727462713945054&alt=media",
+      "featured": false
+    },
+    {
+      "name": "Notebook Modeler",
+      "description": "Used a model in a notebook.",
+      "achieved": "2026-03-17",
+      "image": "https://www.googleapis.com/download/storage/v1/b/kaggle-user-content/o/inbox%2F1488634%2F2df508502fba7fc8937f3847e46b8ec4%2FBadge-29.svg?generation=1727468233931525&alt=media",
+      "featured": false
+    },
+    {
+      "name": "Code Uploader",
+      "description": "Uploaded a notebook.",
+      "achieved": "2026-01-10",
+      "image": "https://www.googleapis.com/download/storage/v1/b/kaggle-user-content/o/inbox%2F1488634%2F1e4546d427340e1495b9ee02261e2dc6%2FBadge-34.svg?generation=1727468126171650&alt=media",
+      "featured": false
+    },
+    {
+      "name": "Python Coder",
+      "description": "Created a python notebook.",
+      "achieved": "2026-01-10",
+      "image": "https://www.googleapis.com/download/storage/v1/b/kaggle-user-content/o/inbox%2F1488634%2F09e1f99bdf3222934ad7769409ec3f6d%2FBadge-26.svg?generation=1727468059623106&alt=media",
+      "featured": false
+    },
+    {
+      "name": "Kaggle Community Member",
+      "description": "Joined the Kaggle Community by creating an account.",
+      "achieved": "2025-12-20",
+      "image": "https://www.googleapis.com/download/storage/v1/b/kaggle-user-content/o/inbox%2F10489106%2F8235ef48b7e37d36d6e081d112f303de%2FBadge-62.svg?generation=1758039755687969&alt=media",
+      "featured": false
+    },
+    {
+      "name": "7 Day Login Streak",
+      "description": "Logged in to Kaggle 7 days in a row.",
+      "achieved": "2025-11-24",
+      "image": "https://www.googleapis.com/download/storage/v1/b/kaggle-user-content/o/inbox%2F1488634%2F6e139e7278fc9c33210e39baf918967f%2FBadge-53.svg?generation=1727468684057299&alt=media",
+      "featured": false
+    },
+    {
+      "name": "Agent of Discord",
+      "description": "Joined the Kaggle Discord and linked the account.",
+      "achieved": "2025-11-10",
+      "image": "https://www.googleapis.com/download/storage/v1/b/kaggle-user-content/o/inbox%2F1488634%2F0b96fc543a2faf02467b3dcd5833feff%2FBadge-45.svg?generation=1727468334875991&alt=media",
+      "featured": false
+    }
+  ],
+  "writeups": [
+    {
+      "title": "UrbanCare AI: A Multimodal Clinical Copilot for Real-Time Hospital Intelligence",
+      "subtitle": "A real-time hospital AI system combining vision, voice, and medical reasoning for collaborative patient care",
+      "type": "Hackathon project",
+      "competition": "The MedGemma Impact Challenge",
+      "competitionUrl": "https://www.kaggle.com/competitions/med-gemma-impact-challenge",
+      "url": "https://www.kaggle.com/competitions/med-gemma-impact-challenge/writeups/urbancare-ai-a-multimodal-clinical-copilot-for-re",
+      "published": "2026-02-24",
+      "excerpt": "Modern healthcare systems impose an enormous administrative and cognitive burden on physicians. Doctors spend more time fighting clunky EMR interfaces, manually parsing unstructured lab reports, and writing repetitive…",
+      "votes": 0,
+      "project": "urbancare-ai"
+    },
+    {
+      "title": "Unlocking Transparent Intelligence: Fine-Tuning Gemma 3 for Verifiable Reasoning",
+      "subtitle": "A GRPO-based approach to Chain-of-Thought reasoning on TPU v5e",
+      "type": "Hackathon project",
+      "competition": "Google Tunix Hack - Train a model to show its work",
+      "competitionUrl": "https://www.kaggle.com/competitions/google-tunix-hackathon",
+      "url": "https://www.kaggle.com/competitions/google-tunix-hackathon/writeups/new-writeup-1767949274949",
+      "published": "2026-01-09",
+      "excerpt": "In critical domains like mathematics, science, and coding, an AI model's answer is only as valuable as the logic behind it. Standard Large Language Models (LLMs) often suffer from the \"Black Box\" problem—delivering…",
+      "votes": 0
+    }
+  ],
+  "active": [
+    {
+      "title": "Biohub - Cell Tracking During Development",
+      "url": "https://www.kaggle.com/competitions/biohub-cell-tracking-during-development",
+      "host": "Biohub",
+      "category": "Research",
+      "deadline": "2026-09-29",
+      "teams": 3908,
+      "userRank": 183,
+      "rankAsOf": "2026-09-26",
+      "active": true,
+      "summary": "Detect and track zebrafish cells through 3D space and time (code competition)."
+    },
+    {
+      "title": "Google - The Gemma 4 Developer Agent Paper Track",
+      "url": "https://www.kaggle.com/competitions/gemma-4-developer-agent-paper",
+      "host": "Google DeepMind",
+      "category": "Featured",
+      "deadline": "2026-11-12",
+      "teams": 30,
+      "active": true,
+      "summary": "Submit a research paper advancing agentic software engineering."
+    },
+    {
+      "title": "Google - The Gemma 4 Developer Agent Competition",
+      "url": "https://www.kaggle.com/competitions/gemma-4-developer-agent",
+      "host": "Google DeepMind",
+      "category": "Featured",
+      "deadline": "2026-12-02",
+      "teams": 281,
+      "active": true,
+      "summary": "Accelerate research in autonomous coding agents."
+    }
+  ],
+  "past": [
+    {
+      "title": "NVIDIA Nemotron Model Reasoning Challenge",
+      "url": "https://www.kaggle.com/competitions/nvidia-nemotron-model-reasoning-challenge",
+      "host": "NVIDIA",
+      "category": "Featured",
+      "deadline": "2026-06-15",
+      "teams": 4185,
+      "active": false
+    },
+    {
+      "title": "The Gemma 4 Good Hackathon",
+      "url": "https://www.kaggle.com/competitions/gemma-4-good-hackathon",
+      "host": "Google DeepMind",
+      "category": "Featured",
+      "deadline": "2026-05-18",
+      "teams": 1607,
+      "active": false
+    },
+    {
+      "title": "Measuring Progress Toward AGI - Cognitive Abilities",
+      "url": "https://www.kaggle.com/competitions/kaggle-measuring-agi",
+      "host": "Google DeepMind",
+      "category": "Featured",
+      "deadline": "2026-04-16",
+      "teams": 1063,
+      "active": false
+    },
+    {
+      "title": "AI Mathematical Olympiad - Progress Prize 3",
+      "url": "https://www.kaggle.com/competitions/ai-mathematical-olympiad-progress-prize-3",
+      "host": "AI|MO",
+      "category": "Featured",
+      "deadline": "2026-04-15",
+      "teams": 4138,
+      "active": false
+    },
+    {
+      "title": "March Machine Learning Mania 2026",
+      "url": "https://www.kaggle.com/competitions/march-machine-learning-mania-2026",
+      "host": "Kaggle",
+      "category": "Featured",
+      "deadline": "2026-04-07",
+      "teams": 3462,
+      "userRank": 1049,
+      "rankAsOf": "2026-09-26",
+      "active": false
+    },
+    {
+      "title": "The MedGemma Impact Challenge",
+      "url": "https://www.kaggle.com/competitions/med-gemma-impact-challenge",
+      "host": "Google Research",
+      "category": "Featured",
+      "deadline": "2026-02-24",
+      "teams": 872,
+      "active": false,
+      "hasWriteup": true
+    },
+    {
+      "title": "Google Tunix Hack - Train a model to show its work",
+      "url": "https://www.kaggle.com/competitions/google-tunix-hackathon",
+      "host": "Google Cloud",
+      "category": "Featured",
+      "deadline": "2026-01-12",
+      "teams": 319,
+      "active": false,
+      "hasWriteup": true
+    },
+    {
+      "title": "Google DeepMind - Vibe Code with Gemini 3 Pro in AI Studio",
+      "url": "https://www.kaggle.com/competitions/gemini-3",
+      "host": "Google DeepMind",
+      "category": "Featured",
+      "deadline": "2025-12-12",
+      "teams": 4083,
+      "active": false
+    },
+    {
+      "title": "Agents Intensive - Capstone Project",
+      "url": "https://www.kaggle.com/competitions/agents-intensive-capstone-project",
+      "host": "Kaggle",
+      "category": "Community",
+      "deadline": "2025-12-03",
+      "teams": 11458,
+      "active": false
+    },
+    {
+      "title": "BigQuery AI - Building the Future of Data",
+      "url": "https://www.kaggle.com/competitions/bigquery-ai-hackathon",
+      "host": "Google Cloud",
+      "category": "Featured",
+      "deadline": "2025-09-22",
+      "teams": 276,
+      "active": false
+    }
+  ]
+}

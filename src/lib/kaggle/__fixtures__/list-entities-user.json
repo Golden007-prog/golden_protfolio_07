@@ -1,0 +1,30 @@
+{
+  "documents": [
+    {
+      "id": 28291918,
+      "documentType": "USER",
+      "title": "Oikantik Basu",
+      "imageUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/https://storage.googleapis.com/kaggle-avatars/thumbnails/28291918-kg.png?t=2025-11-30-20-59-25",
+      "createTime": "2025-08-10T10:06:38.253Z",
+      "isPrivate": false,
+      "votes": 0,
+      "ownerUser": {
+        "id": 28291918,
+        "displayName": "Oikantik Basu",
+        "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/28291918-kg.png?t=2025-11-30-20-59-25",
+        "url": "/oikantikbasu007",
+        "userName": "oikantikbasu007",
+        "progressionOptOut": false,
+        "tier": "CONTRIBUTOR"
+      },
+      "userDocument": {
+        "userLocation": "",
+        "occupationOrganizationName": "",
+        "competitionPoints": 265,
+        "kernelPoints": 0,
+        "datasetPoints": 0
+      }
+    }
+  ],
+  "totalDocuments": 1
+}

@@ -2,6 +2,8 @@
 
 import { useEffect, useId, useMemo, useReducer, useRef, useState, type ReactNode } from 'react';
 import { MessageCircle, X } from 'lucide-react';
+import achievementsRaw from '@/data/achievements.json';
+import certificationsRaw from '@/data/certifications.json';
 import profile from '@/data/profile.json';
 import { PROJECTS } from '@/data/projects';
 import { AIDisclosure } from '@/components/ai/AIDisclosure';
@@ -48,7 +50,9 @@ import {
   type TopProject,
 } from '@/lib/ai/fit';
 import type { AiAction, AiFallbackReason, AiTarget } from '@/lib/ai/protocol';
+import { parseAchievements } from '@/lib/achievements';
 import { track } from '@/lib/analytics';
+import { parseCertifications } from '@/lib/certifications';
 import { emit } from '@/lib/events';
 import { SITE } from '@/lib/site';
 import { cn } from '@/utils/cn';
@@ -62,7 +66,13 @@ import { ScreeningQuestions, type QuestionItem } from './ScreeningQuestions';
 import { SkillsMatrix } from './SkillsMatrix';
 import { TopProjects } from './TopProjects';
 
-const DATA: FitData = { profile, projects: PROJECTS };
+// With the credentials and hackathon results, so cert: and achievement: evidence ids pass plausibleId.
+const DATA: FitData = {
+  profile,
+  projects: PROJECTS,
+  certifications: parseCertifications(certificationsRaw),
+  achievements: parseAchievements(achievementsRaw),
+};
 const LINKS: SiteLinks = { url: SITE.url, cvUrl: `${SITE.url}${SITE.cvShortPath}`, builtAt: formatIsoDate(process.env.NEXT_PUBLIC_BUILD_TIME) };
 const MATCH_STEP = `Matching against ${PROJECTS.length} projects and ${profile.experience.length} roles…`;
 // After the sheet closes (scroll lock released), so the runner's scroll lands.

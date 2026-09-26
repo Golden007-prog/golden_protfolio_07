@@ -26,6 +26,12 @@ const CONDENSE_AT = 80;
 const HIDE_VELOCITY = 900;
 const HIDDEN_Y = -120;
 const DESKTOP = '(min-width: 768px)';
+/**
+ * Links that join the bar only from 800px. With all seven sections the bar needs
+ * about 765px, more than the 752px it may take at 768px; below 800px Certifications
+ * stays one step away through search, the page itself and #certifications.
+ */
+const WIDE_ONLY: ReadonlySet<SectionId> = new Set(['certifications']);
 
 const noopSubscribe = () => () => {};
 function isMacPlatform(): boolean {
@@ -61,7 +67,7 @@ function NavLinks({ pathname }: { pathname: string }) {
         {SECTIONS.map(({ id, label }) => {
           const isActive = onHome && active === id;
           return (
-            <li key={id}>
+            <li key={id} className={WIDE_ONLY.has(id) ? 'max-[799.98px]:hidden' : undefined}>
               <Link
                 href={sectionHref(id, pathname)}
                 aria-current={isActive ? 'location' : undefined}

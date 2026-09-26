@@ -34,3 +34,11 @@
 {"q":"Which editor does he use?","expect":["tool:0"]}
 {"q":"Attention Is All You Need","expect":["reading:0"]}
 {"q":"Data Science & ML skills","expect":["skills:data-science-ml"]}
+{"q":"Google AI Professional Certificate","expect":["cert:google-ai-professional-certificate"]}
+{"q":"Claude Academy course badges from Anthropic","expect":["cert:claude-academy"]}
+{"q":"IBM data science courses on Coursera","expect":["cert:coursera"]}
+{"q":"Programiz Python certificates","expect":["cert:programiz-pro"]}
+{"q":"AI for Bharat hackathon finalist","expect":["achievement:ai-for-bharat-finalist"]}
+{"q":"dMAT practice platform","expect":["exp:3","achievement:coreforge-launch"]}
+{"q":"ShieldFlow GitLab hackathon","expect":["achievement:gitlab-hackathon-shieldflow"]}
+{"q":"Freelance AI Trainer at Outlier","expect":["exp:5"]}

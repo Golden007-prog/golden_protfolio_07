@@ -29,7 +29,7 @@ const TMP = join(tmpdir(), 'ob-project-media');
 
 const STILL_MAX_BYTES = 80 * 1024;
 const LOOP_MAX_BYTES = 800 * 1024;
-// Both folders together; ten stills plus three loops must stay under this.
+// Both folders together; seventeen stills plus three loops must stay under this.
 const TOTAL_MAX_BYTES = 3 * 1024 * 1024;
 const LOOP_MAX_SECONDS = 8;
 
@@ -52,6 +52,14 @@ const SOURCES = {
     pad: 'white',
   },
   'mcq-tech-challenge': { url: 'https://opengraph.githubassets.com/1/Golden007-prog/test-challenger-07', fit: 'contain', pad: 'white' },
+  // A 2:1 console screenshot whose headline sits at the left edge; letterboxed on its own background.
+  'pulse-stadium-ai': { url: 'https://github.com/user-attachments/assets/ac7473b6-51bc-48ae-9b14-45e4cb36f7f3', fit: 'contain', pad: '0x0A0D14' },
+  sankalp: { url: 'https://opengraph.githubassets.com/1/Golden007-prog/Sankalp', fit: 'contain', pad: 'white' },
+  'cred-domain-support-agent': { url: 'https://opengraph.githubassets.com/1/Golden007-prog/cred-loan-support-agent', fit: 'contain', pad: 'white' },
+  'ksp-dappa': { url: 'https://raw.githubusercontent.com/Golden007-prog/KSP-Dappa/main/.github/media/command-dashboard.jpg', fit: 'cover' },
+  marketpulse: { url: 'https://opengraph.githubassets.com/1/Golden007-prog/MarketPulse', fit: 'contain', pad: 'white' },
+  govprep: { url: 'https://opengraph.githubassets.com/1/Golden007-prog/Govt-Prep', fit: 'contain', pad: 'white' },
+  'the-calcutta-classics': { url: 'https://opengraph.githubassets.com/1/Golden007-prog/calcutta_classic_demo', fit: 'contain', pad: 'white' },
 };
 
 // Largest first; a still that cannot meet the budget at q40 steps down a size.

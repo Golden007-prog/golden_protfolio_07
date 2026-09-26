@@ -1,0 +1,347 @@
+/* Package: coreforge — the founder section, venture page and the small CoreForge
+   placements around the portfolio (badge, announcement, project card, footer line).
+
+   Design numbers, fixed before any rule below:
+   accent   berry, text #F0709F (dark) / #A3154F (light); solid fill #A3154F in both
+   neutrals the portfolio's own: bg-base, bg-surface, glass-border, text-muted, text-primary
+   display  var(--font-display)      text  var(--font-body)
+   base     16px                       radius 16px (--cf-r), 8px (--cf-r-sm)
+
+   Contrast (WCAG 2.x, checked 2026-09-26): berry text is 6.5-7.3:1 on every dark
+   surface (#060609, #0D0D14, #111118, #0A0A10, glass over base) and 6.5:1 on its
+   own 12% tint; 5.9-7.6:1 on every light surface (#F7F5F0, #FFFFFF, #EDE9E0,
+   #E8E2D2) and 5.9:1 on its 10% tint. White on the #A3154F fill is 7.6:1. */
+
+@layer components {
+  :root {
+    --cf-berry: #F0709F;
+    --cf-berry-text: #F0709F;
+    --cf-berry-solid: #A3154F;
+    --cf-on-berry-solid: #FFFFFF;
+    --cf-berry-tint: color-mix(in oklab, var(--cf-berry) 12%, transparent);
+    --cf-berry-border: color-mix(in oklab, var(--cf-berry) 42%, transparent);
+    --cf-r: 16px;
+    --cf-r-sm: 8px;
+    /* Device frames: a neutral bezel that reads on the dark page and on cream. */
+    --cf-bezel: #1B1B24;
+    --cf-bezel-edge: rgba(255, 255, 255, 0.12);
+    --cf-screen: #FFFFFF;
+  }
+
+  :root[data-theme="light"] {
+    --cf-berry: #A3154F;
+    --cf-berry-text: #A3154F;
+    --cf-berry-tint: color-mix(in oklab, var(--cf-berry) 10%, transparent);
+    --cf-berry-border: color-mix(in oklab, var(--cf-berry) 38%, transparent);
+    --cf-bezel: #22222C;
+    --cf-bezel-edge: rgba(20, 20, 30, 0.2);
+  }
+
+  /* ---------- Section backdrop: one restrained berry bloom, no second accent ---------- */
+  .cf-bloom {
+    background:
+      radial-gradient(60% 50% at 85% 20%, color-mix(in oklab, var(--cf-berry) 10%, transparent), transparent 70%),
+      radial-gradient(50% 40% at 10% 85%, color-mix(in oklab, var(--app-violet) 8%, transparent), transparent 70%);
+  }
+
+  /* ---------- Device frames ---------- */
+  .cf-browser {
+    border-radius: var(--cf-r);
+    border: 1px solid var(--app-glass-border-strong);
+    background: var(--cf-bezel);
+    box-shadow: var(--app-glass-shadow-strong);
+  }
+  .cf-browser-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 32px;
+    padding-inline: 16px;
+    border-bottom: 1px solid var(--cf-bezel-edge);
+  }
+  .cf-browser-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.22);
+  }
+  .cf-browser-url {
+    margin-inline-start: 8px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    line-height: 1;
+    /* On the always-dark bezel: 10.5:1 against #1B1B24, 9.6:1 against #22222C. */
+    color: #C7CAD6;
+  }
+  .cf-phone {
+    border-radius: 36px;
+    padding: 8px;
+    background: var(--cf-bezel);
+    border: 1px solid var(--cf-bezel-edge);
+    box-shadow: var(--app-glass-shadow-strong);
+  }
+  .cf-phone-screen {
+    border-radius: 28px;
+    background: var(--cf-screen);
+  }
+  .cf-shot {
+    display: block;
+    width: 100%;
+    height: auto;
+    background-size: cover;
+    background-repeat: no-repeat;
+  }
+
+  /* Swipeable strip on phones: native scroll snap, so touch, trackpad and keyboard
+     (the strip is focusable) all work without a carousel script. */
+  .cf-strip {
+    /* relative: the links' absolutely positioned sr-only hints would otherwise take a
+       containing block outside the scroller, escape its clipping and widen the page.
+       contain inline-size: the strip's min-content (every shot side by side) must not
+       size the grid column it sits in. */
+    position: relative;
+    contain: inline-size;
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(78%, 1fr);
+    gap: 16px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: 16px;
+    padding-inline: 16px;
+    padding-bottom: 16px;
+    margin-inline: -16px;
+    scrollbar-width: none;
+  }
+  .cf-strip::-webkit-scrollbar {
+    display: none;
+  }
+  .cf-strip > * {
+    scroll-snap-align: start;
+  }
+  @media (min-width: 640px) {
+    .cf-strip {
+      grid-auto-columns: minmax(46%, 1fr);
+    }
+  }
+
+  /* ---------- Mini demo ---------- */
+  .cf-frame {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: repeat(2, minmax(0, 1fr));
+    aspect-ratio: 1;
+    gap: 4px;
+    padding: 4px;
+    border-radius: var(--cf-r-sm);
+    border: 1px solid var(--app-glass-border-strong);
+    background: var(--app-surface-tint);
+  }
+  /* The latest frame: solid berry (>= 5.6:1 in both themes) so the cue meets 3:1
+     non-text contrast; the inset ring makes it 2px without shifting the grid. */
+  .cf-frame[data-current] {
+    border-color: var(--cf-berry);
+    box-shadow: inset 0 0 0 1px var(--cf-berry);
+  }
+  .cf-cell {
+    display: grid;
+    place-items: center;
+    border-radius: 4px;
+    background: var(--app-heat-0);
+  }
+  .cf-marker {
+    width: 46%;
+    aspect-ratio: 1;
+    border-radius: 9999px;
+    background: var(--cf-berry);
+    box-shadow: 0 0 0 3px var(--cf-berry-tint);
+  }
+  .cf-marker[data-ghost] {
+    background: transparent;
+    border: 2px dashed var(--cf-berry);
+    box-shadow: none;
+  }
+  .cf-marker-in {
+    animation: cf-marker-in var(--dur-base) var(--ease-out-expo) both;
+  }
+  @keyframes cf-marker-in {
+    from {
+      transform: scale(0.4);
+      opacity: 0;
+    }
+    to {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  /* The four answer cells are real buttons laid out as the fifth frame. */
+  .cf-choice {
+    position: relative;
+    display: grid;
+    place-items: center;
+    min-width: 44px;
+    min-height: 44px;
+    border-radius: var(--cf-r-sm);
+    border: 1px solid var(--app-glass-border-strong);
+    background: var(--app-glass-fill);
+    color: var(--app-text-secondary);
+    transition:
+      border-color var(--dur-quick) ease-out,
+      background-color var(--dur-quick) ease-out,
+      transform var(--dur-quick) var(--ease-out-expo);
+  }
+  .cf-choice:hover:not([aria-disabled="true"]) {
+    border-color: var(--cf-berry-border);
+    background: var(--cf-berry-tint);
+  }
+  .cf-choice:active:not([aria-disabled="true"]) {
+    transform: scale(0.97);
+  }
+  .cf-choice[data-state="correct"] {
+    border-color: var(--app-success);
+    background: color-mix(in oklab, var(--app-success) 12%, transparent);
+    color: var(--app-text-primary);
+  }
+  .cf-choice[data-state="wrong"] {
+    border-color: var(--app-danger);
+    background: color-mix(in oklab, var(--app-danger) 10%, transparent);
+    color: var(--app-text-primary);
+  }
+  .cf-choice[data-state="dim"] {
+    color: var(--app-text-muted);
+  }
+  .cf-shake {
+    animation: cf-shake 360ms var(--ease-in-out) 1;
+  }
+  @keyframes cf-shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-6px); }
+    40% { transform: translateX(6px); }
+    60% { transform: translateX(-4px); }
+    80% { transform: translateX(4px); }
+  }
+
+  /* ---------- Announcement ---------- */
+  .cf-announce {
+    border: 1px solid var(--cf-berry-border);
+    background: var(--app-glass-fill-strong-dense);
+    box-shadow: var(--app-glass-shadow);
+  }
+  .cf-announce-bar {
+    border-bottom: 1px solid var(--app-hairline);
+    background: color-mix(in oklab, var(--app-bg-surface) 88%, var(--cf-berry));
+  }
+
+  /* ---------- Founder badge dot ---------- */
+  .cf-pulse-dot {
+    position: relative;
+    width: 8px;
+    height: 8px;
+    border-radius: 9999px;
+    background: var(--cf-berry);
+  }
+  .cf-pulse-dot::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: inherit;
+    border: 1px solid var(--cf-berry);
+    opacity: 0;
+    animation: cf-ping 2.4s var(--ease-out-expo) 3;
+  }
+  @keyframes cf-ping {
+    0% { transform: scale(0.6); opacity: 0.7; }
+    80%, 100% { transform: scale(1.6); opacity: 0; }
+  }
+
+  /* ---------- Changelog timeline ---------- */
+  .cf-timeline {
+    position: relative;
+  }
+  .cf-timeline::before {
+    content: '';
+    position: absolute;
+    inset-block: 8px;
+    inset-inline-start: 7px;
+    width: 1px;
+    background: linear-gradient(to bottom, var(--cf-berry-border), var(--app-hairline));
+  }
+  .cf-timeline-node {
+    position: absolute;
+    inset-inline-start: 0;
+    top: 6px;
+    width: 15px;
+    height: 15px;
+    border-radius: 9999px;
+    border: 1px solid var(--cf-berry-border);
+    background: var(--app-bg-base);
+  }
+  .cf-timeline-node::after {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    border-radius: inherit;
+    background: var(--cf-berry);
+  }
+
+  /* ---------- FAQ accordion (native details/summary) ---------- */
+  .cf-faq summary {
+    list-style: none;
+    cursor: pointer;
+  }
+  .cf-faq summary::-webkit-details-marker {
+    display: none;
+  }
+  .cf-faq-chevron {
+    transition: transform var(--dur-quick) var(--ease-out-expo);
+  }
+  .cf-faq[open] .cf-faq-chevron {
+    transform: rotate(180deg);
+  }
+
+  /* ---------- QR code ---------- */
+  .cf-qr {
+    /* A QR code needs dark modules on a light field in both themes to scan. */
+    background: #FFFFFF;
+    color: #0F0F14;
+    border-radius: var(--cf-r-sm);
+  }
+
+  /* ---------- Reduced motion: keyed off the in-page setting, never the OS query ---------- */
+  html[data-motion="reduced"] .cf-marker-in,
+  html[data-motion="reduced"] .cf-shake,
+  html[data-motion="reduced"] .cf-pulse-dot::after {
+    animation: none;
+  }
+  html[data-motion-paused] .cf-pulse-dot::after {
+    animation: none;
+  }
+  html[data-motion="reduced"] .cf-choice,
+  html[data-motion="reduced"] .cf-faq-chevron {
+    transition: none;
+  }
+  html[data-motion="reduced"] .cf-strip {
+    scroll-behavior: auto;
+  }
+
+  @media (forced-colors: active) {
+    .cf-marker {
+      background: CanvasText;
+      box-shadow: none;
+    }
+    .cf-marker[data-ghost] {
+      background: transparent;
+      border-color: CanvasText;
+    }
+    .cf-choice[data-state="correct"],
+    .cf-choice[data-state="wrong"] {
+      border-width: 3px;
+    }
+    .cf-pulse-dot,
+    .cf-timeline-node::after {
+      background: CanvasText;
+    }
+  }
+}

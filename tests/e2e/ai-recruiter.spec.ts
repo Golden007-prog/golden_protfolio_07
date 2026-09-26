@@ -629,7 +629,9 @@ test.describe('timeline ask', () => {
     await gotoHydrated(page);
     const cards = page.locator('#experience article[data-role-card]');
     await expect(cards).toHaveCount(profile.experience.length);
-    for (let i = 0; i < profile.experience.length; i++) await expect(cards.nth(i)).toHaveAttribute('data-exp-index', String(i));
+    // Display order is newest start first; every profile.experience index appears exactly once.
+    const indices = await cards.evaluateAll((els) => els.map((el) => Number(el.getAttribute('data-exp-index'))));
+    expect([...indices].sort((a, b) => a - b)).toEqual(profile.experience.map((_, i) => i));
 
     await page.evaluate(() => {
       const w = window as Window & { __asks?: unknown[] };

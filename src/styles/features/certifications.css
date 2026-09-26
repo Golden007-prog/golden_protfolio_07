@@ -1,0 +1,93 @@
+/* Package: certifications — the Certifications section (src/components/certifications).
+   It adds no new design values; it builds on the site's tokens:
+     accent    --app-violet-bright (with --app-cyan-bright as its gradient partner)
+     neutrals  --app-bg-base, --app-glass-fill, --app-glass-border, --app-text-muted, --app-text-primary
+     type      Clash Display (display), Satoshi (text), JetBrains Mono (labels); base 16px
+     shape     glass radius 1rem, chips fully rounded
+     motion    --ease-out-expo, --dur-quick / --dur-base
+   Reduced motion needs no rule of its own for the keyframes below: the global
+   html[data-motion="reduced"] rule collapses every animation to its end state. */
+
+@layer components {
+  /* ---------- Phones: a long group folds to its first row ----------
+     One column below 480px, two up to 640px (the grid's own breakpoints). The
+     'Show all N' button that clears data-collapsed is sm:hidden, so from 640px up
+     every card always shows. Hidden cards stay in the DOM with their Verify links. */
+  @media (max-width: 479.98px) {
+    .cert-grid[data-collapsed] > li:nth-child(n + 2) {
+      display: none;
+    }
+  }
+  @media (min-width: 480px) and (max-width: 639.98px) {
+    .cert-grid[data-collapsed] > li:nth-child(n + 3) {
+      display: none;
+    }
+  }
+
+  /* The cards that 'Show all' brings in rise in a short cascade. translate, not
+     transform, so framer's inline transform on the same <li> is left alone. */
+  @media (max-width: 639.98px) {
+    .cert-grid[data-revealing] > li {
+      animation: cert-rise var(--dur-base) var(--ease-out-expo) both;
+      animation-delay: calc(min(var(--i, 0), 12) * 30ms);
+    }
+  }
+
+  /* ---------- Featured certificate: a gradient hairline along the top edge ---------- */
+  .cert-featured::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--app-violet-bright) 30%, var(--app-cyan-bright) 70%, transparent);
+    opacity: 0.8;
+    pointer-events: none;
+  }
+
+  /* ---------- A card reached from the command palette ---------- */
+  [data-cert-flash] {
+    animation: cert-flash 1.4s var(--ease-out-expo) 0.2s backwards;
+  }
+  /* An outline, not a box-shadow: the glass utilities' shadow outranks this layer. */
+  html[data-motion='reduced'] [data-cert-flash],
+  html[data-motion-paused] [data-cert-flash] {
+    animation: none;
+    outline: 3px solid var(--app-focus-ring);
+    outline-offset: 2px;
+  }
+
+  @media (forced-colors: active) {
+    .cert-featured::before {
+      background: CanvasText;
+    }
+    [data-cert-flash] {
+      outline: 3px solid Highlight;
+      outline-offset: 4px;
+    }
+  }
+}
+
+@keyframes cert-rise {
+  from {
+    opacity: 0;
+    translate: 0 12px;
+  }
+}
+
+@keyframes cert-flash {
+  0% {
+    box-shadow:
+      0 0 0 0 color-mix(in oklab, var(--app-violet-bright) 85%, transparent),
+      0 0 0 0 color-mix(in oklab, var(--app-violet-bright) 22%, transparent);
+  }
+  35% {
+    box-shadow:
+      0 0 0 3px color-mix(in oklab, var(--app-violet-bright) 85%, transparent),
+      0 0 0 10px color-mix(in oklab, var(--app-violet-bright) 22%, transparent);
+  }
+  100% {
+    box-shadow:
+      0 0 0 3px transparent,
+      0 0 0 16px transparent;
+  }
+}

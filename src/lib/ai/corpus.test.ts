@@ -2,6 +2,8 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import { SITE_COPY } from '../../data/site-copy.ts';
+import { parseAchievements } from '../achievements.ts';
+import { certificationGroups, formatIssued, parseCertifications } from '../certifications.ts';
 import { buildCorpus, corpusHash, CORE_CARD_IDS, entities, stableHash, type CorpusSources } from './corpus.ts';
 
 const read = (name: string) => JSON.parse(readFileSync(new URL(`../../data/${name}`, import.meta.url), 'utf8'));
@@ -14,6 +16,8 @@ const load = (): CorpusSources => ({
   skillsIndex: read('skills-index.json'),
   liveSnapshot: read('live-snapshot.json'),
   siteCopy: SITE_COPY,
+  certifications: parseCertifications(read('certifications.json')),
+  achievements: parseAchievements(read('achievements.json')),
 });
 
 const src = load();
@@ -38,6 +42,8 @@ test('every id follows the documented forms', () => {
     /^skills:[a-z0-9-]+$/,
     /^project:[a-z0-9-]+#(tagline|summary|full|problem|solution|lessons|stack)$/,
     /^facts:[a-z0-9-]+$/,
+    /^cert:[a-z0-9-]+$/,
+    /^achievement:[a-z0-9-]+$/,
     /^reading:\d+$/,
     /^tool:\d+$/,
     /^copy:(philosophy#\d+|roles|hero|contact)$/,
@@ -98,9 +104,12 @@ test('live:leetcode calls the streak the longest run, never a current streak', (
   assert.doesNotMatch(saved.text.replace('not a current streak', ''), /current(ly)? streak/i, 'rerun npm run ai:corpus');
 });
 
-test('self text stays under 40K characters', () => {
+// jd-fit packs every 'self' chunk ('full' mode), so this bounds its prompt at
+// about 12K tokens. It was 40K until the credentials (37, each with its verify
+// URL) and the hackathon results joined the corpus.
+test('self text stays under 50K characters', () => {
   const total = chunks.filter((c) => c.cls === 'self').reduce((n, c) => n + c.text.length, 0);
-  assert.ok(total < 40_000, `self text is ${total} chars`);
+  assert.ok(total < 50_000, `self text is ${total} chars`);
 });
 
 test('the core card exists and states the education status honestly', () => {
@@ -108,7 +117,11 @@ test('the core card exists and states the education status honestly', () => {
   assert.match(byId.get('edu:0')!.text, /In progress/);
   assert.match(byId.get('edu:0')!.text, /Not yet completed/);
   assert.match(byId.get('edu:1')!.text, /CGPA: 8\.22/);
-  assert.match(byId.get('profile:about')!.text, /No certifications are listed/);
+  const about = byId.get('profile:about')!.text;
+  assert.match(about, new RegExp(`Credentials listed on this site, ${src.certifications!.items.length} in all`));
+  assert.match(about, /20 course-completion badges from Anthropic on Claude Academy \(course badges, not certifications\)/);
+  assert.match(about, /No other certifications are listed\./);
+  assert.doesNotMatch(about, /No certifications are listed/);
   assert.equal(byId.get('exp:1')!.target.kind, 'experience');
   assert.match(byId.get('exp:1')!.text, /Mindrift/);
 });
@@ -133,11 +146,34 @@ test('a tagline edit changes the stable hash; a live-data change does not', () =
 });
 
 test('entities lists the real employers, schools, degrees and allow-lists', () => {
-  const e = entities({ profile: src.profile, projects: src.projects, skills: src.skillsIndex, reading: src.reading });
-  assert.deepEqual(e.companies, ['iHUB DivyaSampark @ IIT Roorkee', 'Mindrift', 'Unified Mentor Private Limited']);
+  const e = entities({
+    profile: src.profile,
+    projects: src.projects,
+    skills: src.skillsIndex,
+    reading: src.reading,
+    certifications: src.certifications,
+    achievements: src.achievements,
+  });
+  assert.deepEqual(e.companies, [
+    'iHUB DivyaSampark @ IIT Roorkee',
+    'Mindrift',
+    'Unified Mentor Private Limited',
+    "GOLDEN's Coreforge",
+    'Alignerr',
+    'Outlier',
+    'Telangana Desam Leader',
+    'K.pop Merchandise',
+  ]);
   assert.equal(e.institutions.length, 2);
   assert.deepEqual(e.inProgress, ["Master's in Data Science (Online MDS)"]);
-  assert.deepEqual(e.certifications, []);
+  assert.equal(e.certifications.length, src.certifications!.items.length);
+  assert.deepEqual(
+    e.certifications.find((c) => c.title === 'AI Fundamentals'),
+    { title: 'AI Fundamentals', issuer: 'Google', platform: 'Coursera', kind: 'course-certificate' },
+  );
+  for (const c of src.certifications!.items) assert.ok(e.allowUrls.includes(c.url), c.url);
+  for (const a of src.achievements!.items) for (const l of a.links) assert.ok(e.allowUrls.includes(l.url), l.url);
+  assert.ok(e.allowUrls.includes('https://goldensdmat.in'));
   assert.equal(e.projectNames.length, src.projects.length);
   assert.ok(e.skills.includes('ReAct'));
   assert.ok(e.tech.includes('React'));
@@ -145,6 +181,73 @@ test('entities lists the real employers, schools, degrees and allow-lists', () =
   assert.ok(e.allowUrls.includes('https://basuoikantik.in'));
   assert.deepEqual(e.allowEmails, ['basuoikantik@gmail.com']);
   assert.ok(!e.allowUrls.some((u) => u.includes('7001124396')));
+});
+
+test('every credential sits in exactly one cert: chunk with its issuer, platform, date and verify URL', () => {
+  const certs = src.certifications!;
+  const certChunks = chunks.filter((c) => c.id.startsWith('cert:'));
+  assert.deepEqual(
+    certChunks.map((c) => c.id),
+    certificationGroups(certs).map((g) => `cert:${g.id}`),
+  );
+  for (const c of certChunks) {
+    assert.equal(c.cls, 'self', c.id);
+    assert.equal(c.untrusted, false, c.id);
+    assert.deepEqual(c.target, { kind: 'section', id: 'certifications' }, c.id);
+  }
+  for (const item of certs.items) {
+    const holders = certChunks.filter((c) => c.text.includes(`${item.title} (`) || c.text.includes(`${item.title}:`));
+    assert.equal(holders.length, 1, item.title);
+    const [c] = holders;
+    for (const part of [item.issuer, item.platform, item.url, formatIssued(item.issued)]) assert.ok(c.text.includes(part), `${item.title}: ${part}`);
+  }
+  // Counts come from the data, and the badges keep their kind.
+  assert.match(byId.get('cert:claude-academy')!.text, /20 course-completion badges \(course badges, not certifications\) from Anthropic on Claude Academy/);
+  assert.match(
+    byId.get('cert:google-ai-professional-certificate')!.text,
+    /professional certificate from Google on Coursera, issued Sep 2026 .* made up of 7 course certificates/,
+  );
+  assert.match(byId.get('cert:coursera')!.text, /not part of the Google AI Professional Certificate/);
+  // The Michigan credential is the course, never the specialization LinkedIn names.
+  for (const c of chunks) assert.doesNotMatch(c.text, /Statistics with Python Specialization/, c.id);
+});
+
+test('each hackathon result is one self chunk, worded as the post words it', () => {
+  const results = chunks.filter((c) => c.id.startsWith('achievement:'));
+  assert.equal(results.length, src.achievements!.items.length);
+  for (const a of src.achievements!.items) {
+    const c = byId.get(`achievement:${a.id}`);
+    assert.ok(c, a.id);
+    assert.equal(c.cls, 'self');
+    assert.ok(c.text.includes(a.summary.replace(/\s+/g, ' ').trim()), a.id);
+    for (const l of a.links) assert.ok(c.text.includes(l.url), `${a.id}: ${l.url}`);
+    const linked = Boolean(a.project && src.projects.some((p) => p.slug === a.project));
+    assert.deepEqual(c.target, linked ? { kind: 'project', slug: a.project } : { kind: 'section', id: 'experience' }, a.id);
+    assert.doesNotMatch(c.text, /%/, a.id);
+  }
+  assert.match(byId.get('achievement:ai-for-bharat-finalist')!.text, /Top 36 Finalist .* As a team of two\./);
+  // Only the finalist entry says finalist; nothing says won, winner, prize or award.
+  assert.deepEqual(
+    results.filter((c) => /finalist/i.test(c.text)).map((c) => c.id),
+    ['achievement:ai-for-bharat-finalist'],
+  );
+  for (const c of results) assert.doesNotMatch(c.text, /\b(?:won|winner|prize|award)/i, c.id);
+});
+
+test('the new roles are chunks, and the Coreforge role carries its site', () => {
+  src.profile.experience.forEach((_, i) => assert.ok(byId.has(`exp:${i}`), `exp:${i}`));
+  assert.match(byId.get('exp:3')!.text, /^Owner at GOLDEN's Coreforge \(Jul 2026 - Present\).* Website: https:\/\/goldensdmat\.in\.$/);
+  // K.pop Merchandise lists no location, so none is invented.
+  assert.match(byId.get('exp:7')!.text, /^Freelance WordPress Developer at K\.pop Merchandise \(Jan 2021 - Feb 2022\)\. Built/);
+});
+
+test('without credential data the About chunk still says none are listed', () => {
+  const bare = load();
+  delete bare.certifications;
+  delete bare.achievements;
+  const built = buildCorpus(bare);
+  assert.match(built.find((c) => c.id === 'profile:about')!.text, /No certifications are listed on this site\./);
+  assert.ok(!built.some((c) => c.id.startsWith('cert:') || c.id.startsWith('achievement:')));
 });
 
 test('duplicate ids throw instead of making citations ambiguous', () => {

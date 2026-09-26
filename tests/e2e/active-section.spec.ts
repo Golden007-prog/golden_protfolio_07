@@ -10,7 +10,7 @@ import { expect, test } from './helpers';
  */
 
 // SECTIONS order in src/lib/site.ts; the hero above About is not a section.
-const IDS = ['about', 'skills', 'projects', 'experience', 'philosophy', 'contact'] as const;
+const IDS = ['about', 'skills', 'projects', 'experience', 'certifications', 'philosophy', 'contact'] as const;
 const PROBE = 0.45;
 
 type ProjectUse = { viewport?: { width: number; height: number } | null; colorScheme?: string; reducedMotion?: string };

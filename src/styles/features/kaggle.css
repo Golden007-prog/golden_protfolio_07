@@ -1,0 +1,71 @@
+/* Package: kaggle — the Kaggle section, the badge strip and the writeup card.
+
+   Design numbers (site tokens only, so both themes follow):
+     accent   var(--app-cyan-text): section icons, the countdown and the writeup tag.
+              State colours stay state: amber-text for the last three days, success for the live dot.
+     neutrals var(--app-text-primary) / -secondary / -muted / -dim, var(--app-glass-border)
+     type     var(--font-display) for headings and counts, var(--font-body) for copy, var(--font-mono) for meta
+     size     16px base; 14px card copy; 12px meta
+     radius   1rem cards and badge tiles; 0.5rem the rank box; pills only for tags
+     motion   one shine per hover-in (--kg-shine-dur, ease-out-expo) and a 160ms lift, fine pointers only;
+              none under html[data-motion=reduced], and no shine while motion is paused.
+
+   Everything here is an enhancement: the components are complete without this file. */
+
+@layer components {
+  .kaggle-badge-art {
+    --kg-shine: rgb(255 255 255 / 0.5);
+    --kg-shine-dur: 900ms;
+  }
+
+  .kaggle-badge-art img {
+    transition: transform var(--dur-quick) var(--ease-out-expo);
+  }
+
+  /* A diagonal band clipped to the badge's circle, parked off to the left until hover. */
+  .kaggle-shine {
+    overflow: clip;
+  }
+  .kaggle-shine::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(115deg, transparent 30%, var(--kg-shine) 50%, transparent 70%);
+    transform: translateX(-110%);
+    opacity: 0;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    html:not([data-motion="reduced"]) .kaggle-badge:hover .kaggle-badge-art img {
+      transform: scale(1.06);
+    }
+    .kaggle-badge:hover .kaggle-shine::before {
+      animation: kaggle-shine var(--kg-shine-dur) var(--ease-out-expo) 1 both;
+    }
+  }
+
+  html[data-motion="reduced"] .kaggle-shine,
+  html[data-motion-paused] .kaggle-shine {
+    display: none;
+  }
+
+  @media (forced-colors: active) {
+    .kaggle-shine {
+      display: none;
+    }
+  }
+}
+
+@keyframes kaggle-shine {
+  0% {
+    transform: translateX(-110%);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(110%);
+    opacity: 0;
+  }
+}

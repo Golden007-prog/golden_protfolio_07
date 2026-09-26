@@ -8,7 +8,7 @@ import { slugify } from '../slug.ts';
  * plan planAction() returns. The URL keys a plan may write are fixed here.
  */
 
-export const KNOWN_SECTIONS: readonly SectionId[] = ['about', 'skills', 'projects', 'experience', 'philosophy', 'contact'];
+export const KNOWN_SECTIONS: readonly SectionId[] = ['about', 'skills', 'projects', 'experience', 'certifications', 'philosophy', 'contact'];
 
 /** The projects namespace, which AI surfaces write only through the runner's filter action. */
 export const PROJECT_FILTER_PARAMS = ['q', 'cat', 'tech', 'live'] as const;

@@ -30,7 +30,8 @@
     "ai:generate": "node --env-file-if-exists=.env scripts/ai/run-generators.mjs",
     "ai:review": "node scripts/ai/review.mjs",
     "ai:recall": "node --env-file-if-exists=.env scripts/ai/recall-check.mjs",
-    "ai:scan": "node scripts/ai/secret-scan.mjs"
+    "ai:scan": "node scripts/ai/secret-scan.mjs",
+    "credentials:verify": "node scripts/verify-credentials.mjs"
   },
   "dependencies": {
     "@google/genai": "2.24.0",

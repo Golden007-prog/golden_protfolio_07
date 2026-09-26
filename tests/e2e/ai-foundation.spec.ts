@@ -38,7 +38,7 @@ const notPrimary = ({ viewport, colorScheme, reducedMotion }: { viewport: { widt
   !(viewport?.width === 1440 && colorScheme === 'dark' && reducedMotion !== 'reduce');
 
 const SLUGS = new Set(projects.map((p) => slugify(p.name)));
-const SECTIONS = new Set(['about', 'skills', 'projects', 'experience', 'philosophy', 'contact']);
+const SECTIONS = new Set(['about', 'skills', 'projects', 'experience', 'certifications', 'philosophy', 'contact']);
 const inRange = (i: unknown, n: number) => Number.isInteger(i) && (i as number) >= 0 && (i as number) < n;
 
 /** Mirrors sanitize.validTarget against the site's own data. */

@@ -10,7 +10,9 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { SITE_COPY } from '../../src/data/site-copy.ts';
+import { parseAchievements } from '../../src/lib/achievements.ts';
 import { buildCorpus, entities } from '../../src/lib/ai/corpus.ts';
+import { parseCertifications } from '../../src/lib/certifications.ts';
 
 export { BANNED_PHRASES, bannedPhrase, faithful } from '../../src/lib/ai/verify.ts';
 
@@ -225,6 +227,9 @@ export function loadSources() {
     skillsIndex: read('skills-index.json'),
     liveSnapshot: readJson(path.join(DATA_DIR, 'live-snapshot.json'), null),
     siteCopy: SITE_COPY,
+    // Parsed, so a malformed credential or result fails the corpus build instead of reaching a prompt.
+    certifications: parseCertifications(read('certifications.json')),
+    achievements: parseAchievements(read('achievements.json')),
   };
 }
 
@@ -236,7 +241,14 @@ export function loadCorpus() {
     sources,
     chunks,
     byId: new Map(chunks.map((c) => [c.id, c])),
-    entities: entities({ profile: sources.profile, projects: sources.projects, skills: sources.skillsIndex, reading: sources.reading }),
+    entities: entities({
+      profile: sources.profile,
+      projects: sources.projects,
+      skills: sources.skillsIndex,
+      reading: sources.reading,
+      certifications: sources.certifications,
+      achievements: sources.achievements,
+    }),
   };
 }
 

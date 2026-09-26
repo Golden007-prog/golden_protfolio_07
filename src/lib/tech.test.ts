@@ -33,7 +33,7 @@ test('ReAct stays ReAct and never matches React', () => {
 });
 
 test('Gemini counts every project on any Gemini version', () => {
-  assert.equal(countByTech(projects, 'Gemini'), 6);
+  assert.equal(countByTech(projects, 'Gemini'), 8);
   const verbatim = projects.filter((p) => p.techStack.includes('Gemini')).length;
   assert.equal(verbatim, 1);
 });

@@ -3,6 +3,8 @@ import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import { SITE_COPY } from '../../data/site-copy.ts';
 import { techFamily } from '../tech.ts';
+import { parseAchievements } from '../achievements.ts';
+import { parseCertifications } from '../certifications.ts';
 import { buildCorpus, type Chunk } from './corpus.ts';
 import {
   bm25,
@@ -28,6 +30,8 @@ const chunks = buildCorpus({
   skillsIndex: read('skills-index.json'),
   liveSnapshot: read('live-snapshot.json'),
   siteCopy: SITE_COPY,
+  certifications: parseCertifications(read('certifications.json')),
+  achievements: parseAchievements(read('achievements.json')),
 });
 const index = buildBm25(chunks);
 
@@ -105,7 +109,8 @@ test('hybrid fuses cosine with BM25 and honours the filter', () => {
 
   const onlyProjects = (c: Chunk) => c.target.kind === 'project';
   const filtered = hybrid({ index, vectors, queryVec, query: 'agents', k: 10, filter: onlyProjects });
-  assert.ok(filtered.every((h) => h.id.startsWith('project:') || h.id.startsWith('facts:')));
+  const byId = new Map(chunks.map((c) => [c.id, c]));
+  assert.ok(filtered.length > 0 && filtered.every((h) => byId.get(h.id)?.target.kind === 'project'));
 });
 
 test('RRF ordering is deterministic, ties broken by best rank then id', () => {

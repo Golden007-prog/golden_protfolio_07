@@ -107,7 +107,7 @@ test('every profile.json start/end parses, and the stated ranges agree with them
     assert.equal(from, formatYearMonth(exp.start), exp.duration);
     assert.equal(to, exp.end === null ? 'Present' : formatYearMonth(exp.end), exp.duration);
   }
-  assert.equal(profile.experience.filter((e) => e.end === null).length, 2);
+  assert.equal(profile.experience.filter((e) => e.end === null).length, 3);
   const masters = profile.education.find((e) => /Master/.test(JSON.stringify(e)));
   assert.equal(expectedLabel(masters?.end, '2026-09'), 'Expected Feb 2027');
 });

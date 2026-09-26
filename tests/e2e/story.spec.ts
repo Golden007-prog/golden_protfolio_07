@@ -152,7 +152,7 @@ test.describe('footer', () => {
     const footer = page.locator('footer#site-footer');
     await expect(footer).toHaveCount(1);
     const hrefs = await footer.locator('nav a').evaluateAll((els) => els.map((el) => el.getAttribute('href')));
-    expect(hrefs).toEqual(['#about', '#skills', '#projects', '#experience', '#philosophy', '#contact']);
+    expect(hrefs).toEqual(['#about', '#skills', '#projects', '#experience', '#certifications', '#philosophy', '#contact']);
     for (const link of await footer.locator('a[target="_blank"]').all()) {
       expect(await link.getAttribute('rel')).toContain('noopener');
       expect(await link.textContent()).toContain('(opens in new tab)');
@@ -363,12 +363,13 @@ test.describe('about without JavaScript', () => {
 /* ---------------- Experience (#67-#72) ---------------- */
 
 test.describe('experience', () => {
-  test('kickers read 01 / About, 04 / Experience and 05 / Principles', async ({ page }, info) => {
+  test('kickers read 01 / About, 04 / Experience, 05 / Certifications and 06 / Principles', async ({ page }, info) => {
     test.skip(width(info) !== 1440, 'one viewport is enough');
     await gotoHydrated(page);
     await expect(page.locator('#about header .sr-only').first()).toHaveText('01 / About');
     await expect(page.locator('#experience header .sr-only').first()).toHaveText('04 / Experience');
-    await expect(page.locator('#philosophy header .sr-only').first()).toHaveText('05 / Principles');
+    await expect(page.locator('#certifications header .sr-only').first()).toHaveText('05 / Certifications');
+    await expect(page.locator('#philosophy header .sr-only').first()).toHaveText('06 / Principles');
   });
 
   test('roles are an ordered list of articles with machine-readable dates', async ({ page }, info) => {
@@ -376,8 +377,11 @@ test.describe('experience', () => {
     await gotoHydrated(page);
     const cards = page.locator('#experience ol > li article[data-role-card]');
     await expect(cards).toHaveCount(profile.experience.length);
+    // Cards show newest start first and the earlier roles sit in their own list, so
+    // each role is found through its profile.experience index, not its position.
     for (const [i, exp] of profile.experience.entries()) {
-      const card = cards.nth(i);
+      const card = page.locator(`#experience article[data-role-card][data-exp-index="${i}"]`);
+      await expect(card).toHaveCount(1);
       await expect(card.locator(`time[datetime="${exp.start}"]`)).toHaveCount(1);
       if (exp.end) await expect(card.locator(`time[datetime="${exp.end}"]`)).toHaveCount(1);
       const labelledBy = await card.getAttribute('aria-labelledby');
@@ -390,7 +394,7 @@ test.describe('experience', () => {
       els.filter((el) => !document.getElementById(el.getAttribute('aria-controls')!)).map((el) => el.outerHTML.slice(0, 80)),
     );
     expect(dangling).toEqual([]);
-    const toggle = cards.first().locator('button[aria-controls]');
+    const toggle = page.locator('#experience article[data-role-card][data-exp-index="0"] button[aria-controls]');
     await toggle.scrollIntoViewIfNeeded();
     await toggle.click();
     await expect(toggle).toHaveAttribute('aria-expanded', 'true');
@@ -443,9 +447,16 @@ test.describe('experience', () => {
   test('chips fit at 320 and name only skills that occur verbatim', async ({ page }, info) => {
     test.skip(width(info) !== 320 && width(info) !== 1440, '320 and 1440 only');
     await gotoHydrated(page);
-    const cards = page.locator('#experience article[data-role-card]');
+    // The earlier roles are folded away; open them so every card has a box.
+    const earlier = page.locator('#experience [data-earlier-toggle]');
+    if (await earlier.count()) {
+      await earlier.scrollIntoViewIfNeeded();
+      await earlier.click();
+      await expect(earlier).toHaveAttribute('aria-expanded', 'true');
+    }
     for (const [i, exp] of profile.experience.entries()) {
-      const card = cards.nth(i);
+      const card = page.locator(`#experience article[data-role-card][data-exp-index="${i}"]`);
+      await card.scrollIntoViewIfNeeded();
       const box = (await card.boundingBox())!;
       for (const chip of await card.locator('[data-metric-chip], [data-skill-chip]').all()) {
         const c = (await chip.boundingBox())!;

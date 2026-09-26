@@ -2,7 +2,7 @@
 
 import { useId, useState, useSyncExternalStore } from 'react';
 import { motion } from 'framer-motion';
-import { Briefcase, Calendar, ChevronDown, MapPin, MessageCircle } from 'lucide-react';
+import { Briefcase, Calendar, ChevronDown, ExternalLink, MapPin, MessageCircle } from 'lucide-react';
 import { GlassCard } from '@/components/shared/GlassCard';
 import { LottieIcon } from '@/components/shared/LottieIcon';
 import { Button } from '@/components/ui/Button';
@@ -19,11 +19,25 @@ export type Experience = {
   role: string;
   start: string;
   end: string | null;
+  /** '' when the source gives none; the row is then left out. */
   location: string;
   description?: string;
   highlights: readonly string[];
   metrics?: readonly { value: string; label: string }[];
+  /** Grouped under 'Earlier work' on the timeline. */
+  earlier?: boolean;
+  /** The venture's own site. */
+  url?: string;
 };
+
+/** 'goldensdmat.in' from 'https://goldensdmat.in/...'; '' for anything unparsable. */
+export function hostOf(url: string): string {
+  try {
+    return new URL(url).hostname.replace(/^www\./, '');
+  } catch {
+    return '';
+  }
+}
 
 type Props = {
   exp: Experience;
@@ -207,6 +221,7 @@ export function TimelineCard({ exp, skills }: Props) {
   const long = durationLabel(exp.start, exp.end, now, 'long');
   const terms = exp.description ? skillsInText(exp.description, skills) : [];
   const index = experienceIndex(exp);
+  const site = exp.url && hostOf(exp.url) ? { href: exp.url, host: hostOf(exp.url) } : null;
 
   return (
     <GlassCard
@@ -234,6 +249,21 @@ export function TimelineCard({ exp, skills }: Props) {
         {exp.role}
       </h3>
       <p className="mt-1 font-medium text-violet-bright">{exp.company}</p>
+      {site ? (
+        <Button
+          href={site.href}
+          variant="ghost"
+          size="sm"
+          ripple={false}
+          cursor="open"
+          data-role-site=""
+          aria-label={`${site.host}, ${exp.company}'s site`}
+          trailingIcon={<ExternalLink aria-hidden="true" className="size-3.5 shrink-0" />}
+          className="-ml-3.5 mt-1 font-mono text-xs text-cyan-text"
+        >
+          {site.host}
+        </Button>
+      ) : null}
 
       <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 font-mono text-xs text-text-muted">
         <span className="inline-flex items-center gap-1.5">
@@ -249,10 +279,12 @@ export function TimelineCard({ exp, skills }: Props) {
             <span className="sr-only">{long}</span>
           </span>
         )}
-        <span className="inline-flex items-center gap-1.5">
-          <MapPin aria-hidden="true" className="size-3 shrink-0" />
-          {exp.location}
-        </span>
+        {exp.location ? (
+          <span className="inline-flex items-center gap-1.5">
+            <MapPin aria-hidden="true" className="size-3 shrink-0" />
+            {exp.location}
+          </span>
+        ) : null}
       </div>
 
       <ul className="mt-5 space-y-2.5">

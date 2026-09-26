@@ -106,7 +106,7 @@ const DEFENCES: { title: string; text: string }[] = [
   },
   {
     title: 'Honesty rules',
-    text: 'The model is told never to total his years of experience, state salary, visa, age or health, call him certified, turn a project or evaluation job into employment at Google DeepMind, OpenAI or Anthropic, or describe his in-progress Master’s as held. Reference chunks are never evidence that he used something.',
+    text: 'The model is told never to total his years of experience, state salary, visa, age or health, claim a certification the site does not list, call a Claude Academy badge a certification, state a hackathon result beyond what his post says, turn a project or evaluation job into employment at Google DeepMind, OpenAI or Anthropic, or describe his in-progress Master’s as held. Reference chunks are never evidence that he used something.',
   },
   {
     title: 'A sentence filter',

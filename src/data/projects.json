@@ -323,5 +323,225 @@
     "category": "Web App",
     "thumbnail": "/images/projects/mcq-tech-challenge/cover.webp",
     "fallbackThumbnail": "/images/project-thumb-6.webp"
+  },
+  {
+    "name": "PULSE Stadium AI",
+    "slug": "pulse-stadium-ai",
+    "tagline": "Multi-Agent Nervous System for Large Sporting Venues",
+    "shortDescription": "A Gemini 2.5 Pro orchestrator invokes five Gemini 2.5 Flash specialist agents (Flow, Queue, Concierge, Care and Revenue) through Google ADK’s AgentTool pattern to handle crowd movement, waiting times and real-time coordination. Every intervention lands in Firestore and recolours a React Three Fiber 3D twin of the venue, while a voice-enabled fan PWA answers each fan. Built solo in 48 hours for Hack2skill’s Virtual: PromptWars.",
+    "fullDescription": "A density-only counterfactual simulator runs alongside reality with every agent action suppressed, so operators see side by side what would have happened without intervention. Sensor input comes from a scripted IPL-final simulator publishing to Pub/Sub, so demo figures describe that simulation, not a real deployment. Five live Cloud Run services in asia-south1, Firestore onSnapshot listeners, and a Next.js 15 fan PWA with Web Speech voice in and out.",
+    "language": "TypeScript",
+    "techStack": [
+      "Google ADK",
+      "Gemini 2.5 Pro",
+      "Gemini 2.5 Flash",
+      "Cloud Run",
+      "Firestore",
+      "Pub/Sub",
+      "FastAPI",
+      "Next.js 15",
+      "React Three Fiber"
+    ],
+    "topics": [
+      "multi-agent",
+      "digital-twin",
+      "voice-ai",
+      "gemini"
+    ],
+    "stars": 0,
+    "forks": 0,
+    "githubUrl": "https://github.com/Golden007-prog/PULSE-Stadium-AI",
+    "liveUrl": "https://pulse-frontend-524510164011.asia-south1.run.app",
+    "featured": false,
+    "category": "AI/ML",
+    "thumbnail": "/images/projects/pulse-stadium-ai/cover.webp",
+    "fallbackThumbnail": "/images/project-thumb-8.webp"
+  },
+  {
+    "name": "Sankalp",
+    "slug": "sankalp",
+    "tagline": "Multilingual Voter-Journey Agent for Indian Elections",
+    "shortDescription": "A multimodal, multilingual voter-journey agent that collapses the Election Commission voter portal’s seven fragmented services into one conversation. Five Google ADK agents run on Cloud Run: Gemini 2.5 Flash routes each request, specialists handle registration, EPIC verification and polling-booth lookup, and a Gemini 2.5 Pro story agent explains why the voter’s own vote matters. Built solo for Hack2skill PromptWars 3 (Election Process Education).",
+    "fullDescription": "Voice, camera and text input in seven launch languages. Cloud Vision OCR reads a photographed EPIC card to pre-fill corrections, the registration agent collects Form 6 fields conversationally and produces a pre-filled PDF the voter submits themselves, and the story agent pairs its narrative with an Imagen cover and a React Three Fiber constituency scene. The voter portal has no public API, so the demo runs on curated mock constituency data built from ECI’s published statistical reports; no EPIC numbers, names or addresses are stored.",
+    "language": "Python",
+    "techStack": [
+      "Google ADK",
+      "Gemini 2.5 Flash",
+      "Gemini 2.5 Pro",
+      "FastAPI",
+      "Next.js 14",
+      "Cloud Vision",
+      "Firestore",
+      "Cloud Run",
+      "Imagen 3",
+      "React Three Fiber"
+    ],
+    "topics": [
+      "multi-agent",
+      "civic-tech",
+      "voice-ai",
+      "gemini"
+    ],
+    "stars": 0,
+    "forks": 0,
+    "githubUrl": "https://github.com/Golden007-prog/Sankalp",
+    "liveUrl": "https://sankalp-frontend-93037232246.asia-south1.run.app",
+    "featured": false,
+    "category": "AI/ML",
+    "thumbnail": "/images/projects/sankalp/cover.webp",
+    "fallbackThumbnail": "/images/project-thumb-9.webp"
+  },
+  {
+    "name": "Cred Domain Support Agent",
+    "slug": "cred-domain-support-agent",
+    "tagline": "LangGraph Support Agent for a Lending-Operations Desk",
+    "shortDescription": "The final capstone of Masai’s Banking & FinTech (Cred) track: a LangGraph support agent that answers loan-policy questions only from a 14-document knowledge base, with verbatim cited sentences and an “I don’t know” fallback, checks a loan application’s status through a tool with a designed escalation score, and refuses attempts to override its rules.",
+    "fullDescription": "Chroma retrieval over two chunking strategies with a calibrated similarity threshold, JSON Schema-validated responses, input and output guardrails, masked JSON logging, a FastAPI server, a SQLite checkpointer, timeouts and retries, and an MCP server exposing the status tool. Everything runs offline under MOCK_LLM with no API keys; every policy number and record in the repository is invented for the capstone.",
+    "language": "Python",
+    "techStack": [
+      "Python",
+      "LangGraph",
+      "Chroma",
+      "FastAPI",
+      "MCP",
+      "SQLite",
+      "all-MiniLM-L6-v2"
+    ],
+    "topics": [
+      "rag",
+      "langgraph",
+      "guardrails",
+      "fintech"
+    ],
+    "stars": 0,
+    "forks": 0,
+    "githubUrl": "https://github.com/Golden007-prog/cred-loan-support-agent",
+    "liveUrl": null,
+    "featured": false,
+    "category": "AI/ML",
+    "thumbnail": "/images/projects/cred-domain-support-agent/cover.webp",
+    "fallbackThumbnail": "/images/project-thumb-10.webp"
+  },
+  {
+    "name": "KSP DAPPA",
+    "slug": "ksp-dappa",
+    "tagline": "Crime Analytics & Predictive Policing Assistant on Zoho Catalyst",
+    "shortDescription": "Built for KSP Datathon 2026 on the official Karnataka State Police FIR database schema: an interactive geospatial command center that detects crime hotspots, uncovers criminal networks, links repeat offenders across jurisdictions, forecasts emerging risks and answers plain-English questions. Runs end to end on Zoho Catalyst over 45,000 synthetic FIRs.",
+    "fullDescription": "Heavy analytics (ST-DBSCAN hotspots, Louvain communities, Holt-Winters forecasts) are precomputed into Data Store tables, while live AI sits behind feature flags with same-shape local fallbacks that name themselves on every response. Identity resolution links name variants of an accused across districts into one Offender-360 profile. A second round was a credibility pass in which independent reviewers tried to refute each claim against the running code. Synthetic demonstration data only.",
+    "language": "JavaScript",
+    "techStack": [
+      "Zoho Catalyst",
+      "React 18",
+      "Vite",
+      "Tailwind CSS",
+      "Node.js",
+      "Express",
+      "Python"
+    ],
+    "topics": [
+      "crime-analytics",
+      "geospatial",
+      "forecasting",
+      "network-analysis"
+    ],
+    "stars": 0,
+    "forks": 0,
+    "githubUrl": "https://github.com/Golden007-prog/KSP-Dappa",
+    "liveUrl": "https://golden007-prog.github.io/KSP-Dappa/",
+    "featured": false,
+    "category": "Data Science",
+    "thumbnail": "/images/projects/ksp-dappa/cover.webp",
+    "fallbackThumbnail": "/images/project-thumb-5.webp"
+  },
+  {
+    "name": "MarketPulse",
+    "slug": "marketpulse",
+    "tagline": "Market-Data Operations Dashboard with a Signal Wind Tunnel",
+    "shortDescription": "A market operations dashboard on public Coinbase Exchange data for BTC, ETH and SOL, with an optional Confluent Cloud Kafka path. It helps an operations team spot stale feeds and unusually sharp observed price moves. Its Signal Wind Tunnel freezes a real observed sample, injects duplicates, missing or late events or a synthetic price shock, and compares unguarded and quality-aware decisions.",
+    "fullDescription": "Runs in the browser on GitHub Pages or as a local Node service. Sample VWAP uses scaled BigInt arithmetic, requests have timeouts and bounded retries, and the last good data stays visible with its age instead of being replaced by fabricated fallbacks. Each experiment downloads as evidence with a SHA-256 digest that can be re-verified offline. It places no trades and makes no forecasting claims.",
+    "language": "JavaScript",
+    "techStack": [
+      "Node.js",
+      "JavaScript",
+      "Kafka",
+      "Confluent Cloud",
+      "Coinbase Exchange API"
+    ],
+    "topics": [
+      "finance",
+      "streaming",
+      "data-quality",
+      "kafka"
+    ],
+    "stars": 0,
+    "forks": 0,
+    "githubUrl": "https://github.com/Golden007-prog/MarketPulse",
+    "liveUrl": "https://golden007-prog.github.io/MarketPulse/",
+    "featured": false,
+    "category": "Data Science",
+    "thumbnail": "/images/projects/marketpulse/cover.webp",
+    "fallbackThumbnail": "/images/project-thumb-7.webp"
+  },
+  {
+    "name": "GovPrep",
+    "slug": "govprep",
+    "tagline": "AI Study Companion for Indian Government Exams",
+    "shortDescription": "An AI-native study companion for Indian government and PSU exams. Pick a target exam and date and it builds an adaptive day-by-day plan from that exam’s real syllabus and pattern, starting with Coal India’s Management Trainee (Systems / CS) exam. Adding an exam means adding taxonomy data, not code.",
+    "fullDescription": "Anthropic Claude is the only AI provider: the local backend uses a Claude subscription through the claude CLI, and the hosted GitHub Pages build falls back to a bring-your-own API key. It runs local-first on IndexedDB (Dexie), with an optional Supabase backend (Postgres, GitHub OAuth, row-level security) that caches expensive AI content per exam, topic and language and shares it across users.",
+    "language": "TypeScript",
+    "techStack": [
+      "React",
+      "TypeScript",
+      "Vite",
+      "Tailwind CSS",
+      "Fastify",
+      "Supabase",
+      "Dexie",
+      "Claude API"
+    ],
+    "topics": [
+      "education",
+      "exam-prep",
+      "local-first",
+      "claude"
+    ],
+    "stars": 0,
+    "forks": 0,
+    "githubUrl": "https://github.com/Golden007-prog/Govt-Prep",
+    "liveUrl": "https://golden007-prog.github.io/Govt-Prep/",
+    "featured": false,
+    "category": "Web App",
+    "thumbnail": "/images/projects/govprep/cover.webp",
+    "fallbackThumbnail": "/images/project-thumb-4.webp"
+  },
+  {
+    "name": "The Calcutta Classics",
+    "slug": "the-calcutta-classics",
+    "tagline": "Cinematic Showcase Site for a Kolkata Street-Food Shop",
+    "shortDescription": "A cinematic, mobile-first showcase site for The Calcutta Classics, a street-food shop in Shyambazar, Kolkata: a video hero, a React Three Fiber momo, a filterable menu with fuzzy search, playful foodie tools, and content in English and Bengali. A showcase, not an ordering site: no cart and no checkout.",
+    "fullDescription": "Next.js 16 App Router with the React Compiler, Tailwind CSS v4, and GSAP ScrollTrigger with Lenis smooth scrolling, plus AI-generated photography and video run through a sharp pipeline. Ships as a static export on GitHub Pages with a PWA, JSON-LD, OG images and a sitemap; on a local production build, Lighthouse measured 100 for accessibility, best practices and SEO on the home, menu and dish pages.",
+    "language": "TypeScript",
+    "techStack": [
+      "Next.js 16",
+      "TypeScript",
+      "Tailwind CSS v4",
+      "GSAP",
+      "Lenis",
+      "React Three Fiber"
+    ],
+    "topics": [
+      "web-design",
+      "motion",
+      "3d",
+      "pwa"
+    ],
+    "stars": 0,
+    "forks": 0,
+    "githubUrl": "https://github.com/Golden007-prog/calcutta_classic_demo",
+    "liveUrl": "https://golden007-prog.github.io/calcutta_classic_demo/",
+    "featured": false,
+    "category": "Web App",
+    "thumbnail": "/images/projects/the-calcutta-classics/cover.webp",
+    "fallbackThumbnail": "/images/project-thumb-6.webp"
   }
 ]

@@ -1,0 +1,390 @@
+{
+  "verifiedAt": "2026-09-26",
+  "items": [
+    {
+      "id": "ai-fluency-for-pk-12-educators",
+      "title": "AI Fluency for pK–12 educators",
+      "issuer": "Anthropic",
+      "platform": "Claude Academy",
+      "kind": "course-completion-badge",
+      "issued": "2026-09-25",
+      "credentialId": "23916d20fc67033d3220c0f2ce766431",
+      "url": "https://academy.claude.com/verify/23916d20fc67033d3220c0f2ce766431"
+    },
+    {
+      "id": "ai-fluency-for-nonprofits",
+      "title": "AI Fluency for nonprofits",
+      "issuer": "Anthropic",
+      "platform": "Claude Academy",
+      "kind": "course-completion-badge",
+      "issued": "2026-09-25",
+      "credentialId": "ca3ae6a8b27c9c489039095d9a2f5d67",
+      "url": "https://academy.claude.com/verify/ca3ae6a8b27c9c489039095d9a2f5d67"
+    },
+    {
+      "id": "ai-fluency-for-small-businesses",
+      "title": "AI Fluency for small businesses",
+      "issuer": "Anthropic",
+      "platform": "Claude Academy",
+      "kind": "course-completion-badge",
+      "issued": "2026-09-25",
+      "credentialId": "8b4b31a870cce72cb8c10f5c9515aa2c",
+      "url": "https://academy.claude.com/verify/8b4b31a870cce72cb8c10f5c9515aa2c"
+    },
+    {
+      "id": "ai-fluency-for-students",
+      "title": "AI Fluency for students",
+      "issuer": "Anthropic",
+      "platform": "Claude Academy",
+      "kind": "course-completion-badge",
+      "issued": "2026-09-25",
+      "credentialId": "771d4ca41ccd23165efb14d18173ec65",
+      "url": "https://academy.claude.com/verify/771d4ca41ccd23165efb14d18173ec65"
+    },
+    {
+      "id": "building-effective-human-agent-teams-beta",
+      "title": "Building effective human-agent teams (beta)",
+      "issuer": "Anthropic",
+      "platform": "Claude Academy",
+      "kind": "course-completion-badge",
+      "issued": "2026-09-25",
+      "credentialId": "183c0f292eb063c697eee882a0ad6902",
+      "url": "https://academy.claude.com/verify/183c0f292eb063c697eee882a0ad6902"
+    },
+    {
+      "id": "building-with-the-claude-api",
+      "title": "Building with the Claude API",
+      "issuer": "Anthropic",
+      "platform": "Claude Academy",
+      "kind": "course-completion-badge",
+      "issued": "2026-09-15",
+      "credentialId": "ce9d252a04b863ef2620e1e42715754d",
+      "url": "https://academy.claude.com/verify/ce9d252a04b863ef2620e1e42715754d"
+    },
+    {
+      "id": "ai-fluency-framework-foundations",
+      "title": "AI Fluency: Framework & Foundations",
+      "issuer": "Anthropic",
+      "platform": "Claude Academy",
+      "kind": "course-completion-badge",
+      "issued": "2026-09-15",
+      "credentialId": "4f5428a8727689094ae63dfbdd5cd405",
+      "url": "https://academy.claude.com/verify/4f5428a8727689094ae63dfbdd5cd405"
+    },
+    {
+      "id": "ai-fluency-for-educators",
+      "title": "AI Fluency for educators",
+      "issuer": "Anthropic",
+      "platform": "Claude Academy",
+      "kind": "course-completion-badge",
+      "issued": "2026-09-15",
+      "credentialId": "7e717e7755534183fcac7f829b63676c",
+      "url": "https://academy.claude.com/verify/7e717e7755534183fcac7f829b63676c"
+    },
+    {
+      "id": "ai-capabilities-and-limitations",
+      "title": "AI Capabilities and Limitations",
+      "issuer": "Anthropic",
+      "platform": "Claude Academy",
+      "kind": "course-completion-badge",
+      "issued": "2026-09-15",
+      "credentialId": "861eb574e081153ff9c93dcc8f0e8d6a",
+      "url": "https://academy.claude.com/verify/861eb574e081153ff9c93dcc8f0e8d6a"
+    },
+    {
+      "id": "ai-fluency-for-creative-work",
+      "title": "AI Fluency for Creative Work",
+      "issuer": "Anthropic",
+      "platform": "Claude Academy",
+      "kind": "course-completion-badge",
+      "issued": "2026-09-15",
+      "credentialId": "467a139ef2cf74a95e9c77b38d7844db",
+      "url": "https://academy.claude.com/verify/467a139ef2cf74a95e9c77b38d7844db"
+    },
+    {
+      "id": "ai-fluency-for-builders",
+      "title": "AI Fluency for Builders",
+      "issuer": "Anthropic",
+      "platform": "Claude Academy",
+      "kind": "course-completion-badge",
+      "issued": "2026-09-15",
+      "credentialId": "590c9d3c714d34731cd49450800acd73",
+      "url": "https://academy.claude.com/verify/590c9d3c714d34731cd49450800acd73"
+    },
+    {
+      "id": "claude-with-amazon-bedrock",
+      "title": "Claude with Amazon Bedrock",
+      "issuer": "Anthropic",
+      "platform": "Claude Academy",
+      "kind": "course-completion-badge",
+      "issued": "2026-09-15",
+      "credentialId": "bc8daa6f2342e67c6281222d9855ef5c",
+      "url": "https://academy.claude.com/verify/bc8daa6f2342e67c6281222d9855ef5c"
+    },
+    {
+      "id": "claude-with-google-cloud-s-vertex-ai",
+      "title": "Claude with Google Cloud's Vertex AI",
+      "issuer": "Anthropic",
+      "platform": "Claude Academy",
+      "kind": "course-completion-badge",
+      "issued": "2026-09-15",
+      "credentialId": "d4560cab47cd46d1b3be35844a71e470",
+      "url": "https://academy.claude.com/verify/d4560cab47cd46d1b3be35844a71e470"
+    },
+    {
+      "id": "claude-code-in-action",
+      "title": "Claude Code in Action",
+      "issuer": "Anthropic",
+      "platform": "Claude Academy",
+      "kind": "course-completion-badge",
+      "issued": "2026-09-15",
+      "credentialId": "ebc67c8096736e3ba1c8150b6b69d2bc",
+      "url": "https://academy.claude.com/verify/ebc67c8096736e3ba1c8150b6b69d2bc"
+    },
+    {
+      "id": "deploying-claude-enterprise-with-confidence-the-five-decisions-that-shape-your-rollout",
+      "title": "Deploying Claude Enterprise with Confidence: The five decisions that shape your rollout",
+      "issuer": "Anthropic",
+      "platform": "Claude Academy",
+      "kind": "course-completion-badge",
+      "issued": "2026-09-15",
+      "credentialId": "a1c10e2d2ccdbe9b84c651f482810a7b",
+      "url": "https://academy.claude.com/verify/a1c10e2d2ccdbe9b84c651f482810a7b"
+    },
+    {
+      "id": "claude-platform-101",
+      "title": "Claude Platform 101",
+      "issuer": "Anthropic",
+      "platform": "Claude Academy",
+      "kind": "course-completion-badge",
+      "issued": "2026-09-15",
+      "credentialId": "a744ac3dd38ce898129535384c15640e",
+      "url": "https://academy.claude.com/verify/a744ac3dd38ce898129535384c15640e"
+    },
+    {
+      "id": "introduction-to-model-context-protocol",
+      "title": "Introduction to Model Context Protocol",
+      "issuer": "Anthropic",
+      "platform": "Claude Academy",
+      "kind": "course-completion-badge",
+      "issued": "2026-09-15",
+      "credentialId": "7473c81277f3424f45fd6c7c12b6dfbe",
+      "url": "https://academy.claude.com/verify/7473c81277f3424f45fd6c7c12b6dfbe"
+    },
+    {
+      "id": "claude-code-101",
+      "title": "Claude Code 101",
+      "issuer": "Anthropic",
+      "platform": "Claude Academy",
+      "kind": "course-completion-badge",
+      "issued": "2026-09-15",
+      "credentialId": "7d50858c00db41b4a131190f16e836a1",
+      "url": "https://academy.claude.com/verify/7d50858c00db41b4a131190f16e836a1"
+    },
+    {
+      "id": "introduction-to-claude-cowork",
+      "title": "Introduction to Claude Cowork",
+      "issuer": "Anthropic",
+      "platform": "Claude Academy",
+      "kind": "course-completion-badge",
+      "issued": "2026-09-15",
+      "credentialId": "0a254b765410d4a1c40a9dca7177355a",
+      "url": "https://academy.claude.com/verify/0a254b765410d4a1c40a9dca7177355a"
+    },
+    {
+      "id": "claude-101",
+      "title": "Claude 101",
+      "issuer": "Anthropic",
+      "platform": "Claude Academy",
+      "kind": "course-completion-badge",
+      "issued": "2026-09-15",
+      "credentialId": "132f28b34b597982e46b3c31d09d1ab0",
+      "url": "https://academy.claude.com/verify/132f28b34b597982e46b3c31d09d1ab0"
+    },
+    {
+      "id": "google-ai-professional-certificate",
+      "title": "Google AI Professional Certificate",
+      "issuer": "Google",
+      "platform": "Coursera",
+      "kind": "professional-certificate",
+      "issued": "2026-09",
+      "url": "https://www.coursera.org/account/accomplishments/specialization/1DNXA6BTRMFL",
+      "includes": [
+        "AI Fundamentals",
+        "AI for Brainstorming and Planning",
+        "AI for Research and Insights",
+        "AI for Writing and Communicating",
+        "AI for Content Creation",
+        "AI for Data Analysis",
+        "AI for App Building"
+      ]
+    },
+    {
+      "id": "ai-for-app-building",
+      "title": "AI for App Building",
+      "issuer": "Google",
+      "platform": "Coursera",
+      "kind": "course-certificate",
+      "issued": "2026-09",
+      "credentialId": "NLPGVJ1DLBN5",
+      "url": "https://www.coursera.org/account/accomplishments/verify/NLPGVJ1DLBN5",
+      "partOf": "Google AI Professional Certificate"
+    },
+    {
+      "id": "ai-for-data-analysis",
+      "title": "AI for Data Analysis",
+      "issuer": "Google",
+      "platform": "Coursera",
+      "kind": "course-certificate",
+      "issued": "2026-09",
+      "credentialId": "1N2SRYFBC3QQ",
+      "url": "https://www.coursera.org/account/accomplishments/verify/1N2SRYFBC3QQ",
+      "partOf": "Google AI Professional Certificate"
+    },
+    {
+      "id": "ai-for-content-creation",
+      "title": "AI for Content Creation",
+      "issuer": "Google",
+      "platform": "Coursera",
+      "kind": "course-certificate",
+      "issued": "2026-09",
+      "credentialId": "OAX9XF2UZSSZ",
+      "url": "https://www.coursera.org/account/accomplishments/verify/OAX9XF2UZSSZ",
+      "partOf": "Google AI Professional Certificate"
+    },
+    {
+      "id": "ai-for-writing-and-communicating",
+      "title": "AI for Writing and Communicating",
+      "issuer": "Google",
+      "platform": "Coursera",
+      "kind": "course-certificate",
+      "issued": "2026-09",
+      "credentialId": "4787OVN3DXC6",
+      "url": "https://www.coursera.org/account/accomplishments/verify/4787OVN3DXC6",
+      "partOf": "Google AI Professional Certificate"
+    },
+    {
+      "id": "ai-for-research-and-insights",
+      "title": "AI for Research and Insights",
+      "issuer": "Google",
+      "platform": "Coursera",
+      "kind": "course-certificate",
+      "issued": "2026-09",
+      "credentialId": "R47HD91CA35K",
+      "url": "https://www.coursera.org/account/accomplishments/verify/R47HD91CA35K",
+      "partOf": "Google AI Professional Certificate"
+    },
+    {
+      "id": "ai-for-brainstorming-and-planning",
+      "title": "AI for Brainstorming and Planning",
+      "issuer": "Google",
+      "platform": "Coursera",
+      "kind": "course-certificate",
+      "issued": "2026-09",
+      "credentialId": "47AEU7T1FINB",
+      "url": "https://www.coursera.org/account/accomplishments/verify/47AEU7T1FINB",
+      "partOf": "Google AI Professional Certificate"
+    },
+    {
+      "id": "ai-fundamentals",
+      "title": "AI Fundamentals",
+      "issuer": "Google",
+      "platform": "Coursera",
+      "kind": "course-certificate",
+      "issued": "2026-09",
+      "credentialId": "UFTKDWTM97TJ",
+      "url": "https://www.coursera.org/account/accomplishments/verify/UFTKDWTM97TJ",
+      "partOf": "Google AI Professional Certificate"
+    },
+    {
+      "id": "databases-and-sql-for-data-science-with-python",
+      "title": "Databases and SQL for Data Science with Python",
+      "issuer": "IBM",
+      "platform": "Coursera",
+      "kind": "course-certificate",
+      "issued": "2025-05",
+      "credentialId": "A811J4203CG8",
+      "url": "https://www.coursera.org/account/accomplishments/verify/A811J4203CG8"
+    },
+    {
+      "id": "understanding-and-visualizing-data-with-python",
+      "title": "Understanding and Visualizing Data with Python",
+      "issuer": "University of Michigan",
+      "platform": "Coursera",
+      "kind": "course-certificate",
+      "issued": "2025-04",
+      "credentialId": "NFQYT47GQOK7",
+      "url": "https://www.coursera.org/account/accomplishments/verify/NFQYT47GQOK7"
+    },
+    {
+      "id": "python-project-for-data-science",
+      "title": "Python Project for Data Science",
+      "issuer": "IBM",
+      "platform": "Coursera",
+      "kind": "course-certificate",
+      "issued": "2025-04",
+      "credentialId": "HCALUT58IOR6",
+      "url": "https://www.coursera.org/account/accomplishments/verify/HCALUT58IOR6"
+    },
+    {
+      "id": "python-for-data-science-ai-development",
+      "title": "Python for Data Science, AI & Development",
+      "issuer": "IBM",
+      "platform": "Coursera",
+      "kind": "course-certificate",
+      "issued": "2025-04",
+      "credentialId": "ZYP8SZEOEJB5",
+      "url": "https://www.coursera.org/account/accomplishments/verify/ZYP8SZEOEJB5"
+    },
+    {
+      "id": "data-science-methodology",
+      "title": "Data Science Methodology",
+      "issuer": "IBM",
+      "platform": "Coursera",
+      "kind": "course-certificate",
+      "issued": "2025-04",
+      "credentialId": "JG1VMJO22WA7",
+      "url": "https://www.coursera.org/account/accomplishments/verify/JG1VMJO22WA7"
+    },
+    {
+      "id": "tools-for-data-science",
+      "title": "Tools for Data Science",
+      "issuer": "IBM",
+      "platform": "Coursera",
+      "kind": "course-certificate",
+      "issued": "2025-03",
+      "credentialId": "OO314JZV9F2X",
+      "url": "https://www.coursera.org/account/accomplishments/verify/OO314JZV9F2X"
+    },
+    {
+      "id": "what-is-data-science",
+      "title": "What is Data Science?",
+      "issuer": "IBM",
+      "platform": "Coursera",
+      "kind": "course-certificate",
+      "issued": "2025-03",
+      "credentialId": "6GODCA4TJ6ZZ",
+      "url": "https://www.coursera.org/account/accomplishments/verify/6GODCA4TJ6ZZ"
+    },
+    {
+      "id": "learn-python-basics",
+      "title": "Learn Python Basics",
+      "issuer": "Programiz",
+      "platform": "Programiz PRO",
+      "kind": "course-certificate",
+      "issued": "2025-03",
+      "credentialId": "A880C936C407",
+      "url": "https://programiz.pro/certificates/detail/A880C936C407"
+    },
+    {
+      "id": "practice-python-basics",
+      "title": "Practice: Python Basics",
+      "issuer": "Programiz",
+      "platform": "Programiz PRO",
+      "kind": "course-certificate",
+      "issued": "2025-03",
+      "credentialId": "909D4B5900CB",
+      "url": "https://programiz.pro/certificates/detail/909D4B5900CB"
+    }
+  ]
+}

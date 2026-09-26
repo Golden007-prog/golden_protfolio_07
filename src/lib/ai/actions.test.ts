@@ -21,6 +21,7 @@ const LABELS: Record<SectionId, string> = {
   skills: 'Skills',
   projects: 'Projects',
   experience: 'Experience',
+  certifications: 'Certifications',
   philosophy: 'Principles',
   contact: 'Contact',
 };

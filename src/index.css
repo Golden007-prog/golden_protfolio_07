@@ -14,6 +14,7 @@
 @import "./styles/features/ai-recruiter.css";
 @import "./styles/features/ai-contact.css";
 @import "./styles/features/ai-lab.css";
+@import "./styles/features/certifications.css";
 
 /* ============================
    Theme tokens (swap via [data-theme="light"])

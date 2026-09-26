@@ -11,9 +11,9 @@ const profile = JSON.parse(readFileSync(new URL('../data/profile.json', import.m
 };
 const allSkills = Object.values(profile.skills).flat();
 
-test('Gemini is used in 6 projects, across every Gemini version', () => {
+test('Gemini is used in 8 projects, across every Gemini version', () => {
   const matches = projectsForSkill(projects, 'Gemini');
-  assert.equal(matches.length, 6);
+  assert.equal(matches.length, 8);
   assert.ok(matches.every((p) => p.techStack.some((t) => /Gemini/.test(t))));
 });
 
@@ -35,7 +35,7 @@ test('stack entries match on families and whole words only', () => {
 
 test('projectCounts covers the profile skills and omits zeros', () => {
   const counts = projectCounts(projects, allSkills);
-  assert.equal(counts.Gemini, 6);
+  assert.equal(counts.Gemini, 8);
   assert.equal(counts.ReAct, undefined);
   for (const [skill, n] of Object.entries(counts)) {
     assert.ok(allSkills.includes(skill));

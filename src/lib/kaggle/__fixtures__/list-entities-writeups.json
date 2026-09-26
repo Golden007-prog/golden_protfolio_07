@@ -1,0 +1,128 @@
+{
+  "documents": [
+    {
+      "id": 678446,
+      "documentType": "TOPIC",
+      "title": "UrbanCare AI: A Multimodal Clinical Copilot for Real-Time Hospital Intelligence",
+      "imageUrl": "/writeups/70603/images/thumbnail",
+      "createTime": "2026-02-24T13:33:31.936767200Z",
+      "updateTime": "2026-02-24T13:33:31.936666700Z",
+      "isPrivate": false,
+      "votes": 0,
+      "ownerUser": {
+        "id": 28291918,
+        "displayName": "Oikantik Basu",
+        "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/28291918-kg.png?t=2025-11-30-20-59-25",
+        "url": "/oikantikbasu007",
+        "userName": "oikantikbasu007",
+        "progressionOptOut": false,
+        "tier": "CONTRIBUTOR"
+      },
+      "discussionDocument": {
+        "newCommentUrl": "/competitions/med-gemma-impact-challenge/writeups/urbancare-ai-a-multimodal-clinical-copilot-for-re#3413210",
+        "messageStripped": "### Project name\n\nUrbanCare AI\n\n### Your team\n\nOikantik Basu\n\n### Problem statement\n\nModern healthcare systems impose an enormous administrative and cognitive burden on physicians. Doctors spend more time fighting clunky EMR interfaces, manually parsing unstructured lab reports, and writing repetitive documentation than providing direct patient care. Critical insights trapped inside X-rays, lab PDFs, and patient histories often go unnoticed because no single tool connects them intelligently. In fast-paced urban hospitals, this inefficiency translates directly to physician burnout, diagnostic delay, and compromised patient outcomes.\n\nThe impact potential is significant: UrbanCare AI targets t",
+        "messageMarkdown": "### Project name\n\nUrbanCare AI\n\n### Your team\n\nOikantik Basu\n\n### Problem statement\n\nModern healthcare systems impose an enormous administrative and cognitive burden on physicians. Doctors spend more time fighting clunky EMR interfaces, manually parsing unstructured lab reports, and writing repetitive documentation than providing direct patient care. Critical insights trapped inside X-rays, lab PD",
+        "forumName": "The MedGemma Impact Challenge Hackathons",
+        "topicType": "SEARCH_DISCUSSIONS_TOPIC_TYPE_WRITE_UPS",
+        "type": "SEARCH_DISCUSSIONS_DOCUMENT_TYPE_WRITE_UP",
+        "writeUpMetadata": {
+          "type": "HACKATHON_PROJECT",
+          "subtitle": "A real-time hospital AI system combining vision, voice, and medical reasoning for collaborative patient care",
+          "collaborators": [
+            {
+              "displayName": "Oikantik Basu",
+              "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/28291918-kg.png?t=2025-11-30-20-59-25",
+              "url": "/oikantikbasu007",
+              "userName": "oikantikbasu007",
+              "tier": "CONTRIBUTOR",
+              "id": 28291918,
+              "profileUrl": "/oikantikbasu007",
+              "performanceTier": "CONTRIBUTOR",
+              "userId": 28291918,
+              "progressionOptOut": false
+            }
+          ],
+          "competitionInfo": {
+            "competitionTitle": "The MedGemma Impact Challenge",
+            "competitionUrl": "/competitions/med-gemma-impact-challenge",
+            "deadline": "2026-02-24T23:59:00Z",
+            "isHackathonWinner": false,
+            "competitionId": 118534
+          },
+          "contentState": "PUBLISHED",
+          "teamName": "SLYTHERIN",
+          "id": 70603,
+          "hackathonTrackIds": [
+            253,
+            221,
+            254,
+            220
+          ],
+          "teamLeaderUserId": 28291918,
+          "hackathonWriteUpId": 56189
+        }
+      }
+    },
+    {
+      "id": 666810,
+      "documentType": "TOPIC",
+      "title": "Unlocking Transparent Intelligence: Fine-Tuning Gemma 3 for Verifiable Reasoning",
+      "imageUrl": "/writeups/64112/images/thumbnail",
+      "createTime": "2026-01-09T09:01:15.174457400Z",
+      "updateTime": "2026-01-09T09:01:15.173333300Z",
+      "isPrivate": false,
+      "votes": 0,
+      "ownerUser": {
+        "id": 28291918,
+        "displayName": "Oikantik Basu",
+        "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/28291918-kg.png?t=2025-11-30-20-59-25",
+        "url": "/oikantikbasu007",
+        "userName": "oikantikbasu007",
+        "progressionOptOut": false,
+        "tier": "CONTRIBUTOR"
+      },
+      "discussionDocument": {
+        "newCommentUrl": "/competitions/google-tunix-hackathon/writeups/new-writeup-1767949274949#3388624",
+        "messageStripped": "1. Introduction\nIn critical domains like mathematics, science, and coding, an AI model's answer is only as valuable as the logic behind it. Standard Large Language Models (LLMs) often suffer from the \"Black Box\" problem—delivering conclusions without revealing the steps taken to reach them. This opacity reduces trust and makes error detection nearly impossible.\n\nFor the Google Tunix Hackathon, I set out to solve this by training Gemma 3 (1B) to explicitly \"show its work.\" Using Tunix, Google’s JAX-native library for post-training, I implemented Group Relative Policy Optimization (GRPO). The goal was to force the model to generate a structured, verifiable ",
+        "messageMarkdown": "1. Introduction\nIn critical domains like mathematics, science, and coding, an AI model's answer is only as valuable as the logic behind it. Standard Large Language Models (LLMs) often suffer from the \"Black Box\" problem—delivering conclusions without revealing the steps taken to reach them. This opacity reduces trust and makes error detection nearly impossible.\n\nFor the Google Tunix Hackathon, I s",
+        "forumName": "Tunix Hackathon: Train a model to show its work Hackathons",
+        "topicType": "SEARCH_DISCUSSIONS_TOPIC_TYPE_WRITE_UPS",
+        "type": "SEARCH_DISCUSSIONS_DOCUMENT_TYPE_WRITE_UP",
+        "writeUpMetadata": {
+          "type": "HACKATHON_PROJECT",
+          "subtitle": "A GRPO-based approach to Chain-of-Thought reasoning on TPU v5e",
+          "collaborators": [
+            {
+              "displayName": "Oikantik Basu",
+              "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/28291918-kg.png?t=2025-11-30-20-59-25",
+              "url": "/oikantikbasu007",
+              "userName": "oikantikbasu007",
+              "tier": "CONTRIBUTOR",
+              "id": 28291918,
+              "profileUrl": "/oikantikbasu007",
+              "performanceTier": "CONTRIBUTOR",
+              "userId": 28291918,
+              "progressionOptOut": false
+            }
+          ],
+          "competitionInfo": {
+            "competitionTitle": "Google Tunix Hack - Train a model to show its work",
+            "competitionUrl": "/competitions/google-tunix-hackathon",
+            "deadline": "2026-01-12T23:59:00Z",
+            "isHackathonWinner": false,
+            "competitionId": 119261
+          },
+          "contentState": "PUBLISHED",
+          "teamName": "SLYTHERIN",
+          "id": 64112,
+          "hackathonTrackIds": [
+            237
+          ],
+          "teamLeaderUserId": 28291918,
+          "hackathonWriteUpId": 50679
+        }
+      }
+    }
+  ],
+  "totalDocuments": 2
+}

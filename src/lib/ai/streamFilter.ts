@@ -85,6 +85,8 @@ export function createSentenceFilter(opts: SentenceFilterOptions): SentenceFilte
     ...opts.entities.institutions.flatMap(orgAliases),
     ...(opts.entities.projectNames ?? []),
     ...(opts.entities.degrees ?? []),
+    // A listed credential named without a citation is a claim about him too.
+    ...(opts.entities.certifications ?? []).map((c) => (typeof c === 'string' ? c : c.title)),
   ]
     .filter((n) => n.length >= 3)
     .map((n) => n.toLowerCase());

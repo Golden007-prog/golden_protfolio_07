@@ -2,8 +2,23 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import { SITE_COPY } from '../../data/site-copy.ts';
+import { parseAchievements } from '../achievements.ts';
+import { parseCertifications } from '../certifications.ts';
 import { buildCorpus, entities, type CorpusSources } from './corpus.ts';
-import { bannedPhrase, canonicalId, faithful, normalizeDigits, numbersIn, quoteOk, resolveId, tripwire, unlistedAffiliation, verifyClaims } from './verify.ts';
+import {
+  bannedPhrase,
+  canonicalId,
+  credentialIssue,
+  faithful,
+  honourIssue,
+  normalizeDigits,
+  numbersIn,
+  quoteOk,
+  resolveId,
+  tripwire,
+  unlistedAffiliation,
+  verifyClaims,
+} from './verify.ts';
 
 const read = (name: string) => JSON.parse(readFileSync(new URL(`../../data/${name}`, import.meta.url), 'utf8'));
 const src: CorpusSources = {
@@ -15,10 +30,12 @@ const src: CorpusSources = {
   skillsIndex: read('skills-index.json'),
   liveSnapshot: read('live-snapshot.json'),
   siteCopy: SITE_COPY,
+  certifications: parseCertifications(read('certifications.json')),
+  achievements: parseAchievements(read('achievements.json')),
 };
 const chunks = buildCorpus(src);
 const facts = new Map(chunks.map((c) => [c.id, c.text]));
-const ents = entities({ profile: src.profile, projects: src.projects, skills: src.skillsIndex, reading: src.reading });
+const ents = entities({ profile: src.profile, projects: src.projects, skills: src.skillsIndex, reading: src.reading, certifications: src.certifications, achievements: src.achievements });
 const fact = (id: string) => facts.get(id)!;
 
 test('normalizeDigits maps every decimal-digit script to ASCII', () => {
@@ -66,9 +83,127 @@ test('a stated total of years is dropped, in digits, other scripts or words', ()
   assert.equal(tripwire('He has 20 years of experience.', [fact('exp:2#m1')], ents), 'years-of-experience');
 });
 
-test("'AWS certified' is dropped while certifications is empty; an honest negative passes", () => {
+test("'AWS certified' is dropped with or without listed credentials; an honest negative passes", () => {
   assert.equal(tripwire('He is AWS certified.', [fact('profile:about')], ents), 'certification');
-  assert.equal(tripwire('No certifications are listed on this site.', [fact('profile:about')], ents), null);
+  assert.equal(tripwire('The site lists no AWS certification.', [fact('profile:about')], ents), null);
+  // With nothing listed, any credential claim that is not negated fails, as it always did.
+  const none = { ...ents, certifications: [] };
+  assert.equal(tripwire('He holds the Google AI Professional Certificate.', [fact('profile:about')], none), 'certification');
+  assert.equal(tripwire('He holds several certificates.', [fact('profile:about')], none), 'certification');
+  assert.equal(tripwire('No certifications are listed on this site.', [fact('profile:about')], none), null);
+});
+
+test('a listed credential passes when the sentence names it and cites its chunk', () => {
+  const kept: [string, string[]][] = [
+    ['He holds the Google AI Professional Certificate from Google on Coursera.', ['cert:google-ai-professional-certificate']],
+    ['He holds the Google AI Professional Certificate.', ['profile:about']],
+    ['He earned 20 course-completion badges from Anthropic on Claude Academy.', ['cert:claude-academy']],
+    ['He completed Claude Code in Action on Claude Academy.', ['cert:claude-academy']],
+    ['He has the Claude Code in Action badge.', ['cert:claude-academy']],
+    ['His Coursera course certificates come from IBM and the University of Michigan.', ['cert:coursera']],
+    ['He holds IBM course certificates on Coursera.', ['cert:coursera']],
+    ['He completed Understanding and Visualizing Data with Python from the University of Michigan on Coursera.', ['cert:coursera']],
+    ['He holds two Programiz PRO certificates: Learn Python Basics and Practice: Python Basics.', ['cert:programiz-pro']],
+    ['He has Python certificates from Programiz PRO.', ['cert:programiz-pro']],
+    ['He holds a Google AI certificate from Coursera.', ['cert:google-ai-professional-certificate']],
+    ['His certificates include AI Fundamentals and Data Science Methodology.', ['cert:google-ai-professional-certificate', 'cert:coursera']],
+    ['His credential ID for Tools for Data Science is OO314JZV9F2X.', ['cert:coursera']],
+    ['He earned a Claude Code badge from Anthropic.', ['cert:claude-academy']],
+    ["The site lists 37 credentials.", ['profile:about']],
+    // A project's own wording is not a claim about his credentials.
+    ['MCQ Tech Challenge is aimed at government job or certification prep.', ['project:mcq-tech-challenge#summary']],
+    // An ordinary phrase that happens to be a course title in lower case.
+    ['He used AI for data analysis in the project.', ['exp:0']],
+  ];
+  for (const [s, ids] of kept) assert.equal(tripwire(s, ids.map(fact), ents), null, s);
+});
+
+test('an unlisted, uncited or inflated credential is dropped', () => {
+  const dropped: [string, string[]][] = [
+    ['He is AWS certified.', ['cert:claude-academy']],
+    ['He holds the AWS Certified Solutions Architect credential.', ['profile:about']],
+    ['He is PMP certified.', ['profile:about']],
+    ['He holds a Google Cloud Professional certification.', ['cert:google-ai-professional-certificate']],
+    // The Vertex AI badge is Anthropic's, on Claude Academy: it cannot vouch for a Google Cloud certificate.
+    ['He holds a Google Cloud Professional certificate from Coursera.', ['cert:google-ai-professional-certificate', 'cert:claude-academy']],
+    ['He is Google Cloud certified.', ['cert:claude-academy']],
+    ['He holds a Google Cloud credential.', ['cert:claude-academy']],
+    ['He has a Stanford certificate in machine learning.', ['profile:about']],
+    ['He holds the Stanford machine learning certificate.', ['profile:about']],
+    // LinkedIn's name for the Michigan course: it is a single course, not the specialization.
+    ['He completed the Statistics with Python Specialization.', ['cert:coursera']],
+    ['He completed the Statistics with Python specialization from the University of Michigan.', ['cert:coursera']],
+    ['He has an IBM Data Science Professional Certificate.', ['cert:coursera']],
+    // An issuer alone names no credential.
+    ['He is Google certified.', ['cert:google-ai-professional-certificate']],
+    ['He holds IBM certificates.', ['cert:coursera']],
+    // Claude Academy items are course-completion badges, not certifications.
+    ['He is certified in Claude Code in Action.', ['cert:claude-academy']],
+    ['He holds 20 Claude Academy certifications.', ['cert:claude-academy']],
+    ['He holds an Anthropic certification.', ['cert:claude-academy']],
+    ['He is certified.', ['cert:claude-academy']],
+    // A listed title the cited chunk does not contain.
+    ['He holds the Google AI Professional Certificate.', ['exp:0']],
+    ['He completed AI Fundamentals.', ['exp:0']],
+    // Answer particles and contrasts do not negate the claim that follows.
+    ['No, he is AWS certified.', ['profile:about']],
+    ['He has not worked at OpenAI, but he is AWS certified.', ['profile:about']],
+  ];
+  for (const [s, ids] of dropped) assert.equal(tripwire(s, ids.map(fact), ents), 'certification', s);
+});
+
+test('a negated credential claims nothing, and a contrast after it is checked on its own', () => {
+  const about = [fact('profile:about')];
+  for (const s of [
+    'He is not AWS certified.',
+    'The site lists no AWS, PMP or Google Cloud certification.',
+    "He doesn't hold a Google Cloud Professional certification.",
+    'No certifications beyond those are listed.',
+  ]) {
+    assert.equal(tripwire(s, about, ents), null, s);
+  }
+  const gaipc = [fact('cert:google-ai-professional-certificate')];
+  assert.equal(tripwire('He does not hold a Google Cloud Professional certification; he holds the Google AI Professional Certificate.', gaipc, ents), null);
+  assert.equal(
+    tripwire('His Michigan credential is the course Understanding and Visualizing Data with Python, not the Statistics with Python Specialization.', [fact('cert:coursera')], ents),
+    null,
+  );
+  assert.equal(tripwire('He is not AWS certified, but he is PMP certified.', about, ents), 'certification');
+});
+
+test('credentialIssue caps a job requirement the listed credentials cannot meet', () => {
+  assert.equal(credentialIssue('AWS Certified Machine Learning Specialty', [fact('profile:about')], ents), 'certification');
+  assert.equal(credentialIssue('TensorFlow Developer Certificate', [fact('cert:coursera')], ents), 'certification');
+  assert.equal(credentialIssue('Google AI Professional Certificate', [fact('cert:google-ai-professional-certificate')], ents), null);
+  assert.equal(credentialIssue('Strong Python skills', [fact('exp:0')], ents), null, 'no credential asked for');
+});
+
+test('a hackathon result must be worded as the cited post words it', () => {
+  const bharat = [fact('achievement:ai-for-bharat-finalist')];
+  const pulse = [fact('achievement:promptwars-pulse')];
+  const kaggle = [fact('achievement:kaggle-hai-def')];
+  assert.equal(tripwire('Vyapar-Gyan was selected as a Top 36 Finalist at the AI for Bharat Hackathon.', bharat, ents), null);
+  assert.equal(tripwire('VyaparGyan did not win; it was selected as a Top 36 Finalist.', bharat, ents), null);
+  assert.equal(tripwire('He built VyaparGyan in a team of two.', bharat, ents), null);
+  assert.equal(tripwire('PULSE Stadium AI was built solo in 48 hours for PromptWars.', pulse, ents), null);
+  assert.equal(tripwire('UrbanCare AI was submitted to The MedGemma Impact Challenge on Kaggle.', kaggle, ents), null);
+  assert.equal(tripwire('Vyapar-Gyan won the AI for Bharat Hackathon.', bharat, ents), 'honour:won');
+  assert.equal(tripwire('Vyapar-Gyan was the winner of the AI for Bharat Hackathon.', bharat, ents), 'honour:winner');
+  assert.equal(tripwire('PULSE Stadium AI was a PromptWars finalist.', pulse, ents), 'honour:finalist');
+  assert.equal(tripwire('UrbanCare AI received an award in the HAI-DEF challenge.', kaggle, ents), 'honour:award');
+  assert.equal(tripwire('UrbanCare AI received an award in the MedGemma Impact Challenge.', kaggle, ents), 'honour:award');
+  assert.equal(tripwire('It took first place.', bharat, ents), 'honour:first place');
+  assert.equal(tripwire('It was a Top 10 finalist.', bharat, ents), 'number:10');
+  // honourIssue alone: a finalist is not a semi-finalist, and "won't" is not a result.
+  assert.equal(honourIssue('It was a semi-finalist.', bharat), 'honour:semi-finalist');
+  assert.equal(honourIssue("He won't overstate it.", []), null);
+});
+
+test('the new roles are employers only where they are cited', () => {
+  assert.equal(tripwire('He works at Outlier as a Freelance AI Trainer.', [fact('exp:5')], ents), null);
+  assert.equal(tripwire("He is the Owner at GOLDEN's Coreforge.", [fact('exp:3')], ents), null);
+  assert.equal(tripwire('He was a Freelance AI Trainer at Outlier.', [fact('exp:1')], ents), 'employer:Outlier');
+  assert.equal(tripwire('He was a Product Manager at Google.', [fact('exp:1')], ents), 'employer:Google');
 });
 
 test("'worked at Google DeepMind' is dropped; a listed employer in evidence passes", () => {
@@ -259,6 +394,8 @@ test('unlistedAffiliation finds an employer, school or venue a job requirement a
     'Freelance AI Agent Specialist at Mindrift',
     'Data Science Intern at Unified Mentor',
     'Evaluate LLM outputs for RLHF',
+    'Designer for Figma plugins',
+    'Freelance AI Trainer at Outlier',
   ];
   for (const r of tools) assert.equal(unlistedAffiliation(r, ents), null, r);
 });

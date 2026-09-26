@@ -1,6 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
+import dynamic from 'next/dynamic';
 import { Mail } from 'lucide-react';
 import { useReferenceMonth } from '@/components/experience/TimelineCard';
 import { FitCheckTrigger, LensSlot } from '@/components/recruiter/FitCheckTrigger';
@@ -18,6 +19,12 @@ import { expectedLabel } from '@/utils/dates';
 const [ROLE_TITLE, ...FOCUS_AREAS] = SITE.headline.split('|').map((s) => s.trim()).filter(Boolean);
 const CURRENT = profile.experience.find((e) => e.end === null) ?? null;
 const DEGREE = profile.education.find((e) => e.end !== null && /master/i.test(e.degree)) ?? null;
+
+// Server-rendered like the sections, but in its own chunk (shared with the
+// Certifications section), so certifications.json never joins the first-load bundle.
+const CertificationsFact = dynamic(() =>
+  import('@/components/certifications/CertificationsFact').then((m) => m.CertificationsFact),
+);
 
 type Props = { className?: string };
 
@@ -38,6 +45,7 @@ export function AtAGlance({ className }: Props) {
   ];
   if (CURRENT) facts.push({ term: 'Current program', detail: `${CURRENT.role} · ${CURRENT.company}` });
   if (DEGREE) facts.push({ term: 'Education', detail: expected ? `${DEGREE.degree} · ${expected}` : DEGREE.degree });
+  facts.push({ term: 'Credentials', detail: <CertificationsFact /> });
 
   return (
     <GlassCard

@@ -2,6 +2,8 @@
 
 import { useId, useRef, useState } from 'react';
 import { ChevronDown } from 'lucide-react';
+import achievementsRaw from '@/data/achievements.json';
+import certificationsRaw from '@/data/certifications.json';
 import profile from '@/data/profile.json';
 import { PROJECTS } from '@/data/projects';
 import { AIButton } from '@/components/ai/AIButton';
@@ -12,10 +14,18 @@ import { hashText, sessionGet, sessionSet } from '@/lib/ai/clientCache';
 import { AI_LIMITS } from '@/lib/ai/config';
 import { nearestLens, plausibleId, type BriefResponse, type FitData, type FitEvidence, type LensId } from '@/lib/ai/fit';
 import type { AiTarget } from '@/lib/ai/protocol';
+import { parseAchievements } from '@/lib/achievements';
 import { track } from '@/lib/analytics';
+import { parseCertifications } from '@/lib/certifications';
 import { cn } from '@/utils/cn';
 
-const DATA: FitData = { profile, projects: PROJECTS };
+// With the credentials and hackathon results, so cert: and achievement: evidence ids pass plausibleId.
+const DATA: FitData = {
+  profile,
+  projects: PROJECTS,
+  certifications: parseCertifications(certificationsRaw),
+  achievements: parseAchievements(achievementsRaw),
+};
 const NAME = new Map(PROJECTS.map((p) => [p.slug, p.name]));
 
 /** The client's second look: claims citing ids the site cannot have are dropped; mostly dropped reads as discarded. */

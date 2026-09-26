@@ -246,11 +246,11 @@ test.describe('contact form (#110, #111)', () => {
     await expect(page.locator('#contact textarea[name="message"]')).toHaveValue('');
   });
 
-  test('tel link has no spaces, kicker reads 06 / Contact, every link is named', async ({ page }) => {
+  test('tel link has no spaces, kicker reads 07 / Contact, every link is named', async ({ page }) => {
     await gotoSection(page, 'contact');
     const tel = await page.locator('#contact a[href^="tel:"]').first().getAttribute('href');
     expect(tel).toBe('tel:+917001124396');
-    await expect(page.locator('#contact header')).toContainText('06 / Contact');
+    await expect(page.locator('#contact header')).toContainText('07 / Contact');
     const unnamed = await page.locator('#contact a').evaluateAll((links) =>
       links
         .filter((a) => a.getClientRects().length > 0)

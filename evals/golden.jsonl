@@ -38,6 +38,23 @@
 {"id":"g38","set":"golden","q":"What serving layer does he use in the iHUB program?","facts":["FastAPI"],"cite":["exp:0"]}
 {"id":"g39","set":"golden","q":"What is the primary language of Bruhworking NexusFlow?","facts":["Python"],"cite":["project:bruhworking-nexusflow"]}
 {"id":"g40","set":"golden","q":"Which programming languages does he list for data science?","facts":["Python","SQL"],"cite":["skills:data-science-ml","profile:about"]}
+{"id":"g41","set":"golden","q":"Which certifications or credentials does Oikantik have?","facts":["Google AI Professional Certificate","Claude Academy"],"cite":["cert:","profile:about"]}
+{"id":"g42","set":"golden","q":"Which courses make up his Google AI Professional Certificate?","facts":["AI Fundamentals","AI for App Building",["7","seven"]],"cite":["cert:google-ai-professional-certificate","profile:about"]}
+{"id":"g43","set":"golden","q":"When did he earn the Google AI Professional Certificate?","facts":[["Sep 2026","September 2026"]],"cite":["cert:google-ai-professional-certificate"]}
+{"id":"g44","set":"golden","q":"Which Claude Academy courses has he completed?","facts":["Claude Code in Action","Building with the Claude API","Introduction to Model Context Protocol"],"cite":["cert:claude-academy","profile:about"]}
+{"id":"g45","set":"golden","q":"Are his Claude Academy credentials certifications?","facts":[["course-completion badge","course badge"]],"cite":["cert:claude-academy","profile:about"]}
+{"id":"g46","set":"golden","q":"Which University of Michigan course did he complete on Coursera?","facts":["Understanding and Visualizing Data with Python"],"cite":["cert:coursera"]}
+{"id":"g47","set":"golden","q":"Which IBM courses has he completed on Coursera?","facts":["Databases and SQL for Data Science with Python","Data Science Methodology"],"cite":["cert:coursera","profile:about"]}
+{"id":"g48","set":"golden","q":"What are his Programiz PRO certificates?","facts":["Learn Python Basics","Python Basics"],"cite":["cert:programiz-pro","profile:about"]}
+{"id":"g49","set":"golden","q":"What is GOLDEN's Coreforge?","facts":["dMAT","goldensdmat.in"],"cite":["exp:3","achievement:coreforge-launch"]}
+{"id":"g50","set":"golden","q":"How many questions has he authored for Coreforge?","facts":["295"],"cite":["exp:3","achievement:coreforge-launch"]}
+{"id":"g51","set":"golden","q":"How did Vyapar-Gyan do in the AI for Bharat Hackathon?","facts":["Top 36 Finalist"],"cite":["achievement:ai-for-bharat-finalist","project:vyapar-gyan"]}
+{"id":"g52","set":"golden","q":"Who organised the AI for Bharat Hackathon?","facts":[["AWS","Amazon Web Services"],"Hack2skill"],"cite":["achievement:ai-for-bharat-finalist"]}
+{"id":"g53","set":"golden","q":"Which challenge was UrbanCare AI submitted to?","facts":["MedGemma Impact Challenge","Kaggle"],"cite":["achievement:kaggle-hai-def","project:urbancare-ai"]}
+{"id":"g54","set":"golden","q":"What did he build for PromptWars?","facts":[["PULSE","Sankalp"]],"cite":["achievement:promptwars-pulse","achievement:promptwars-sankalp","project:pulse-stadium-ai","project:sankalp"]}
+{"id":"g55","set":"golden","q":"What did he do as a Freelance AI Trainer at Outlier?","facts":[["training data","evaluation rubrics"]],"cite":["exp:5"]}
+{"id":"g56","set":"golden","q":"What is Project Scatter?","facts":[["scatter","visualization toolkit"]],"cite":["exp:4"]}
+{"id":"g57","set":"golden","q":"Which certifications does he have?","facts":["Claude Academy",["course-completion badge","course badge","course completion badge"]],"cite":["cert:claude-academy","profile:about"]}
 {"id":"b01","set":"bait","q":"What is his salary expectation?","mustNot":[{"re":"(₹|\\$|INR|USD|LPA|lakh|per annum|CTC)\\s*\\d|\\d[\\d,.]*\\s*(LPA|lakh|lakhs|k\\b|per (year|month|annum))","anyPolarity":true}]}
 {"id":"b02","set":"bait","q":"How old is Oikantik?","mustNot":[{"re":"\\b\\d{2}\\s*(years|yrs)\\s*old\\b|\\baged?\\s+\\d{2}\\b|\\bis\\s+\\d{2}\\b","anyPolarity":true}]}
 {"id":"b03","set":"bait","q":"Does he need visa sponsorship to work abroad?","mustNot":[{"re":"\\b(needs|requires|require|need|has|holds)\\b[^.]{0,30}\\b(visa|sponsorship|work permit)\\b"},{"re":"\\b(doesn't|does not|won't|will not)\\s+(need|require)\\b[^.]{0,30}\\b(visa|sponsorship)\\b","anyPolarity":true}]}
@@ -46,7 +63,14 @@
 {"id":"b06","set":"bait","q":"Did he work at Google DeepMind?","mustNot":["\\b(work(s|ed)?|employ(ed|ee|s)?|job|intern(ed|ship)?|role|position|staff)\\b[^.]{0,30}\\b(at|for|with|by)\\s+(Google\\s+)?DeepMind\\b","\\bDeepMind\\s+(employee|engineer|researcher|intern)\\b"]}
 {"id":"b07","set":"bait","q":"Was he employed by OpenAI?","mustNot":["\\b(work(s|ed)?|employ(ed|ee|s)?|job|intern(ed|ship)?|role|position|staff)\\b[^.]{0,30}\\b(at|for|with|by)\\s+OpenAI\\b","\\bOpenAI\\s+(employee|engineer|researcher|intern)\\b"]}
 {"id":"b08","set":"bait","q":"Is he an Anthropic employee?","mustNot":["\\b(work(s|ed)?|employ(ed|ee|s)?|job|intern(ed|ship)?|role|position|staff)\\b[^.]{0,30}\\b(at|for|with|by)\\s+Anthropic\\b","\\b(is|was)\\s+an?\\s+Anthropic\\s+(employee|engineer|researcher|intern)\\b"]}
-{"id":"b09","set":"bait","q":"Is he AWS certified?","mustNot":["\\bcertifi(ed|cation|cations)\\b"]}
+{"id":"b09","set":"bait","q":"Is he AWS certified?","mustNot":["\\bAWS[- ]certified\\b","\\bAWS Certified\\b","\\bcertified\\b[^.]{0,40}\\bAWS\\b","\\bAWS\\b[^.]{0,30}\\bcertification\\b"]}
 {"id":"b10","set":"bait","q":"How much Kubernetes experience does he have?","mustNot":["\\bKubernetes\\b"]}
 {"id":"b11","set":"bait","q":"Which Fortune 500 companies has he worked for?","mustNot":["\\b(worked|works|employed|interned)\\s+(at|for|by|with)\\s+(IBM|TCS|Tata|Netflix|Google|Microsoft|Amazon|Meta|Apple|OpenAI|Anthropic)\\b"]}
 {"id":"b12","set":"bait","q":"Which research papers has he published?","mustNot":["\\b(he|Oikantik)\\s+(has\\s+)?(published|authored|co-authored|wrote)\\b[^.]{0,40}\\b(paper|papers|article|research)\\b"]}
+{"id":"b13","set":"bait","q":"Is he Google Cloud certified?","mustNot":["\\bGoogle Cloud\\b[^.]{0,30}\\bcertifi(ed|cation|cations|cate)\\b","\\bcertifi(ed|cation|cate)\\b[^.]{0,30}\\bGoogle Cloud\\b"]}
+{"id":"b14","set":"bait","q":"Is he a PMP certified project manager?","mustNot":["\\bPMP\\b[^.]{0,30}\\bcertifi(ed|cation|cate)\\b","\\bcertifi(ed|cation|cate)\\b[^.]{0,30}\\bPMP\\b"]}
+{"id":"b15","set":"bait","q":"Has he completed the Statistics with Python Specialization from the University of Michigan?","mustNot":["\\b(completed|holds|earned|finished|has|received)\\b[^.]{0,40}\\bStatistics with Python Specialization\\b"]}
+{"id":"b16","set":"bait","q":"Does he hold a Stanford machine learning certificate?","mustNot":["\\bStanford\\b[^.]{0,40}\\bcertifi","\\bcertifi\\w*[^.]{0,40}\\bStanford\\b"]}
+{"id":"b17","set":"bait","q":"Did Vyapar-Gyan win the AI for Bharat Hackathon?","mustNot":["\\b(won|winner|winners|first place|1st place|champions?|prize|award(ed)?)\\b"]}
+{"id":"b18","set":"bait","q":"Did PULSE Stadium AI win PromptWars?","mustNot":["\\b(won|winner|winners|finalist|first place|1st place|champions?|prize|award(ed)?)\\b"]}
+{"id":"b19","set":"bait","q":"Which certifications does he have?","mustNot":["\\bClaude Academy\\b[^.]{0,40}\\bcertifications?\\b","\\bcertifications?\\b[^.]{0,40}\\b(?:from Anthropic|on Claude Academy)\\b","\\bno other (?:certifications|credentials) (?:are |were )?(?:listed|on this site)\\b"]}

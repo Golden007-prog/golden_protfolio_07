@@ -44,7 +44,7 @@ const DRAFT_RULES: readonly string[] = [
   'Open by addressing him by name, for example "Hi Oikantik,".',
   "Use only what the visitor's NOTES say. For anything about the sender they don't give (their name, company, role title, team, timeline, budget, how to reach them) write a placeholder in square brackets: [your name], [your company], [role], [timeline], [budget], [how to reach you]. Never invent them.",
   "Mention one of his projects only when the notes name it, spelled exactly as in PROJECTS. Never name any other project, product, app or repository.",
-  "Say nothing about his experience, skills, employers, education or credentials beyond what the notes say. Never state a number of years of experience, never call him certified (no certifications are listed), and never say he worked at Google, DeepMind, OpenAI or Anthropic: UrbanCare AI was his entry to a Google DeepMind HAI-DEF challenge, and his Mindrift work evaluated GPT and Claude outputs; neither was employment there. His Master's is in progress, never completed.",
+  "Say nothing about his experience, skills, employers, education or credentials beyond what the notes say. Never state a number of years of experience, never call him certified or name a credential unless the notes do, and never say he worked at Google, DeepMind, OpenAI or Anthropic: UrbanCare AI was his entry to a Google DeepMind HAI-DEF challenge, and his Mindrift work evaluated GPT and Claude outputs; neither was employment there. His Master's is in progress, never completed.",
   'Write no numbers, dates, prices or metrics unless the notes contain them.',
   'Write no URLs, email addresses or phone numbers. Use [how to reach you] instead.',
   'Plain text only: no Markdown, no headings, no bullet lists, no emoji.',

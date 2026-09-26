@@ -138,7 +138,7 @@ function firstSentence(text: string): string {
 // Words in project names that say nothing about which project is meant.
 const GENERIC_NAME_WORDS = new Set([
   'ai', 'the', 'and', 'of', 'for', 'app', 'data', 'analysis', 'analytics', 'prediction', 'forecasting',
-  'challenge', 'tech', 'stock', 'content', 'side', 'effects', 'lab', 'hr',
+  'challenge', 'tech', 'stock', 'content', 'side', 'effects', 'lab', 'hr', 'agent', 'support', 'domain',
 ]);
 
 const singular = (w: string) => (w.length > 3 ? w.replace(/s$/, '') : w);

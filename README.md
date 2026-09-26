@@ -2,7 +2,7 @@
 
 The personal site of Oikantik Basu, live at **[www.basuoikantik.in](https://www.basuoikantik.in)**. It is a single scrolling page (hero, about, skills, projects, experience, principles, contact) with static case-study pages for the projects that have one. It runs on Next.js 16 (App Router, Turbopack) on Vercel, with React 19, Tailwind CSS 4, framer-motion and GSAP for motion, and React Three Fiber for the 3D scenes.
 
-All copy comes from the data files in `src/data/` (the profile, projects and skills), so changing a fact there changes it everywhere it appears, including the page title, the social cards, the JSON-LD and the vCard.
+All copy comes from the data files in `src/data/` (the profile, projects, skills, credentials and achievements), so changing a fact there changes it everywhere it appears, including the page title, the social cards, the JSON-LD and the vCard.
 
 ## Stack
 
@@ -55,6 +55,7 @@ No environment variables are needed to run the site locally. Without `GOOGLE_AI_
 | `npm run ai:generate` | Runs every `scripts/ai/gen-*.mjs` generator to refresh the precomputed AI content in `src/data/ai-generated/` (hash-gated; exits 0 without a key or on a 429). |
 | `npm run ai:review` | Owner review of precomputed AI content: interactive, or `-- --list`, `-- --approve store:key`, `-- --reject store:key`. |
 | `npm run ai:scan` | After a build: fails if a Google API key pattern appears in `.next/static`, the prerendered pages, `public/` or this README, if `@google/genai` or the key's variable name reaches client code, or if `next.config.ts`'s `env` block holds anything but its four allowed keys (CI runs it). |
+| `npm run credentials:verify` | Opens every credential in `src/data/certifications.json` in a logged-out browser and fails unless the issuer's public page shows his name and the title. Pass ids to check a few (`npm run credentials:verify -- claude-101`). Needs `npx playwright install chromium` once. |
 
 `npm run budget -- --budget /=900000` overrides one route's budget for a single run, which is handy when checking a change locally.
 
@@ -95,6 +96,16 @@ Only names are listed here; values live in the Vercel project settings or a loca
 **Shared building blocks.** `src/components/ui/` is the UI kit (Button, Dialog, Toast, Tooltip, CopyButton, DownloadCvButton, SocialLinks, LocalTime, Skeleton). `src/components/shared/` holds GlassCard, LottieIcon, Deferred3D (mounts a WebGL scene only near the viewport and keeps at most one live WebGL context), LazyMount, CanvasBoundary and BackgroundVideo. URL state (`?project=`, `?skill=`, the filters and the section hash) goes only through `src/lib/urlState.ts`, keyboard shortcuts only through `src/hooks/useHotkeys.ts`, and site facts only through `src/lib/site.ts`.
 
 **Styling rules.** Colours are tokens with dark and light values in `src/index.css`; the lint guard rejects raw white/black alpha utilities because they vanish in the light theme. Touch targets are at least 44px, the z-index scale is fixed (`z-nav`, `z-dock`, `z-overlay`, `z-toast`, `z-cursor`), and each feature's global CSS sits in its own file inside `@layer components`. `src/styles/features/platform.css` also holds the print stylesheet, which prints a light single-column page with link targets spelled out.
+
+## Profile data sync
+
+The five newer experience roles in `src/data/profile.json`, the credentials in `src/data/certifications.json` and the hackathon and launch entries in `src/data/achievements.json` were captured on 2026-09-26 from Oikantik's own accounts: his LinkedIn profile and posts, the Claude Academy dashboard, the Coursera certificates tab, and the Programiz PRO certificates that LinkedIn links to. The newer entries in `src/data/projects.json` come from the READMEs of his public GitHub repositories. Where two sources disagree, the issuer's site wins over LinkedIn, so titles and dates are the ones Claude Academy, Coursera or Programiz show (the University of Michigan credential, for example, is the single course *Understanding and Visualizing Data with Python*).
+
+Only verified credentials ship. Every entry's `url` is the issuer's public verification page, and it went into the file only after that page, opened in a logged-out browser, showed his name and the credential's title. `parseCertifications` (`src/lib/certifications.ts`) fails the build on a malformed entry or on any link that is not https on `academy.claude.com`, `www.coursera.org` or `programiz.pro`, and the kind stays visible: the 20 Claude Academy items are course completion badges, not certifications. The achievements hold only what he said in his own posts, with no added ranks, prizes or numbers and no teammates named (`parseAchievements` enforces what it can). Private repositories, personal documents, other people's profiles and LinkedIn audience analytics are never published, and no years-of-experience total is computed from the roles.
+
+To re-verify, install the browser once with `npx playwright install chromium`, then run `npm run credentials:verify` (the same as `node scripts/verify-credentials.mjs`). It opens every credential in a fresh logged-out context, requires his name, most of the title's words, a status below 400 and a final URL still on the issuer's host (a login wall fails), retries once, and exits 1 if anything fails. Pass ids to check a few (`node scripts/verify-credentials.mjs claude-101 ai-fundamentals`) or `--json <path>` to keep the results. `npm run test:unit` covers the data offline: unique ids, valid dates, allowed hosts, certificate and course links that resolve both ways, and every achievement's project on the site. When a credential stops verifying, remove it from `certifications.json` rather than keep a link that no longer proves anything.
+
+The same data feeds the site's JSON-LD (`src/lib/structured-data.ts`): each credential is a `hasCredential` entry on the Person (an `EducationalOccupationalCredential` recognised by its issuer, with the verification page as its `url`), the finalist placing is the Person's only `award`, in the words of his post, and GOLDEN's Coreforge is an `Organization` with him as `founder`.
 
 ## AI features (Gemini)
 

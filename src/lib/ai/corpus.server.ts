@@ -1,4 +1,6 @@
 import 'server-only';
+import achievementsRaw from '@/data/achievements.json';
+import certificationsRaw from '@/data/certifications.json';
 import githubFacts from '@/data/github-facts.json';
 import liveSnapshot from '@/data/live-snapshot.json';
 import profile from '@/data/profile.json';
@@ -8,6 +10,8 @@ import { SITE_COPY } from '@/data/site-copy';
 import skillsIndex from '@/data/skills-index.json';
 import tools from '@/data/tools.json';
 import vectorFile from '@/data/ai-vectors.json';
+import { parseAchievements } from '@/lib/achievements';
+import { parseCertifications } from '@/lib/certifications';
 import { KNOWN_SECTIONS } from './actions';
 import { AI_EMBED_BUDGET_MS } from './config';
 import { buildCorpus, corpusHash, entities, type Chunk, type CorpusLiveSnapshot, type Entities } from './corpus';
@@ -62,6 +66,8 @@ function loadVectors(chunks: readonly Chunk[]): { vectors: Map<string, Float32Ar
 
 export function getCorpus(): Corpus {
   if (memo) return memo;
+  const certifications = parseCertifications(certificationsRaw);
+  const achievements = parseAchievements(achievementsRaw);
   const chunks = buildCorpus({
     profile,
     projects: PROJECTS,
@@ -71,6 +77,8 @@ export function getCorpus(): Corpus {
     skillsIndex,
     liveSnapshot: liveSnapshot as CorpusLiveSnapshot,
     siteCopy: SITE_COPY,
+    certifications,
+    achievements,
   });
   const { vectors, model } = loadVectors(chunks);
   const projectVecs = new Map<string, Float32Array>();
@@ -89,7 +97,7 @@ export function getCorpus(): Corpus {
     vectors,
     vectorModel: model,
     projectVecs,
-    entities: entities({ profile, projects: PROJECTS, skills: skillsIndex, reading }),
+    entities: entities({ profile, projects: PROJECTS, skills: skillsIndex, reading, certifications, achievements }),
     hash: corpusHash(chunks),
     known: {
       slugs: PROJECTS.map((p) => p.slug),

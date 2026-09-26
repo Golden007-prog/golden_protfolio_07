@@ -34,6 +34,9 @@ const SkillsSection = dynamic(() => import('./components/skills/SkillsSection').
 const ToolsStrip = dynamic(() => import('./components/shared/ToolsStrip').then((m) => m.ToolsStrip));
 const ProjectsSection = dynamic(() => import('./components/projects/ProjectsSection').then((m) => m.ProjectsSection));
 const ExperienceSection = dynamic(() => import('./components/experience/ExperienceSection').then((m) => m.ExperienceSection));
+const CertificationsSection = dynamic(() =>
+  import('./components/certifications/CertificationsSection').then((m) => m.CertificationsSection),
+);
 const PhilosophySection = dynamic(() => import('./components/shared/PhilosophySection').then((m) => m.PhilosophySection));
 const ContactSection = dynamic(() => import('./components/contact/ContactSection').then((m) => m.ContactSection));
 // A ?project or ?skill link opens its dialog on arrival. The dialogs load on demand, so
@@ -295,6 +298,9 @@ function App({ lensChips = [], interests = [] }: AppProps) {
           </SectionTransition>
           <SectionTransition className={SHEET}>
             <ExperienceSection />
+          </SectionTransition>
+          <SectionTransition className={SHEET}>
+            <CertificationsSection />
           </SectionTransition>
           <SectionTransition className={SHEET}>
             <PhilosophySection />

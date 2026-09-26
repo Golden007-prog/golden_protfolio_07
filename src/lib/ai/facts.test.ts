@@ -9,14 +9,20 @@ test('overlapping roles: the union of months is less than the sum', () => {
   const { rows, unionMonths } = experienceSpans(profile.experience, '2026-09');
   const sum = rows.reduce((n, r) => n + r.months, 0);
   assert.ok(unionMonths < sum, `${unionMonths} >= ${sum}`);
-  // Mar 2025 to Sep 2026 inclusive.
-  assert.equal(unionMonths, 19);
+  // Jan 2021 to Feb 2022, Apr 2023 to Jun 2024, and Mar 2025 to Sep 2026, each inclusive:
+  // the spans are a fact for the tools, never a years-of-experience total.
+  assert.equal(unionMonths, 14 + 15 + 19);
   assert.deepEqual(
     rows.map((r) => [r.company, r.months, r.label]),
     [
       ['iHUB DivyaSampark @ IIT Roorkee', 9, '9 mos'],
       ['Mindrift', 16, '1 yr 4 mos'],
       ['Unified Mentor Private Limited', 4, '4 mos'],
+      ["GOLDEN's Coreforge", 3, '3 mos'],
+      ['Alignerr', 3, '3 mos'],
+      ['Outlier', 2, '2 mos'],
+      ['Telangana Desam Leader', 15, '1 yr 3 mos'],
+      ['K.pop Merchandise', 14, '1 yr 2 mos'],
     ],
   );
 });

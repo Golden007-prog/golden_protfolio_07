@@ -109,7 +109,7 @@ test.beforeEach(async ({ page }) => {
 /* ---------------- #92 data and slugs ---------------- */
 
 test.describe('project data (#92)', () => {
-  test('ten unique slugs equal slugify(name), and the grid renders one card per project', async ({ page }, info) => {
+  test('unique slugs equal slugify(name), and the grid renders one card per project', async ({ page }, info) => {
     test.skip(!once(info), 'one project is enough');
     expect(new Set(SLUGS).size).toBe(projects.length);
     for (const p of projects) expect((p as { slug?: string }).slug, p.name).toBe(slugify(p.name));
@@ -118,7 +118,9 @@ test.describe('project data (#92)', () => {
     await expect(cards(page)).toHaveCount(projects.length);
     const rendered = await cards(page).evaluateAll((els) => els.map((el) => el.getAttribute('data-project-card')));
     expect([...rendered].sort()).toEqual([...SLUGS].sort());
-    await expect(page.locator('#projects header')).toContainText('ten shipped projects');
+    // countWord in src/data/projects.ts: words up to twelve, digits past it.
+    const WORDS = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve'];
+    await expect(page.locator('#projects header')).toContainText(`${WORDS[projects.length] ?? projects.length} shipped projects`);
   });
 });
 

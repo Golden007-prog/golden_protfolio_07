@@ -21,7 +21,9 @@ import type { AiFallback, AiTarget } from './protocol.ts';
 import { redact } from './redact.ts';
 import { visible, type StoreEntry } from './reviewGate.ts';
 import { validTarget, type KnownTargets } from './sanitize.ts';
-import { numbersIn, resolveId, tripwire, unlistedAffiliation, verifyClaims, type ClaimEntities, type FactSource } from './verify.ts';
+import { credentialIssue, numbersIn, resolveId, tripwire, unlistedAffiliation, verifyClaims, type ClaimEntities, type FactSource } from './verify.ts';
+import type { AchievementData } from '../achievements.ts';
+import { certificationGroups, type CertificationData } from '../certifications.ts';
 import { projectsForSkill } from '../skillProjects.ts';
 import { slugify } from '../slug.ts';
 import { matchesTech, techFamily } from '../tech.ts';
@@ -45,7 +47,14 @@ export type FitProfile = {
 
 export type FitProject = { slug: string; name: string; tagline: string; techStack: readonly string[]; featured?: boolean };
 
-export type FitData = { profile: FitProfile; projects: readonly FitProject[] };
+export type FitData = {
+  profile: FitProfile;
+  projects: readonly FitProject[];
+  /** parseCertifications(certifications.json): lets plausibleId accept cert:<group> ids. */
+  certifications?: CertificationData | null;
+  /** parseAchievements(achievements.json): lets plausibleId accept achievement:<id> ids. */
+  achievements?: AchievementData | null;
+};
 
 export const REQ_KINDS = ['must', 'nice'] as const;
 export type ReqKind = (typeof REQ_KINDS)[number];
@@ -560,13 +569,15 @@ export function onlySiteTerms(text: string, vocab: readonly VocabTerm[]): boolea
   return coverWords(text).every((forms) => forms.some((w) => covered.has(w) || STOPWORDS.has(w) || TERM_FILLER.has(w)));
 }
 
-// A credential ('TensorFlow Developer Certificate', 'AWS Certified ...', 'licensed').
-const CREDENTIAL = /\bcertif\w*|\blicen[cs](?:e|ed)\b|\baccredit\w*/i;
+// No licence or accreditation is listed, so a requirement for one is never evidenced.
+const LICENCE = /\blicen[cs](?:e|ed)\b|\baccredit\w*/i;
 
 /**
  * Why a requirement cannot be evidenced or adjacent whatever the evidence says, or
- * null: it asks for an employer, school or venue the profile doesn't list, or for a
- * credential while no certification is listed (or none of the cited text mentions one).
+ * null: it asks for an employer, school or venue the profile doesn't list, for a
+ * licence, or for a certification that is not one certifications.json lists and
+ * the cited evidence contains ('AWS Certified …', 'TensorFlow Developer
+ * Certificate'; see credentialIssue).
  */
 export function requirementCap(req: Pick<Requirement, 'text' | 'gloss'>, evidenceTexts: readonly string[], entities: ClaimEntities): string | null {
   const texts = [req.text, req.gloss ?? ''].filter(Boolean);
@@ -574,10 +585,7 @@ export function requirementCap(req: Pick<Requirement, 'text' | 'gloss'>, evidenc
     const org = unlistedAffiliation(t, entities);
     if (org) return `affiliation:${org}`;
   }
-  if (texts.some((t) => CREDENTIAL.test(t))) {
-    const listed = (entities.certifications ?? []).length > 0;
-    if (!listed || !evidenceTexts.some((t) => CREDENTIAL.test(t))) return 'credential';
-  }
+  if (texts.some((t) => LICENCE.test(t) || credentialIssue(t, evidenceTexts, entities))) return 'credential';
   return null;
 }
 
@@ -735,6 +743,10 @@ export function plausibleId(id: string, data: FitData): boolean {
   if (m) return Object.keys(data.profile.skills).some((c) => slugify(c) === m![1]);
   m = /^(?:project:([a-z0-9-]+)#(?:tagline|summary|full|problem|solution|lessons|stack)|facts:([a-z0-9-]+))$/.exec(id);
   if (m) return data.projects.some((p) => p.slug === (m![1] ?? m![2]));
+  m = /^cert:([a-z0-9-]+)$/.exec(id);
+  if (m) return Boolean(data.certifications) && certificationGroups(data.certifications!).some((g) => g.id === m![1]);
+  m = /^achievement:([a-z0-9-]+)$/.exec(id);
+  if (m) return Boolean(data.achievements?.items.some((a) => a.id === m![1]));
   return /^(?:reading|tool):\d+$|^copy:philosophy#\d+$/.test(id);
 }
 

@@ -1,0 +1,49 @@
+{
+  "id": 136605,
+  "ref": "https://www.kaggle.com/competitions/biohub-cell-tracking-during-development",
+  "title": "Biohub - Cell Tracking During Development",
+  "url": "https://www.kaggle.com/competitions/biohub-cell-tracking-during-development",
+  "description": "Detect and track zebrafish cells through 3D space and time",
+  "organizationName": "Biohub",
+  "category": "Research",
+  "reward": "60,000 Usd",
+  "tags": [
+    {
+      "ref": "image",
+      "name": "image"
+    },
+    {
+      "ref": "video",
+      "name": "video"
+    },
+    {
+      "ref": "computer vision",
+      "name": "computer vision"
+    },
+    {
+      "ref": "object detection",
+      "name": "object detection"
+    },
+    {
+      "ref": "biology",
+      "name": "biology"
+    },
+    {
+      "ref": "custom metric",
+      "name": "custom metric"
+    }
+  ],
+  "deadline": "2026-09-29T23:59:00Z",
+  "teamCount": 3908,
+  "newEntrantDeadline": "2026-09-22T23:59:00Z",
+  "enabledDate": "2026-06-29T19:01:13.613Z",
+  "maxDailySubmissions": 5,
+  "maxTeamSize": 5,
+  "evaluationMetric": "CZI Biohub Zebrafish 133605",
+  "awardsPoints": true,
+  "isKernelsSubmissionsOnly": true,
+  "thumbnailImageUrl": "https://storage.googleapis.com/kaggle-competitions/kaggle/136605/logos/thumb76_76.png",
+  "hostName": "Biohub",
+  "dateCreated": "2026-04-01T21:58:55.077484900Z",
+  "licenseName": "CC0: Public Domain"
+}

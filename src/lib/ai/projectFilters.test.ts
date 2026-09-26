@@ -379,7 +379,8 @@ test('interest seeds come from topics, stack and the write-up', () => {
   const seeds = (id: string) => interestSeeds(INTERESTS.find((i) => i.id === id)!, PROJECTS);
   assert.ok(seeds('agents').includes('bruhworking-nexusflow'));
   assert.ok(seeds('rag').includes('urbancare-ai'));
-  assert.deepEqual(seeds('forecasting'), ['tcs-stock-forecasting']);
+  // KSP DAPPA lists a forecasting topic; MarketPulse 'makes no forecasting claims', which is no seed.
+  assert.deepEqual(seeds('forecasting'), ['tcs-stock-forecasting', 'ksp-dappa']);
 });
 
 /* ---------------- #201 starters and quick answers ---------------- */

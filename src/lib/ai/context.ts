@@ -1,8 +1,9 @@
 /*
  * Scope rules and the context packer. Every scope kind is implemented here once,
  * so no feature package re-implements one:
- *   project:    its own chunks, its GitHub facts, and the skills in its stack
- *               (their reference chunks and the skill lists that name them);
+ *   project:    its own chunks, its GitHub facts, the hackathon results that
+ *               name it, and the skills in its stack (their reference chunks and
+ *               the skill lists that name them);
  *   skill:      projects whose techStack matchesTech the exact skill, experience
  *               chunks naming it (exact but for the first letter's case, as the
  *               skill modal cites them; ReAct is still not React),
@@ -38,7 +39,8 @@ export function scopeFilter(scope: AskScope | null | undefined, data: ScopeData)
     const refs = new Set(skills.map((s) => `ref:${slugify(s)}`));
     const lists = new Set(listed.filter(([, list]) => list.some((s) => skills.includes(s))).map(([cat]) => `skills:${slugify(cat)}`));
     const own = `project:${project.slug}#`;
-    return (c) => c.id.startsWith(own) || c.id === `facts:${project.slug}` || refs.has(c.id) || lists.has(c.id);
+    const result = (c: Chunk) => c.id.startsWith('achievement:') && c.target.kind === 'project' && c.target.slug === project.slug;
+    return (c) => c.id.startsWith(own) || c.id === `facts:${project.slug}` || result(c) || refs.has(c.id) || lists.has(c.id);
   }
 
   if ('skill' in scope) {
