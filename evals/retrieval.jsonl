@@ -42,3 +42,10 @@
 {"q":"dMAT practice platform","expect":["exp:3","achievement:coreforge-launch"]}
 {"q":"ShieldFlow GitLab hackathon","expect":["achievement:gitlab-hackathon-shieldflow"]}
 {"q":"Freelance AI Trainer at Outlier","expect":["exp:5"]}
+{"q":"CoreForge dMAT practice for German Master's applicants","expect":["coreforge:overview"]}
+{"q":"How are CoreForge questions generated and checked?","expect":["coreforge:engineering"]}
+{"q":"CoreForge Free and Pro plans","expect":["coreforge:plans"]}
+{"q":"Kaggle profile and tier","expect":["kaggle:profile"]}
+{"q":"Kaggle badges","expect":["kaggle:badges"]}
+{"q":"UrbanCare writeup for the MedGemma Impact Challenge","expect":["kaggle:writeup-urbancare-ai-a-multimodal-clinical-copilot-for-re"]}
+{"q":"Biohub cell tracking competition rank","expect":["kaggle:competition-biohub-cell-tracking-during-development"]}

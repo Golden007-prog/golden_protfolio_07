@@ -3,8 +3,8 @@ import { collectPageErrors, expect, expectNoHorizontalOverflow, test } from './h
 
 /*
  * Package "kaggle": the Kaggle section (profile, tiers, counts, open competitions,
- * writeups, badges, competition history) and the badge strip. Every test skips
- * itself while no page renders #kaggle, so the spec can land before the mount.
+ * writeups, badges, competition history) and the badge strip. The section is
+ * mounted on the home page, so a page without #kaggle fails rather than skips.
  * Assertions compare the page with itself (counts against lists, links against
  * data-url), so they hold for live data and for the snapshot alike.
  */
@@ -71,7 +71,7 @@ async function openKaggle(page: Page): Promise<boolean> {
 
 async function kaggle(page: Page): Promise<Locator> {
   const found = await openKaggle(page);
-  test.skip(!found, 'no page renders #kaggle yet');
+  expect(found, 'a page renders #kaggle').toBe(true);
   return page.locator(SECTION);
 }
 

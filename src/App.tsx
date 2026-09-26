@@ -12,6 +12,8 @@ import LoadingScreen from './components/loading/LoadingScreen';
 import { BackToTop } from './components/shared/BackToTop';
 import { LazyMount } from './components/shared/LazyMount';
 import type { SectionToolsRequest } from './components/ai/discovery/SectionTools';
+import type { CoreforgeNewsItem } from './components/coreforge/NewsList';
+import { KaggleDataContext } from './components/kaggle/KaggleDataContext';
 import { ServerInterestsContext } from './components/projects/projectsAi';
 import { LensChipsContext, type LensChip } from './components/recruiter/FitCheckTrigger';
 import { useIntro } from './contexts/IntroContext';
@@ -22,6 +24,7 @@ import { useMediaQuery } from './hooks/useMediaQuery';
 import { useMotionPrefs } from './hooks/useMotionPrefs';
 import { openAssistant } from './lib/ai/bus';
 import type { InterestView } from './lib/ai/prompts/projects';
+import type { KaggleData } from './lib/kaggle/types';
 import { SECTIONS } from './lib/site';
 import { findTarget } from './lib/urlState';
 
@@ -33,10 +36,12 @@ import { findTarget } from './lib/urlState';
 const SkillsSection = dynamic(() => import('./components/skills/SkillsSection').then((m) => m.SkillsSection));
 const ToolsStrip = dynamic(() => import('./components/shared/ToolsStrip').then((m) => m.ToolsStrip));
 const ProjectsSection = dynamic(() => import('./components/projects/ProjectsSection').then((m) => m.ProjectsSection));
+const CoreforgeSection = dynamic(() => import('./components/coreforge/CoreforgeSection').then((m) => m.CoreforgeSection));
 const ExperienceSection = dynamic(() => import('./components/experience/ExperienceSection').then((m) => m.ExperienceSection));
 const CertificationsSection = dynamic(() =>
   import('./components/certifications/CertificationsSection').then((m) => m.CertificationsSection),
 );
+const KaggleSection = dynamic(() => import('./components/kaggle/KaggleSection').then((m) => m.KaggleSection));
 const PhilosophySection = dynamic(() => import('./components/shared/PhilosophySection').then((m) => m.PhilosophySection));
 const ContactSection = dynamic(() => import('./components/contact/ContactSection').then((m) => m.ContactSection));
 // A ?project or ?skill link opens its dialog on arrival. The dialogs load on demand, so
@@ -243,9 +248,13 @@ type AppProps = {
   /** Worked out on the server (app/page.tsx), so these chips are in the first paint. */
   lensChips?: readonly LensChip[];
   interests?: readonly InterestView[];
+  /** Read on the server (live or the committed snapshot); the section is left out without it. */
+  kaggle?: KaggleData | null;
+  /** goldensdmat.in news for the CoreForge section; the slot is left out when empty. */
+  coreforgeNews?: readonly CoreforgeNewsItem[];
 };
 
-function App({ lensChips = [], interests = [] }: AppProps) {
+function App({ lensChips = [], interests = [], kaggle = null, coreforgeNews = [] }: AppProps) {
   const pageRef = useRef<HTMLDivElement>(null);
   // Read during the first render, before any effect can rewrite the hash; never rendered.
   const [arrivalHash] = useState(() => (typeof window === 'undefined' ? '' : window.location.hash.slice(1)));
@@ -282,7 +291,9 @@ function App({ lensChips = [], interests = [] }: AppProps) {
           </div>
           <SectionTransition className={SHEET}>
             <LensChipsContext.Provider value={lensChips}>
-              <AboutSection />
+              <KaggleDataContext.Provider value={kaggle}>
+                <AboutSection />
+              </KaggleDataContext.Provider>
             </LensChipsContext.Provider>
           </SectionTransition>
           <SectionTransition className={SHEET}>
@@ -297,11 +308,19 @@ function App({ lensChips = [], interests = [] }: AppProps) {
             </ServerInterestsContext.Provider>
           </SectionTransition>
           <SectionTransition className={SHEET}>
+            <CoreforgeSection newsItems={coreforgeNews} />
+          </SectionTransition>
+          <SectionTransition className={SHEET}>
             <ExperienceSection />
           </SectionTransition>
           <SectionTransition className={SHEET}>
             <CertificationsSection />
           </SectionTransition>
+          {kaggle ? (
+            <SectionTransition className={SHEET}>
+              <KaggleSection data={kaggle} />
+            </SectionTransition>
+          ) : null}
           <SectionTransition className={SHEET}>
             <PhilosophySection />
           </SectionTransition>

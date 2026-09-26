@@ -91,16 +91,16 @@ export function VenturePage({ newsItems = [], shareUrl, contained = true, classN
   const heroId = 'cf-venture-title';
   const body = (
     <article aria-labelledby={heroId} data-cf-venture="" className="relative isolate">
-      <div aria-hidden="true" className="cf-bloom pointer-events-none absolute inset-x-0 top-0 -z-10 h-[40rem]" />
+      <div aria-hidden="true" className="cf-bloom cf-bloom-hero pointer-events-none absolute inset-x-0 top-0 -z-10 h-[40rem]" />
 
-      <header className="grid gap-12 pt-6 sm:pt-10 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] lg:items-end">
+      <header className="grid gap-12 pt-6 sm:pt-10 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] lg:items-start">
         {/* The hero text renders at once: it is the page's first paint and likely its LCP. */}
         <div>
           <p className="flex flex-wrap items-center gap-3 font-mono text-eyebrow text-cyan-text uppercase">
             <span aria-hidden="true" className="cf-pulse-dot" />
             {VENTURE_COPY.eyebrow}
           </p>
-          <h1 id={heroId} className="mt-4 font-display text-h1 font-bold text-balance text-text-primary">
+          <h1 id={heroId} className="mt-4 font-display text-h1 font-bold text-balance text-text-primary lg:text-[4.25rem]">
             {VENTURE_COPY.title}
           </h1>
           <p className="mt-6 max-w-2xl text-lead text-text-secondary">{COREFORGE_POSITIONING}</p>
@@ -116,7 +116,7 @@ export function VenturePage({ newsItems = [], shareUrl, contained = true, classN
             <CoreforgeDisclaimer className="mt-6 max-w-2xl" />
           </div>
         </div>
-        <Reveal variant="fade" delay={0.15} className="flex flex-wrap items-end gap-4 lg:justify-end">
+        <Reveal variant="fade" delay={0.15} className="flex flex-wrap items-end gap-4 lg:justify-end lg:pt-12">
           <QRCard placement={`${P}-qr`} className="hidden md:inline-flex" />
           <ShareButton url={shareUrl} placement={`${P}-share`} />
         </Reveal>

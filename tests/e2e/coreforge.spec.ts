@@ -4,9 +4,8 @@ import { collectPageErrors, expect, expectNoHorizontalOverflow, test } from './h
 
 /*
  * CoreForge placements: the home section (#coreforge), the announcement bar and the
- * /ventures/coreforge page. They are built ahead of their mounts, so every test skips
- * itself while its target is absent and the suite stays green until a later stage
- * mounts them. Once mounted, these run in every configured project.
+ * /ventures/coreforge page. All three are mounted, so a missing target is a failure,
+ * not a skip. These run in every configured project.
  */
 
 const SECTION = '#coreforge';
@@ -57,14 +56,15 @@ async function homeSection(page: Page): Promise<Locator> {
   await skipIntro(page);
   await gotoHydrated(page, '/');
   const section = await findSection(page);
-  test.skip(!section, 'CoreForge section is not mounted yet');
+  expect(section, 'the home page renders #coreforge').not.toBeNull();
   return section as Locator;
 }
 
 async function venturePage(page: Page) {
   await skipIntro(page);
   const res = await gotoHydrated(page, VENTURE);
-  test.skip(!res || res.status() === 404 || (await page.locator('[data-cf-venture]').count()) === 0, `${VENTURE} is not routed yet`);
+  expect(res?.status(), `${VENTURE} responds`).toBe(200);
+  await expect(page.locator('[data-cf-venture]')).toHaveCount(1);
 }
 
 async function expectCoreforgeLinks(scope: Locator) {
@@ -228,9 +228,10 @@ test.describe('CoreForge announcement bar', () => {
     test.skip(!primary(info) && width(info) !== 320, 'dismissal does not vary by theme or motion');
     await skipIntro(page);
     await gotoHydrated(page, '/');
-    // The floating strip is display:none below sm, so only a visible bar counts.
+    // The floating strip is display:none below md (768px; AnnouncementSlot), where the hero column is full width.
+    test.skip(width(info) < 768, 'the floating announcement is not shown below md');
     const bar = page.locator('[data-cf-announcement]:visible');
-    test.skip((await bar.count()) === 0, 'AnnouncementBar is not mounted (or not shown at this width) yet');
+    await expect(bar).toHaveCount(1);
 
     await expectCoreforgeLinks(bar);
     await bar.locator('[data-cf-dismiss]').click();

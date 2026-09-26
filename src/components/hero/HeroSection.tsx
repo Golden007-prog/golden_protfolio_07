@@ -4,6 +4,7 @@ import { lazy, useEffect, useLayoutEffect, useRef } from 'react';
 import { preload } from 'react-dom';
 import Image, { getImageProps } from 'next/image';
 import { ChevronDown, Hand } from 'lucide-react';
+import { FounderBadge } from '@/components/coreforge/FounderBadge';
 import { BackgroundVideo } from '@/components/shared/BackgroundVideo';
 import { Deferred3D } from '@/components/shared/Deferred3D';
 import { LottieIcon } from '@/components/shared/LottieIcon';
@@ -436,6 +437,9 @@ export function HeroSection() {
             </span>
             <span data-hero-kicker-item="" data-reveal="" className="hero-intro inline-flex">
               <LocalTime showOffset city={SITE.location} />
+            </span>
+            <span data-hero-kicker-item="" data-reveal="" className="hero-intro inline-flex">
+              <FounderBadge variant="nav" placement="hero-kicker" />
             </span>
           </div>
 

@@ -9,6 +9,7 @@
  * listed and which projects put it in their stack; they never claim more.
  */
 import { wantsNavigation } from '../lib/ai/tools.ts';
+import { COREFORGE_DISCLAIMER } from '../lib/coreforge/brand.ts';
 import { slugify } from '../lib/slug.ts';
 import { matchesTech, techFamily } from '../lib/tech.ts';
 
@@ -43,6 +44,7 @@ export type AskIntent =
   | 'cv'
   | 'links'
   | 'experience'
+  | 'venture'
   | 'education'
   | 'about'
   | 'skill'
@@ -67,8 +69,8 @@ export type AskAnswer = {
 
 export const STARTERS = [
   'What do you work on?',
+  'What is CoreForge?',
   'Show me your best projects',
-  'What tech do you use?',
   'How do I hire you?',
 ] as const;
 
@@ -275,6 +277,7 @@ const RE = {
   current: /\b(work(ing)? on|currently|right now|these days|nowadays|doing now)\b/i,
   experience: /\b(experience|jobs?|roles?|compan(y|ies)|work history|employ\w*|internships?|career)\b/i,
   education: /\b(education|degrees?|college|universit(y|ies)|stud(y|ies|ying)|master'?s|b\.?tech|school|cgpa|gpa)\b/i,
+  venture: /\b(core ?forge|goldensdmat|d-?mat|start-?up|(?:your|his) (?:own )?(?:company|venture|business))\b/i,
   about: /\b(about you|yourself|who are you|who is oikantik|background|bio|introduce|introduction)\b/i,
   stack: /\b(stack|tech|technolog(y|ies)|tools?|languages?|frameworks?|skills?)\b/i,
   projects: /\b(projects?|built|build|made|shipped|portfolio|work samples?|showcase|best work)\b/i,
@@ -351,6 +354,22 @@ function experienceAnswer(data: AskData, currentOnly: boolean): AskAnswer {
   };
 }
 
+/**
+ * The venture he founded, from its experience entry, with a link to its page. Open
+ * questions about it ('How does CoreForge make its questions?') still escalate, and
+ * the model answers those from the coreforge: corpus chunks.
+ */
+function ventureAnswer(data: AskData): AskAnswer | null {
+  const role = data.profile.experience.find((e) => /coreforge/i.test(e.company));
+  if (!role) return null;
+  return {
+    intent: 'venture',
+    text: `**${role.role}**, ${role.company} (${role.duration}).\n${role.highlights.map((h) => `· ${h}`).join('\n')}\n${COREFORGE_DISCLAIMER}`,
+    projects: [],
+    actions: [{ kind: 'link', label: 'Read about CoreForge', href: '/ventures/coreforge', external: false }],
+  };
+}
+
 function educationAnswer(data: AskData): AskAnswer {
   return {
     intent: 'education',
@@ -396,6 +415,11 @@ export function answer(question: string, data: AskData): AskAnswer {
 
   const named = findProjects(q, data.projects);
   if (named.length) return projectAnswer(named);
+
+  if (has(q, RE.venture)) {
+    const venture = ventureAnswer(data);
+    if (venture) return venture;
+  }
 
   if (has(q, RE.cv)) return { intent: 'cv', text: "Here's my CV.", projects: [], actions: [{ kind: 'cv' }] };
   if (has(q, RE.hire)) return hireAnswer(data);

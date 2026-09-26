@@ -45,6 +45,8 @@ const INTENTS = [
   { id: 'research', label: 'Research', subject: 'Research' },
   { id: 'fulltime', label: 'Full-time AI/ML role', subject: 'Full-time AI/ML role' },
   { id: 'freelance', label: 'Freelance work', subject: 'Freelance work' },
+  // His own venture (goldensdmat.in), for product feedback or a partnership.
+  { id: 'coreforge', label: 'CoreForge (feedback/partnership)', subject: 'CoreForge: feedback or partnership' },
 ] as const;
 type IntentId = (typeof INTENTS)[number]['id'];
 
@@ -474,7 +476,8 @@ function ContactForm({ restore }: { restore: boolean }) {
         <DraftHelper
           message={draft.message}
           subject={draft.subject}
-          intent={draft.intent}
+          // The drafting model knows research, full-time and freelance; a CoreForge note drafts as general.
+          intent={draft.intent === 'coreforge' ? null : draft.intent}
           intentLabel={INTENTS.find((i) => i.id === draft.intent)?.label ?? null}
           onApply={applyDraft}
           onBusyChange={setDrafting}

@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import { allAchievements, parseAchievements } from './achievements.ts';
 import { allCertifications, isAllowedCredentialUrl, parseCertifications } from './certifications.ts';
-import { COREFORGE_ORG_ID, PORTFOLIO_PERSON_ID } from './coreforge/jsonld.ts';
+import { COREFORGE_ORG_COPY, COREFORGE_ORG_ID, PORTFOLIO_PERSON_ID } from './coreforge/jsonld.ts';
 import { buildSiteGraph, foundedOrganizations, serializeJsonLd } from './structured-data.ts';
 
 /* eslint-disable @typescript-eslint/no-explicit-any -- JSON-LD nodes are open-ended records */
@@ -89,7 +89,9 @@ test("GOLDEN's Coreforge is an Organization he founded, from the data, sharing t
   assert.equal(o.url, 'https://goldensdmat.in');
   assert.deepEqual(o.founder, { '@id': `${SITE}/#person` });
   assert.equal(o.foundingDate, '2026-07');
-  assert.equal(o.description, ACH.items.find((a) => a.kind === 'founder')!.summary);
+  assert.equal(o.description, COREFORGE_ORG_COPY.description);
+  assert.equal(o.disambiguatingDescription, COREFORGE_ORG_COPY.disambiguatingDescription);
+  assert.doesNotMatch(JSON.stringify(o), /295/);
   assert.equal(o['@id'], COREFORGE_ORG_ID);
   assert.equal(PORTFOLIO_PERSON_ID, `${SITE}/#person`);
 });

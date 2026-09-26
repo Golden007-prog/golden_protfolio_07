@@ -152,7 +152,7 @@ test.describe('footer', () => {
     const footer = page.locator('footer#site-footer');
     await expect(footer).toHaveCount(1);
     const hrefs = await footer.locator('nav a').evaluateAll((els) => els.map((el) => el.getAttribute('href')));
-    expect(hrefs).toEqual(['#about', '#skills', '#projects', '#experience', '#certifications', '#philosophy', '#contact']);
+    expect(hrefs).toEqual(['#about', '#skills', '#projects', '#coreforge', '#experience', '#certifications', '#kaggle', '#philosophy', '#contact']);
     for (const link of await footer.locator('a[target="_blank"]').all()) {
       expect(await link.getAttribute('rel')).toContain('noopener');
       expect(await link.textContent()).toContain('(opens in new tab)');
@@ -363,13 +363,13 @@ test.describe('about without JavaScript', () => {
 /* ---------------- Experience (#67-#72) ---------------- */
 
 test.describe('experience', () => {
-  test('kickers read 01 / About, 04 / Experience, 05 / Certifications and 06 / Principles', async ({ page }, info) => {
+  test('kickers read 01 / About, 05 / Experience, 06 / Certifications and 08 / Principles', async ({ page }, info) => {
     test.skip(width(info) !== 1440, 'one viewport is enough');
     await gotoHydrated(page);
     await expect(page.locator('#about header .sr-only').first()).toHaveText('01 / About');
-    await expect(page.locator('#experience header .sr-only').first()).toHaveText('04 / Experience');
-    await expect(page.locator('#certifications header .sr-only').first()).toHaveText('05 / Certifications');
-    await expect(page.locator('#philosophy header .sr-only').first()).toHaveText('06 / Principles');
+    await expect(page.locator('#experience header .sr-only').first()).toHaveText('05 / Experience');
+    await expect(page.locator('#certifications header .sr-only').first()).toHaveText('06 / Certifications');
+    await expect(page.locator('#philosophy header .sr-only').first()).toHaveText('08 / Principles');
   });
 
   test('roles are an ordered list of articles with machine-readable dates', async ({ page }, info) => {

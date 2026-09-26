@@ -14,7 +14,7 @@
  * Pure: relative .ts imports only.
  */
 import { sectionOf } from './actions.ts';
-import { CORE_CARD_IDS, type Chunk } from './corpus.ts';
+import { CORE_CARD_IDS, inFullContext, type Chunk } from './corpus.ts';
 import { untrusted } from './prompts/base.ts';
 import type { AiSource, AskScope, RetrievalHit } from './protocol.ts';
 import { GATE, relevant, type GateThreshold } from './retrieval.ts';
@@ -124,7 +124,7 @@ export type PackedContext = {
  *   budgetTokens and arranged so the strongest sit first and last. Untrusted
  *   chunks are wrapped as data. `filter` (usually scopeFilter) drops hits outside
  *   the scope.
- * - 'full' (jd-fit): every 'self' chunk in corpus order, no budget.
+ * - 'full' (jd-fit): every 'self' chunk in corpus order (less RETRIEVAL_ONLY_PREFIXES), no budget.
  */
 export function packContext(opts: {
   chunks: readonly Chunk[];
@@ -141,7 +141,7 @@ export function packContext(opts: {
   let chosen: Chunk[];
 
   if (mode === 'full') {
-    chosen = opts.chunks.filter((c) => c.cls === 'self');
+    chosen = opts.chunks.filter(inFullContext);
   } else {
     const core = CORE_CARD_IDS.map((id) => byId.get(id)).filter((c): c is Chunk => Boolean(c));
     const coreIds = new Set(core.map((c) => c.id));

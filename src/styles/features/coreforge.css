@@ -43,6 +43,14 @@
       radial-gradient(60% 50% at 85% 20%, color-mix(in oklab, var(--cf-berry) 10%, transparent), transparent 70%),
       radial-gradient(50% 40% at 10% 85%, color-mix(in oklab, var(--app-violet) 8%, transparent), transparent 70%);
   }
+  /* The venture hero's box is only as wide as the article, so its bloom must reach
+     transparent inside the box (the berry ellipse ends near 97%, the violet one near 4%) or its
+     edges show as a hard step against the page. */
+  .cf-bloom-hero {
+    background:
+      radial-gradient(32% 50% at 75% 35%, color-mix(in oklab, var(--cf-berry) 10%, transparent), transparent 70%),
+      radial-gradient(30% 40% at 25% 85%, color-mix(in oklab, var(--app-violet) 8%, transparent), transparent 70%);
+  }
 
   /* ---------- Device frames ---------- */
   .cf-browser {
@@ -119,6 +127,10 @@
   }
   .cf-strip > * {
     scroll-snap-align: start;
+  }
+  /* A soft right edge says the strip scrolls; it sits over the 16px end padding. */
+  .cf-strip {
+    mask-image: linear-gradient(to right, #000 calc(100% - 32px), transparent);
   }
   @media (min-width: 640px) {
     .cf-strip {

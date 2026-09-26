@@ -20,7 +20,7 @@ const MISSING_COPY: Record<CheckMissing, string> = {
   'how to reach you': 'How and when you would like a reply',
 };
 
-type Intent = { id: 'research' | 'fulltime' | 'freelance'; label: string };
+type Intent = { id: 'research' | 'fulltime' | 'freelance' | 'coreforge'; label: string };
 
 type Shown = { forMessage: string; result: CheckResult; source: 'ai' | 'rules' };
 

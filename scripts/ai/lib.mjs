@@ -13,6 +13,7 @@ import { SITE_COPY } from '../../src/data/site-copy.ts';
 import { parseAchievements } from '../../src/lib/achievements.ts';
 import { buildCorpus, entities } from '../../src/lib/ai/corpus.ts';
 import { parseCertifications } from '../../src/lib/certifications.ts';
+import { COREFORGE_CORPUS } from '../../src/lib/coreforge/corpus.ts';
 
 export { BANNED_PHRASES, bannedPhrase, faithful } from '../../src/lib/ai/verify.ts';
 
@@ -230,6 +231,9 @@ export function loadSources() {
     // Parsed, so a malformed credential or result fails the corpus build instead of reaching a prompt.
     certifications: parseCertifications(read('certifications.json')),
     achievements: parseAchievements(read('achievements.json')),
+    coreforge: COREFORGE_CORPUS,
+    // The committed snapshot, not a live read, so the corpus (and its vectors) only change on commit.
+    kaggle: readJson(path.join(ROOT, 'src', 'lib', 'kaggle', 'snapshot.json'), null),
   };
 }
 
@@ -248,6 +252,7 @@ export function loadCorpus() {
       reading: sources.reading,
       certifications: sources.certifications,
       achievements: sources.achievements,
+      kaggle: sources.kaggle,
     }),
   };
 }

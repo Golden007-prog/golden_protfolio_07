@@ -26,6 +26,10 @@ import { apiKey, embedTexts, loadCorpus, readJson, ROOT, VECTORS_PATH } from './
 // queries, lexical 0.951, hybrid 0.985. The one new partial miss is 'React':
 // govprep, ksp-dappa and the-calcutta-classics now list React too and outrank
 // two of the three stack chunks the row expects.
+// 2026-09-26, CoreForge and Kaggle mounted: seven queries for the coreforge: and
+// kaggle: chunks. The bare 'What is CoreForge?' starter is answered by the rules
+// (askme 'venture'), so the rows use the words a visitor searching the corpus
+// would; one-word 'CoreForge' queries rank the short exp:3 highlights first.
 export const RECALL_FLOOR = 0.95;
 const K = 5;
 

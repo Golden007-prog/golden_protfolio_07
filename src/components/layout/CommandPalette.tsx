@@ -32,6 +32,7 @@ import {
   Moon,
   Pause,
   Play,
+  Rocket,
   Search,
   SearchX,
   Sparkles,
@@ -55,6 +56,9 @@ import { setPaused, useMotionPrefs, usePaused } from '@/hooks/useMotionPrefs';
 import { sectionOf } from '@/lib/ai/actions';
 import { openAssistant } from '@/lib/ai/bus';
 import { AI_LIMITS } from '@/lib/ai/config';
+import { COREFORGE_BRAND, COREFORGE_PATHS } from '@/lib/coreforge/brand';
+import { cfUrl } from '@/lib/coreforge/links';
+import { trackCoreforge } from '@/lib/coreforge/track';
 import type { AiTarget } from '@/lib/ai/protocol';
 import { isFallbackBody } from '@/lib/ai/stream';
 import { track } from '@/lib/analytics';
@@ -156,6 +160,12 @@ function afterClose(fn: () => void) {
 
 function openExternal(url: string) {
   window.open(url, '_blank', 'noopener,noreferrer');
+}
+
+/** goldensdmat.in with the palette's UTM campaign; the referrer is kept on purpose, as on every CoreForge link. */
+function openCoreforge(path: string, placement: string) {
+  trackCoreforge(placement);
+  window.open(cfUrl(path, placement), '_blank', 'noopener');
 }
 
 /* ---- 'By meaning': POST /api/ai/retrieve, once per settled query, cached for the page's life ---- */
@@ -368,6 +378,24 @@ function PaletteBody({
       { id: 'link:github', group: 'Links', label: 'GitHub', hint: 'Opens in a new tab', icon: icon(Github), run: () => openExternal(SITE.links.github) },
       { id: 'link:linkedin', group: 'Links', label: 'LinkedIn', hint: 'Opens in a new tab', icon: icon(Linkedin), run: () => openExternal(SITE.links.linkedin) },
       { id: 'link:leetcode', group: 'Links', label: 'LeetCode', hint: 'Opens in a new tab', icon: icon(Code2), run: () => openExternal(SITE.links.leetcode) },
+      {
+        id: 'link:coreforge',
+        group: 'Links',
+        label: 'Open CoreForge',
+        hint: `${COREFORGE_BRAND.domain} · opens in a new tab`,
+        keywords: 'coreforge goldensdmat dmat startup venture founder',
+        icon: icon(Rocket),
+        run: () => openCoreforge(COREFORGE_PATHS.home, 'palette-open'),
+      },
+      {
+        id: 'link:coreforge-demo',
+        group: 'Links',
+        label: 'Try the free dMAT demo',
+        hint: '10 questions a day, no account · opens in a new tab',
+        keywords: 'coreforge goldensdmat dmat demo practice test german masters',
+        icon: icon(Rocket),
+        run: () => openCoreforge(COREFORGE_PATHS.demo, 'palette-demo'),
+      },
       {
         id: 'link:copy-email',
         group: 'Links',

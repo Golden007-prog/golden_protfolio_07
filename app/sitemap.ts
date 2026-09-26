@@ -16,6 +16,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'monthly' as const,
       priority: 0.8,
     })),
+    // His venture, CoreForge (goldensdmat.in).
+    { url: `${SITE.url}/ventures/coreforge`, lastModified: BUILT_AT, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${SITE.url}${SITE.cvPath}`, lastModified: BUILT_AT, changeFrequency: 'monthly', priority: 0.5 },
     // How the site's AI works: model cards, privacy, evals.
     { url: `${SITE.url}/ai`, lastModified: BUILT_AT, changeFrequency: 'monthly', priority: 0.4 },

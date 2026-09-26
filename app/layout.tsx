@@ -6,6 +6,7 @@ import profile from '@/data/profile.json';
 import { BOOTSTRAP_SCRIPT } from '@/lib/bootstrap-script';
 import { SITE } from '@/lib/site';
 import { headlineRole, siteDescription } from '@/lib/structured-data';
+import { AnnouncementSlot } from '@/components/coreforge/AnnouncementSlot';
 import { StructuredData } from '@/components/seo/StructuredData';
 import { WebVitals } from '@/components/seo/WebVitals';
 import { Providers } from './providers';
@@ -59,7 +60,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script dangerouslySetInnerHTML={{ __html: BOOTSTRAP_SCRIPT }} />
       </head>
       <body>
-        <Providers>{children}</Providers>
+        <Providers>
+          <AnnouncementSlot />
+          {children}
+        </Providers>
         <StructuredData />
         <WebVitals />
         {ON_VERCEL ? (

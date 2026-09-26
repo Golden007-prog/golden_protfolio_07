@@ -5,7 +5,7 @@
       "title": "Founded GOLDEN's Coreforge — goldensdmat.in",
       "date": "2026-07",
       "kind": "founder",
-      "summary": "A dMAT (digitaler Mastertest) practice platform for students applying to German Master's programmes, free to start: generators for figure sequences (with an inferability check), equation systems (brute-forced to a unique whole-number solution) and Latin squares (verified unique answer cell), real exam timing, a Supabase backend with cross-device sync and leaderboards, and a 295-question content bank.",
+      "summary": "A dMAT (digitaler Mastertest) practice platform for students applying to German Master's programmes, free to start: generators for figure sequences (with an inferability check), equation systems (brute-forced to a unique whole-number solution) and Latin squares (verified unique answer cell), real exam timing, a Supabase backend with cross-device sync and leaderboards, and a 295-question content bank at launch.",
       "links": [{ "label": "Live site", "url": "https://goldensdmat.in" }]
     },
     {

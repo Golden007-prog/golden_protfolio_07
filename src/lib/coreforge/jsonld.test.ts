@@ -18,6 +18,7 @@ test('the organization names the founder by reference', () => {
   assert.equal(org.name, "GOLDEN's Coreforge");
   assert.equal(org.url, 'https://goldensdmat.in');
   assert.deepEqual(org.founder, { '@id': 'https://www.basuoikantik.in/#person' });
+  assert.match(String(org.disambiguatingDescription), /Not affiliated with g\.a\.s\.t\./);
   assert.deepEqual(buildCoreforgeOrganization({ founderId: 'https://x.test/#me' }).founder, { '@id': 'https://x.test/#me' });
   assert.deepEqual(coreforgeFounderLink(), { worksFor: { '@id': COREFORGE_ORG_ID } });
   assert.equal(PORTFOLIO_PERSON_ID, 'https://www.basuoikantik.in/#person');
@@ -33,14 +34,12 @@ test('the app offers only the Free plan and claims no ratings', () => {
   assert.deepEqual(app.offers, {
     '@type': 'Offer',
     name: 'Free plan',
-    description: 'Free plan',
-    price: 0,
-    priceCurrency: 'INR',
+    description: 'Free plan — no card, no expiry',
     url: 'https://goldensdmat.in/pricing',
   });
   const json = JSON.stringify(buildCoreforgeJsonLd());
   assert.ok(!containsPrice(json));
-  assert.doesNotMatch(json, /aggregateRating|"review"|ratingValue|utm_/);
+  assert.doesNotMatch(json, /aggregateRating|"review"|ratingValue|"price|priceCurrency|utm_/);
   assert.match(json, /Not affiliated with g\.a\.s\.t\./);
 });
 

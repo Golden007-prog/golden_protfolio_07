@@ -12,9 +12,11 @@ import tools from '@/data/tools.json';
 import vectorFile from '@/data/ai-vectors.json';
 import { parseAchievements } from '@/lib/achievements';
 import { parseCertifications } from '@/lib/certifications';
+import { COREFORGE_CORPUS } from '@/lib/coreforge/corpus';
+import kaggleSnapshot from '@/lib/kaggle/snapshot.json';
 import { KNOWN_SECTIONS } from './actions';
 import { AI_EMBED_BUDGET_MS } from './config';
-import { buildCorpus, corpusHash, entities, type Chunk, type CorpusLiveSnapshot, type Entities } from './corpus';
+import { buildCorpus, corpusHash, entities, type Chunk, type CorpusKaggle, type CorpusLiveSnapshot, type Entities } from './corpus';
 import { aiEmbed, type Deadline } from './gemini.server';
 import { Lru, normalizeQuestion } from './lru';
 import type { RetrievalHit } from './protocol';
@@ -68,6 +70,8 @@ export function getCorpus(): Corpus {
   if (memo) return memo;
   const certifications = parseCertifications(certificationsRaw);
   const achievements = parseAchievements(achievementsRaw);
+  // The committed snapshot, as in scripts/ai/lib.mjs, so chunk hashes match ai-vectors.json.
+  const kaggle = kaggleSnapshot as unknown as CorpusKaggle;
   const chunks = buildCorpus({
     profile,
     projects: PROJECTS,
@@ -79,6 +83,8 @@ export function getCorpus(): Corpus {
     siteCopy: SITE_COPY,
     certifications,
     achievements,
+    coreforge: COREFORGE_CORPUS,
+    kaggle,
   });
   const { vectors, model } = loadVectors(chunks);
   const projectVecs = new Map<string, Float32Array>();
@@ -97,7 +103,7 @@ export function getCorpus(): Corpus {
     vectors,
     vectorModel: model,
     projectVecs,
-    entities: entities({ profile, projects: PROJECTS, skills: skillsIndex, reading, certifications, achievements }),
+    entities: entities({ profile, projects: PROJECTS, skills: skillsIndex, reading, certifications, achievements, kaggle }),
     hash: corpusHash(chunks),
     known: {
       slugs: PROJECTS.map((p) => p.slug),

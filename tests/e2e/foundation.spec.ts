@@ -204,7 +204,9 @@ test.describe('buttons (#22)', () => {
     for (const link of await links.all()) {
       const rel = (await link.getAttribute('rel')) ?? '';
       expect(rel).toContain('noopener');
-      expect(rel).toContain('noreferrer');
+      // goldensdmat.in (his own CoreForge) keeps the referrer on purpose; coreforge.spec.ts checks those.
+      const host = new URL((await link.getAttribute('href')) ?? '', 'https://www.basuoikantik.in').hostname;
+      if (host !== 'goldensdmat.in') expect(rel).toContain('noreferrer');
       const name = (await link.getAttribute('aria-label')) ?? (await link.textContent()) ?? '';
       expect(name).toMatch(/opens in new tab/);
     }

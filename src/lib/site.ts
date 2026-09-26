@@ -34,19 +34,30 @@ export const SITE = {
   },
 } as const;
 
-export type SectionId = 'about' | 'skills' | 'projects' | 'experience' | 'certifications' | 'philosophy' | 'contact';
+export type SectionId =
+  | 'about'
+  | 'skills'
+  | 'projects'
+  | 'coreforge'
+  | 'experience'
+  | 'certifications'
+  | 'kaggle'
+  | 'philosophy'
+  | 'contact';
 
 export const SECTIONS: ReadonlyArray<{ id: SectionId; label: string; index: string }> = [
   { id: 'about', label: 'About', index: '01' },
   { id: 'skills', label: 'Skills', index: '02' },
   { id: 'projects', label: 'Projects', index: '03' },
-  { id: 'experience', label: 'Experience', index: '04' },
-  { id: 'certifications', label: 'Certifications', index: '05' },
-  { id: 'philosophy', label: 'Principles', index: '06' },
-  { id: 'contact', label: 'Contact', index: '07' },
+  { id: 'coreforge', label: 'CoreForge', index: '04' },
+  { id: 'experience', label: 'Experience', index: '05' },
+  { id: 'certifications', label: 'Certifications', index: '06' },
+  { id: 'kaggle', label: 'Kaggle', index: '07' },
+  { id: 'philosophy', label: 'Principles', index: '08' },
+  { id: 'contact', label: 'Contact', index: '09' },
 ];
 
-/** '07 / Contact' */
+/** '09 / Contact' */
 export function kickerFor(id: SectionId): string {
   const section = SECTIONS.find((s) => s.id === id);
   return section ? `${section.index} / ${section.label}` : '';

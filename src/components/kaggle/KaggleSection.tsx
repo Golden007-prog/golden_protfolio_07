@@ -52,18 +52,22 @@ const CHIP = 'rounded-full border border-glass-border bg-surface-tint px-3 py-1 
 export function KaggleSection({ data, id = 'kaggle', className }: KaggleSectionProps) {
   const writeups = useMemo(() => sortWriteups(data.writeups.filter((w) => kaggleHref(w.url))), [data.writeups]);
   const badges = useMemo(() => sortBadges(data.badges), [data.badges]);
-  // Regrouped by the time the data was read (never the visitor's clock), so server and browser agree.
-  const { active, past } = useMemo(
-    () => splitCompetitions([...data.active, ...data.past], parseDay(data.fetchedAt)),
-    [data.active, data.past, data.fetchedAt],
-  );
+  // Grouped by the time the data was read, so server and browser agree at hydration. After
+  // that, the visitor's clock can only move a competition whose deadline has passed into
+  // the past list, which matters when a stale snapshot is served.
+  const now = useNow();
+  const { active, past } = useMemo(() => {
+    const read = parseDay(data.fetchedAt);
+    const reference = now !== null && (read === null || now > read) ? now : read;
+    return splitCompetitions([...data.active, ...data.past], reference);
+  }, [data.active, data.past, data.fetchedAt, now]);
 
   return (
     <SectionWrapper id={id} className={cn('kaggle', className)}>
       <SectionHeading
         kicker="Kaggle"
         title="On *Kaggle*."
-        subtitle="What I'm competing in right now, the writeups I've published and the badges I've earned, straight from my public Kaggle profile."
+        subtitle="What I'm competing in right now, the writeups I've published and the badges I've earned, read from Kaggle and limited to what is public."
       />
 
       <Reveal>

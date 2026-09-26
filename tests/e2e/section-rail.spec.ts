@@ -77,7 +77,7 @@ test.describe('chapter rail geometry (#43)', () => {
     await open(page);
     if (!isTouch(info)) await page.mouse.move(1, 1);
     const ids = await page.locator('[data-section-rail] a').evaluateAll((as) => as.map((a) => a.getAttribute('href')!.slice(1)));
-    expect(ids.length).toBe(7);
+    expect(ids.length).toBe(9); // SECTIONS in src/lib/site.ts, CoreForge and Kaggle included
 
     for (const id of ids) {
       await scrollToSection(page, id);

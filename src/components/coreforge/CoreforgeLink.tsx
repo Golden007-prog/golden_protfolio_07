@@ -53,6 +53,8 @@ type ButtonLinkProps = LinkProps & {
   leadingIcon?: ReactNode;
   magnetic?: boolean;
   fullWidth?: boolean;
+  /** Extra data-* hooks for the anchor, e.g. { 'data-role-site': '' }. */
+  data?: Readonly<Record<`data-${string}`, string>>;
 };
 
 /**
@@ -70,6 +72,7 @@ export function CoreforgeButton({
   leadingIcon,
   magnetic,
   fullWidth,
+  data,
   'aria-label': ariaLabel,
 }: ButtonLinkProps) {
   const link = useCoreforgeLink(path, placement);
@@ -85,7 +88,7 @@ export function CoreforgeButton({
       trailingIcon={arrow ? <ArrowUpRight aria-hidden="true" className="size-4 shrink-0" /> : undefined}
       className={className}
     >
-      <a {...link} aria-label={ariaLabel ? `${ariaLabel} (opens in new tab)` : undefined}>
+      <a {...data} {...link} aria-label={ariaLabel ? `${ariaLabel} (opens in new tab)` : undefined}>
         {children}
         {ariaLabel ? null : NEW_TAB_HINT}
       </a>

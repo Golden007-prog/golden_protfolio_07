@@ -1,6 +1,8 @@
 import projectsStore from '@/data/ai-generated/projects.json';
 import recruiterStore from '@/data/ai-generated/recruiter.json';
 import { PROJECTS } from '@/data/projects';
+import { fetchCoreforgeNews } from '@/lib/coreforge/news';
+import { getKaggleData } from '@/lib/kaggle/client.server';
 import { SHOW_UNREVIEWED } from '@/lib/ai/config';
 import { visibleLenses, type LensStore } from '@/lib/ai/fit';
 import { selectInterests } from '@/lib/ai/prompts/projects';
@@ -19,6 +21,16 @@ const INTERESTS = selectInterests(
   SHOW_UNREVIEWED,
 );
 
-export default function Page() {
-  return <App lensChips={LENS_CHIPS} interests={INTERESTS} />;
+// Prerendered, then regenerated at most hourly: the CoreForge news slot and the
+// Kaggle section are read here, on the server, so both are in the static HTML. The
+// Kaggle read keeps its own six-hour cache and falls back to the committed
+// snapshot; the news read falls back to an empty list. Neither can fail the page.
+export const revalidate = 3600;
+
+export default async function Page() {
+  const [kaggle, coreforgeNews] = await Promise.all([
+    getKaggleData(),
+    fetchCoreforgeNews({ limit: 3, revalidate: 3600 }),
+  ]);
+  return <App lensChips={LENS_CHIPS} interests={INTERESTS} kaggle={kaggle} coreforgeNews={coreforgeNews} />;
 }

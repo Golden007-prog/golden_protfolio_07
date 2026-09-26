@@ -1,5 +1,6 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { Contact, Mail, Phone } from 'lucide-react';
 import { SectionWrapper } from '@/components/layout/SectionWrapper';
 import { Reveal, Stagger, StaggerItem } from '@/components/motion';
@@ -12,6 +13,7 @@ import projects from '@/data/projects.json';
 import { track } from '@/lib/analytics';
 import { SITE } from '@/lib/site';
 import { techFamily } from '@/lib/tech';
+import { useKaggleData } from '@/components/kaggle/KaggleDataContext';
 import { AtAGlance } from './AtAGlance';
 import { PortraitPanel } from './PortraitPanel';
 import { ScrubText } from './ScrubText';
@@ -26,10 +28,14 @@ const STATS = [
   { value: new Set(projects.flatMap((p) => p.techStack.map(techFamily))).size, label: 'Technologies in projects' },
 ];
 
+// Server-rendered in its own chunk, so the badge art code stays out of the first load.
+const KaggleBadgeStrip = dynamic(() => import('@/components/kaggle/KaggleBadgeStrip').then((m) => m.KaggleBadgeStrip));
+
 const LINK =
   'inline-flex min-h-11 min-w-0 items-center rounded text-left text-text-primary ring-focus transition-colors [overflow-wrap:anywhere] hover:text-violet-bright';
 
 export function AboutSection() {
+  const kaggle = useKaggleData();
   return (
     <SectionWrapper id="about">
       <SectionHeading sectionId="about" title="The story behind the *stack*." className="mb-10 md:mb-16" />
@@ -92,6 +98,13 @@ export function AboutSection() {
           </StaggerItem>
         ))}
       </Stagger>
+
+      {kaggle ? (
+        <Reveal className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-6">
+          <p className="shrink-0 font-mono text-[11px] uppercase tracking-[0.2em] text-text-dim">On Kaggle</p>
+          <KaggleBadgeStrip data={kaggle} moreHref="#kaggle" />
+        </Reveal>
+      ) : null}
     </SectionWrapper>
   );
 }

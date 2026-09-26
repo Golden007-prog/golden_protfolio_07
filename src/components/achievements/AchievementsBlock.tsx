@@ -2,6 +2,7 @@
 
 import { FolderOpen, Rocket, Users } from 'lucide-react';
 import { Reveal, Stagger, StaggerItem } from '@/components/motion';
+import { CoreforgeButton } from '@/components/coreforge/CoreforgeLink';
 import { GlassCard } from '@/components/shared/GlassCard';
 import { LottieIcon } from '@/components/shared/LottieIcon';
 import { Button } from '@/components/ui/Button';
@@ -9,6 +10,7 @@ import { smoothScrollTo } from '@/contexts/LenisContext';
 import raw from '@/data/achievements.json';
 import { getProjectBySlug } from '@/data/projects';
 import { ACHIEVEMENT_KIND_LABEL, allAchievements, parseAchievements, type Achievement, type AchievementKind } from '@/lib/achievements';
+import { isCoreforgeUrl } from '@/lib/coreforge/links';
 import { emit } from '@/lib/events';
 import { cn } from '@/utils/cn';
 import { formatYearMonth } from '@/utils/dates';
@@ -98,7 +100,21 @@ function AchievementCard({ item }: { item: Achievement }) {
             Open project
           </Button>
         ) : null}
-        {item.links.map((link) => (
+        {item.links.map((link) =>
+          isCoreforgeUrl(link.url) ? (
+            <CoreforgeButton
+              key={link.url}
+              path={link.url}
+              placement={`achievement-${item.id}`}
+              data={{ 'data-achievement-link': '' }}
+              variant="outline"
+              size="sm"
+              arrow={false}
+              aria-label={`${link.label}: ${item.title}`}
+            >
+              {link.label}
+            </CoreforgeButton>
+          ) : (
           <Button
             key={link.url}
             href={link.url}
@@ -110,7 +126,8 @@ function AchievementCard({ item }: { item: Achievement }) {
           >
             {link.label}
           </Button>
-        ))}
+          ),
+        )}
       </div>
     </GlassCard>
   );

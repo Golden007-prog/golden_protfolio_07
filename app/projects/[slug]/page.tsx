@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { InlineAskLazy } from '@/components/ai/projects/InlineAskLazy';
+import { KaggleWriteupCard } from '@/components/kaggle/KaggleWriteupCard';
 import { Footer } from '@/components/layout/Footer';
 import { SubpageHeader } from '@/components/layout/SubpageHeader';
 import { ProjectCaseStudy } from '@/components/projects/ProjectCaseStudy';
@@ -10,6 +11,7 @@ import aiStore from '@/data/ai-generated/projects.json';
 import { PROJECTS, getProjectBySlug, githubFacts, hasCaseStudy } from '@/data/projects';
 import { SHOW_UNREVIEWED } from '@/lib/ai/config';
 import { selectCaseStudyAi } from '@/lib/ai/prompts/projects';
+import { getKaggleData } from '@/lib/kaggle/client.server';
 import { SITE } from '@/lib/site';
 
 // Only projects with a real problem statement and approach get a page; the rest
@@ -17,6 +19,9 @@ import { SITE } from '@/lib/site';
 const CASE_STUDIES = PROJECTS.filter(hasCaseStudy);
 
 export const dynamicParams = false;
+// A project's Kaggle writeup (UrbanCare AI's) comes from the Kaggle read, which
+// refreshes every six hours and falls back to the committed snapshot.
+export const revalidate = 21600;
 
 export function generateStaticParams() {
   return CASE_STUDIES.map((p) => ({ slug: p.slug }));
@@ -58,6 +63,7 @@ export default async function CaseStudyPage({ params }: Props) {
   const next = CASE_STUDIES[(index + 1) % CASE_STUDIES.length];
   // Selected here, so the store stays on the server and only this project's slice reaches the page.
   const ai = selectCaseStudyAi(aiStore, project, PROJECTS, SHOW_UNREVIEWED);
+  const writeup = (await getKaggleData()).writeups.find((w) => w.project === project.slug) ?? null;
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -88,6 +94,15 @@ export default async function CaseStudyPage({ params }: Props) {
         />
         <div className="mx-auto max-w-6xl px-4 pb-16 pt-6 sm:px-8 sm:pt-10">
           <ProjectCaseStudy project={project} variant="page" titleId="case-study-title" shareUrl={url} ai={ai} />
+
+          {writeup ? (
+            <section aria-labelledby="case-study-kaggle-title" data-case-study-kaggle="" className="px-1 pb-10 sm:px-8">
+              <h2 id="case-study-kaggle-title" className="font-mono text-eyebrow uppercase text-cyan-text">
+                Written up on Kaggle
+              </h2>
+              <KaggleWriteupCard writeup={writeup} headingLevel="h3" className="mt-4" />
+            </section>
+          ) : null}
 
           <div className="px-1 pb-10 sm:px-8">
             <InlineAskLazy slug={project.slug} />

@@ -27,11 +27,16 @@ const HIDE_VELOCITY = 900;
 const HIDDEN_Y = -120;
 const DESKTOP = '(min-width: 768px)';
 /**
- * Links that join the bar only from 800px. With all seven sections the bar needs
- * about 765px, more than the 752px it may take at 768px; below 800px Certifications
- * stays one step away through search, the page itself and #certifications.
+ * Links that join the bar only on wider screens. The seven core sections need about
+ * 765px, more than the 752px the bar may take at 768px, so Certifications joins
+ * from 800px; CoreForge and Kaggle join from 1280px. Below that each stays one step
+ * away through the mobile menu, search, the page itself and its #hash.
  */
-const WIDE_ONLY: ReadonlySet<SectionId> = new Set(['certifications']);
+const WIDE_ONLY: Partial<Record<SectionId, string>> = {
+  certifications: 'max-[799.98px]:hidden',
+  coreforge: 'max-[1279.98px]:hidden',
+  kaggle: 'max-[1279.98px]:hidden',
+};
 
 const noopSubscribe = () => () => {};
 function isMacPlatform(): boolean {
@@ -67,7 +72,7 @@ function NavLinks({ pathname }: { pathname: string }) {
         {SECTIONS.map(({ id, label }) => {
           const isActive = onHome && active === id;
           return (
-            <li key={id} className={WIDE_ONLY.has(id) ? 'max-[799.98px]:hidden' : undefined}>
+            <li key={id} className={WIDE_ONLY[id]}>
               <Link
                 href={sectionHref(id, pathname)}
                 aria-current={isActive ? 'location' : undefined}

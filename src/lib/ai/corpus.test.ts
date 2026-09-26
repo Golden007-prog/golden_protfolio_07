@@ -4,7 +4,9 @@ import { test } from 'node:test';
 import { SITE_COPY } from '../../data/site-copy.ts';
 import { parseAchievements } from '../achievements.ts';
 import { certificationGroups, formatIssued, parseCertifications } from '../certifications.ts';
-import { buildCorpus, corpusHash, CORE_CARD_IDS, entities, stableHash, type CorpusSources } from './corpus.ts';
+import { containsPrice } from '../coreforge/copy-guard.ts';
+import { COREFORGE_CORPUS } from '../coreforge/corpus.ts';
+import { buildCorpus, corpusHash, CORE_CARD_IDS, entities, inFullContext, stableHash, type CorpusSources } from './corpus.ts';
 
 const read = (name: string) => JSON.parse(readFileSync(new URL(`../../data/${name}`, import.meta.url), 'utf8'));
 const load = (): CorpusSources => ({
@@ -18,6 +20,8 @@ const load = (): CorpusSources => ({
   siteCopy: SITE_COPY,
   certifications: parseCertifications(read('certifications.json')),
   achievements: parseAchievements(read('achievements.json')),
+  coreforge: COREFORGE_CORPUS,
+  kaggle: JSON.parse(readFileSync(new URL('../kaggle/snapshot.json', import.meta.url), 'utf8')),
 });
 
 const src = load();
@@ -48,6 +52,8 @@ test('every id follows the documented forms', () => {
     /^tool:\d+$/,
     /^copy:(philosophy#\d+|roles|hero|contact)$/,
     /^ref:[a-z0-9-]+$/,
+    /^coreforge:(overview|features|plans|engineering|numbers|changelog|faq#[a-z0-9-]+)$/,
+    /^kaggle:(profile|badges|writeup-[a-z0-9-]+|competition-[a-z0-9-]+)$/,
     /^live:(leetcode|github)$/,
   ];
   for (const c of chunks) assert.ok(FORMS.some((re) => re.test(c.id)), `unexpected id ${c.id}`);
@@ -104,12 +110,16 @@ test('live:leetcode calls the streak the longest run, never a current streak', (
   assert.doesNotMatch(saved.text.replace('not a current streak', ''), /current(ly)? streak/i, 'rerun npm run ai:corpus');
 });
 
-// jd-fit packs every 'self' chunk ('full' mode), so this bounds its prompt at
-// about 12K tokens. It was 40K until the credentials (37, each with its verify
-// URL) and the hackathon results joined the corpus.
-test('self text stays under 50K characters', () => {
-  const total = chunks.filter((c) => c.cls === 'self').reduce((n, c) => n + c.text.length, 0);
-  assert.ok(total < 50_000, `self text is ${total} chars`);
+// jd-fit packs every 'self' chunk ('full' mode) except the retrieval-only product
+// and badge detail, so this bounds its prompt at about 12K tokens. It was 40K until
+// the credentials (37, each with its verify URL) and the hackathon results joined.
+test('full-mode self text stays under 50K characters', () => {
+  const total = chunks.filter(inFullContext).reduce((n, c) => n + c.text.length, 0);
+  assert.ok(total < 50_000, `full-mode self text is ${total} chars`);
+  // The retrieval-only chunks still exist for retrieval.
+  assert.ok(chunks.some((c) => c.cls === 'self' && !inFullContext(c)));
+  assert.ok(inFullContext(byId.get('coreforge:overview')!));
+  assert.ok(inFullContext(byId.get('kaggle:profile')!));
 });
 
 test('the core card exists and states the education status honestly', () => {
@@ -254,4 +264,43 @@ test('duplicate ids throw instead of making citations ambiguous', () => {
   const dup = load();
   dup.projects = [...dup.projects, dup.projects[0]];
   assert.throws(() => buildCorpus(dup), /Duplicate corpus id/);
+});
+
+test('CoreForge chunks are his own evidence, carry the disclaimer and never a price', () => {
+  const cf = chunks.filter((c) => c.id.startsWith('coreforge:'));
+  assert.ok(cf.length >= 6);
+  for (const c of cf) {
+    assert.equal(c.cls, 'self', c.id);
+    assert.deepEqual(c.target, { kind: 'section', id: 'coreforge' }, c.id);
+    assert.equal(containsPrice(c.text), false, c.id);
+    assert.match(c.text, /Not affiliated with g\.a\.s\.t\., TestDaF-Institut, APS, or the DAAD\./, c.id);
+  }
+  assert.doesNotMatch(byId.get('coreforge:features')!.text, /Real exam timing \(Pro plan\)/);
+  assert.match(byId.get('coreforge:overview')!.text, /Not affiliated with g\.a\.s\.t\., TestDaF-Institut, APS, or the DAAD\./);
+  // His LinkedIn title stays 'Owner'; 'founder' comes from his headline and the venture's own footer.
+  assert.match(byId.get('coreforge:overview')!.text, /LinkedIn title for the role is Owner/);
+});
+
+test('Kaggle chunks: profile, badges and writeups are evidence; every rank is dated and out of N teams', () => {
+  const kg = chunks.filter((c) => c.id.startsWith('kaggle:'));
+  const snapshot = src.kaggle!;
+  assert.equal(kg.filter((c) => c.id.startsWith('kaggle:writeup-')).length, snapshot.writeups.length);
+  assert.equal(kg.filter((c) => c.id.startsWith('kaggle:competition-')).length, snapshot.active.length + snapshot.past.length);
+  for (const c of kg) {
+    if (c.id.startsWith('kaggle:competition-')) {
+      assert.equal(c.cls, 'live', c.id);
+      assert.equal(c.untrusted, true, c.id);
+      assert.match(c.asOf ?? '', /^\d{4}-\d{2}-\d{2}$/, c.id);
+    } else {
+      assert.equal(c.cls, 'self', c.id);
+    }
+    for (const m of c.text.matchAll(/rank:? (\d+)/gi)) {
+      assert.match(c.text.slice(m.index), /^rank:? \d+ of \d+ teams, as of \d{4}-\d{2}-\d{2}/i, c.id);
+    }
+  }
+  const urbancare = kg.find((c) => c.id.startsWith('kaggle:writeup-urbancare'));
+  assert.deepEqual(urbancare?.target, { kind: 'project', slug: 'urbancare-ai' });
+  const allow = entities({ profile: src.profile, projects: src.projects, kaggle: snapshot }).allowUrls;
+  assert.ok(allow.includes(snapshot.profile.url));
+  for (const w of snapshot.writeups) assert.ok(allow.includes(w.url), w.url);
 });

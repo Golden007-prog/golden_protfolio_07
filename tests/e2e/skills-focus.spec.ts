@@ -136,9 +136,15 @@ test.describe('skills stage keeps keyboard focus across the swap', () => {
     await page.goto('/');
     await expect(page.locator('html')).toHaveClass(/\bhydrated\b/);
     const gl = await hasHardwareWebGL(page);
+    // About's last control: the Kaggle strip's link when that section has data, else Save contact.
+    const stripMore = page.locator('#about [data-kaggle-strip-more]');
     const save = page.locator('#about a', { hasText: 'Save contact' }).first();
     await save.scrollIntoViewIfNeeded();
-    await save.focus();
+    // The strip is a next/dynamic chunk; give it a moment to attach before choosing.
+    await stripMore.first().waitFor({ state: 'attached', timeout: 5000 }).catch(() => {});
+    const last = (await stripMore.count()) > 0 ? stripMore.first() : save;
+    await last.scrollIntoViewIfNeeded();
+    await last.focus();
 
     // One sample per frame, so a <body> that ever reaches the screen is caught.
     await page.evaluate(() => {
@@ -156,7 +162,7 @@ test.describe('skills stage keeps keyboard focus across the swap', () => {
     });
     await page.keyboard.press('Tab');
     const first = await focusState(page);
-    expect(first, 'the first Tab after Save contact reaches a stage node').toMatch(/^[\w-]+@(constellation|sphere)$/);
+    expect(first, "the first Tab after About's last control reaches a stage node").toMatch(/^[\w-]+@(constellation|sphere)$/);
     const slug = first.split('@')[0];
 
     const stage = page.locator('#skills [data-deferred3d="skills"]');
@@ -168,7 +174,7 @@ test.describe('skills stage keeps keyboard focus across the swap', () => {
       w.__focusStop = true;
       return w.__focusSamples ?? [];
     });
-    // Sampling started on Save contact, so any BODY came after the Tab.
+    // Sampling started on About's last control, so any BODY came after the Tab.
     expect(samples, samples.join(' -> ')).not.toContain('BODY');
     expect(await focusState(page)).toMatch(new RegExp(`^${slug}@`));
 

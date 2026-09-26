@@ -3,7 +3,8 @@
 import { useId } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ArrowUp, Sparkles } from 'lucide-react';
+import { ArrowUp, Rocket, Sparkles } from 'lucide-react';
+import { FooterLine } from '@/components/coreforge/FooterLine';
 import { Marquee } from '@/components/motion';
 import { toggleReducedMotion } from '@/components/shared/MotionToggle';
 import { smoothScrollTo } from '@/contexts/LenisContext';
@@ -92,6 +93,7 @@ export function Footer() {
               <span aria-hidden="true" className="size-2 rounded-full bg-success" />
               {SITE.availability.status}
             </p>
+            <FooterLine className="mt-3 max-w-sm" />
           </div>
 
           <nav aria-labelledby="footer-sitemap" className="lg:col-span-2">
@@ -121,6 +123,12 @@ export function Footer() {
                 <Link href="/ai" prefetch={false} className={LINK} data-footer-ai-link="">
                   <Sparkles aria-hidden="true" className="size-3.5 shrink-0 text-cyan-text" />
                   How the AI works
+                </Link>
+              </li>
+              <li>
+                <Link href="/ventures/coreforge" prefetch={false} className={LINK} data-footer-venture-link="">
+                  <Rocket aria-hidden="true" className="size-3.5 shrink-0 text-cyan-text" />
+                  CoreForge, my venture
                 </Link>
               </li>
               {ELSEWHERE.map((l) => (

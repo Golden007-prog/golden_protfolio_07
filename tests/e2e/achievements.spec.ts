@@ -35,6 +35,19 @@ async function gotoHydrated(page: Page) {
   await expect(page.locator('html')).toHaveClass(/\bhydrated\b/, { timeout: 15_000 });
 }
 
+const isCoreforge = (href: string) => {
+  try {
+    return new URL(href).hostname === 'goldensdmat.in';
+  } catch {
+    return false;
+  }
+};
+/**
+ * goldensdmat.in links go through cfUrl(), which adds UTM tags and maps '/' to
+ * '/welcome', so they compare by host; every other link compares as written.
+ */
+const linkKey = (href: string) => (isCoreforge(href) ? 'goldensdmat.in' : href);
+
 const block = (page: Page) => page.locator('#experience [data-achievements]');
 
 test.describe('hackathons & launches', () => {
@@ -58,11 +71,14 @@ test.describe('hackathons & launches', () => {
       const links = await entry.locator('[data-achievement-link]').evaluateAll((els) =>
         els.map((el) => ({ href: el.getAttribute('href'), target: el.getAttribute('target'), rel: el.getAttribute('rel') ?? '' })),
       );
-      expect(links.map((l) => l.href)).toEqual(a.links.map((l) => l.url));
+      // goldensdmat.in links carry CoreForge's UTM tags and keep the referrer (coreforge.spec.ts).
+      expect(links.map((l) => linkKey(l.href ?? ''))).toEqual(a.links.map((l) => linkKey(l.url)));
       for (const l of links) {
         expect(l.href).toMatch(/^https:\/\//);
         expect(l.target).toBe('_blank');
-        expect(l.rel.split(/\s+/)).toEqual(expect.arrayContaining(['noopener', 'noreferrer']));
+        expect(l.rel.split(/\s+/)).toContain('noopener');
+        if (isCoreforge(l.href ?? '')) expect(new URL(l.href ?? '').searchParams.get('utm_source')).toBe('basuoikantik.in');
+        else expect(l.rel.split(/\s+/)).toContain('noreferrer');
       }
     }
   });
@@ -135,7 +151,8 @@ test.describe('experience: new roles and earlier work', () => {
       const url = 'url' in e ? (e.url as string | undefined) : undefined;
       if (url) {
         const site = card.locator('[data-role-site]');
-        await expect(site).toHaveAttribute('href', url);
+        const href = (await site.getAttribute('href')) ?? '';
+        expect(linkKey(href)).toBe(linkKey(url));
         await expect(site).toHaveAttribute('target', '_blank');
         await expect(site).toHaveAttribute('rel', /noopener/);
       } else {

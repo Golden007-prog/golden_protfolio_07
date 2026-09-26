@@ -3,6 +3,7 @@
 import type { ReactNode } from 'react';
 import dynamic from 'next/dynamic';
 import { Mail } from 'lucide-react';
+import { FounderBadge } from '@/components/coreforge/FounderBadge';
 import { useReferenceMonth } from '@/components/experience/TimelineCard';
 import { FitCheckTrigger, LensSlot } from '@/components/recruiter/FitCheckTrigger';
 import { GlassCard } from '@/components/shared/GlassCard';
@@ -44,6 +45,7 @@ export function AtAGlance({ className }: Props) {
     { term: 'Focus', detail: SITE.availability.focus },
   ];
   if (CURRENT) facts.push({ term: 'Current program', detail: `${CURRENT.role} · ${CURRENT.company}` });
+  facts.push({ term: 'Venture', detail: <FounderBadge variant="nav" placement="at-a-glance" /> });
   if (DEGREE) facts.push({ term: 'Education', detail: expected ? `${DEGREE.degree} · ${expected}` : DEGREE.degree });
   facts.push({ term: 'Credentials', detail: <CertificationsFact /> });
 

@@ -4,6 +4,8 @@
  * callers read from src/data; nothing here is written by hand.
  */
 
+import { COREFORGE_ORG_COPY, COREFORGE_ORG_ID } from './coreforge/jsonld.ts';
+
 export type ProfileData = {
   name: string;
   headline: string;
@@ -150,8 +152,12 @@ export function credentialNodes(siteUrl: string, credentials: readonly Credentia
  * links, to the experience entry whose url is the same site, which gives the
  * organisation's name. A founder entry with no matching role is left out. The
  * @id is `<its origin>/#organization`, the id src/lib/coreforge/jsonld.ts gives
- * GOLDEN's Coreforge, so a page that also renders that graph describes one entity.
+ * GOLDEN's Coreforge, so a page that also renders that graph describes one entity,
+ * and an organisation listed in FOUNDED_ORG_COPY takes that copy instead of the
+ * achievement summary so the shared @id never carries two descriptions.
  */
+const FOUNDED_ORG_COPY: Readonly<Record<string, JsonLd>> = { [COREFORGE_ORG_ID]: COREFORGE_ORG_COPY };
+
 export function foundedOrganizations(
   personId: string,
   experience: NonNullable<ProfileData['experience']>,
@@ -163,13 +169,14 @@ export function foundedOrganizations(
       const hosts = new Set(a.links.map((l) => hostOf(l.url)).filter(Boolean));
       const role = experience.find((e) => e.url && hosts.has(hostOf(e.url)));
       if (!role?.url) return [];
+      const id = `${new URL(role.url).origin}/#organization`;
       return [
         {
           '@type': 'Organization',
-          '@id': `${new URL(role.url).origin}/#organization`,
+          '@id': id,
           name: role.company,
           url: role.url,
-          description: a.summary,
+          ...(FOUNDED_ORG_COPY[id] ?? { description: a.summary }),
           founder: { '@id': personId },
           foundingDate: a.date,
         },

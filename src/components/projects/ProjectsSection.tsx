@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { SearchX } from 'lucide-react';
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { InterestChips } from '@/components/ai/projects/InterestChips';
+import { CoreforgeProjectCard } from '@/components/coreforge/CoreforgeProjectCard';
 import { Reveal } from '@/components/motion';
 import { REVEAL_MARGIN, revealVariants } from '@/components/motion/Reveal';
 import { SectionWrapper } from '@/components/layout/SectionWrapper';
@@ -246,6 +247,14 @@ export function ProjectsSection() {
         that turns 'visible' after a filter change would re-animate the cards that
         are exiting and strand them on screen.
       */}
+      {/* The venture leads the unfiltered grid as one full-width featured row; it is not a
+          project in projects.json, so filters and interest ranking leave it out. */}
+      {!filter.q && !filter.cat && !filter.tech && !filter.live && !interest ? (
+        <Reveal className="mb-5 md:mb-6">
+          <CoreforgeProjectCard ventureHref="/ventures/coreforge" />
+        </Reveal>
+      ) : null}
+
       <ul id={GRID_ID} className="relative grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-6 lg:grid-flow-dense lg:grid-cols-6">
         <AnimatePresence mode="popLayout">
           {slots.map(({ project, size }, i) => (

@@ -73,7 +73,21 @@ test('"What do you work on?" answers with the current roles', () => {
 
 test('every starter chip gets a real answer', () => {
   const intents = STARTERS.map((q) => ask(q).intent);
-  assert.deepEqual(intents, ['experience', 'projects', 'stack', 'hire']);
+  assert.deepEqual(intents, ['experience', 'venture', 'projects', 'hire']);
+});
+
+test('"What is CoreForge?" answers from the venture role and links its page', () => {
+  const a = ask('What is CoreForge?');
+  assert.equal(a.intent, 'venture');
+  const role = data.profile.experience.find((e) => /coreforge/i.test(e.company));
+  assert.ok(role);
+  assert.ok(a.text.startsWith(`**${role.role}**, ${role.company}`), a.text);
+  for (const h of role.highlights) assert.ok(a.text.includes(h), h);
+  assert.match(a.text, /Unofficial practice tool\. Not affiliated with g\.a\.s\.t\., TestDaF-Institut, APS, or the DAAD\./);
+  assert.deepEqual(a.actions, [{ kind: 'link', label: 'Read about CoreForge', href: '/ventures/coreforge', external: false }]);
+  assert.equal(ask('Tell me about your startup').intent, 'venture');
+  // An open question about it goes to the model, which has the coreforge: chunks.
+  assert.equal(shouldEscalate('How does CoreForge generate its questions?', ask('How does CoreForge generate its questions?')), true);
 });
 
 test('no skill answer claims production use', () => {

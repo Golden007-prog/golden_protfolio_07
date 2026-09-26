@@ -14,10 +14,14 @@ import { GlitchText } from './GlitchText';
 
 type Props = {
   /**
-   * Supplies the kicker ('06 / Contact') and the h2 id (`${sectionId}-title`). Wins over
+   * Supplies the kicker ('09 / Contact') and the h2 id (`${sectionId}-title`). Wins over
    * `kicker`. Defaults to the enclosing SectionWrapper's id when that is a SectionId.
    */
   sectionId?: SectionId;
+  /**
+   * Own kicker text. Inside a SectionWrapper whose id is a SectionId (and with no
+   * explicit sectionId) it keeps the section's index: '04 / Founder · …'.
+   */
   kicker?: string;
   /** A string may mark one emphasised word with asterisks: 'Things I've *built*.' */
   title: ReactNode;
@@ -87,7 +91,14 @@ export function SectionHeading({ sectionId, kicker, title, subtitle, id, align =
 
   const wrapperId = useContext(SectionIdContext);
   const section = sectionId ?? (isSectionId(wrapperId) ? wrapperId : undefined);
-  const kickerText = section ? kickerFor(section) : kicker;
+  const indexOf = (id: SectionId) => SECTIONS.find((s) => s.id === id)?.index;
+  const kickerText = sectionId
+    ? kickerFor(sectionId)
+    : section && kicker
+      ? `${indexOf(section)} / ${kicker}`
+      : section
+        ? kickerFor(section)
+        : kicker;
   const titleId = id ?? (section ? `${section}-title` : wrapperId ? `${wrapperId}-title` : undefined);
   const parsed = useMemo(() => (typeof title === 'string' ? parseTitle(title, show && !reduce) : null), [title, show, reduce]);
   const fade = useMemo(() => revealVariants('fade-up', reduce), [reduce]);

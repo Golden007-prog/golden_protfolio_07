@@ -20,8 +20,10 @@ const LABELS: Record<SectionId, string> = {
   about: 'About',
   skills: 'Skills',
   projects: 'Projects',
+  coreforge: 'CoreForge',
   experience: 'Experience',
   certifications: 'Certifications',
+  kaggle: 'Kaggle',
   philosophy: 'Principles',
   contact: 'Contact',
 };

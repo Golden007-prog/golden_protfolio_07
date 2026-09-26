@@ -109,7 +109,7 @@ export const COREFORGE_FEATURES: readonly CoreforgeFeature[] = [
   },
   {
     id: 'exam-timing',
-    title: 'Real exam timing',
+    title: 'Full timed Core Module',
     body: 'Three Core subtests of 20 tasks in 25:00 each, building up to the full sitting of about 3.5 hours.',
     icon: 'Timer',
     path: '/dmat-exam-pattern',

@@ -15,6 +15,12 @@
  * behind it. They arrive already checked by parseCertifications and
  * parseAchievements.
  *
+ * CoreForge (src/lib/coreforge/facts.ts) is 'self' evidence: his venture, in the
+ * words of goldensdmat.in as captured, never with a price. Kaggle (the committed
+ * snapshot) splits in two: the profile, badges and writeups are 'self'; each
+ * competition is 'live' and untrusted, and any rank in it is stated as 'of N
+ * teams, as of <date>'.
+ *
  * Deliberately left out: profile.stats (the About section withholds
  * yearsExperience because the listed roles overlap and mix freelance with
  * WordPress work), the phone number, project media paths, and the latest
@@ -137,6 +143,73 @@ export type CorpusSiteCopy = {
   contact: string;
 };
 
+/** CoreForge, from src/lib/coreforge/facts.ts (see src/lib/coreforge/corpus.ts). */
+export type CorpusCoreforge = {
+  /** 'YYYY-MM-DD' the goldensdmat.in facts were captured. */
+  capturedAt: string;
+  company: string;
+  product: string;
+  tagline: string;
+  domain: string;
+  /** "Founder of GOLDEN's Coreforge" */
+  founderLine: string;
+  /** His LinkedIn title for the role ('Owner'). */
+  linkedinTitle: string;
+  sinceLabel: string;
+  positioning: string;
+  audience: string;
+  freePlan: string;
+  proSummary: string;
+  disclaimer: string;
+  features: readonly { id: string; title: string; body: string; plan?: 'pro' }[];
+  resources: readonly { id: string; title: string; body: string }[];
+  stats: readonly { display: string; label: string }[];
+  generatorChecks: readonly { subtest: string; check: string }[];
+  builtWith: readonly { name: string; role: string }[];
+  changelog: readonly { date: string; title: string; summary: string }[];
+  faq: readonly { id: string; q: string; a: string }[];
+};
+
+/** The Kaggle snapshot (src/lib/kaggle/snapshot.json); structural, so the JSON satisfies it. */
+export type CorpusKaggle = {
+  fetchedAt: string;
+  profile: {
+    userName: string;
+    displayName: string;
+    url: string;
+    joined: string;
+    tiers: readonly { category: string; tier: string }[];
+    competitionPoints?: number;
+    overallTier?: string;
+  };
+  badges: readonly { name: string; description: string; achieved: string; featured: boolean }[];
+  writeups: readonly {
+    title: string;
+    subtitle: string;
+    type: string;
+    competition: string;
+    url: string;
+    published: string;
+    excerpt?: string;
+    project?: string;
+  }[];
+  active: readonly CorpusKaggleCompetition[];
+  past: readonly CorpusKaggleCompetition[];
+};
+
+export type CorpusKaggleCompetition = {
+  title: string;
+  url: string;
+  host: string;
+  category: string;
+  deadline: string;
+  teams: number;
+  userRank?: number;
+  rankAsOf?: string;
+  summary?: string;
+  hasWriteup?: boolean;
+};
+
 export type CorpusSources = {
   profile: CorpusProfile;
   projects: readonly CorpusProject[];
@@ -150,6 +223,10 @@ export type CorpusSources = {
   certifications?: CertificationData | null;
   /** parseAchievements(achievements.json). */
   achievements?: AchievementData | null;
+  /** His venture; absent means no CoreForge chunks. */
+  coreforge?: CorpusCoreforge | null;
+  /** The Kaggle snapshot; absent means no Kaggle chunks. */
+  kaggle?: CorpusKaggle | null;
 };
 
 /* ---------------------------------------------------------------------------
@@ -177,6 +254,27 @@ export function hashText(s: string, seed = 0): string {
 
 /** The ids packContext() always includes: who he is, how to reach him, and the status of both degrees. */
 export const CORE_CARD_IDS: readonly string[] = ['profile:about', 'profile:availability', 'edu:0', 'edu:1'];
+
+/**
+ * 'self' chunks that retrieval finds but 'full' mode (jd-fit, which packs every
+ * self chunk) leaves out: CoreForge's product detail and the Kaggle badge list.
+ * They describe the product and platform activity, not his skills, and would push
+ * the jd-fit prompt past its bound. The CoreForge overview and engineering chunks
+ * and the Kaggle profile and writeups stay in.
+ */
+export const RETRIEVAL_ONLY_PREFIXES: readonly string[] = [
+  'coreforge:features',
+  'coreforge:plans',
+  'coreforge:numbers',
+  'coreforge:changelog',
+  'coreforge:faq#',
+  'kaggle:badges',
+];
+
+/** True for a chunk packContext's 'full' mode includes: every 'self' chunk except RETRIEVAL_ONLY_PREFIXES. */
+export function inFullContext(c: Pick<Chunk, 'id' | 'cls'>): boolean {
+  return c.cls === 'self' && !RETRIEVAL_ONLY_PREFIXES.some((p) => c.id.startsWith(p));
+}
 
 /** Chunks rebuilt from build-time fetches (GitHub facts, live snapshot); the freshness gate ignores them. */
 export const VOLATILE_PREFIXES: readonly string[] = ['live:', 'facts:'];
@@ -615,6 +713,170 @@ function liveChunks(snapshot: CorpusLiveSnapshot | null): Draft[] {
   return out;
 }
 
+const COREFORGE_TARGET: AiTarget = { kind: 'section', id: 'coreforge' };
+
+/**
+ * His venture, in goldensdmat.in's own words as captured. Never a price: the plans
+ * chunk says where prices are instead. Retrieval picks chunks independently, so
+ * every chunk carries the disclaimer, not just the overview.
+ */
+function coreforgeChunks(cf: CorpusCoreforge | null | undefined): Draft[] {
+  if (!cf) return [];
+  const base = { cls: 'self' as const, target: COREFORGE_TARGET, asOf: cf.capturedAt };
+  const name = `${cf.product} (${cf.domain})`;
+  const out: Draft[] = [
+    {
+      ...base,
+      id: 'coreforge:overview',
+      title: `${cf.product}: what it is`,
+      label: `${cf.product} · overview`,
+      text:
+        `${name}, '${cf.product} ${cf.tagline}', is made by ${cf.company}. Oikantik is the ${cf.founderLine.replace(/^Founder of /, 'founder of ')} ` +
+        `(his LinkedIn title for the role is ${cf.linkedinTitle}), since ${cf.sinceLabel}. ${sentence(cf.positioning)} ` +
+        `Who it is for: ${sentence(cf.audience)} ${sentence(cf.disclaimer)}`,
+    },
+    {
+      ...base,
+      id: 'coreforge:features',
+      title: `${cf.product}: features`,
+      label: `${cf.product} · features`,
+      text: `What ${name} offers: ${cf.features
+        .map((f) => `${f.title}${f.plan === 'pro' ? ' (Pro plan)' : ''}: ${sentence(f.body)}`)
+        .join(' ')} Free public resources: ${cf.resources.map((r) => `${r.title}: ${sentence(r.body)}`).join(' ')}`,
+    },
+    {
+      ...base,
+      id: 'coreforge:plans',
+      title: `${cf.product}: Free and Pro plans`,
+      label: `${cf.product} · plans`,
+      text: `${cf.product} Free plan: ${sentence(cf.freePlan)} ${sentence(cf.proSummary)} This site states no prices; current prices are on ${cf.domain}/pricing.`,
+    },
+    {
+      ...base,
+      id: 'coreforge:engineering',
+      title: `${cf.product}: how the questions are generated`,
+      label: `${cf.product} · engineering`,
+      text:
+        `How ${cf.product}'s Core Module tasks are made: each is freshly generated and checked by its generator before it is served. ` +
+        `${cf.generatorChecks.map((g) => `${g.subtest}: ${sentence(g.check)}`).join(' ')} ` +
+        `Built with ${cf.builtWith.map((b) => `${b.name} (${b.role.charAt(0).toLowerCase()}${b.role.slice(1)})`).join(' and ')}.`,
+    },
+    {
+      ...base,
+      id: 'coreforge:numbers',
+      title: `${cf.product}: published numbers`,
+      label: `${cf.product} · numbers`,
+      text: `${cf.product}'s own published numbers: ${cf.stats.map((st) => `${st.display} ${st.label}`).join('; ')}.`,
+    },
+    {
+      ...base,
+      id: 'coreforge:changelog',
+      title: `${cf.product}: changelog`,
+      label: `${cf.product} · changelog`,
+      text: `${cf.product} public changelog, newest first: ${cf.changelog.map((m) => `${m.date}, ${m.title}: ${sentence(m.summary)}`).join(' ')}`,
+    },
+  ];
+  for (const f of cf.faq) {
+    out.push({
+      ...base,
+      id: `coreforge:faq#${f.id}`,
+      title: `${cf.product} FAQ: ${f.q}`,
+      label: `${cf.product} · ${f.q}`,
+      text: `${cf.product} FAQ. ${f.q} ${sentence(f.a)}`,
+    });
+  }
+  const disclaimer = sentence(cf.disclaimer);
+  return out.map((d) => (d.text.includes(cf.disclaimer) ? d : { ...d, text: `${d.text} ${disclaimer}` }));
+}
+
+const KAGGLE_TARGET: AiTarget = { kind: 'section', id: 'kaggle' };
+
+/** The last path segment of a Kaggle URL, for a stable chunk id. */
+function kaggleSlug(url: string): string {
+  const seg = url.replace(/[?#].*$/, '').replace(/\/+$/, '').split('/').pop() ?? '';
+  return slugify(seg) || hashText(url);
+}
+
+function rankLine(c: CorpusKaggleCompetition): string {
+  return typeof c.userRank === 'number' && c.rankAsOf
+    ? ` His leaderboard rank: ${c.userRank} of ${c.teams} teams, as of ${c.rankAsOf}.`
+    : ' This site records no rank of his for it.';
+}
+
+/**
+ * His public Kaggle profile from the committed snapshot: profile and tiers, badges
+ * and writeups as 'self' evidence, each competition as dated 'live' data.
+ */
+function kaggleChunks(kg: CorpusKaggle | null | undefined, projects: readonly CorpusProject[]): Draft[] {
+  if (!kg) return [];
+  const asOf = isoDay(kg.fetchedAt);
+  const dated = asOf ? ` As of ${asOf}.` : '';
+  const p = kg.profile;
+  const entered = [...kg.active, ...kg.past];
+  const tiers = p.tiers.map((t) => `${t.category} ${t.tier}`).join(', ');
+  const out: Draft[] = [
+    {
+      id: 'kaggle:profile',
+      title: 'Kaggle profile',
+      label: 'Kaggle · profile',
+      text:
+        `Oikantik's Kaggle profile is ${p.userName} (${p.url}), joined ${p.joined}.` +
+        `${p.overallTier ? ` Overall tier: ${p.overallTier}.` : ''}${tiers ? ` Tiers by category: ${tiers}.` : ''}` +
+        `${typeof p.competitionPoints === 'number' ? ` Competition points: ${p.competitionPoints}.` : ''}` +
+        ` ${kg.badges.length} badges earned, ${kg.writeups.length} writeups published and ${entered.length} competitions entered: ${entered.map((c) => c.title).join('; ')}.${dated}`,
+      cls: 'self',
+      target: KAGGLE_TARGET,
+      ...(asOf ? { asOf } : {}),
+    },
+    {
+      id: 'kaggle:badges',
+      title: 'Kaggle badges',
+      label: 'Kaggle · badges',
+      text: `Kaggle badges he has earned (${kg.badges.length}): ${[...kg.badges]
+        .sort((a, b) => Number(b.featured) - Number(a.featured) || b.achieved.localeCompare(a.achieved))
+        .map((b) => `${b.name} (${b.achieved}): ${sentence(b.description)}`)
+        .join(' ')}${dated}`,
+      cls: 'self',
+      target: KAGGLE_TARGET,
+      ...(asOf ? { asOf } : {}),
+    },
+  ];
+  const names = new Map(projects.map((pr) => [pr.slug, pr.name]));
+  for (const w of kg.writeups) {
+    const project = w.project && names.has(w.project) ? w.project : undefined;
+    out.push({
+      id: `kaggle:writeup-${kaggleSlug(w.url)}`,
+      title: `Kaggle writeup: ${w.title}`,
+      label: `Kaggle · ${w.title}`,
+      text:
+        `Kaggle writeup he published on ${w.published}${w.type ? ` (${w.type.toLowerCase()})` : ''}: "${w.title}"` +
+        `${w.subtitle ? `, ${w.subtitle}` : ''}.${w.competition ? ` Written for ${w.competition}.` : ''}` +
+        `${project ? ` Project on this site: ${names.get(project)}.` : ''} Link: ${w.url}.` +
+        `${w.excerpt ? ` It opens: ${w.excerpt}` : ''}`,
+      cls: 'self',
+      target: project ? { kind: 'project', slug: project } : KAGGLE_TARGET,
+    });
+  }
+  for (const c of entered) {
+    const open = kg.active.includes(c);
+    const at = c.rankAsOf ?? asOf;
+    out.push({
+      id: `kaggle:competition-${kaggleSlug(c.url)}`,
+      title: `Kaggle competition: ${c.title}`,
+      label: `Kaggle · ${c.title}`,
+      text:
+        `Kaggle competition he entered: ${c.title}, hosted by ${c.host} (${c.category}), ${open ? 'open until' : 'closed on'} ${c.deadline}, ` +
+        `${c.teams} teams on the leaderboard.${c.summary ? ` ${sentence(c.summary)}` : ''}${c.hasWriteup ? ' He published a writeup for it.' : ''}` +
+        `${rankLine(c)}${at ? ` Data as of ${at}.` : ''} Link: ${c.url}.`,
+      cls: 'live',
+      target: KAGGLE_TARGET,
+      ...(at ? { asOf: at } : {}),
+      untrusted: true,
+    });
+  }
+  return out;
+}
+
 /**
  * Every chunk, in a stable order: profile, experience, education, credentials,
  * skills, projects, GitHub facts, hackathon results, reading, tools, site copy,
@@ -631,6 +893,8 @@ export function buildCorpus(src: CorpusSources): Chunk[] {
     ...projectChunks(src.projects),
     ...factChunks(src.projects, src.githubFacts),
     ...achievementChunks(src.achievements, src.projects),
+    ...coreforgeChunks(src.coreforge),
+    ...kaggleChunks(src.kaggle, src.projects),
     ...readingChunks(src.reading),
     ...toolChunks(src.tools),
     ...copyChunks(src.siteCopy),
@@ -690,6 +954,7 @@ export function entities(src: {
   reading?: readonly { url: string }[];
   certifications?: CertificationData | null;
   achievements?: AchievementData | null;
+  kaggle?: CorpusKaggle | null;
 }): Entities {
   const { profile, projects } = src;
   const uniq = (xs: Iterable<string>) => [...new Set([...xs].filter((x) => typeof x === 'string' && x.trim()))];
@@ -712,6 +977,9 @@ export function entities(src: {
       ...(src.reading ?? []).map((r) => r.url),
       ...credentials.map((c) => c.url),
       ...(src.achievements?.items ?? []).flatMap((a) => a.links.map((l) => l.url)),
+      ...(src.kaggle
+        ? [src.kaggle.profile.url, ...src.kaggle.writeups.map((w) => w.url), ...[...src.kaggle.active, ...src.kaggle.past].map((c) => c.url)]
+        : []),
     ]),
     allowEmails: uniq([profile.email]),
   };

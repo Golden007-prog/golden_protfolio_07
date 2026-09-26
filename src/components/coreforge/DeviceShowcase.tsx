@@ -121,7 +121,7 @@ function Strip({ ids, placement, label, className }: { ids: readonly CoreforgeSh
       {ids.map((id) => {
         const shot = COREFORGE_SHOTS[id];
         return (
-          <li key={id} className={cn('self-end', shot.device === 'mobile' && 'justify-self-center')}>
+          <li key={id} className={cn('self-center', shot.device === 'mobile' && 'justify-self-center')}>
             <figure className={shot.device === 'mobile' ? 'w-[min(15rem,70vw)]' : undefined}>
               <Framed shot={shot} sizes={shot.device === 'mobile' ? '240px' : '(min-width: 640px) 46vw, 78vw'} />
               <Caption shot={shot} placement={placement} />

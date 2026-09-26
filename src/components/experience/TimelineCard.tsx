@@ -3,6 +3,9 @@
 import { useId, useState, useSyncExternalStore } from 'react';
 import { motion } from 'framer-motion';
 import { Briefcase, Calendar, ChevronDown, ExternalLink, MapPin, MessageCircle } from 'lucide-react';
+import { CoreforgeButton } from '@/components/coreforge/CoreforgeLink';
+import { ExperienceHighlight } from '@/components/coreforge/ExperienceHighlight';
+import { FounderBadge } from '@/components/coreforge/FounderBadge';
 import { GlassCard } from '@/components/shared/GlassCard';
 import { LottieIcon } from '@/components/shared/LottieIcon';
 import { Button } from '@/components/ui/Button';
@@ -10,6 +13,7 @@ import { useSmoothScrollTo } from '@/contexts/LenisContext';
 import profile from '@/data/profile.json';
 import { useMotionPrefs } from '@/hooks/useMotionPrefs';
 import { openAssistant } from '@/lib/ai/bus';
+import { isCoreforgeUrl } from '@/lib/coreforge/links';
 import { emit } from '@/lib/events';
 import { duration as DURATION, ease } from '@/lib/motion';
 import { durationLabel, formatYearMonth, isoToYearMonth, toYearMonth } from '@/utils/dates';
@@ -222,6 +226,9 @@ export function TimelineCard({ exp, skills }: Props) {
   const terms = exp.description ? skillsInText(exp.description, skills) : [];
   const index = experienceIndex(exp);
   const site = exp.url && hostOf(exp.url) ? { href: exp.url, host: hostOf(exp.url) } : null;
+  // His own venture: the role keeps its LinkedIn title ('Owner'); the badge and the
+  // product capture sit around it, and its site link carries CoreForge's UTM tags.
+  const venture = site ? isCoreforgeUrl(site.href) : false;
 
   return (
     <GlassCard
@@ -242,6 +249,7 @@ export function TimelineCard({ exp, skills }: Props) {
             </span>
           )}
           {current && <PresentBadge />}
+          {venture && <FounderBadge variant="nav" placement="experience-badge" />}
         </div>
       )}
 
@@ -249,7 +257,20 @@ export function TimelineCard({ exp, skills }: Props) {
         {exp.role}
       </h3>
       <p className="mt-1 font-medium text-violet-bright">{exp.company}</p>
-      {site ? (
+      {site && venture ? (
+        <CoreforgeButton
+          path={site.href}
+          placement="experience-site"
+          data={{ 'data-role-site': '' }}
+          variant="ghost"
+          size="sm"
+          arrow={false}
+          aria-label={`${site.host}, ${exp.company}'s site`}
+          className="-ml-3.5 mt-1 font-mono text-xs text-cyan-text"
+        >
+          {site.host}
+        </CoreforgeButton>
+      ) : site ? (
         <Button
           href={site.href}
           variant="ghost"
@@ -295,6 +316,8 @@ export function TimelineCard({ exp, skills }: Props) {
           </li>
         ))}
       </ul>
+
+      {venture ? <ExperienceHighlight placement="experience-highlight" className="mt-5" /> : null}
 
       <SkillChips terms={terms} labelId={`${baseId}-skills`} />
 
